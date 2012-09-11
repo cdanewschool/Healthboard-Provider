@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fxpProperties abbreviated="false" authoringTool="Flex Builder" compiles="true" parentProject="85f63f15-b7f0-4f43-b74e-a9c953737f6b" projectUUID="85f63f15-b7f0-4f43-b74e-a9c953737f6b" pureCatalystProject="false" sdkVersion="4.5.0" uuid="cb5baed4-d746-4d54-a79c-7ca327b2f600" version="15">
+  <projects/>
+  <src>
+    <linked isMain="false" location="${DOCUMENTS}/visualDashboardShared" path="${DOCUMENTS}/visualDashboardShared" position="0" uuid="cb5baed4-d746-4d54-a79c-7ca327b2f600"/>
+  </src>
+  <swc>
+    <linked location="sdkPlaceHolder" path="sdkPlaceHolder" position="0" uuid="cb5baed4-d746-4d54-a79c-7ca327b2f600"/>
+    <linked location="/libs" path="/libs" position="1" uuid="cb5baed4-d746-4d54-a79c-7ca327b2f600"/>
+    <linked location="${DOCUMENTS}/visualDashboardShared/external/kapit/radar_chart.swc" path="${DOCUMENTS}/visualDashboardShared/external/kapit/radar_chart.swc" position="2" uuid="cb5baed4-d746-4d54-a79c-7ca327b2f600"/>
+  </swc>
+  <misc/>
+  <theme/>
+  <mxmlFormattingPrefs groupAttributesByState="true" maxLineWidth="100" mxmlAlignAttributes="true" mxmlAttributeOrder="id,userLabel,includeIn,excludeFrom,visible,x,y,z,left,right,top,bottom,width,height,minWidth,minHeight,maxWidth,maxHeight,label" mxmlKeepAttributeValuesOrganized="true"/>
+</fxpProperties>
