@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enhancedtitlewindow:EnhancedTitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+										 xmlns:s="library://ns.adobe.com/flex/spark" 
+										 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" width="400" height="300">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Metadata>
+		[Event(name="collapsed", type="events.EnhancedTitleWindowEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import events.EnhancedTitleWindowEvent;
+			
+			import models.ProvidersModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.ListEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable] public var model:ProvidersModel;
+			
+			[Bindable] public var providerSortFields:ArrayCollection = new ArrayCollection( [{label:"Team",value:"team"},{label:"Role",value:"role"},{label:"First Name",value:"firstName"},{label:"Last Name",value:"lastName"} ] );
+			
+			[Bindable] public var teamRollOverRowIndex:int = -1;
+			
+			private function sortProviders(event:IndexChangeEvent):void
+			{
+				model.sortField = ComboBox(event.currentTarget).selectedItem.value;
+			}
+			
+			private function onTeamRollOver(event:ListEvent):void
+			{
+				teamRollOverRowIndex = event.rowIndex;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<enhancedtitlewindow:layout>
+		<s:VerticalLayout paddingLeft="0" paddingTop="10" paddingRight="10" paddingBottom="20"/>
+	</enhancedtitlewindow:layout>
+	
+	<s:Spacer height="-5" />
+	<s:HGroup verticalAlign="middle" paddingLeft="10">
+		<s:Label text="Team:" color="0xFFFFFF" fontSize="11" />
+		<s:ComboBox id="providerTeamSelect" dataProvider="{model.providerTeams}" labelField="label" contentBackgroundAlpha="0" width="66" color="0xFFFFFF" selectedIndex="0" change="model.selectedProviderTeam = providerTeamSelect.selectedItem.value;" />
+		<s:ComboBox id="providerSort" dataProvider="{providerSortFields}" contentBackgroundAlpha="0" width="59" color="0xFFFFFF" selectedIndex="0" change="sortProviders(event)" />
+		<s:TextInput id="providerSearch" text="Search" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="80" click="{if(providerSearch.text == 'Search') providerSearch.text=''}" change="{model.searchText = providerSearch.text}" />
+		<s:Button styleName="searchButtonIcon" width="24" height="24" />
+	</s:HGroup>
+	<s:Line xFrom="0" xTo="305">
+		<s:stroke>
+			<s:SolidColorStroke color="0x676767" weight="2" />
+		</s:stroke>
+	</s:Line>
+	
+	<mx:DataGrid 
+		id="providerLists"
+		buttonMode="false" selectable="true" 
+		width="300" height="300" fontFamily="myMyriadNoCFF"
+		color="0xFFFFFF" verticalAlign="middle" 
+		headerHeight="0" dataProvider="{model.providers}"
+		borderVisible="false" horizontalGridLines="true" horizontalGridLineColor="0x444442" verticalGridLines="true" 
+		alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
+		horizontalScrollPolicy="off" verticalScrollPolicy="off" rowHeight="22" horizontalSeparatorSkin="{null}" 
+		itemRollOver="onTeamRollOver(event)" itemRollOut="teamRollOverRowIndex=-1">
+		<mx:columns>
+			<mx:DataGridColumn dataField="team" width="36" />
+			<mx:DataGridColumn dataField="role"  width="53" />
+			<mx:DataGridColumn width="27">
+				<mx:itemRenderer>
+					<fx:Component>
+						<mx:HBox width="27">
+							<s:Label text="{data.available}" color="{data.available == 'U' ? 0xB3B3B3 : 0xCCCC33}" textAlign="center" width="30" fontFamily="myMyriad" />
+						</mx:HBox>
+					</fx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn>
+				<mx:itemRenderer>
+					<fx:Component>
+						<mx:HBox horizontalScrollPolicy="off" width="154">
+							<fx:Script>
+								<![CDATA[
+									import mx.collections.ListCollectionView;
+								]]>
+							</fx:Script>
+							<s:Label text="{data.firstName + ' ' + data.lastName}" color="0xAEDBE2" fontSize="12" paddingLeft="10" paddingTop="4" width="144" fontFamily="myMyriad" />
+							<mx:HBox width="16" paddingTop="6">
+								<s:Image source="@Embed('images/messagesEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{data.rowIndex == outerDocument.teamRollOverRowIndex}" />
+							</mx:HBox>
+						</mx:HBox>
+					</fx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	
+</enhancedtitlewindow:EnhancedTitleWindow>

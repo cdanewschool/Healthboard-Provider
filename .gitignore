@@ -1,0 +1,11 @@
+.actionScriptProperties
+.DS_Store
+.flexProperties
+.fxpProperties
+.gitignore.swp
+.project
+.settings
+bin-debug
+bin-debug/
+bin-release/
+html-template/

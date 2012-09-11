@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:List xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/mx" 
+		maxHeight="100" color="0xFFFFFF"  fontSize="12"
+		alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" selectionColor="0x31535E">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			
+			public var callbackFunction:Function;
+			
+			public var targetElement:DisplayObject;
+		]]>
+	</fx:Script>
+	
+</s:List>

@@ -7,10 +7,10 @@
 			   xmlns:plus="external.TabBarPlus.plus.*"
 			   xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*"
 			   xmlns:general="components.general.*"
-			   xmlns:ASclasses="ASclasses.*"
+				xmlns:ASclasses="ASclasses.*"
 			   fontFamily="myMyriad"
 			   minWidth="1024" minHeight="768"
-			   creationComplete="{patientsXMLdata.send()}">
+			   creationComplete="init()" xmlns:modules="components.modules.*" xmlns:widgets="components.widgets.*">
 
 	<fx:Script source="ASfiles/home.as" />
 	<fx:Script source="ASfiles/messages.as" />
@@ -84,6 +84,10 @@
 		<mx:HTTPService id="medicationsXMLdataForWidget"
 						url="data/medications.xml"
 						result="medicationsResultHandlerForWidget(event)" />
+		
+		<mx:HTTPService id="providersXMLdata"
+						url="data/providers.xml"
+						result="providersResultHandler(event)" />
 		
 		<s:SolidColor id="colorMedicalRecordsOutpatient" color="0x71B2D1" /><!--also used for Medication's "Prescription Drugs"-->
 		<s:SolidColor id="colorMedicalRecordsInpatient" color="0xDC9D00" /><!--also used for Medication's "Supplements"-->
@@ -241,7 +245,7 @@
 					<mx:LinkButton id="btnLogout" label="Logout" color="0xE6E6E6" textRollOverColor="0xE6E6E6" textSelectedColor="0xE6E6E6" skin="{null}" paddingLeft="1" click="{currentState='default'}" rollOver="btnLogout.styleName='linkBtnUnderline';" rollOut="btnLogout.styleName='linkBtn';" />
 					
 					<s:HGroup paddingTop="-6" paddingLeft="-9">
-						<s:DropDownList id="dropDownView" dropShadowVisible="false" skinClass="skins.general.MyOptionsDropDownListSkin" color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" width="35" fontSize="12"><!--change="dropDownView_changeHandler(event)"--> 
+						<s:DropDownList id="dropDownView" dropShadowVisible="false" skinClass="skins.general.MyOptionsDropDownListSkin" color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" contentBackgroundColor="0xFFFFFF" width="35" fontSize="12"><!--change="dropDownView_changeHandler(event)"--> 
 							<mx:ArrayCollection>
 								<fx:String>     Preferences</fx:String>
 								<fx:String>     Sync Now</fx:String>
@@ -254,7 +258,7 @@
 		
 		<s:VGroup paddingTop="-45">
 			<s:Group creationComplete="bar_initializeHandlerMain()">
-				<mx:ViewStack id="viewStackMain" borderColor="0xBDBCBC" cornerRadius="2" width="1024" height="728" x="0" y="22" creationPolicy="all"><!--backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" change="updateBreadcrumb('messages')" -->
+				<mx:ViewStack id="viewStackMain" borderColor="0xBDBCBC" cornerRadius="2" width="1024" height="728" x="0" y="22" creationPolicy="all" resizeToContent="true"><!--backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" change="updateBreadcrumb('messages')" -->
 					<s:NavigatorContent id="providerBox" icon="@Embed('images/healthboard.png')">
 						<s:layout>
 							<s:VerticalLayout gap="0" paddingTop="15" />
@@ -264,13 +268,13 @@
 								<s:SolidColorStroke color="0xFFFFFF" alpha="0.5" weight="1"/>
 							</s:stroke>
 						</s:Line>
-						<mx:ViewStack id="viewStackProviderModules" paddingTop="-1" width="1024">
+						<mx:ViewStack id="viewStackProviderModules" paddingTop="-1" width="1024" resizeToContent="true">
 							<s:NavigatorContent>
 								<s:layout>
 									<s:VerticalLayout />
 								</s:layout>
 								<s:HGroup gap="22" paddingTop="33" paddingLeft="32" minHeight="591" fontSize="12">
-									<s:VGroup gap="17">
+									<s:VGroup id="sidebarWidgets" gap="17">
 										<!-- see http://blog.9mmedia.com/?p=535 -->
 										<enhancedtitlewindow:EnhancedTitleWindow id="widgetMessages" width="305" title="{'Messages (12)'}" collapsible="true" headerClickable="false" module="modMessages" showCloseButton="false" titleBarHeight="30"><!--title="{'Messages (' + getUnreadMessagesCount().substr(2,1) + ')'}"-->
 											<enhancedtitlewindow:layout>
@@ -299,7 +303,7 @@
 																		<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.messages[data.messages.length - 1].urgency == 'Urgent'}" includeInLayout="{data.messages[data.messages.length - 1].urgency == 'Urgent'}" />
 																		<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.messages[data.messages.length - 1].urgency == 'Somewhat urgent'}" includeInLayout="{data.messages[data.messages.length - 1].urgency == 'Somewhat urgent'}" />
 																	</mx:HBox>
-																	<s:Label text="{outerDocument.displayTime(data.date, 'short')}" fontSize="12" width="62" color="0x868686" paddingTop="6" />
+																	<s:Label text="{outerDocument.displayTime(data.date, 'short')}" fontSize="12" width="62" color="0x868686" paddingTop="6" /><!--text="{outerDocument.displayTime(data.date, 'short')}" -->
 																	<s:Label text="{data.correspondent}" color="0xFFFFFF" fontSize="12" width="90" fontWeight="{data.status == 'unread' ? 'bold' : 'normal'}" paddingTop="6" />
 																	<mx:LinkButton id="btnWidgetMessage" label="{data.subject.substr(0,13) + showEllipsis()}" fontSize="12" fontWeight="{data.status == 'unread' ? 'bold' : 'normal'}" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnWidgetMessage.styleName='linkBtnUnderline';}" rollOut="btnWidgetMessage.styleName='linkBtn';" paddingLeft="-3" />
 																</mx:HBox>
@@ -313,55 +317,11 @@
 												<mx:LinkButton id="btnWidgetAllMessages" label="View All »" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnWidgetAllMessages.styleName='linkBtnUnderline';}" rollOut="btnWidgetAllMessages.styleName='linkBtn';" click="currentState='modMessages';" paddingLeft="-3" />
 											</s:HGroup>
 										</enhancedtitlewindow:EnhancedTitleWindow>
-										<enhancedtitlewindow:EnhancedTitleWindow id="widgetChat" width="305" title="Chat" collapsible="true" headerClickable="false" module="modChat" showCloseButton="false" titleBarHeight="30"><!--initialize="populateDatesForWidget();"-->
-											<enhancedtitlewindow:layout>
-												<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10"/>
-											</enhancedtitlewindow:layout>
-											<s:Spacer height="90" />
-											<!--<s:HGroup width="100%">
-											<mx:LinkButton id="btnPrevAppt" label="Previous Appt." icon="{blueArrowLeft}" disabledIcon="{grayArrowLeft}" horizontalGap="9" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{if(btnPrevAppt.enabled) btnPrevAppt.styleName='linkBtnUnderline';}" rollOut="btnPrevAppt.styleName='linkBtn';" click="{currentApptminusminus}" enabled="{currentAppt != 0}" />
-											<s:Spacer width="100%" />
-											<mx:LinkButton id="btnNextAppt" label="Next Appt." icon="{blueArrowRight}" disabledIcon="{grayArrowRight}" horizontalGap="9" labelPlacement="left" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{if(btnNextAppt.enabled) btnNextAppt.styleName='linkBtnUnderline';}" rollOut="btnNextAppt.styleName='linkBtn';" click="{currentAppt++}" enabled="{currentAppt != appointments.length-1}" />
-											</s:HGroup>-->
-										</enhancedtitlewindow:EnhancedTitleWindow>
-										<enhancedtitlewindow:EnhancedTitleWindow id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" module="modTeam" >	<!--title="{'Immunizations (' + immunizationsDueNumber + ')'}" (see comments on ArrayList below)-->
-											<enhancedtitlewindow:layout>
-												<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="20"/>
-											</enhancedtitlewindow:layout>
-											<s:Spacer height="340" />
-											<!--<mx:DataGrid buttonMode="true"
-											width="100%" itemClick="if(!wasImmunizationDataLoaded) immunizationsXMLdata.send(); this.currentState='modImmunizations';"
-											color="0xFFFFFF" verticalAlign="middle"
-											selectable="false"
-											headerHeight="0"
-											borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
-											horizontalScrollPolicy="off" verticalScrollPolicy="off" rowCount="4" rowHeight="18">
-											<mx:ArrayList>-->	<!-- Using this static data source for time saving purposes. It also allows us to show this widget without having to load the Immunizations HTTPservice.  -->
-											<!--<mx:source>-->	<!-- Ideally, instead of using this, we should use the same immunizationsDataFiltered source, sort it (without modifying the original), and display the first 4 due/overdue immunizations. By loading the HTTPservice, we would also have access to immunizationsDueNumber which we could add to the header. -->
-											<!--			<fx:Object name="Hepatitis B" date="05/18/2012" completed="false" />
-											<fx:Object name="Td / Tdap" date="05/18/2012" completed="false" />
-											<fx:Object name="Rabies" date="07/18/2012" completed="false" />
-											<fx:Object name="Rubella" date="07/18/2012" completed="false" />
-											</mx:source>
-											</mx:ArrayList>
-											<mx:columns>
-											<mx:DataGridColumn dataField="name">
-											<mx:itemRenderer>
-											<fx:Component>
-											<mx:HBox horizontalScrollPolicy="off" paddingTop="-3">
-											<mx:HBox width="11" paddingTop="6">
-											<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Overdue" visible="{new Date(data.date) &lt; new Date()}" includeInLayout="{new Date(data.date) &lt; new Date()}" />
-											<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Due" visible="{new Date(data.date) >= new Date()}" includeInLayout="{new Date(data.date) >= new Date()}" />
-											</mx:HBox>
-											<s:Label text="{data.name}" color="0xFFFFFF" fontSize="12" width="110" fontWeight="bold" paddingTop="6" />
-											<s:Label text="{new Date(data.date) &lt; new Date() ? 'due ' + (new Date().setHours(0,0,0,0) - new Date(data.date).getTime()) / (1000*60*60*24) + ' days ago' : 'due in ' + (new Date(data.date).getTime() - new Date().setHours(0,0,0,0)) / (1000*60*60*24) + ' days'}" fontSize="12" color="0x868686" paddingTop="6" fontStyle="italic" />
-											</mx:HBox>
-											</fx:Component>
-											</mx:itemRenderer>
-											</mx:DataGridColumn>
-											</mx:columns>
-											</mx:DataGrid>-->
-										</enhancedtitlewindow:EnhancedTitleWindow>
+										
+										<widgets:ChatWidget id="widgetChat" width="305" title="Chat" collapsible="true" headerClickable="false" module="modChat" showCloseButton="false" titleBarHeight="30" model="{chatModel}" user="{user}" showAutocomplete="onShowAutoComplete(event)" hideAutocomplete="onHideAutoComplete(event)" />
+										
+										<widgets:TeamWidget id="widgetTeam" width="305" height="374" title="Team Profile" collapsible="true" headerClickable="true" showCloseButton="false" titleBarHeight="30" model="{providersModel}" module="modTeam" collapsed="onTeamWidgetCollapse(event)" />
+									
 									</s:VGroup>
 									<s:VGroup gap="17">
 										<enhancedtitlewindow:EnhancedTitleWindow id="widgetMyPatients" width="633" title="My Patients (8)" collapsible="true" headerClickable="false" module="modPatients" showCloseButton="false" titleBarHeight="30" color="0xFFFFFF"><!--creationComplete="{if(!wasMedicationDataLoaded) medicationsXMLdataForWidget.send();}"-->
@@ -535,6 +495,7 @@
 									</s:VGroup>
 								</s:HGroup>
 							</s:NavigatorContent>
+							
 							<s:NavigatorContent id="modPatients">
 								<s:layout>
 									<s:VerticalLayout />
@@ -897,20 +858,17 @@
 									</s:Group>
 								</s:HGroup>
 							</s:NavigatorContent>
-							<s:NavigatorContent>
-								<s:layout>
-									<s:VerticalLayout />
-								</s:layout>
-								<s:Label text="Here we can add the 'TEAM PROFILE' content..." color="0xFFFFFF" />
-							</s:NavigatorContent>
+							
+							<!--	team profile	-->
+							<modules:TeamModule id="modTeam" model="{providersModel}" />
+							
 						</mx:ViewStack>
-						
 					</s:NavigatorContent>
 				</mx:ViewStack>
 				<plus:TabBarPlus id="tabsMain" gap="6" height="38" left="6" cornerRadius="0" styleName="messagesTabs" closePolicy="always" dataProvider="{viewStackMain}" /><!--cornerRadius="4" change="tabbar1_changeHandler(event)"-->
 			</s:Group>
 		</s:VGroup>
-		
+
 		<!--PLACEHOLDERS!!! DELETE!!!-->
 		<mx:Tree id="myTreeMedRec" dataProvider="{medicalRecordsCategoriesTree}" labelField="category" visible="false" includeInLayout="false"
 				 width="130"
@@ -1011,6 +969,6 @@
 						 htmlText="{'There are no matching search results for the requested search.&lt;br&gt;Please make sure all words are spelled correctly, or try different keywords.'}" />
 			</s:NavigatorContent>
 		</mx:ViewStack>
-		
 	</s:VGroup>
+		
 </s:Application>

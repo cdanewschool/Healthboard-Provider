@@ -1,15 +1,40 @@
+import ASfiles.ProviderConstants;
+
+import components.AutoComplete;
 import components.home.ViewPatient;
+
+import events.AutoCompleteEvent;
+import events.EnhancedTitleWindowEvent;
+
+import external.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.geom.Point;
+
+import models.Chat;
+import models.ChatSearch;
+import models.PatientModel;
+import models.ProviderModel;
+import models.ProvidersModel;
+import models.UserModel;
 
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 import mx.events.CalendarLayoutChangeEvent;
 import mx.events.ListEvent;
+import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 
 import spark.events.DropDownEvent;
+import spark.events.IndexChangeEvent;
+
+private function init():void
+{
+	patientsXMLdata.send();
+	providersXMLdata.send();
+	
+	if( ProviderConstants.DEBUG ) this.currentState = "providerHome";
+}
 
 [Bindable] public var fullname:String;
 [Bindable] private var registeredUserID:String = "thisValueWillBeReplaced";
@@ -64,7 +89,20 @@ private function patientsResultHandler(event:ResultEvent):void {
 	clusterData = event.result.autnresponse.responsedata.clusters.cluster;	
 	}*/
 	
-	patientsData = event.result.patients.patient;	
+	var results:ArrayCollection = event.result.patients.patient;
+	
+	var patients:ArrayCollection = new ArrayCollection();
+	
+	for each(var result:Object in results)
+	{
+		var patient:PatientModel = PatientModel.fromObj(result);
+		patients.addItem( patient );
+	}
+	
+	patientsData = patients;
+	
+	chatModel.patients = patientsData;
+	initChatHistory();
 }
 
 public var arrOpenPatients:Array = new Array();
@@ -119,4 +157,95 @@ private function filterPatientsSearch(item:Object):Boolean {
 	var notifFilter:Boolean = showPatientsAll.selected ? true : item.urgency != "Not urgent";
 	
 	return searchFilter && birthDayFilter && birthMonthFilter && birthYearFilter && genderFilter && notifFilter;
+}
+
+[Bindable] public var providersModel:ProvidersModel = new ProvidersModel();
+[Bindable] public var chatModel:ChatSearch = new ChatSearch();
+[Bindable] public var user:UserModel;	//	logged-in user, i.e. Dr. Berg
+
+private function providersResultHandler(event:ResultEvent):void {
+	
+	var results:ArrayCollection = event.result.providers.provider;
+	
+	var teams:Array = [ {label:"Show All",value:-1} ];
+	
+	var providers:ArrayCollection = new ArrayCollection();
+	
+	for each(var result:Object in results)
+	{
+		var provider:ProviderModel = ProviderModel.fromObj(result);
+		provider.id = providers.length;
+		providers.addItem( provider );
+		
+		if( provider.id == ProviderConstants.USER_ID ) user = provider;
+		
+		var team:Object = {label:"Team " + provider.team, value: provider.team};
+		if( teams[provider.team] == null ) teams[provider.team] = team;
+	}
+	
+	providersModel.providers = providers;
+	providersModel.providerTeams = new ArrayCollection( teams );
+	
+	chatModel.providers = providers;
+	initChatHistory();
+}
+
+private var autocompleteCallback:Function;
+private var autocomplete:AutoComplete;
+
+public function onTeamWidgetCollapse(event:EnhancedTitleWindowEvent ):void
+{
+	providersModel.reset();
+}
+
+private function onShowAutoComplete( event:AutoCompleteEvent ):void
+{
+	if( autocomplete 
+		&& autocomplete.parent 
+		&& autocomplete.targetElement == event.targetElement 
+		&& autocomplete.dataProvider == event.dataProvider )
+		return;
+	
+	var coords:Point = new Point( event.targetElement.x, event.targetElement.y );
+	coords = event.targetElement.parent.localToGlobal( coords );
+	
+	if( !autocomplete )
+	{
+		autocomplete = new AutoComplete();
+		autocomplete.addEventListener( Event.CHANGE, onAutocompleteSelect );
+	}
+	
+	autocomplete.targetElement = event.targetElement;
+	autocomplete.callbackFunction = event.callbackFunction;
+	autocomplete.labelFunction = event.labelFunction;
+	autocomplete.dataProvider = event.dataProvider;
+	
+	autocomplete.x = coords.x;
+	autocomplete.y = coords.y + event.targetElement.height;
+	autocomplete.width = event.targetElement.width;
+	
+	PopUpManager.addPopUp( autocomplete, this );
+}
+
+private function onHideAutoComplete( event:AutoCompleteEvent ):void
+{
+	if( autocomplete )
+	{
+		PopUpManager.removePopUp( autocomplete );
+	}
+}
+
+private function onAutocompleteSelect( event:IndexChangeEvent ):void
+{
+	autocomplete.callbackFunction( event );
+}
+
+private function initChatHistory():void
+{
+	if( !chatModel.providers || !chatModel.patients ) return;
+	
+	chatModel.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,1,17,35),new Date(2012,09,1,17,45) ) );
+	chatModel.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,23,17,28),new Date(2012,09,23,17,33) ) );
+	chatModel.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,10,1,17,30),new Date(2012,10,1,17,35) ) );
+	chatModel.addChat( new Chat( user, chatModel.getUser( 1, UserModel.TYPE_PROVIDER ), new Date(2012,10,11,17,31),new Date(2012,10,11,17,42) ) );
 }

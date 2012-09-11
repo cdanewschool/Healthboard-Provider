@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				creationComplete="init()"
+				autoDrawBackground="true">
+	
+	<fx:Script>
+		<![CDATA[
+			import ASfiles.ProviderConstants;
+			
+			import models.ChatMessage;
+			import models.FileUpload;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.LinkButton;
+			
+			import utils.DateUtil;
+			
+			private function init():void
+			{
+				var time:Date = ChatMessage(data).time;
+				
+				header.text = "[" + (time.hours<10?'0'+time.hours:time.hours) + ':' + (time.minutes<10?'0'+time.minutes:time.minutes) + ':' + (time.seconds<10?'0'+time.seconds:time.seconds) + "]";
+				username.text =  ChatMessage(data).user.id == ProviderConstants.USER_ID ? "Me" : ChatMessage(data).user.fullName;
+				message.text = ChatMessage(data).text;
+				
+				var attachments:ArrayCollection = ChatMessage(data).attachments;
+				for each(var attachment:FileUpload in attachments)
+				{
+					var link:LinkButton = new LinkButton();
+					link.label = attachment.name;
+					link.styleName = "linkBtnBlue";
+					link.setStyle('fontSize',11);
+					addElement( link );
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:TileLayout />
+	</s:layout>
+	
+	<s:Label id="header" styleName="gray12" />
+	<s:Label id="username" styleName="black12" />
+	<s:Label id="message" styleName="black12" />
+	
+</s:ItemRenderer>

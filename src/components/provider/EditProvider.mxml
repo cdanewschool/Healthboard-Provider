@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+   	xmlns:s="library://ns.adobe.com/flex/spark" 
+   	xmlns:mx="library://ns.adobe.com/flex/mx" 
+   	skinClass="skins.general.myChromelessTitleWindow" 
+   	backgroundColor="0x706F6F" borderColor="0x898989" borderVisible="false" styleName="whiteBoldTitle" dropShadowVisible="false" chromeColor="0x706F6F" cornerRadius="10" 
+   	title="User Profile" 
+	width="884" 
+	controlBarVisible="true" 
+	creationComplete="init()"
+	close="PopUpManager.removePopUp(this)" > 
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import models.ProviderModel;
+			import events.ProviderEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Text;
+			import mx.managers.PopUpManager;
+			
+			[Bindable] public var provider:ProviderModel;
+			
+			[Bindable] private var stateAbbreviations:ArrayCollection = new ArrayCollection( ["AK","AL","AR","AS","AZ","CA","CO","CT","DC","DE","FL","GA","GU","HI","IA","ID", "IL","IN","KS","KY","LA","MA","MD","ME","MH","MI","MN","MO","MS","MT","NC","ND","NE","NH","NJ","NM","NV","NY", "OH","OK","OR","PA","PR","PW","RI","SC","SD","TN","TX","UT","VA","VI","VT","WA","WI","WV","WY"] );
+			[Bindable] private var relations:ArrayCollection = new ArrayCollection( ["Spouse","Parent"] );
+			[Bindable] private var securityQuestions:ArrayCollection = new ArrayCollection( ["What is the name of your first pet?"] );
+			
+			private function saveField( event:FocusEvent, field:String ):void
+			{
+				if( provider.hasOwnProperty( field ) )
+				{
+					if( event.currentTarget is TextInput )
+					{
+						provider[ field ] = TextInput(event.currentTarget).text;
+					}
+					else if( event.currentTarget is TextArea )
+					{
+						provider[ field ] = TextArea(event.currentTarget).text;
+					}
+					else if( event.currentTarget is DropDownList )
+					{
+						provider[ field ] = DropDownList(event.currentTarget).selectedIndex;
+					}
+				}
+			}
+			
+			private function save():void
+			{
+				var evt:ProviderEvent = new ProviderEvent( ProviderEvent.SAVE, false, false, provider );
+				dispatchEvent( evt );
+			}
+			
+			private function init():void
+			{
+				controlBarVisible = false;
+				profilePic.source = provider.getProfilePictureURL();
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:HorizontalLayout paddingTop="5" paddingLeft="15" gap="0" />
+	</s:layout>
+	
+	<s:controlBarContent />
+	
+	<s:VGroup paddingTop="10">
+		<s:BorderContainer borderColor="0xBBBDBF" borderWeight="1" width="60" height="75"> 
+			<mx:Image id="profilePic" />
+		</s:BorderContainer>
+		<mx:LinkButton id="btnChangePic" label="Change profile picture" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" textDecoration="underline" fontSize="12" fontWeight="normal" skin="{null}" paddingLeft="-2" rollOver="btnChangePic.styleName='linkBtnUnderline';" rollOut="btnChangePic.styleName='linkBtn';" />
+	</s:VGroup>
+	
+	<mx:Form id="myForm" styleName="whiteText13">			
+		
+		<s:HGroup gap="47">
+			
+			<s:VGroup>
+				<mx:FormHeading label="{parentApplication.fullname}" styleName="blueBoldSubtitle" paddingTop="-5"/>
+				<s:HGroup height="24">
+					<s:Label width="116" textAlign="right" text="DOB:" />
+					<s:Label text="{provider.birthday}" paddingLeft="13" />
+				</s:HGroup>
+				<s:HGroup height="24"> 
+					<s:Label width="116" textAlign="right" text="Sex:" />
+					<s:Label text="{provider.sex}" paddingLeft="13" />
+				</s:HGroup>
+				<s:HGroup height="24">
+					<s:Label width="116" textAlign="right" text="Team:" />
+					<s:Label text="{provider.team}" paddingLeft="13" />
+				</s:HGroup>
+				<s:HGroup height="24">
+					<s:Label width="116" textAlign="right" text="Role:" />
+					<s:Label text="{provider.role}" paddingLeft="13" />
+				</s:HGroup>
+			</s:VGroup>
+			
+			<s:VGroup>
+				
+				<s:Label text="Security" paddingLeft="264" styleName="greenBoldText" />
+				
+				<mx:FormItem label="Password:" labelWidth="250" height="24">
+					<s:TextInput maxChars="20" text="{provider.password}" styleName="black" displayAsPassword="true" focusOut="saveField(event,'password')" />
+				</mx:FormItem>
+				<mx:FormItem label="Password confirmation:" labelWidth="250" height="24">
+					<s:TextInput maxChars="20" text="{provider.password}" styleName="black" displayAsPassword="true" />
+				</mx:FormItem>
+				<mx:FormItem label="Security Question:" labelWidth="250" height="24">
+					<s:DropDownList dataProvider="{securityQuestions}" selectedIndex="{parseInt(provider.securityQuestion)}" styleName="buttonText" focusOut="saveField(event,'password')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Answer for Security Question:" labelWidth="250" height="24">
+					<s:TextInput text="{provider.securityAnswer}" styleName="black" focusOut="saveField(event,'securityAnswer')"/>
+				</mx:FormItem>
+				<mx:FormItem label="E-mail Address:" labelWidth="250" height="24">
+					<s:TextInput text="{provider.email}" styleName="black" focusOut="saveField(event,'email')"/>
+				</mx:FormItem>
+				
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<s:HGroup paddingBottom="15" paddingTop="5">
+			<s:Line xFrom="0" xTo="700">
+				<s:stroke>
+					<s:SolidColorStroke color="0x898989" weight="1"/>
+				</s:stroke>
+			</s:Line>
+		</s:HGroup>
+		
+		<s:HGroup>
+			
+			<s:VGroup>
+				
+				<s:Label text="Education and Experience" paddingLeft="136" styleName="greenBoldText" />
+				
+				<mx:FormItem label="Education:" labelWidth="122" width="392" height="50">
+					<s:TextArea text="{provider.education}" styleName="black" width="270" height="50" fontSize="11" focusOut="saveField(event,'education')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Board Certification:" labelWidth="122" width="392" height="50">
+					<s:TextArea text="{provider.certification}" styleName="black" width="270" height="50" fontSize="11" focusOut="saveField(event,'certification')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Specialty:" labelWidth="122" width="392" height="24" >
+					<s:TextInput text="{provider.specialty}" styleName="black" width="270" focusOut="saveField(event,'specialty')" />
+				</mx:FormItem>
+			</s:VGroup>
+			
+			<s:VGroup>
+				<s:Label text="Role and Office Information" paddingLeft="114" styleName="greenBoldText" />
+				<mx:FormItem label="Position:" labelWidth="100" height="24">
+					<s:TextInput text="{provider.role}" styleName="black" focusOut="saveField(event,'role')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Current Team:" labelWidth="100" height="24">
+					<s:TextInput text="{provider.team}" styleName="black" focusOut="saveField(event,'team')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Location:" labelWidth="100" height="24">
+					<s:TextInput text="{provider.location}" styleName="black" focusOut="saveField(event,'location')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Office:" labelWidth="100" height="24">
+					<s:TextInput text="{provider.office}" styleName="black" focusOut="saveField(event,'office')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Office Phone:" labelWidth="100" height="24">
+					<s:TextInput text="{provider.phone}" styleName="black" focusOut="saveField(event,'phone')"/>
+				</mx:FormItem>
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<s:HGroup paddingBottom="15" paddingTop="10">
+			<s:Line xFrom="0" xTo="700">
+				<s:stroke>
+					<s:SolidColorStroke color="0x898989" weight="1"/>
+				</s:stroke>
+			</s:Line>
+		</s:HGroup>
+		
+		<s:HGroup>
+			
+			<s:VGroup>
+				
+				<s:Label text="Address" paddingLeft="136" styleName="greenBoldText" />
+				
+				<mx:FormItem label="Street 1:" labelWidth="122" height="24" width="300">
+					<s:TextInput text="{provider.street1}" styleName="black" focusOut="saveField(event,'street1')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Street 2:" labelWidth="122" height="24" width="300">
+					<s:TextInput text="{provider.street2}" styleName="black" focusOut="saveField(event,'street2')"/>
+				</mx:FormItem>
+				<mx:FormItem label="City:" labelWidth="122" height="24" width="300">
+					<s:TextInput text="{provider.city}" styleName="black" focusOut="saveField(event,'city')"/>
+				</mx:FormItem>
+				<mx:FormItem label="State:" labelWidth="122" height="24" width="300">
+					<s:DropDownList dataProvider="{stateAbbreviations}" selectedItem="{provider.state}" styleName="buttonText" focusOut="saveField(event,'state')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Zip/Postal Code:" labelWidth="122" height="24" width="300">
+					<s:TextInput text="{provider.zip}" styleName="black" focusOut="saveField(event,'zip')"/>
+				</mx:FormItem>
+			</s:VGroup>
+			
+			<s:VGroup>
+				<s:Label text="Emergency Contact" paddingLeft="207" styleName="greenBoldText" />
+				<mx:FormItem label="Name:" labelWidth="193" height="24">
+					<s:TextInput text="{provider.emergencyName}" styleName="black" focusOut="saveField(event,'emergencyName')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Relation:" labelWidth="193" height="24">
+					<s:DropDownList dataProvider="{relations}" selectedIndex="{parseInt(provider.emergencyRelation)}" styleName="buttonText" focusOut="saveField(event,'emergencyRelation')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Emergency Phone 1:" labelWidth="193" height="24">
+					<s:TextInput text="{provider.emergencyPhone1}" styleName="black" focusOut="saveField(event,'emergencyPhone1')"/>
+				</mx:FormItem>
+				<mx:FormItem label="Emergency Phone 2:" labelWidth="193" height="24">
+					<s:TextInput text="{provider.emergencyPhone2}" styleName="black" focusOut="saveField(event,'emergencyPhone2')"/>
+				</mx:FormItem>
+			</s:VGroup>
+		</s:HGroup>
+		
+		<s:HGroup paddingBottom="15" paddingTop="10">
+			<s:Line xFrom="0" xTo="700">
+				<s:stroke>
+					<s:SolidColorStroke color="0x898989" weight="1"/>
+				</s:stroke>
+			</s:Line>
+		</s:HGroup>
+		
+		<s:Group textAlign="center" width="100%">
+			<s:layout>
+				<s:BasicLayout />
+			</s:layout>
+			<s:HGroup horizontalCenter="0" gap="20">
+				<s:Button label="Save" click="save()" styleName="orangeButton" />
+				<s:Button label="Cancel" click="{PopUpManager.removePopUp( this )}" />
+			</s:HGroup>
+		</s:Group>
+		
+	</mx:Form>
+	
+</s:TitleWindow>

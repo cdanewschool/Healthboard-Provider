@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enhancedtitlewindow:EnhancedTitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
+	width="305" height="112"
+	stateChangeComplete="onStateChange(event)"
+	creationComplete="init()">
+	
+	<enhancedtitlewindow:states>
+		<s:State name="default" />
+		<s:State name="connecting" />
+		<s:State name="connected" />
+		<s:State name="declined" />
+	</enhancedtitlewindow:states>
+	
+	<fx:Metadata>
+		[Event(name="showAutocomplete", type="events.AutoCompleteEvent")]
+		[Event(name="hideAutocomplete", type="events.AutoCompleteEvent")]
+	</fx:Metadata>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import components.AutoComplete;
+			import components.popups.ChatHistoryPopup;
+			import components.popups.ChatPopup;
+			import components.popups.ChatRequestDeniedPopup;
+			import components.popups.VerifyCredentialsPopup;
+			
+			import events.AuthenticationEvent;
+			import events.AutoCompleteEvent;
+			
+			import models.Chat;
+			import models.ChatSearch;
+			import models.UserModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.Application;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.StateChangeEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.components.List;
+			import spark.components.TitleWindow;
+			import spark.events.IndexChangeEvent;
+			import spark.events.ListEvent;
+			import spark.events.PopUpEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable] public var model:ChatSearch;
+			
+			[Bindable] public var user:UserModel;
+			[Bindable] private var targetUser:UserModel;
+			
+			private var selectedChatMode:String;
+			
+			private var chatPopup:IFlexDisplayObject;
+			private var popup:IFlexDisplayObject;
+			
+			private var connectionTimer:Timer;
+			
+			private function onStateChange(event:FlexEvent):void
+			{
+				if( currentState == "connecting" )
+				{
+					connectionTimer.reset();
+					connectionTimer.delay = 1000 * Math.round( Math.random() * 5 );
+					connectionTimer.start();
+				}
+			}
+			
+			private function onGroupSelect(event:IndexChangeEvent):void
+			{
+				model.selectedChatGroup = DropDownList(event.currentTarget).selectedIndex;
+				
+				showResults();
+			}
+			
+			private function chat(event:IndexChangeEvent):void
+			{
+				if( !targetUser ) return;
+				
+				selectedChatMode = ButtonBar(event.currentTarget).selectedItem.data;
+				
+				if( popup) PopUpManager.removePopUp( popup );
+				
+				popup = new VerifyCredentialsPopup();
+				VerifyCredentialsPopup(popup).user = user;
+				popup.addEventListener( Event.CANCEL, onPopupCancel );
+				popup.addEventListener( AuthenticationEvent.SUCCESS, onAuthenticationSuccess );
+				
+				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function viewHistory(event:MouseEvent):void
+			{
+				//	launch history popup
+				if( popup) PopUpManager.removePopUp( popup );
+				
+				popup = new ChatHistoryPopup();
+				ChatHistoryPopup(popup).user = user;
+				ChatHistoryPopup(popup).chat = model;
+				popup.addEventListener( AuthenticationEvent.SUCCESS, onAuthenticationSuccess );
+				
+				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function onSearchChange(event:TextOperationEvent):void
+			{
+				model.searchText = TextInput(event.currentTarget).text;
+			}
+			
+			private function showResults():void
+			{
+				var evt:AutoCompleteEvent = new AutoCompleteEvent( AutoCompleteEvent.SHOW );
+				evt.dataProvider = model.dataProvider;
+				evt.targetElement = search;
+				evt.callbackFunction = selectResult;
+				evt.labelFunction = getDisplayName;
+				
+				dispatchEvent( evt );
+			}
+			
+			private function onAuthenticationSuccess(event:AuthenticationEvent):void
+			{
+				currentState = "connecting";
+			}
+			
+			private function onConnectionTimerComplete(event:TimerEvent):void
+			{
+				if( !targetUser ) return;
+				
+				if( targetUser.available == UserModel.STATE_AVAILABLE )
+				{
+					currentState = "connected";
+					
+					var chat:Chat = new Chat( user, targetUser, new Date() );
+					chat.mode = selectedChatMode;
+					
+					chatPopup = new ChatPopup();
+					ChatPopup(chatPopup).chat = chat;
+					chatPopup.addEventListener( CloseEvent.CLOSE, onChatClose );
+					
+					PopUpManager.addPopUp( chatPopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), false );
+					
+					//	log chat?
+				}
+				else
+				{
+					//	show "communication request denied" popup
+					if( popup) PopUpManager.removePopUp( popup );
+					
+					popup = new ChatRequestDeniedPopup();
+					ChatRequestDeniedPopup(popup).user = targetUser;
+					popup.addEventListener( CloseEvent.CLOSE, onPopupClose );
+					
+					PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
+					PopUpManager.centerPopUp( popup );
+				}
+			}
+			
+			private function onChatClose( event:CloseEvent ):void
+			{
+				reset();
+			}
+			
+			private function onPopupCancel( event:Event ):void
+			{
+				reset();
+			}
+			
+			private function onPopupClose( event:CloseEvent ):void
+			{
+				reset();
+			}
+			
+			private function reset():void
+			{
+				currentState = "default";
+				chatType.selectedItem = null;
+				search.text = "";
+			}
+			
+			protected function selectResult(event:IndexChangeEvent):void
+			{
+				var user:UserModel = List(event.currentTarget).selectedItem;
+				
+				targetUser = user;
+				
+				search.text = user.fullName;
+				
+				dispatchEvent( new AutoCompleteEvent( AutoCompleteEvent.HIDE ) );
+				
+				stage.focus = null;
+			}
+			
+			private function getDisplayName(item:UserModel):String
+			{
+				return item.firstName + ' ' + item.lastName;
+			}
+			
+			private function init():void
+			{
+				search.text = ChatSearch.SEARCH_PLACEHOLDER;
+				
+				contentGroup.clipAndEnableScrolling = false;
+				
+				connectionTimer = new Timer(1000,1);
+				connectionTimer.addEventListener(TimerEvent.TIMER_COMPLETE,onConnectionTimerComplete);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<enhancedtitlewindow:layout>
+		<s:BasicLayout />
+	</enhancedtitlewindow:layout>
+	
+	<s:VGroup gap="5" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">
+		
+		<s:HGroup gap="10">
+			
+			<s:DropDownList dataProvider="{model.chatGroups}" width="75" change="onGroupSelect(event)" labelField="firstName" selectedIndex="0" />
+			
+			<s:HGroup gap="-1">
+				<s:TextInput id="search" includeIn="default" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="164" height="24" focusIn="showResults()" change="onSearchChange(event)" click="{if(search.text == ChatSearch.SEARCH_PLACEHOLDER) search.text=''}" />
+				<s:Label includeIn="connecting" text="{targetUser.fullName} - Connecting..." width="164" height="24" fontSize="10" enabled="false" color="0xFFFFFF" paddingTop="5"/>
+				<s:Label includeIn="declined" text="{targetUser.fullName} - Not online" width="164" height="24" fontSize="10" enabled="false" color="0xFFFFFF" paddingTop="5"/>
+				<s:Label includeIn="connected" text="{targetUser.fullName} - Connected" width="164" height="24" fontSize="10" enabled="false" color="0xFFFFFF" paddingTop="5"/>
+				<s:Button styleName="searchButtonIcon" width="24" height="24" fontSize="10" />
+			</s:HGroup>
+			
+		</s:HGroup>
+		
+		<s:Line xFrom="0" xTo="280">
+			<s:stroke>
+				<s:SolidColorStroke color="0x676767" weight="1" />
+			</s:stroke>
+		</s:Line>
+		
+		<s:HGroup gap="10">
+			
+			<s:HGroup gap="3">
+				<s:ButtonBar 
+					id="chatType"
+					width="197" dataProvider="{Chat.MODES}" iconField="icon" labelField="label" change="chat(event)" enabled="{targetUser!=null}"
+					firstButton="skins.general.IconButtonSkin"
+					middleButton="skins.general.IconButtonSkin" 
+					lastButton="skins.general.IconButtonSkin" fontSize="11">
+					
+					<s:layout>
+						<s:ButtonBarHorizontalLayout gap="3" />
+					</s:layout>
+					
+				</s:ButtonBar>
+					
+				<!--
+				<s:Button width="62" height="22" label="Text" icon="@Embed('images/button_icons/text.png')" iconPlacement="left" click="chat( ChatModel.MODE_TEXT )" fontSize="11" enabled="{model.user!=null}" />  
+				<s:Button width="62" height="22" label="Voice" icon="@Embed('images/button_icons/voice.png')" iconPlacement="left" click="chat( ChatModel.MODE_VOICE )" fontSize="11" enabled="{model.user!=null}" />
+				<s:Button width="62" height="22" label="Video" icon="@Embed('images/button_icons/video.png')" iconPlacement="left" click="chat( ChatModel.MODE_VIDEO )" fontSize="11" enabled="{model.user!=null}" />
+				-->
+			</s:HGroup>
+			
+			<mx:LinkButton styleName="linkBtnBlue" label="View History" click="viewHistory(event)" />
+			
+		</s:HGroup>
+		
+	</s:VGroup>
+	
+</enhancedtitlewindow:EnhancedTitleWindow>
