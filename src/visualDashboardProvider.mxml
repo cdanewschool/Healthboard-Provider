@@ -320,7 +320,7 @@
 										
 										<widgets:ChatWidget id="widgetChat" width="305" title="Chat" collapsible="true" headerClickable="false" module="modChat" showCloseButton="false" titleBarHeight="30" model="{chatModel}" user="{user}" showAutocomplete="onShowAutoComplete(event)" hideAutocomplete="onHideAutoComplete(event)" />
 										
-										<widgets:TeamWidget id="widgetTeam" width="305" height="374" title="Team Profile" collapsible="true" headerClickable="true" showCloseButton="false" titleBarHeight="30" model="{providersModel}" module="modTeam" collapsed="onTeamWidgetCollapse(event)" />
+										<widgets:TeamWidget id="widgetTeam" width="305" height="374" title="Team Profile" collapsible="false" headerClickable="true" showCloseButton="false" titleBarHeight="30" model="{providersModel}" module="modTeam" collapsed="onTeamWidgetCollapse(event)" />
 									
 									</s:VGroup>
 									<s:VGroup gap="17">
@@ -362,7 +362,7 @@
 												</s:VGroup>
 												<s:Spacer width="100%" />
 												<s:VGroup gap="5">
-													<s:DropDownList id="dropPatientsSex" height="24" width="74" styleName="buttonText" selectedIndex="0" contentBackgroundColor="0x3C3C3B" chromeColor="0x3C3C3B" color="0xCCCBCB" rollOverColor="0x666666" selectionColor="0x888888" change="patientsSearchFilter()">
+													<s:DropDownList id="dropPatientsSex" styleName="dropDownListDark" height="24" width="74" selectedIndex="0" change="patientsSearchFilter()">
 														<s:dataProvider>
 															<s:ArrayList>
 																<fx:Object label="All" />
@@ -860,7 +860,7 @@
 							</s:NavigatorContent>
 							
 							<!--	team profile	-->
-							<modules:TeamModule id="modTeam" model="{providersModel}" />
+							<modules:TeamModule id="modTeam" model="{providersModel}" navigate="navigate(event)" />
 							
 						</mx:ViewStack>
 					</s:NavigatorContent>
