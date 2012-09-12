@@ -31,12 +31,15 @@
 			import components.popups.ChatPopup;
 			import components.popups.ChatRequestDeniedPopup;
 			import components.popups.VerifyCredentialsPopup;
+			import components.popups.ViewAttachmentPopup;
 			
+			import events.ApplicationEvent;
 			import events.AuthenticationEvent;
 			import events.AutoCompleteEvent;
 			
 			import models.Chat;
 			import models.ChatSearch;
+			import models.FileUpload;
 			import models.UserModel;
 			
 			import mx.collections.ArrayCollection;
@@ -53,6 +56,8 @@
 			import spark.events.ListEvent;
 			import spark.events.PopUpEvent;
 			import spark.events.TextOperationEvent;
+			
+			import utils.DateUtil;
 			
 			[Bindable] public var model:ChatSearch;
 			
@@ -71,7 +76,7 @@
 				if( currentState == "connecting" )
 				{
 					connectionTimer.reset();
-					connectionTimer.delay = 1000 * Math.round( Math.random() * 5 );
+					connectionTimer.delay = DateUtil.SECOND * Math.round( Math.random() * 5 );
 					connectionTimer.start();
 				}
 			}
@@ -123,7 +128,8 @@
 			{
 				var evt:AutoCompleteEvent = new AutoCompleteEvent( AutoCompleteEvent.SHOW );
 				evt.dataProvider = model.dataProvider;
-				evt.targetElement = search;
+				evt.targetField = search;
+				evt.desiredWidth = searchBox.width;
 				evt.callbackFunction = selectResult;
 				evt.labelFunction = getDisplayName;
 				
@@ -148,6 +154,7 @@
 					
 					chatPopup = new ChatPopup();
 					ChatPopup(chatPopup).chat = chat;
+					chatPopup.addEventListener( ApplicationEvent.VIEW_FILE, onViewAttachment );
 					chatPopup.addEventListener( CloseEvent.CLOSE, onChatClose );
 					
 					PopUpManager.addPopUp( chatPopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), false );
@@ -165,6 +172,20 @@
 					
 					PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
 					PopUpManager.centerPopUp( popup );
+				}
+			}
+			
+			private function onViewAttachment( event:ApplicationEvent ):void
+			{
+				if( event.data is FileUpload )
+				{
+					var attachment:FileUpload = FileUpload( event.data );
+					
+					if( popup) PopUpManager.removePopUp( popup );
+					
+					popup = new ViewAttachmentPopup();
+					ViewAttachmentPopup(popup).file = attachment;
+					popup.addEventListener( CloseEvent.CLOSE, onPopupClose );
 				}
 			}
 			
@@ -229,9 +250,9 @@
 		
 		<s:HGroup gap="10">
 			
-			<s:DropDownList dataProvider="{model.chatGroups}" width="75" change="onGroupSelect(event)" labelField="firstName" selectedIndex="0" />
+			<s:DropDownList dataProvider="{model.chatGroups}" width="75" change="onGroupSelect(event)" labelField="firstName" selectedIndex="0" styleName="dropDownListDark" />
 			
-			<s:HGroup gap="-1">
+			<s:HGroup id="searchBox" gap="-1">
 				<s:TextInput id="search" includeIn="default" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="164" height="24" focusIn="showResults()" change="onSearchChange(event)" click="{if(search.text == ChatSearch.SEARCH_PLACEHOLDER) search.text=''}" />
 				<s:Label includeIn="connecting" text="{targetUser.fullName} - Connecting..." width="164" height="24" fontSize="10" enabled="false" color="0xFFFFFF" paddingTop="5"/>
 				<s:Label includeIn="declined" text="{targetUser.fullName} - Not online" width="164" height="24" fontSize="10" enabled="false" color="0xFFFFFF" paddingTop="5"/>
@@ -247,18 +268,18 @@
 			</s:stroke>
 		</s:Line>
 		
-		<s:HGroup gap="10">
+		<s:HGroup gap="5">
 			
 			<s:HGroup gap="3">
 				<s:ButtonBar 
-					id="chatType"
-					width="197" dataProvider="{Chat.MODES}" iconField="icon" labelField="label" change="chat(event)" enabled="{targetUser!=null}"
+					id="chatType" styleName="greyButtonBar"
+					width="210" dataProvider="{Chat.MODES}" iconField="icon" labelField="label" change="chat(event)" enabled="{targetUser!=null}"
 					firstButton="skins.general.IconButtonSkin"
 					middleButton="skins.general.IconButtonSkin" 
 					lastButton="skins.general.IconButtonSkin" fontSize="11">
 					
 					<s:layout>
-						<s:ButtonBarHorizontalLayout gap="3" />
+						<s:ButtonBarHorizontalLayout gap="1" />
 					</s:layout>
 					
 				</s:ButtonBar>

@@ -3,12 +3,15 @@ import ASfiles.ProviderConstants;
 import components.AutoComplete;
 import components.home.ViewPatient;
 
+import events.ApplicationEvent;
 import events.AutoCompleteEvent;
 import events.EnhancedTitleWindowEvent;
 
 import external.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
 
+import flash.display.InteractiveObject;
 import flash.events.Event;
+import flash.events.FocusEvent;
 import flash.events.MouseEvent;
 import flash.geom.Point;
 
@@ -202,32 +205,29 @@ private function onShowAutoComplete( event:AutoCompleteEvent ):void
 {
 	if( autocomplete 
 		&& autocomplete.parent 
-		&& autocomplete.targetElement == event.targetElement 
+		&& autocomplete.targetField == event.targetField 
 		&& autocomplete.dataProvider == event.dataProvider )
 		return;
-	
-	var coords:Point = new Point( event.targetElement.x, event.targetElement.y );
-	coords = event.targetElement.parent.localToGlobal( coords );
 	
 	if( !autocomplete )
 	{
 		autocomplete = new AutoComplete();
+		autocomplete.width = event.desiredWidth ? event.desiredWidth : event.targetField.width;
 		autocomplete.addEventListener( Event.CHANGE, onAutocompleteSelect );
+		autocomplete.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
 	}
 	
-	autocomplete.targetElement = event.targetElement;
+	autocomplete.targetField = event.targetField;
 	autocomplete.callbackFunction = event.callbackFunction;
 	autocomplete.labelFunction = event.labelFunction;
 	autocomplete.dataProvider = event.dataProvider;
 	
-	autocomplete.x = coords.x;
-	autocomplete.y = coords.y + event.targetElement.height;
-	autocomplete.width = event.targetElement.width;
+	
 	
 	PopUpManager.addPopUp( autocomplete, this );
 }
 
-private function onHideAutoComplete( event:AutoCompleteEvent ):void
+private function onHideAutoComplete( event:AutoCompleteEvent = null ):void
 {
 	if( autocomplete )
 	{
@@ -248,4 +248,12 @@ private function initChatHistory():void
 	chatModel.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,23,17,28),new Date(2012,09,23,17,33) ) );
 	chatModel.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,10,1,17,30),new Date(2012,10,1,17,35) ) );
 	chatModel.addChat( new Chat( user, chatModel.getUser( 1, UserModel.TYPE_PROVIDER ), new Date(2012,10,11,17,31),new Date(2012,10,11,17,42) ) );
+}
+
+private function navigate(event:ApplicationEvent):void
+{
+	if( event.data is int )
+	{
+		viewStackProviderModules.selectedIndex = event.data;
+	}
 }

@@ -5,13 +5,16 @@ package events
 	
 	import mx.collections.ArrayCollection;
 	
+	import spark.components.TextInput;
+	
 	public class AutoCompleteEvent extends Event
 	{
 		public static const SHOW:String = "showAutocomplete";
 		public static const HIDE:String = "hideAutocomplete";
 		
 		public var dataProvider:ArrayCollection;
-		public var targetElement:DisplayObject;
+		public var targetField:TextInput;
+		public var desiredWidth:int;
 		
 		public var callbackFunction:Function;
 		public var labelFunction:Function;
