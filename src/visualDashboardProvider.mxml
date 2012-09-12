@@ -362,7 +362,7 @@
 												</s:VGroup>
 												<s:Spacer width="100%" />
 												<s:VGroup gap="5">
-													<s:DropDownList id="dropPatientsSex" height="24" width="74" styleName="buttonText" selectedIndex="0" contentBackgroundColor="0x3C3C3B" chromeColor="0x3C3C3B" color="0xCCCBCB" rollOverColor="0x666666" selectionColor="0x888888" change="patientsSearchFilter()">
+													<s:DropDownList id="dropPatientsSex" styleName="dropDownListDark" height="24" width="74" selectedIndex="0" change="patientsSearchFilter()">
 														<s:dataProvider>
 															<s:ArrayList>
 																<fx:Object label="All" />
