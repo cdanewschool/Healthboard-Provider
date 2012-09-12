@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	skinClass="skins.general.myChromelessTitleWindow" 
+	backgroundColor="0x706F6F" borderColor="0x898989" borderVisible="false" styleName="whiteBoldTitle" dropShadowVisible="false" chromeColor="0x706F6F" cornerRadius="10" 
+	controlBarVisible="true" 
+	creationComplete="init()">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import models.FileUpload;
+			
+			import mx.managers.PopUpManager;
+			
+			[Bindable] public var file:FileUpload;
+			
+			private function init():void
+			{
+				width = attachment.width + 20;
+				height = attachment.height + 20;
+				
+				controlBarVisible = false;
+				
+				PopUpManager.centerPopUp( this );
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:controlBarContent />
+	
+	<s:HGroup paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">
+		
+		<s:Image id="attachment" source="{file.data}" />
+		
+	</s:HGroup>
+	
+</s:TitleWindow>
