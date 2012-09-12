@@ -26,7 +26,7 @@ package models
 		
 		public function reset():void
 		{
-			selectedProviderTeam = -1;
+			selectedProviderTeam = 0;
 			searchText = "";
 			sortField = null;
 		}
@@ -52,7 +52,7 @@ package models
 			var search:String = searchText ? searchText.toLowerCase() : "";
 			if( valid && search != "" && search != "search" ) valid = item.firstName.toLowerCase().indexOf( search ) > -1 || item.lastName.toLowerCase().indexOf( search ) > -1;
 			
-			if( valid && selectedProviderTeam > -1 ) valid = valid && item.team == selectedProviderTeam;
+			if( valid && selectedProviderTeam > 0 ) valid = valid && item.team == selectedProviderTeam;
 			
 			return valid;
 		}

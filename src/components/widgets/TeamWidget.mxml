@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<enhancedtitlewindow:EnhancedTitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
-										 xmlns:s="library://ns.adobe.com/flex/spark" 
-										 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" width="400" height="300">
+<enhancedtitlewindow:EnhancedTitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
+	width="400" height="300" creationComplete="init()">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -16,6 +19,7 @@
 			
 			import models.ProvidersModel;
 			
+			import mx.binding.utils.BindingUtils;
 			import mx.collections.ArrayCollection;
 			import mx.events.ListEvent;
 			
@@ -29,12 +33,22 @@
 			
 			private function sortProviders(event:IndexChangeEvent):void
 			{
-				model.sortField = ComboBox(event.currentTarget).selectedItem.value;
+				model.sortField = DropDownList(event.currentTarget).selectedItem.value;
 			}
 			
 			private function onTeamRollOver(event:ListEvent):void
 			{
 				teamRollOverRowIndex = event.rowIndex;
+			}
+			
+			private function onSetTeam(value:Object):void
+			{
+				providerTeamSelect.selectedIndex = 0;
+			}
+			
+			private function init():void
+			{
+				BindingUtils.bindSetter( onSetTeam, model, 'providerTeams' );
 			}
 			
 		]]>
@@ -47,10 +61,12 @@
 	<s:Spacer height="-5" />
 	<s:HGroup verticalAlign="middle" paddingLeft="10">
 		<s:Label text="Team:" color="0xFFFFFF" fontSize="11" />
-		<s:ComboBox id="providerTeamSelect" dataProvider="{model.providerTeams}" labelField="label" contentBackgroundAlpha="0" width="66" color="0xFFFFFF" selectedIndex="0" change="model.selectedProviderTeam = providerTeamSelect.selectedItem.value;" />
-		<s:ComboBox id="providerSort" dataProvider="{providerSortFields}" contentBackgroundAlpha="0" width="59" color="0xFFFFFF" selectedIndex="0" change="sortProviders(event)" />
-		<s:TextInput id="providerSearch" text="Search" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="80" click="{if(providerSearch.text == 'Search') providerSearch.text=''}" change="{model.searchText = providerSearch.text}" />
-		<s:Button styleName="searchButtonIcon" width="24" height="24" />
+		<s:DropDownList id="providerTeamSelect" dataProvider="{model.providerTeams}" labelField="label" width="76" change="model.selectedProviderTeam = providerTeamSelect.selectedItem.value;" />
+		<s:DropDownList id="providerSort" dataProvider="{providerSortFields}" width="69" selectedIndex="0" change="sortProviders(event)" />
+		<s:HGroup gap="0" verticalAlign="middle" >
+			<s:TextInput id="providerSearch" text="Search" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="70" height="24" click="{if(providerSearch.text == 'Search') providerSearch.text=''}" change="{model.searchText = providerSearch.text}" />
+			<s:Button styleName="searchButtonIcon" width="24" height="24" />
+		</s:HGroup>
 	</s:HGroup>
 	<s:Line xFrom="0" xTo="305">
 		<s:stroke>
