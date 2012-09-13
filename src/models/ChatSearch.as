@@ -16,14 +16,12 @@ package models
 		
 		public var dataProvider:ArrayCollection;
 		
-		public var history:ArrayCollection;
-		
 		public function ChatSearch()
 		{
 			super();	
 		}
 
-		public function getUser( id:int, type:String = UserModel.TYPE_PATIENT ):UserModel
+		public function getUser( id:int, type:String = null ):UserModel
 		{
 			var user:UserModel;
 			var users:ArrayCollection = (type==UserModel.TYPE_PROVIDER?providers:patients);
@@ -31,12 +29,6 @@ package models
 			for each(user in users) if( user.id == id ) return user;
 			
 			return null;
-		}
-		
-		public function addChat( chat:Chat ):void
-		{
-			if( !history ) history = new ArrayCollection();
-			history.addItem( chat );
 		}
 		
 		private function updateDataProvider():void

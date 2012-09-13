@@ -23,6 +23,7 @@ import models.ProvidersModel;
 import models.UserModel;
 
 import mx.collections.ArrayCollection;
+
 import mx.events.CalendarLayoutChangeEvent;
 import mx.events.ListEvent;
 import mx.managers.PopUpManager;
@@ -222,8 +223,6 @@ private function onShowAutoComplete( event:AutoCompleteEvent ):void
 	autocomplete.labelFunction = event.labelFunction;
 	autocomplete.dataProvider = event.dataProvider;
 	
-	
-	
 	PopUpManager.addPopUp( autocomplete, this );
 }
 
@@ -244,10 +243,12 @@ private function initChatHistory():void
 {
 	if( !chatModel.providers || !chatModel.patients ) return;
 	
-	chatModel.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,1,17,35),new Date(2012,09,1,17,45) ) );
-	chatModel.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,23,17,28),new Date(2012,09,23,17,33) ) );
-	chatModel.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,10,1,17,30),new Date(2012,10,1,17,35) ) );
-	chatModel.addChat( new Chat( user, chatModel.getUser( 1, UserModel.TYPE_PROVIDER ), new Date(2012,10,11,17,31),new Date(2012,10,11,17,42) ) );
+	var user:UserModel = chatModel.getUser( ProviderConstants.USER_ID, UserModel.TYPE_PROVIDER );
+	
+	user.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,1,17,35),new Date(2012,09,1,17,45) ) );
+	user.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,23,17,28),new Date(2012,09,23,17,33) ) );
+	user.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,10,1,17,30),new Date(2012,10,1,17,35) ) );
+	user.addChat( new Chat( user, chatModel.getUser( 1, UserModel.TYPE_PROVIDER ), new Date(2012,10,11,17,31),new Date(2012,10,11,17,42) ) );
 }
 
 private function navigate(event:ApplicationEvent):void
@@ -256,4 +257,13 @@ private function navigate(event:ApplicationEvent):void
 	{
 		viewStackProviderModules.selectedIndex = event.data;
 	}
+}
+
+private function toggleAvailability(event:MouseEvent):void
+{
+	var button:LinkButton = LinkButton(event.currentTarget);
+	
+	user.available = user.available == UserModel.STATE_AVAILABLE ? UserModel.STATE_UNAVAILABLE : UserModel.STATE_AVAILABLE;
+	
+	button.styleName = user.available ? 'linkBtnYellow' : 'linkBtnGray';
 }

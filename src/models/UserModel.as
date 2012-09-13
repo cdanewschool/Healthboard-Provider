@@ -1,5 +1,7 @@
 package models
 {
+	import mx.collections.ArrayCollection;
+
 	[Bindable]
 	public class UserModel
 	{
@@ -22,9 +24,18 @@ package models
 		
 		public var available:String;
 		
+		public var chatHistory:ArrayCollection;
+		
 		public function UserModel( type:String = TYPE_PATIENT )
 		{
 			this.userType = type;
+		}
+		
+		
+		public function addChat( chat:Chat ):void
+		{
+			if( !chatHistory ) chatHistory = new ArrayCollection();
+			chatHistory.addItem( chat );
 		}
 		
 		public function get fullName():String

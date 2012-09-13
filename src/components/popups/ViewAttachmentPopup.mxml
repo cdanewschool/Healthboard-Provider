@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:TitleWindow 
+<s:BorderContainer 
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	skinClass="skins.general.myChromelessTitleWindow" 
-	backgroundColor="0x706F6F" borderColor="0x898989" borderVisible="false" styleName="whiteBoldTitle" dropShadowVisible="false" chromeColor="0x706F6F" cornerRadius="10" 
-	controlBarVisible="true" 
+	backgroundColor="0xFFFFFF" borderVisible="false" dropShadowVisible="false" cornerRadius="0" 
 	creationComplete="init()">
-	
 	
 	<fx:Script>
 		<![CDATA[
@@ -17,25 +14,31 @@
 			
 			[Bindable] public var file:FileUpload;
 			
-			private function init():void
+			private function onComplete():void
 			{
-				width = attachment.width + 20;
-				height = attachment.height + 20;
-				
-				controlBarVisible = false;
+				width = attachment.bitmapData.width + container.paddingLeft + container.paddingRight;
+				height = attachment.bitmapData.height + container.paddingTop + container.paddingBottom;
 				
 				PopUpManager.centerPopUp( this );
+			}
+			
+			private function init():void
+			{
+				caption.text = file.name + " " + file.fileSize;
 			}
 			
 		]]>
 	</fx:Script>
 	
-	<s:controlBarContent />
-	
-	<s:HGroup paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">
+	<s:HGroup id="container" paddingLeft="30" paddingTop="30" paddingRight="30" paddingBottom="30">
 		
-		<s:Image id="attachment" source="{file.data}" />
+		<s:Image id="attachment" source="{file.data}" complete="onComplete()" />
 		
 	</s:HGroup>
 	
-</s:TitleWindow>
+	<s:Label id="caption" horizontalCenter="0" bottom="4" styleName="black12" />
+	
+	<s:Button id="closeButton" skinClass="skins.general.CustomTitleWindowCloseButtonSkin"
+			  width="25" height="25" right="-11" top="-14" click="{PopUpManager.removePopUp(this)}" />
+	
+</s:BorderContainer>

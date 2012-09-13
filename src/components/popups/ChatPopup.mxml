@@ -12,53 +12,145 @@
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
-	
+
 	<fx:Script>
 		<![CDATA[
 			import models.Chat;
 			import models.ChatMessage;
 			import models.FileUpload;
+			import models.UserModel;
 			
 			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
 			import mx.events.CloseEvent;
 			import mx.events.ResizeEvent;
 			import mx.managers.PopUpManager;
 			
+			import org.osmf.net.StreamType;
+			
+			import spark.components.mediaClasses.DynamicStreamingVideoItem;
+			import spark.components.mediaClasses.DynamicStreamingVideoSource;
 			import spark.events.IndexChangeEvent;
 			
+			import utils.DateUtil;
+			
 			private var updateTimer:Timer;
+			private var responseTimer:Timer;
+			
 			private var fileRef:FileReference;
 			
 			[Bindable] public var chat:Chat;
+			[Bindable] public var user:UserModel;
 			
 			public var attachments:ArrayCollection;
 			
-			private function sendMessage( event:MouseEvent ):void
+			private var patientSpeak:Array =
+				[
+					{ triggers: ["hi","hello"], responses: [ "Hello", "hi {{name}}", "Hi Dr." ] },
+				];
+			
+			private var providerSpeak:Array =
+				[
+					{ triggers: ["hi","hello", "what's new"], responses: [ "Hey Dr.", "hi {{name}}" ] },
+					{ triggers: ["those yankees"], responses: [ "You know I'm a Red Sox Fan!" ] },
+					{ triggers: ["weather"], responses: [ "Overcast again", "It's raining, and I forgot my umbrella" ] },
+				];
+			
+			private var camera:Camera;
+			private var videoSoure:DynamicStreamingVideoSource;
+			
+			private function onSendClick( event:MouseEvent ):void
 			{
 				relayMessage();
 			}
 			
 			private function relayMessage():void
 			{
-				var message:ChatMessage = new ChatMessage();
-				message.time = new Date();
-				message.text = input.text;
-				message.user = chat.sourceUser;
-				
+				var messageAttachments:ArrayCollection;
 				if( attachments && attachments.length )
-					message.attachments = new ArrayCollection( attachments.source.slice() );
+					messageAttachments = new ArrayCollection( attachments.source.slice() );
 				
-				chat.addMessage( message );
+				sendMessage( chat.sourceUser, input.text, messageAttachments );
+				simulateResponse();
 				
 				//	clear stuff
 				input.text = "";
 				attachments = new ArrayCollection;
 			}
 			
+			private function sendMessage( user:UserModel, text:String, attachments:ArrayCollection = null ):void
+			{
+				var message:ChatMessage = new ChatMessage();
+				message.time = new Date();
+				message.text = text;
+				message.user = user;
+				message.attachments = attachments;
+				chat.addMessage( message );
+			}
+			
+			private function simulateResponse():void
+			{
+				responseTimer.reset();
+				responseTimer.delay = DateUtil.SECOND * (1 + Math.round( Math.random() * 5 ) );
+				responseTimer.start();
+			}
+			
+			private function onResponseTimer( event:TimerEvent ):void
+			{
+				var responseObject:Object;
+				var rid:int;
+				var message:String;
+				var user:UserModel;
+				
+				var last:ChatMessage = chat.messages && chat.messages.length ? ChatMessage( chat.messages.getItemAt( chat.messages.length -1 ) ) : null;
+				var responses:Array = chat.targetUser.userType == UserModel.TYPE_PATIENT ? patientSpeak : providerSpeak;
+				
+				if( last 
+					&& last.text != "" )
+				{
+					var lastMessage:String = last.text;
+					lastMessage = lastMessage.replace( /\n/, '' );
+					lastMessage = lastMessage.replace( /\r/, '' );
+					lastMessage = lastMessage.replace( /\s*(\w*)\s/, '' );
+					
+					user = last.user == chat.sourceUser ? chat.targetUser : chat.sourceUser;
+					
+					for each(responseObject in responses)
+					{
+						for each(var trigger:String in responseObject.triggers)
+						{
+							if( lastMessage.toLowerCase().indexOf(trigger) > -1 )
+							{
+								rid = Math.floor( Math.random() * (responseObject.responses.length) );
+								
+								message = responseObject.responses[ rid ];
+								message = message.replace( /{{name}}/, user.firstName );
+								
+								sendMessage( chat.targetUser, message );
+								
+								break;
+							}
+						}
+						
+					}
+				}
+				else
+				{
+					user = chat.sourceUser;
+					
+					responseObject = responses[0];
+					rid = Math.floor( Math.random() * (responseObject.responses.length -1) );
+					
+					message = responseObject.responses[ rid ];
+					message = message.replace( /{{name}}/, chat.targetUser.firstName );
+					
+					sendMessage( chat.targetUser, message );
+				}
+			}
+			
 			private function addAttachment( event:MouseEvent ):void
 			{
 				fileRef.browse();
-				
 			}
 			
 			private function onAttachmentSelect( event:Event ):void
@@ -70,7 +162,7 @@
 			{
 				var attachment:FileUpload = new FileUpload( fileRef.name, fileRef.size, fileRef.data );
 				
-				if( !attachments ) attachments = new Vector.<FileUpload>;
+				if( !attachments ) attachments = new ArrayCollection();
 				attachments.addItem( attachment );
 			}
 			
@@ -109,15 +201,58 @@
 			
 			private function onClose(event:Event):void
 			{
-				dispatchEvent( new CloseEvent( CloseEvent.CLOSE ) );
+				chat.endTime = new Date();
+				user.addChat( chat );
 				
 				PopUpManager.removePopUp(this);
+			}
+			
+			private function onKeyDown(event:KeyboardEvent):void
+			{
+				if( event.keyCode == Keyboard.ENTER )
+				{
+					relayMessage();
+				}
+			}
+			
+			private function initCamera(event:Event):void
+			{
+				camera = Camera.getCamera();
+				
+				if (camera) 
+				{
+					videoSoure = new DynamicStreamingVideoSource();
+					
+					var videoItems:Vector.<DynamicStreamingVideoItem>;
+					videoItems=new Vector.<DynamicStreamingVideoItem>();
+					videoItems[0]=new DynamicStreamingVideoItem();
+					
+					videoSoure.host= "";
+					videoSoure.streamType=StreamType.LIVE;
+					videoSoure.streamItems=videoItems;
+					
+					sourceUserVideo.source = videoSoure;
+					
+					var cam:Camera = Camera.getCamera();
+					cam.setMode(78, 55, 15);
+					cam.setQuality(0, 80);
+					sourceUserVideo.videoObject.attachCamera(cam); 
+					
+				} 
+				else 
+				{
+					Alert.show("You don't seem to have a camera.");
+				}
+				
 			}
 			
 			private function init():void
 			{
 				updateTimer = new Timer( 500 );
 				updateTimer.addEventListener( TimerEvent.TIMER, onUpdate );
+				
+				responseTimer = new Timer( 500, 1 );
+				responseTimer.addEventListener( TimerEvent.TIMER_COMPLETE, onResponseTimer );
 				
 				fileRef = new FileReference();
 				fileRef.addEventListener(Event.SELECT, onAttachmentSelect);
@@ -128,12 +263,15 @@
 				updateMode.selectedIndex = Chat.getModeIndex( chat.mode );
 				
 				initChatMode();
+				simulateResponse();
 				
 				controlBarVisible=false;
 				
 				position();
 				
 				updateTimer.start();
+				
+				addEventListener( KeyboardEvent.KEY_DOWN, onKeyDown );
 			}
 		]]>
 	</fx:Script>
@@ -150,14 +288,16 @@
 		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
 	</s:layout>
 	
+	<s:Image includeIn="voiceChat" source="@Embed('images/chatPhoneReadout.jpg')" />
+	
 	<s:Group includeIn="videoChat">
 		
-		<s:BorderContainer borderColor="0xBBBDBF" borderWeight="1" width="240" height="184"> 
+		<s:BorderContainer borderColor="0xBBBDBF" borderWeight="1" width="240" height="184">
 			<s:Image id="targetUserPic" width="240" height="184" creationComplete="{targetUserPic.source = chat.targetUser.getProfilePictureURL('medium')}" />
 		</s:BorderContainer>
 		
-		<s:BorderContainer borderColor="0xBBBDBF" borderWeight="1" width="240" height="184"> 
-			<s:Image id="sourceUserPic" width="78" height="55" right="5" bottom="5" creationComplete="{sourceUserPic.source = chat.sourceUser.getProfilePictureURL()}" />
+		<s:BorderContainer borderColor="0xBBBDBF" borderWeight="1" width="78" height="55" right="5" bottom="5" > 
+			<s:VideoDisplay id="sourceUserVideo" width="78" height="55" creationComplete="initCamera(event)" />
 		</s:BorderContainer>
 		
 	</s:Group>
@@ -195,9 +335,9 @@
 	
 	<mx:VDividedBox verticalGap="4">
 		
-		<s:List id="output" width="240" height="117" dataProvider="{chat.messages}" itemRenderer="components.itemrenderers.ChatMessageRenderer" rollOverColor="0x808080">
+		<s:List id="output" width="240" height="117" dataProvider="{chat.messages}" itemRenderer="components.itemrenderers.ChatMessageRenderer" rollOverColor="0x808080" contentBackgroundColor="0xE6E6E6">
 			<s:layout>
-				<s:VerticalLayout variableRowHeight="true" paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5" />
+				<s:VerticalLayout variableRowHeight="true" paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5" gap="0" />
 			</s:layout>
 		</s:List>
 		
@@ -218,7 +358,7 @@
 		</s:HGroup>
 		
 		<s:HGroup width="100%" horizontalAlign="right">
-			<s:Button label="Send" click="sendMessage(event)" />
+			<s:Button label="Send" click="onSendClick(event)" />
 		</s:HGroup>
 		
 	</s:HGroup>

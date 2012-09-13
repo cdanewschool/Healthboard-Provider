@@ -40,8 +40,8 @@
 			
 			private function filter():void
 			{
-				chat.history.filterFunction = filterHistory;
-				chat.history.refresh();
+				user.chatHistory.filterFunction = filterHistory;
+				user.chatHistory.refresh();
 			}
 			
 			private function filterHistory(item:Chat):Boolean
@@ -81,12 +81,14 @@
 	<s:VGroup gap="15" width="100%">
 		
 		<s:HGroup gap="10" width="100%" horizontalAlign="right" verticalAlign="middle">
-			<s:DropDownList id="groupSelect" width="81" height="24" dataProvider="{chat.chatGroups}" change="filter()" selectedIndex="1" />
+			<s:DropDownList id="groupSelect" width="81" height="24" dataProvider="{chat.chatGroups}" change="filter()" selectedIndex="0" />
 			<s:Label text="Time Range:" styleName="mediumTextBlack" />
 			<s:DropDownList id="timeRangeSelect" width="81" height="24" dataProvider="{timeRanges}" change="filter()" selectedIndex="0" />
 		</s:HGroup>
 		
-		<s:DataGroup dataProvider="{chat.history}" height="355">
+		<s:Spacer height="15" />
+		
+		<s:DataGroup dataProvider="{user.chatHistory}" height="325">
 			<s:layout>
 				<s:VerticalLayout />
 			</s:layout>
