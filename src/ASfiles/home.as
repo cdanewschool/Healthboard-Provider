@@ -23,7 +23,7 @@ import models.ProvidersModel;
 import models.UserModel;
 
 import mx.collections.ArrayCollection;
-
+import mx.controls.LinkButton;
 import mx.events.CalendarLayoutChangeEvent;
 import mx.events.ListEvent;
 import mx.managers.PopUpManager;
@@ -265,5 +265,5 @@ private function toggleAvailability(event:MouseEvent):void
 	
 	user.available = user.available == UserModel.STATE_AVAILABLE ? UserModel.STATE_UNAVAILABLE : UserModel.STATE_AVAILABLE;
 	
-	button.styleName = user.available ? 'linkBtnYellow' : 'linkBtnGray';
+	button.setStyle('color',user.available == UserModel.STATE_AVAILABLE ? 0xCCCC33 : 0xB3B3B3 );
 }
