@@ -3,6 +3,8 @@ import ASfiles.ProviderConstants;
 import components.AutoComplete;
 import components.home.ViewPatient;
 
+import controllers.ApplicationController;
+
 import events.ApplicationEvent;
 import events.AutoCompleteEvent;
 import events.EnhancedTitleWindowEvent;
@@ -31,6 +33,8 @@ import mx.rpc.events.ResultEvent;
 
 import spark.events.DropDownEvent;
 import spark.events.IndexChangeEvent;
+
+private var controller:ApplicationController = ApplicationController.getInstance();
 
 private function init():void
 {
@@ -105,7 +109,8 @@ private function patientsResultHandler(event:ResultEvent):void {
 	
 	patientsData = patients;
 	
-	chatModel.patients = patientsData;
+	controller.patients = chatModel.patients = patientsData;
+
 	initChatHistory();
 }
 
@@ -190,7 +195,8 @@ private function providersResultHandler(event:ResultEvent):void {
 	providersModel.providers = providers;
 	providersModel.providerTeams = new ArrayCollection( teams );
 	
-	chatModel.providers = providers;
+	controller.providers = chatModel.providers = providers;
+	
 	initChatHistory();
 }
 
@@ -243,12 +249,14 @@ private function initChatHistory():void
 {
 	if( !chatModel.providers || !chatModel.patients ) return;
 	
-	var user:UserModel = chatModel.getUser( ProviderConstants.USER_ID, UserModel.TYPE_PROVIDER );
+	var user:UserModel = controller.getUser( ProviderConstants.USER_ID, UserModel.TYPE_PROVIDER );
 	
-	user.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,1,17,35),new Date(2012,09,1,17,45) ) );
-	user.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,23,17,28),new Date(2012,09,23,17,33) ) );
-	user.addChat( new Chat( user, chatModel.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,10,1,17,30),new Date(2012,10,1,17,35) ) );
-	user.addChat( new Chat( user, chatModel.getUser( 1, UserModel.TYPE_PROVIDER ), new Date(2012,10,11,17,31),new Date(2012,10,11,17,42) ) );
+	user.addChat( new Chat( user, controller.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,1,17,35),new Date(2012,09,1,17,45) ) );
+	user.addChat( new Chat( user, controller.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,23,17,28),new Date(2012,09,23,17,33) ) );
+	user.addChat( new Chat( user, controller.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,10,1,17,30),new Date(2012,10,1,17,35) ) );
+	user.addChat( new Chat( user, controller.getUser( 1, UserModel.TYPE_PROVIDER ), new Date(2012,10,11,17,31),new Date(2012,10,11,17,42) ) );
+	
+	appointmentsXMLdata.send();
 }
 
 private function navigate(event:ApplicationEvent):void

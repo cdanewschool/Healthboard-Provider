@@ -1,9 +1,14 @@
 package models
 {
+	import ASclasses.Constants;
+	
 	import controllers.ApplicationController;
 	
 	import mx.collections.ArrayCollection;
+	
+	import utils.DateUtil;
 
+	[Bindable]
 	public class Appointment
 	{
 		public static const RECUR_TYPE_DAY:String = "day";
@@ -47,10 +52,32 @@ package models
 		public var recurUnit:String;
 		
 		public var type:String;
-		public var typeReason:String;
+		
+		public var reason:String;
+		public var prerequisite:String;
+		
+		public var location:String;
 		
 		public function Appointment()
 		{
+			location = "The New York Clinic\n99 Main St.\nNew York, NY 11111";	//	temp
+		}
+		
+		public function fromDateString():String{ return getAppointmentTime( from ); }
+		public function toDateString():String{ return getAppointmentTime( to ); }
+		
+		public function getAppointmentTime( date:Date ):String
+		{
+			return  Constants.MONTHS_ABBR[ date.month ] + ' ' + date.date + ', ' +  date.fullYear + ' at ' + DateUtil.formatTimeFromDate( date ); 
+		}
+		
+		public function toString():String
+		{
+			var str:String = from.month + '/' + from.date + '/' + from.fullYear + ' ';
+			str += 'appointment at ' + DateUtil.formatTimeFromDate( from ) + ' with ' + patient.fullName;
+			if( prerequisite ) str += '\nPrerequisite: ' + prerequisite;
+			
+			return str;
 		}
 		
 		public static function fromObj( data:Object ):Appointment

@@ -140,6 +140,7 @@
 					column.setStyle('labelPosition','inside');
 					column.setStyle('labelAlign','top');
 					
+					chart.horizontalAxis = hAxis;
 					chart.horizontalAxisRenderers = [renderer];
 					chart.series = [column];
 					
@@ -193,6 +194,7 @@
 					DateTimeAxis(hAxis).alignLabelsToUnits = true;
 					renderer.axis = hAxis;
 					
+					chart.horizontalAxis = hAxis;
 					chart.horizontalAxisRenderers = [renderer];
 					chart.series = series;
 				}
@@ -237,6 +239,8 @@
 			
 			private function valueFunctionWeek(series:Series, item:Appointment, fieldName:String):Object 
 			{
+				trace( series.id + ' ' + fieldName );
+				
 				if( fieldName == "xValue" )
 					return( new Date( item.from.fullYear, item.from.month, item.from.date ) );
 				else if( fieldName == "yValue" )
@@ -273,7 +277,7 @@
 			private function getDataTip(element:ChartItem, series:Series):String
 			{
 				var appointment:Appointment = Appointment( element.item );
-				return appointment.patient.fullName + '\n' + DateUtil.formatTimeFromDate( appointment.from, false, false ) + '-' + DateUtil.formatTimeFromDate( appointment.to, false, false ) + ' hrs';
+				return appointment.patient ? appointment.patient.fullName : 'Conference' + '\n' + DateUtil.formatTimeFromDate( appointment.from, false, false ) + '-' + DateUtil.formatTimeFromDate( appointment.to, false, false ) + ' hrs';
 			}
 			
 			private function getFill(element:ChartItem, index:Number):IFill 
@@ -381,14 +385,13 @@
 		
 	</fx:Declarations>
 	
-	
 	<s:layout>
 		<s:VerticalLayout />
 	</s:layout>
 	
 	<components:ModuleHeader id="header" title="Appointments" icon="@Embed('images/patientHome.png')" showSearch="true" searchPlaceholder="Search Appointments" searchFunction="{onHeaderSearch}" />
 	
-	<s:Group>
+	<s:Group y="15">
 		
 		<mx:ViewStack 
 			id="appointmentTypeViews" 
@@ -554,7 +557,6 @@
 						<s:HGroup>
 							
 							<s:Line yFrom="0" yTo="607">
-								
 								<s:stroke>
 									<s:SolidColorStroke color="0xBDBCBC" weight="1" />
 								</s:stroke>
@@ -566,9 +568,95 @@
 								
 								<s:Label text="Select an appointment to view details" styleName="gray9Italic" width="100%" textAlign="center" visible="{selectedAppointment==null}" includeInLayout="{selectedAppointment==null}" />
 								
-								<s:VGroup visible="{selectedAppointment!=null}" includeInLayout="{selectedAppointment!=null}">
+								<s:VGroup visible="{selectedAppointment!=null}" includeInLayout="{selectedAppointment!=null}" paddingTop="15" gap="0">
+								
+									<s:Label text="{selectedAppointment.provider.fullName}" styleName="blue9SemiBold" width="100%" textAlign="center" />
+									
+									<s:Spacer height="10" />
+									
+									<s:Line xFrom="5" xTo="170">
+										<s:stroke>
+											<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+										</s:stroke>
+									</s:Line>
+									
+									<s:Spacer height="10" />
+									
+									<mx:FormItem label="From:" labelWidth="60" height="16" labelStyleName="white9Bold">
+										<s:Label text="{selectedAppointment.fromDateString()}" styleName="white9" paddingLeft="-10" />
+									</mx:FormItem>
+									<mx:FormItem label="To:" labelWidth="60" height="16" labelStyleName="white9Bold">
+										<s:Label text="{selectedAppointment.toDateString()}" styleName="white9" paddingLeft="-10" />
+									</mx:FormItem>
+									<mx:FormItem label="Location:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+										<mx:Text text="{selectedAppointment.location}" styleName="white9" paddingLeft="-10" />
+									</mx:FormItem>
+									
+									<s:Spacer height="10" />
+									
+									<s:Line xFrom="5" xTo="170">
+										<s:stroke>
+											<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+										</s:stroke>
+									</s:Line>
+									
+									<s:Spacer height="10" />
+									
+									<mx:FormItem label="Patient" labelWidth="60" height="16" labelStyleName="white9Bold">
+										<mx:LinkButton label="{selectedAppointment.patient.fullName}" styleName="linkBtnBlue" fontSize="9" paddingLeft="-10"/>
+									</mx:FormItem>
+									<mx:FormItem label="Telephone:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+										<s:Label text="{selectedAppointment.patient.phone}" styleName="white9" paddingLeft="-10"/>
+									</mx:FormItem>
+									<mx:FormItem label="Email:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+										<s:Label text="{selectedAppointment.patient.email}" styleName="white9" paddingLeft="-10"/>
+									</mx:FormItem>
+									
+									<s:Spacer height="10" />
+									
+									<s:Line xFrom="5" xTo="170">
+										<s:stroke>
+											<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+										</s:stroke>
+									</s:Line>
+
+									<s:Spacer height="10" />
+									
+									<mx:FormItem label="Type:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+										<s:Label text="{selectedAppointment.type}" styleName="white9" fontSize="9" paddingLeft="-10"/>
+									</mx:FormItem>
+									<mx:FormItem label="Reason:" labelWidth="60" height="16" labelStyleName="white9Bold">
+										<s:Label text="{selectedAppointment.reason}" styleName="white9" paddingLeft="-10"/>
+									</mx:FormItem>
+									
+									<s:Spacer height="10" />
+									
+									<s:Line xFrom="5" xTo="170">
+										<s:stroke>
+											<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+										</s:stroke>
+									</s:Line>
+									
+									<s:Spacer height="10" />
+									
+									<mx:FormItem label="Prerequisite:" labelWidth="60" height="24" labelStyleName="white9Bold">
+										<s:Label text="{selectedAppointment.prerequisite ? selectedAppointment.prerequisite : 'None'}" styleName="white9" fontSize="9" paddingLeft="-10"/>
+									</mx:FormItem>
+									
+									<s:Spacer height="10" />
+									
+									<s:Line xFrom="5" xTo="170">
+										<s:stroke>
+											<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+										</s:stroke>
+									</s:Line>
+									
+									<s:Spacer height="15" />
+									
+									<mx:LinkButton label="Send Message" styleName="linkBtnGray" fontSize="9" width="100%" textAlign="center"/>
 									
 								</s:VGroup>
+								
 							</s:VGroup>
 							
 						</s:HGroup>

@@ -18,16 +18,38 @@ package utils
 		
 		public static function formatTime( ms:int ):String
 		{
+			var parts:Array = [];
+			
 			var hours:int = Math.floor( ms/HOUR );
 			ms -= (hours * HOUR);
 			
 			var minutes:int = Math.floor( ms/MINUTE );
 			ms -= (minutes * MINUTE);
 			
-			var seconds:int = Math.floor( ms/SECOND );
-			ms -= (seconds * SECOND);
+			parts.push( hours<10?'0'+hours:hours );
+			parts.push( minutes<10?'0'+minutes:minutes );
 			
-			return (hours<10?'0'+hours:hours) + ':' + (minutes<10?'0'+minutes:minutes) + ':' + (seconds<10?'0'+seconds:seconds);
+			var seconds:int = parts.push( Math.floor( ms/SECOND ) );
+			ms -= (seconds * SECOND);
+				
+			parts.push( seconds<10?'0'+seconds:seconds );
+			
+			return parts.join( ':' );
+		}
+		
+		public static function formatTimeFromDate( date:Date, includeSeconds:Boolean = true, includeColon:Boolean = true ):String
+		{
+			var parts:Array = [];
+			
+			parts.push( date.hours<10?'0'+date.hours:date.hours );
+			parts.push( date.minutes<10?'0'+date.minutes:date.minutes );
+			
+			if( includeSeconds )
+			{
+				parts.push( date.seconds<10?'0'+date.seconds:date.seconds );
+			}
+			
+			return parts.join( includeColon?':':'');
 		}
 	}
 }

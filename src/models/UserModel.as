@@ -19,6 +19,11 @@ package models
 		public var sex:String;
 		public var team:String;
 		
+		//	contact
+		public var email:String;
+		public var phone:String;
+		
+		//	security
 		public var username:String;
 		public var password:String;
 		
