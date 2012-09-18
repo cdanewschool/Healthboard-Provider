@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="init()" 
+				autoDrawBackground="true">
+	<fx:Script>
+		<![CDATA[
+			import models.ProviderModel;
+			
+			private function init():void
+			{
+				checkbox.selected = ProviderModel(data).selected;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:CheckBox id="checkbox" label="{ProviderModel(data).fullName}" left="5" />
+	
+</s:ItemRenderer>
