@@ -61,10 +61,10 @@
 	<s:Spacer height="-5" />
 	<s:HGroup verticalAlign="middle" paddingLeft="10">
 		<s:Label text="Team:" color="0xFFFFFF" fontSize="11" />
-		<s:DropDownList id="providerTeamSelect" dataProvider="{model.providerTeams}" labelField="label" width="76" change="model.selectedProviderTeam = providerTeamSelect.selectedItem.value;" />
-		<s:DropDownList id="providerSort" dataProvider="{providerSortFields}" width="69" selectedIndex="0" change="sortProviders(event)" />
+		<s:DropDownList id="providerTeamSelect" dataProvider="{model.providerTeams}" labelField="label" width="90" height="24" change="model.selectedProviderTeam = providerTeamSelect.selectedItem.value;" styleName="dropDownListDark" />
+		<!--<s:DropDownList id="providerSort" dataProvider="{providerSortFields}" width="69" selectedIndex="0" change="sortProviders(event)" />-->
 		<s:HGroup gap="0" verticalAlign="middle" >
-			<s:TextInput id="providerSearch" text="Search" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="70" height="24" click="{if(providerSearch.text == 'Search') providerSearch.text=''}" change="{model.searchText = providerSearch.text}" />
+			<s:TextInput id="providerSearch" text="Search" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="125" height="24" click="{if(providerSearch.text == 'Search') providerSearch.text=''}" change="{model.searchText = providerSearch.text}" />
 			<s:Button styleName="searchButtonIcon" width="24" height="24" />
 		</s:HGroup>
 	</s:HGroup>
@@ -79,15 +79,16 @@
 		buttonMode="false" selectable="true" 
 		width="300" height="300" fontFamily="myMyriadNoCFF"
 		color="0xFFFFFF" verticalAlign="middle" 
-		headerHeight="0" dataProvider="{model.providers}"
+		dataProvider="{model.providers}"
+		headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeaderAlternative" headerHeight="30" paddingTop="6"
 		borderVisible="false" horizontalGridLines="true" horizontalGridLineColor="0x444442" verticalGridLines="true" 
 		alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
 		horizontalScrollPolicy="off" verticalScrollPolicy="off" rowHeight="22" horizontalSeparatorSkin="{null}" 
 		itemRollOver="onTeamRollOver(event)" itemRollOut="teamRollOverRowIndex=-1">
 		<mx:columns>
-			<mx:DataGridColumn dataField="team" width="36" />
-			<mx:DataGridColumn dataField="role"  width="53" />
-			<mx:DataGridColumn width="27">
+			<mx:DataGridColumn dataField="team" width="36" headerText="Team" />
+			<mx:DataGridColumn dataField="role"  width="53" headerText="Role" />
+			<mx:DataGridColumn width="47" headerText="Status">
 				<mx:itemRenderer>
 					<fx:Component>
 						<mx:HBox width="27">
@@ -96,17 +97,17 @@
 					</fx:Component>
 				</mx:itemRenderer>
 			</mx:DataGridColumn>
-			<mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Name">
 				<mx:itemRenderer>
 					<fx:Component>
-						<mx:HBox horizontalScrollPolicy="off" width="154">
+						<mx:HBox horizontalScrollPolicy="off" width="134">
 							<fx:Script>
 								<![CDATA[
 									import mx.collections.ListCollectionView;
 								]]>
 							</fx:Script>
-							<s:Label text="{data.firstName + ' ' + data.lastName}" color="0xAEDBE2" fontSize="12" paddingLeft="10" paddingTop="4" width="144" fontFamily="myMyriad" />
-							<mx:HBox width="16" paddingTop="6">
+							<s:Label text="{data.firstName + ' ' + data.lastName}" color="0xAEDBE2" fontSize="12" paddingLeft="10" width="124" fontFamily="myMyriad" />
+							<mx:HBox width="16" paddingTop="0">
 								<s:Image source="@Embed('images/messagesEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{data.rowIndex == outerDocument.teamRollOverRowIndex}" />
 							</mx:HBox>
 						</mx:HBox>

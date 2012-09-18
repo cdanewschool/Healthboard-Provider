@@ -4,7 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:plus="external.TabBarPlus.plus.*"
-	width="100%" height="100%">
+	width="100%" height="100%" xmlns:components="components.*">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -111,6 +111,11 @@
 				dispatchEvent( evt );
 			}
 			
+			private function onHeaderSearch():void
+			{
+				model.searchText = header.searchText;
+			}
+			
 			protected function onTeamClick(event:ListEvent):void 
 			{
 				showTeamMember( ProviderModel(event.itemRenderer.data) );
@@ -132,26 +137,7 @@
 		<s:VerticalLayout />
 	</s:layout>
 	
-	<s:BorderContainer height="40" width="100%">
-		<s:layout>
-			<s:HorizontalLayout verticalAlign="middle" paddingLeft="16" />
-		</s:layout>
-		<s:backgroundFill>
-			<s:LinearGradient rotation="270">
-				<s:GradientEntry color="0xA3A3A3" alpha="1" ratio=".38" />
-				<s:GradientEntry color="0x706F6F" alpha="1" ratio="1" /> <!--ratio="0.8834"-->
-			</s:LinearGradient>
-		</s:backgroundFill>
-		
-		<s:Image source="@Embed('images/patientHome.png')" buttonMode="true" click="onHeaderClick(event)" />
-		<s:Label id="lblBreadcrumbPatient" text="Team Profile" color="0xFFFFFF" fontSize="22" fontWeight="bold" paddingTop="2" paddingLeft="3" />
-		<s:Label text="▼" fontSize="10" color="0xFFFFFF" paddingTop="4" paddingLeft="12" />
-		<s:Spacer width="100%" />
-		<s:HGroup gap="-1" paddingRight="38">
-			<s:TextInput id="search" text="{SEARCH_PLACEHOLDER}" fontSize="10" fontStyle="italic" color="0x999999" height="24" width="166" paddingTop="5" click="{if(search.text == SEARCH_PLACEHOLDER) search.text=''}" change="{model.searchText = search.text}" />
-			<s:Button styleName="searchButtonIcon" width="24" height="24" />
-		</s:HGroup>
-	</s:BorderContainer>
+	<components:ModuleHeader id="header" title="Team Profile" icon="@Embed('images/patientHome.png')" showSearch="true" searchPlaceholder="Search Patients" searchFunction="{onHeaderSearch}" />
 	
 	<s:HGroup width="100%" paddingTop="30">
 		

@@ -2,12 +2,22 @@
 <s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
 				xmlns:s="library://ns.adobe.com/flex/spark" 
 				xmlns:mx="library://ns.adobe.com/flex/mx" 
-				creationComplete="init()"
+				creationComplete="init()" width="100%"
 				autoDrawBackground="true">
 	
 	<fx:Script>
 		<![CDATA[
 			import ASfiles.ProviderConstants;
+			
+			import events.ApplicationEvent;
+			
+			import flashx.textLayout.conversion.TextConverter;
+			import flashx.textLayout.elements.Configuration;
+			import flashx.textLayout.elements.LinkElement;
+			import flashx.textLayout.elements.TextFlow;
+			import flashx.textLayout.events.FlowElementMouseEvent;
+			import flashx.textLayout.events.TextLayoutEvent;
+			import flashx.textLayout.formats.TextLayoutFormat;
 			
 			import models.ChatMessage;
 			import models.FileUpload;
@@ -17,33 +27,63 @@
 			
 			import utils.DateUtil;
 			
+			private function onLinkClick(event:FlowElementMouseEvent):void
+			{
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				
+				var attachmentID:int = parseInt( LinkElement(event.flowElement).href );
+				var attachment:FileUpload = FileUpload( ChatMessage(data).attachments.getItemAt( attachmentID ) );
+				
+				if( attachment.isImage() )
+				{
+					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.VIEW_FILE, true );
+					evt.data = attachment;
+					dispatchEvent( evt );
+				}
+			}
+			
 			private function init():void
 			{
+			
+				
 				var time:Date = ChatMessage(data).time;
-				
-				header.text = "[" + (time.hours<10?'0'+time.hours:time.hours) + ':' + (time.minutes<10?'0'+time.minutes:time.minutes) + ':' + (time.seconds<10?'0'+time.seconds:time.seconds) + "]";
-				username.text =  ChatMessage(data).user.id == ProviderConstants.USER_ID ? "Me" : ChatMessage(data).user.fullName;
-				message.text = ChatMessage(data).text;
-				
 				var attachments:ArrayCollection = ChatMessage(data).attachments;
-				for each(var attachment:FileUpload in attachments)
+				
+				var messageStart:String = "[<font color='0x999999'>" + (time.hours<10?'0'+time.hours:time.hours) + ':' + (time.minutes<10?'0'+time.minutes:time.minutes) + ':' + (time.seconds<10?'0'+time.seconds:time.seconds) + "</font>]";
+				var messageFrom:String =  ChatMessage(data).user.id == ProviderConstants.USER_ID ? "Me" : ChatMessage(data).user.fullName;
+				var messageBody:String = ChatMessage(data).text;
+				
+				var messageAttachments:String = "";
+				
+				if( attachments
+					&& attachments.length )
 				{
-					var link:LinkButton = new LinkButton();
-					link.label = attachment.name;
-					link.styleName = "linkBtnBlue";
-					link.setStyle('fontSize',11);
-					addElement( link );
+					for(var i:int=0;i<attachments.length;i++)
+					{
+						var attachment:FileUpload = attachments[i];
+						messageAttachments += ("<a href='" + i + "'>" + attachment.name + "</a> ");
+					}
 				}
+				
+				var flow:TextFlow = TextConverter.importToFlow(messageStart + ' ' + messageFrom + ': ' + messageBody + ' ' + messageAttachments, TextConverter.TEXT_FIELD_HTML_FORMAT);
+				flow.addEventListener( FlowElementMouseEvent.CLICK, onLinkClick,false,0,true );
+				
+				message.textFlow = flow;
+				
+				var cfg:Configuration = TextFlow.defaultConfiguration;
+				
+				var normalTLF:TextLayoutFormat = new TextLayoutFormat(cfg.defaultLinkNormalFormat);
+				normalTLF.color = 0xAEDEE4;
+				
+				cfg.defaultLinkNormalFormat = normalTLF;
+				cfg.defaultLinkHoverFormat = normalTLF;
+				cfg.defaultLinkActiveFormat = normalTLF;
+				TextFlow.defaultConfiguration = cfg;
 			}
 		]]>
 	</fx:Script>
 	
-	<s:layout>
-		<s:TileLayout />
-	</s:layout>
-	
-	<s:Label id="header" styleName="gray12" />
-	<s:Label id="username" styleName="black12" />
-	<s:Label id="message" styleName="black12" />
+	<s:RichEditableText id="message" width="100%" editable="false" selectable="false" styleName="black12" />
 	
 </s:ItemRenderer>

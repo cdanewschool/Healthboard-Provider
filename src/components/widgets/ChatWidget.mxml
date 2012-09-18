@@ -154,6 +154,7 @@
 					
 					chatPopup = new ChatPopup();
 					ChatPopup(chatPopup).chat = chat;
+					ChatPopup(chatPopup).user = user;
 					chatPopup.addEventListener( ApplicationEvent.VIEW_FILE, onViewAttachment );
 					chatPopup.addEventListener( CloseEvent.CLOSE, onChatClose );
 					
@@ -186,6 +187,8 @@
 					popup = new ViewAttachmentPopup();
 					ViewAttachmentPopup(popup).file = attachment;
 					popup.addEventListener( CloseEvent.CLOSE, onPopupClose );
+					
+					PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
 				}
 			}
 			
@@ -253,7 +256,7 @@
 			<s:DropDownList dataProvider="{model.chatGroups}" width="75" change="onGroupSelect(event)" labelField="firstName" selectedIndex="0" styleName="dropDownListDark" />
 			
 			<s:HGroup id="searchBox" gap="-1">
-				<s:TextInput id="search" includeIn="default" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="164" height="24" focusIn="showResults()" change="onSearchChange(event)" click="{if(search.text == ChatSearch.SEARCH_PLACEHOLDER) search.text=''}" />
+				<s:TextInput id="search" includeIn="default" styleName="{search.text == ChatSearch.SEARCH_PLACEHOLDER ? 'searchPlaceholder' : 'whiteText11'}" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="174" height="24" focusIn="showResults()" change="onSearchChange(event)" click="{if(search.text == ChatSearch.SEARCH_PLACEHOLDER) search.text=''}" />
 				<s:Label includeIn="connecting" text="{targetUser.fullName} - Connecting..." width="164" height="24" fontSize="10" enabled="false" color="0xFFFFFF" paddingTop="5"/>
 				<s:Label includeIn="declined" text="{targetUser.fullName} - Not online" width="164" height="24" fontSize="10" enabled="false" color="0xFFFFFF" paddingTop="5"/>
 				<s:Label includeIn="connected" text="{targetUser.fullName} - Connected" width="164" height="24" fontSize="10" enabled="false" color="0xFFFFFF" paddingTop="5"/>
