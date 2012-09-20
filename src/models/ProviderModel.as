@@ -9,10 +9,6 @@ package models
 		public var age:String;
 		public var birthday:String;
 		
-		//	contact
-		public var email:String;
-		public var phone:String;
-		
 		//	address
 		public var street1:String;
 		public var street2:String;
@@ -41,9 +37,13 @@ package models
 		public var securityQuestion:String;
 		public var securityAnswer:String;
 		
+		public var selected:Boolean;
+		
 		public function ProviderModel()
 		{
 			super( TYPE_PROVIDER );
+			
+			selected = true;
 		}
 		
 		override public function get fullName():String

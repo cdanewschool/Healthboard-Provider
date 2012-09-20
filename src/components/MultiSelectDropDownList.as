@@ -3,7 +3,7 @@
 */
 package components
 {
-	import components.itemrenderers.MultiSelectItemRenderer;
+	import components.itemrenderers.selectable.SelectableItemRenderer;
 	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -19,10 +19,8 @@ package components
 	
 	public class MultiSelectDropDownList extends DropDownList
 	{
-		public var placeholderText:String = "Select all";
-		public var placeholderTextPartial:String = "{n} selected";
-		
-		private var checkboxesInitialized:Boolean = false;
+		private var _placeholderText:String = "Select all";
+		private var _placeholderTextPartial:String = "{n} selected";
 		
 		/** selected check boxes */
 		protected var currentlySelectedCheckBoxes:Array = new Array();
@@ -78,14 +76,17 @@ package components
 		override protected function item_mouseDownHandler(event:MouseEvent):void 
 		{
 			// launch solo view mode when clicking "playback only"
-			if ( event.currentTarget.data == "All Doctors" ) {
-				deselectAllCheckBoxes();
+			if ( event.currentTarget.data == placeholderText ) {
+				//deselectAllCheckBoxes();
 			}
 			
-			if (selectedCheckboxes.length == 0) {
+			if (selectedCheckboxes.length == 0) 
+			{
 				super.item_mouseDownHandler(event);    
 				dispatchEvent(new Event("selectionChange"));
-			} else {
+			} 
+			else 
+			{
 				closeDropDown(false);
 			}
 		}
@@ -108,6 +109,7 @@ package components
 				// which is to set a selection index
 				event.preventDefault();
 			}
+			
 			super.dropDownController_closeHandler(event);
 		}
 		
@@ -116,27 +118,19 @@ package components
 		 */
 		protected function activateAllCheckBoxes():void 
 		{
-			if( checkboxesInitialized ) return;
+			if( !dataGroup ) return;
 			
 			for (var c:int = 0; c < dataGroup.numElements; c++) 
 			{
-				var obj:MultiSelectItemRenderer = dataGroup.getElementAt(c) as MultiSelectItemRenderer;
+				var obj:SelectableItemRenderer = dataGroup.getElementAt(c) as SelectableItemRenderer;
 				
 				if (obj) 
 				{
-					// find and check of previously checked boxes
-					if ( currentlySelectedCheckBoxes.indexOf(dataProvider.getItemAt(c)) != -1 ) 
-					{
-						obj.checkbox.selected = true;
-					}
-					
 					obj.checkbox.addEventListener(MouseEvent.MOUSE_DOWN, mouseCheckBox, false, 0, true);
 					obj.checkbox.addEventListener(MouseEvent.MOUSE_UP, mouseCheckBox, false, 0, true);
 					obj.checkbox.addEventListener(Event.CHANGE, changeCheckBoxSelection, false, 0, true);
 				}
 			}
-			
-			checkboxesInitialized = true;
 			
 			updateLabel();
 		}
@@ -149,7 +143,7 @@ package components
 			currentlySelectedCheckBoxes = [];
 			for (var c:int = 0; c < dataGroup.numElements; c++) 
 			{
-				var obj:MultiSelectItemRenderer = dataGroup.getElementAt(c) as MultiSelectItemRenderer;
+				var obj:SelectableItemRenderer = dataGroup.getElementAt(c) as SelectableItemRenderer;
 				if (obj) {
 					obj.checkbox.selected = false;
 				}
@@ -161,14 +155,14 @@ package components
 		 * 
 		 * @return array of selected checkboxes
 		 */
-		public function get selectedCheckboxes():Array
+		private function get selectedCheckboxes():Array
 		{
 			var returnList:Array = new Array();
 			if( !dataGroup ) return returnList;
 			
 			for (var c:int = 0; c < dataGroup.numElements; c++) 
 			{
-				var obj:MultiSelectItemRenderer = dataGroup.getElementAt(c) as MultiSelectItemRenderer;
+				var obj:SelectableItemRenderer = dataGroup.getElementAt(c) as SelectableItemRenderer;
 				if (obj && obj.checkbox.selected) {
 					returnList.push(obj.data);
 				}
@@ -194,6 +188,16 @@ package components
 		protected function changeCheckBoxSelection(event:Event):void 
 		{
 			currentlySelectedCheckBoxes = selectedCheckboxes;
+			
+			for (var c:int = 0; c < dataGroup.numElements; c++) 
+			{
+				var obj:SelectableItemRenderer = dataGroup.getElementAt(c) as SelectableItemRenderer;
+				
+				if ( obj && obj.data && obj.data.hasOwnProperty('selected') ) 
+				{
+					obj.data.selected = obj.checkbox.selected;
+				}
+			}
 			
 			// turn on multi-view mode
 			if (event.currentTarget.selected == true ) 
@@ -224,8 +228,30 @@ package components
 			}
 			else
 			{
-				prompt = placeholderText.replace( /%n%/, selected.length );
+				prompt = placeholderTextPartial.replace( /%n%/, selected.length );
 			}
 		}
+
+		public function get placeholderText():String
+		{
+			return _placeholderText;
+		}
+
+		public function set placeholderText(value:String):void
+		{
+			_placeholderText = prompt = value;
+		}
+
+		public function get placeholderTextPartial():String
+		{
+			return _placeholderTextPartial;
+		}
+
+		public function set placeholderTextPartial(value:String):void
+		{
+			_placeholderTextPartial = value;
+		}
+
+
 	}
 }

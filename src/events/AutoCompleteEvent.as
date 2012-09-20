@@ -9,8 +9,8 @@ package events
 	
 	public class AutoCompleteEvent extends Event
 	{
-		public static const SHOW:String = "showAutocomplete";
-		public static const HIDE:String = "hideAutocomplete";
+		public static const SHOW:String = "AutoCompleteEvent.SHOW";
+		public static const HIDE:String = "AutoCompleteEvent.HIDE";
 		
 		public var dataProvider:ArrayCollection;
 		public var targetField:TextInput;
@@ -22,6 +22,18 @@ package events
 		public function AutoCompleteEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
+		}
+		
+		override public function clone():Event
+		{
+			var event:AutoCompleteEvent = new AutoCompleteEvent(type, bubbles, cancelable);
+			event.dataProvider = dataProvider;
+			event.targetField = targetField;
+			event.desiredWidth = desiredWidth;
+			event.callbackFunction = callbackFunction;
+			event.labelFunction = labelFunction;
+			
+			return event;
 		}
 	}
 }

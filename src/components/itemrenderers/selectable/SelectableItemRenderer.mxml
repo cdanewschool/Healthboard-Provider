@@ -5,15 +5,18 @@
 				autoDrawBackground="true">
 	<fx:Script>
 		<![CDATA[
-			import models.ProviderModel;
 			
-			private function init():void
+			protected function init():void
 			{
-				checkbox.selected = ProviderModel(data).selected;
+				if( data.hasOwnProperty('selected') )
+				{
+					checkbox.selected = data.selected;
+				}
+				
 			}
 		]]>
 	</fx:Script>
 	
-	<s:CheckBox id="checkbox" label="{ProviderModel(data).fullName}" left="5" />
+	<s:CheckBox id="checkbox" left="5" />
 	
 </s:ItemRenderer>

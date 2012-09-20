@@ -12,6 +12,7 @@ package controllers
 	import mx.graphics.LinearGradient;
 	import mx.rpc.events.ResultEvent;
 
+	[Bindable]
 	public class AppointmentsController
 	{
 		private static var __instance:AppointmentsController;

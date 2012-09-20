@@ -126,7 +126,7 @@
 			
 			private function showResults():void
 			{
-				var evt:AutoCompleteEvent = new AutoCompleteEvent( AutoCompleteEvent.SHOW );
+				var evt:AutoCompleteEvent = new AutoCompleteEvent( AutoCompleteEvent.SHOW, true );
 				evt.dataProvider = model.dataProvider;
 				evt.targetField = search;
 				evt.desiredWidth = searchBox.width;
@@ -222,7 +222,7 @@
 				
 				search.text = user.fullName;
 				
-				dispatchEvent( new AutoCompleteEvent( AutoCompleteEvent.HIDE ) );
+				dispatchEvent( new AutoCompleteEvent( AutoCompleteEvent.HIDE, true ) );
 				
 				stage.focus = null;
 			}
