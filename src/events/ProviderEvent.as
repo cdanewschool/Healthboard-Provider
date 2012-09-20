@@ -17,5 +17,13 @@ package events
 			
 			this.provider = provider;
 		}
+		
+		override public function clone():Event
+		{
+			var event:ProviderEvent = new ProviderEvent(type, bubbles, cancelable);
+			event.provider = provider;
+			
+			return event;
+		}
 	}
 }

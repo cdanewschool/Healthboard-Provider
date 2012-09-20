@@ -4,12 +4,17 @@ package events
 	
 	public class AuthenticationEvent extends Event
 	{
-		public static const SUCCESS:String = "success";
-		public static const ERROR:String = "error";
+		public static const SUCCESS:String = "AuthenticationEvent.SUCCESS";
+		public static const ERROR:String = "AuthenticationEvent.ERROR";
 		
 		public function AuthenticationEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
+		}
+		
+		override public function clone():Event
+		{
+			return new AuthenticationEvent(type, bubbles, cancelable);
 		}
 	}
 }
