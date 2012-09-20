@@ -127,8 +127,7 @@
 			private function getFill(element:ChartItem, index:Number):IFill 
 			{
 				var appointment:Appointment = Appointment( appointments.getItemAt( index ) );
-				
-				return controller.getFill( appointment.type );
+				return controller.getFill( appointment.isPending ? Appointment.TYPE_PENDING : appointment.type );
 			}
 			
 			private function verticalAxisCategoryFunction(axis:AxisBase, item:ProviderModel):Object 
