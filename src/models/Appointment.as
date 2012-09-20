@@ -23,8 +23,12 @@ package models
 		public static const RECUR_TYPES:ArrayCollection = new ArrayCollection
 			( 
 				[ 
-					{ label: "day", labelShort: "d", value: RECUR_TYPE_DAY }, { label: "week", labelShort: "w", value: RECUR_TYPE_DAY }, { label: "month", labelShort: "m", value: RECUR_TYPE_MONTH_ONE }, 
-					{ label: "three months", labelShort: "3m", value: RECUR_TYPE_MONTH_THREE }, { label: "six months", labelShort: "6m", value: RECUR_TYPE_MONTH_SIX }, { label: "year", labelShort: "1y", value: RECUR_TYPE_YEAR }, 
+					{ label: "day", labelShort: "d", value: RECUR_TYPE_DAY }, 
+					{ label: "week", labelShort: "w", value: RECUR_TYPE_DAY }, 
+					{ label: "month", labelShort: "m", value: RECUR_TYPE_MONTH_ONE }, 
+					{ label: "three months", labelShort: "3m", value: RECUR_TYPE_MONTH_THREE }, 
+					{ label: "six months", labelShort: "6m", value: RECUR_TYPE_MONTH_SIX }, 
+					{ label: "year", labelShort: "1y", value: RECUR_TYPE_YEAR }, 
 				]
 			);
 		public static const TYPE_VISIT:String = "visit";
@@ -54,6 +58,8 @@ package models
 		
 		public var from:Date;
 		public var to:Date;
+		
+		public var isPending:Boolean;
 		
 		public var isRecurring:Boolean;
 		public var recurUnit:String;
@@ -144,6 +150,8 @@ package models
 			
 			val.patient = ApplicationController.getInstance().getUser( data.patient_id, UserModel.TYPE_PATIENT );
 			val.provider = ApplicationController.getInstance().getUser( data.provider_id, UserModel.TYPE_PROVIDER );
+			
+			val.isPending = String(data.is_pending) == 'true';
 			
 			return val;
 		}
