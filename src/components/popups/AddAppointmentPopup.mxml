@@ -301,10 +301,10 @@
 	</s:HGroup>
 	
 	<mx:FormItem label="" labelWidth="75">
-		<s:CheckBox id="isRecurring" label="Recurring {appointment.recurUnit?' every' + Appointment.RECUR_TYPES.getItemAt(recurUnit.selectedIndex).label + ':':''}" selected="{appointment.isRecurring}" change="{appointment.isRecurring = isRecurring.selected}" />
+		<s:CheckBox id="isRecurring" label="Recurring {appointment.recurUnit?' every ' + Appointment.RECUR_TYPES.getItemAt(recurUnit.selectedIndex).label + '':''}" selected="{appointment.isRecurring}" change="{appointment.isRecurring = isRecurring.selected}" />
 		<mx:LinkBar 
-			id="recurUnit" width="123" 
-			styleName="linkBtnGray" textRollOverColor="0x808080" backgroundAlpha="0" 
+			id="recurUnit" 
+			linkButtonStyleName="linkBtnGray" contentBackgroundAlpha="0" horizontalGap="0" 
 			dataProvider="{Appointment.RECUR_TYPES}" labelField="labelShort" separatorWidth="0" 
 			itemClick="{appointment.recurUnit=Appointment.RECUR_TYPES[recurUnit.selectedIndex].value}" visible="{appointment.isRecurring}" />		
 	</mx:FormItem>
@@ -332,6 +332,8 @@
 			<s:Button label="Cancel" width="43" height="24" click="cancel();" skinClass="skins.general.IconButtonSkin" />
 		</s:HGroup>
 	</s:HGroup>
+	
+	<s:Spacer height="15" />
 	
 	<s:Group visible="{mode==MODE_EDIT}" includeInLayout="{mode==MODE_EDIT}" width="100%">
 		<s:layout>
