@@ -4,6 +4,8 @@ package models
 	
 	import controllers.ApplicationController;
 	
+	import flash.utils.describeType;
+	
 	import mx.collections.ArrayCollection;
 	
 	import utils.DateUtil;
@@ -21,8 +23,8 @@ package models
 		public static const RECUR_TYPES:ArrayCollection = new ArrayCollection
 			( 
 				[ 
-					{ label: "d", value: RECUR_TYPE_DAY }, { label: "w", value: RECUR_TYPE_DAY }, { label: "m", value: RECUR_TYPE_MONTH_ONE }, 
-					{ label: "3m", value: RECUR_TYPE_MONTH_THREE }, { label: "6m", value: RECUR_TYPE_MONTH_SIX }, { label: "1y", value: RECUR_TYPE_YEAR }, 
+					{ label: "day", labelShort: "d", value: RECUR_TYPE_DAY }, { label: "week", labelShort: "w", value: RECUR_TYPE_DAY }, { label: "month", labelShort: "m", value: RECUR_TYPE_MONTH_ONE }, 
+					{ label: "three months", labelShort: "3m", value: RECUR_TYPE_MONTH_THREE }, { label: "six months", labelShort: "6m", value: RECUR_TYPE_MONTH_SIX }, { label: "year", labelShort: "1y", value: RECUR_TYPE_YEAR }, 
 				]
 			);
 		public static const TYPE_VISIT:String = "visit";
@@ -34,12 +36,17 @@ package models
 		public static const APPOINTMENT_TYPES:ArrayCollection = new ArrayCollection
 			( 
 				[ 
-					{ label: "Visits", value: TYPE_VISIT, colors:['0x09557F','0x096980','0x095580'] }, 
+					{ label: "Visit", value: TYPE_VISIT, colors:['0x09557F','0x096980','0x095580'] }, 
 					{ label: "Web Conference", value: TYPE_CONFERENCE_WEB, colors:['0x004F27','0x006127','0x004F27'] }, 
 					{ label: "Telephone Conference", value: TYPE_CONFERENCE_PHONE, colors:['0x006361','0x05948F','0x006361'] }, 
-					{ label: "Others", value: TYPE_OTHER, colors:['0x542D91','0x702D91','0x542D91'] }, 
+					{ label: "Other", value: TYPE_OTHER, colors:['0x542D91','0x702D91','0x542D91'] }, 
 					{ label: "Pending", value: TYPE_PENDING, colors:['0xD66E30','0xED8722','0xD66E30'] }
 				]
+			);
+		
+		public static const REASONS:ArrayCollection = new ArrayCollection
+			(
+				[ 'General Consultation', 'Physical Examination', 'Follow-up', 'Flu Vaccination', 'Common RFV #5', 'Common RFV #6', 'Common RFV #7', 'Common RFV #8' ]
 			);
 		
 		public var patient:UserModel;
@@ -61,6 +68,13 @@ package models
 		public function Appointment()
 		{
 			location = "The New York Clinic\n99 Main St.\nNew York, NY 11111";	//	temp
+			
+			var today:Date = ApplicationController.getInstance().today;
+			
+			from = new Date( today.fullYear, today.month, today.date, 10 );
+			to = new Date( today.fullYear, today.month, today.date, 11 );
+			
+			type = TYPE_VISIT;
 		}
 		
 		public function fromDateString():String{ return getAppointmentTime( from ); }
@@ -68,7 +82,7 @@ package models
 		
 		public function getAppointmentTime( date:Date ):String
 		{
-			return  Constants.MONTHS_ABBR[ date.month ] + ' ' + date.date + ', ' +  date.fullYear + ' at ' + DateUtil.formatTimeFromDate( date ); 
+			return Constants.MONTHS_ABBR[ date.month ] + ' ' + date.date + ', ' +  date.fullYear + ' at ' + DateUtil.formatTimeFromDate( date ); 
 		}
 		
 		public function toString():String
@@ -78,6 +92,34 @@ package models
 			if( prerequisite ) str += '\nPrerequisite: ' + prerequisite;
 			
 			return str;
+		}
+		
+		public function clone():Appointment
+		{
+			var val:Appointment = new Appointment();
+			
+			var definition:XML = describeType(this);
+			
+			for each(var prop:XML in definition..accessor)
+			{
+				if( prop.@access == "readonly" ) continue;
+				
+				val[prop.@name] = this[prop.@name];
+			}
+			
+			return val;
+		}
+		
+		public function copy( from:Appointment ):void
+		{
+			var definition:XML = describeType(this);
+			
+			for each(var prop:XML in definition..accessor)
+			{
+				if( prop.@access == "readonly" ) continue;
+				
+				this[prop.@name] = from[prop.@name];
+			}
 		}
 		
 		public static function fromObj( data:Object ):Appointment
@@ -104,6 +146,19 @@ package models
 			val.provider = ApplicationController.getInstance().getUser( data.provider_id, UserModel.TYPE_PROVIDER );
 			
 			return val;
+		}
+		
+		public static function getTypeByKey( key:String ):Object
+		{
+			for each(var type:Object in APPOINTMENT_TYPES)
+			{
+				if( type.value == key )
+				{
+					return type;
+				}
+			}
+			
+			return null;
 		}
 	}
 }

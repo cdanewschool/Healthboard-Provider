@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	width="371" height="549"
+	controlBarVisible="true" 
+	skinClass="skins.general.myHeaderlessTitleWindow"
+	creationComplete="init()">
+	
+	<fx:Declarations>
+		<s:RadioButtonGroup id="appointmentTypes" itemClick="selectAppointmentType(event)" selectedValue="{appointment.type}" />
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import controllers.ApplicationController;
+			import controllers.AppointmentsController;
+			
+			import events.AppointmentEvent;
+			import events.AutoCompleteEvent;
+			
+			import models.Appointment;
+			import models.AppointmentsModel;
+			import models.UserModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.LinkButton;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.events.CloseEvent;
+			import mx.events.ItemClickEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.components.List;
+			import spark.components.RadioButton;
+			import spark.events.DropDownEvent;
+			import spark.events.IndexChangeEvent;
+			
+			import utils.DateUtil;
+			
+			public static const MODE_ADD:String = "add";
+			public static const MODE_EDIT:String = "edit";
+			
+			[Bindable] public var user:UserModel;
+			[Bindable] public var appointment:Appointment;
+			[Bindable] public var mode:String = MODE_ADD;
+			
+			private var patients:ArrayCollection;
+			
+			private const PATIENT_PLACEHOLDER:String = "Enter name";
+			private const REASON_PLACEHOLDER:String = "Enter or select reason for visit";
+			
+			private function save():void
+			{
+				if( mode == MODE_EDIT )
+				{
+					dispatchEvent( new AppointmentEvent( AppointmentEvent.SAVE ) );
+				}
+				else if( mode == MODE_ADD )
+				{
+					dispatchEvent( new AppointmentEvent( AppointmentEvent.ADD ) );
+				}
+			}
+			
+			private function cancelAppointment():void
+			{
+				dispatchEvent( new AppointmentEvent( AppointmentEvent.CANCEL ) );
+			}
+			
+			private function cancel():void
+			{
+				dispatchEvent( new Event( Event.CANCEL ) );
+			}
+			
+			private function showResults():void
+			{
+				var evt:AutoCompleteEvent = new AutoCompleteEvent( AutoCompleteEvent.SHOW, true );
+				evt.dataProvider = patients;
+				evt.targetField = patient;
+				evt.desiredWidth = patient.width;
+				evt.callbackFunction = selectResult;
+				evt.labelFunction = getDisplayName;
+				
+				dispatchEvent( evt );
+			}
+			
+			protected function selectResult(event:IndexChangeEvent):void
+			{
+				var user:UserModel = List(event.currentTarget).selectedItem;
+				if( !user ) return;
+				
+				appointment.patient = user;
+				
+				patient.text = user ? user.fullName : PATIENT_PLACEHOLDER;
+				
+				dispatchEvent( new AutoCompleteEvent( AutoCompleteEvent.HIDE ) );
+				
+				stage.focus = null;
+			}
+			
+			private function getDisplayName(item:UserModel):String
+			{
+				return item.firstName + ' ' + item.lastName;
+			}
+			
+			private function onReasonClick(event:MouseEvent):void
+			{
+				var link:LinkButton = LinkButton(event.currentTarget);
+				
+				appointment.reason = reason.text = link.label;
+			}
+			
+			private function selectAppointmentType(event:ItemClickEvent):void
+			{
+				appointment.type = RadioButtonGroup(event.currentTarget).selectedValue.toString();
+			}
+			
+			private function filter():void
+			{
+				patients.refresh();
+			}
+			
+			private function filterPatients(item:Object):Boolean 
+			{
+				var pattern:RegExp = new RegExp("[^]*"+patient.text+"[^]*", "i");
+				var searchFilter:Boolean = (patient.text == 'Search' || patient.text == '') ? true : (pattern.test(item.lastName) || pattern.test(item.firstName));
+				
+				return searchFilter;
+			}
+
+			/*
+			protected function onDateDropDownOpen(event:DropDownEvent):void 
+			{
+				DropDownList(event.currentTarget).addEventListener(MouseEvent.MOUSE_DOWN, stopPropagation, false, 0, true);
+			}
+			
+			protected function stopPropagation(event:Event):void 
+			{
+				event.stopImmediatePropagation();
+			}
+			
+			private function setDate( date:Date, event:CalendarLayoutChangeEvent ):void
+			{
+				var dateChooser:DateChooser = DateChooser(event.currentTarget);
+				
+				date = dateChooser.selectedDate;
+				
+				DropDownList(dateChooser.parent).closeDropDown(true);
+				DropDownList(dateChooser.parent).removeEventListener(MouseEvent.MOUSE_DOWN, stopPropagation);
+			}
+			*/
+			
+			private function init():void
+			{
+				controlBarVisible = false;
+				
+				patients = new ArrayCollection( ApplicationController.getInstance().patients.source );
+				patients.filterFunction = filterPatients;
+				
+				patient.text = appointment.patient ? appointment.patient.fullName : PATIENT_PLACEHOLDER;
+				reason.text = appointment.reason != '' ? appointment.reason : REASON_PLACEHOLDER;
+				
+				fromDate.selectedDate = appointment.from;
+				fromHours.text = appointment.from.hours.toString();
+				fromMinutes.text = appointment.from.minutes.toString();
+				
+				//fromDate.text = appointment.from.month + '/' + appointment.from.date + '/' + appointment.from.fullYear;
+				//fromDatePicker.selectedDate = appointment.from;
+				//toDate.text = appointment.to.month + '/' + appointment.to.date + '/' + appointment.to.fullYear;
+				//toDatePicker.selectedDate = appointment.to;
+				
+				toDate.selectedDate = appointment.to;
+				toHours.text = appointment.to.hours.toString();
+				toMinutes.text = appointment.to.minutes.toString();
+				
+				for(var i:int=0,r:int=0;i<Appointment.APPOINTMENT_TYPES.length;i++)
+				{
+					var def:Object = Appointment.APPOINTMENT_TYPES[i];
+					
+					var radio:RadioButton = new RadioButton();
+					radio.groupName = "appointmentTypes"
+					radio.value = def.value;
+					radio.label = def.label;
+					typeList.addElement( radio );
+				}
+				
+				var reasons:ArrayCollection = Appointment.REASONS;
+				var rows:int = Math.ceil( reasons.length/2 );
+				
+				var column:VGroup = new VGroup();
+				column.gap = -6;
+				reasonList.addElement( column );
+				
+				for(i=0,r=0;i<reasons.length;i++)
+				{
+					var link:LinkButton = new LinkButton();
+					link.label = reasons[i];
+					link.styleName = "linkBtnDarkBlue";
+					link.addEventListener( MouseEvent.CLICK, onReasonClick );
+					column.addElement( link );
+					
+					if( r == rows - 1 )
+					{
+						column = new VGroup();
+						column.gap = -6;
+						reasonList.addElement( column );
+						
+						r=0;
+					}
+					else
+					{
+						r++;
+					}
+				}
+				
+				if( appointment.recurUnit )
+				{
+					for(i=0;i<Appointment.RECUR_TYPES.length;i++)
+					{
+						if( appointment.recurUnit == Appointment.RECUR_TYPES[i].value )
+						{
+							recurUnit.selectedIndex = i;
+							
+							break;
+						}
+					}
+				}
+				
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="15" paddingTop="15" paddingRight="15" gap="12" horizontalAlign="left" />
+	</s:layout>
+	
+	<s:Label text="{mode==MODE_EDIT?'Edit':'Add'} Appointment" styleName="darkGrayBold16" />
+	
+	<mx:FormItem label="Patient:" labelWidth="75" labelStyleName="mediumTextBlackBold">
+		<s:TextInput id="patient" styleName="{patient.text == PATIENT_PLACEHOLDER ? 'searchPlaceholder' : 'grayText11'}" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="215" height="24" change="filter();showResults()" click="{if(patient.text == PATIENT_PLACEHOLDER) { patient.text=''} showResults()}" />
+	</mx:FormItem>
+	
+	<s:HGroup>
+		<mx:FormItem label="From:" labelWidth="75" labelStyleName="mediumTextBlackBold">
+			<!--
+			<s:HGroup>
+				<s:TextInput id="fromDate" width="88" height="24" />
+				<s:HGroup paddingTop="-2" paddingLeft="-3">
+					<s:DropDownList dropShadowVisible="false" skinClass="skins.general.MyCalendarDropDownListSkin" itemRenderer="spark.skins.spark.DefaultComplexItemRenderer" width="25" requireSelection="false" open="onDateDropDownOpen(event)" click="{event.stopImmediatePropagation()}"> 
+						<s:dataProvider>
+							<s:ArrayList>
+								<mx:DateChooser 
+									id="fromDatePicker"
+									showToday="true" allowMultipleSelection="false"
+									contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" headerStyleName="dateChooserVitalGrayHeader"
+									fontSize="11" change="setDate( appointment.from, event ); fromDate.text = appointment.from.month + '/' + appointment.from.date + '/' + appointment.from.fullYear;" />
+							</s:ArrayList>
+						</s:dataProvider>
+					</s:DropDownList>
+				</s:HGroup>	
+			</s:HGroup>
+			-->
+			<mx:DateField id="fromDate" change="{appointment.from = fromDate.selectedDate}" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput"/>
+		</mx:FormItem>
+		<mx:FormItem label="To:" labelWidth="25" labelStyleName="mediumTextBlackBold">
+			<!--
+			<s:TextInput id="toDate" width="88" height="24" />		
+			<s:HGroup paddingTop="-2" paddingLeft="-3">
+				<s:DropDownList dropShadowVisible="false" skinClass="skins.general.MyCalendarDropDownListSkin" itemRenderer="spark.skins.spark.DefaultComplexItemRenderer" width="25" requireSelection="false" open="onDateDropDownOpen(event)" click="{event.stopImmediatePropagation()}"> 
+					<s:dataProvider>
+						<s:ArrayList>
+							<mx:DateChooser 
+								id="toDatePicker"
+								showToday="true" allowMultipleSelection="false"
+								contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" headerStyleName="dateChooserVitalGrayHeader"
+								fontSize="11" change="setDate( appointment.to, event ); toDate.text = appointment.to.month + '/' + appointment.to.date + '/' + appointment.to.fullYear;" />
+						</s:ArrayList>
+					</s:dataProvider>
+				</s:DropDownList>
+			</s:HGroup>	
+			-->
+			<mx:DateField id="toDate" change="{appointment.to = toDate.selectedDate}" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput"/>
+		</mx:FormItem>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<mx:FormItem label="Time:" labelWidth="75" labelStyleName="mediumTextBlackBold">
+			<s:HGroup verticalAlign="middle">
+				<s:TextInput id="fromHours" width="25" height="24" restrict="0-9" change="{appointment.from.hours = parseInt(fromHours.text)}" />
+				<s:TextInput id="fromMinutes" width="25" height="24" restrict="0-9" change="{appointment.from.minutes = parseInt(fromMinutes.text)}" />
+				<s:Label text="hr"/>
+			</s:HGroup>
+		</mx:FormItem>
+		<mx:FormItem label="" labelWidth="40">
+			<s:HGroup verticalAlign="middle">
+				<s:TextInput id="toHours" width="25" height="24" restrict="0-9" change="{appointment.to.hours = parseInt(toHours.text)}" />
+				<s:TextInput id="toMinutes" width="25" height="24" restrict="0-9" change="{appointment.to.minutes = parseInt(toMinutes.text)}" />
+				<s:Label text="hr"/>
+			</s:HGroup>
+		</mx:FormItem>
+	</s:HGroup>
+	
+	<mx:FormItem label="" labelWidth="75">
+		<s:CheckBox id="isRecurring" label="Recurring {appointment.recurUnit?' every' + Appointment.RECUR_TYPES.getItemAt(recurUnit.selectedIndex).label + ':':''}" selected="{appointment.isRecurring}" change="{appointment.isRecurring = isRecurring.selected}" />
+		<mx:LinkBar 
+			id="recurUnit" width="123" 
+			styleName="linkBtnGray" textRollOverColor="0x808080" backgroundAlpha="0" 
+			dataProvider="{Appointment.RECUR_TYPES}" labelField="labelShort" separatorWidth="0" 
+			itemClick="{appointment.recurUnit=Appointment.RECUR_TYPES[recurUnit.selectedIndex].value}" visible="{appointment.isRecurring}" />		
+	</mx:FormItem>
+	
+	<s:VGroup paddingLeft="30">
+		<s:Label text="What is the type of this appointment?" styleName="grayText11" />
+		<s:VGroup id="typeList" gap="5" paddingLeft="30" />
+	</s:VGroup>
+	
+	<s:VGroup  paddingLeft="20" gap="7">
+		<s:TextInput id="reason" styleName="{reason.text == REASON_PLACEHOLDER ? 'searchPlaceholder' : 'grayText11'}" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="292" height="24" click="{if(reason.text == REASON_PLACEHOLDER) reason.text=''}" />
+		<s:Label text="Common reasons for visit:" />
+		<s:HGroup id="reasonList" paddingLeft="10" />
+	</s:VGroup>
+	
+	<s:Line xFrom="0" xTo="340">
+		<s:stroke>
+			<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:HGroup horizontalAlign="right" width="100%" visible="{mode==MODE_ADD}" includeInLayout="{mode==MODE_ADD}">
+		<s:HGroup gap="10" paddingRight="10" >
+			<s:Button label="Add Appointment" width="101" height="24" click="save();" skinClass="skins.general.IconButtonSkin" enabled="{appointment.provider!=null}" />
+			<s:Button label="Cancel" width="43" height="24" click="cancel();" skinClass="skins.general.IconButtonSkin" />
+		</s:HGroup>
+	</s:HGroup>
+	
+	<s:Group visible="{mode==MODE_EDIT}" includeInLayout="{mode==MODE_EDIT}" width="100%">
+		<s:layout>
+			<s:BasicLayout />
+		</s:layout>
+		<s:Button label="Cancel This Appointment" width="135" height="24" click="cancelAppointment();" skinClass="skins.general.IconButtonSkin" left="0" />
+		<s:HGroup gap="10" right="0">
+			<s:Button label="Submit Change" width="91" height="24" click="save();" skinClass="skins.general.IconButtonSkin" enabled="{appointment.provider!=null}" />
+			<s:Button label="Close" width="43" height="24" click="cancel();" skinClass="skins.general.IconButtonSkin" />
+		</s:HGroup>
+	</s:Group>
+	
+</s:TitleWindow>
