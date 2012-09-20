@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	width="371" height="378"
+	controlBarVisible="true" 
+	skinClass="skins.general.myHeaderlessTitleWindow"
+	creationComplete="init()">
+	
+	<fx:Declarations>
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import events.AppointmentEvent;
+			
+			import models.Appointment;
+			
+			[Bindable] public var appointment:Appointment;
+			
+			private function cancel():void
+			{
+				dispatchEvent( new Event( Event.CANCEL ) );
+			}
+			
+			private function accept():void
+			{
+				var evt:AppointmentEvent = new AppointmentEvent( AppointmentEvent.ACCEPT );
+				evt.appointment = appointment;
+				dispatchEvent( evt );
+			}
+			
+			private function init():void
+			{
+				controlBarVisible = false;			
+				
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="15" paddingTop="15" paddingRight="15" gap="15" horizontalAlign="left" />
+	</s:layout>
+	
+	<s:VGroup gap="5">
+		<s:Label text="Are you sure you want to accept this request?" styleName="darkGrayBold16" />
+		<mx:Text text="Once you accept these requests, a message will be sent to the patient informing them of your confirmation." styleName="grayText11" width="275" />
+	</s:VGroup>
+	
+	<s:Group width="100%">
+		
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" />
+		</s:layout>
+		
+		<s:BorderContainer width="250" height="228">
+			
+			<s:borderStroke>
+				<s:LinearGradientStroke rotation="0" weight="0">
+					<s:GradientEntry color="0xffffff" />
+					<s:GradientEntry color="0xCCCCCC" alpha=".3" />
+				</s:LinearGradientStroke>
+			</s:borderStroke>
+			
+			<s:backgroundFill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry color="0xffffff" />
+					<s:GradientEntry color="0xCCCCCC" alpha=".3" />
+				</s:LinearGradient>
+			</s:backgroundFill>
+			
+			<s:VGroup gap="5" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">
+				
+				<mx:FormItem label="Patient:" labelWidth="75" labelStyleName="darkGrayBold12">
+					<s:Label text="{appointment.patient.fullName}" styleName="darkGray12" />
+				</mx:FormItem>
+				
+				<mx:FormItem label="Type:" labelWidth="75" labelStyleName="darkGrayBold12">
+					<s:Label text="{Appointment.getTypeByKey(appointment.type).label}" styleName="darkGray12" />
+				</mx:FormItem>
+				
+				<mx:FormItem label="Provider:" labelWidth="75" labelStyleName="darkGrayBold12">
+					<s:Label text="{appointment.provider.fullName}" styleName="darkGray12" />
+				</mx:FormItem>
+				
+				<mx:FormItem label="Time:" labelWidth="75" labelStyleName="mediumTextBlackBold">
+					<s:Label text="{appointment.fromDateString()}" styleName="darkGray12" />
+					<s:Label text="{appointment.toDateString()}" styleName="darkGray12" />
+				</mx:FormItem>
+				
+				<mx:FormItem label="Location:" labelWidth="75" labelStyleName="mediumTextBlackBold">
+					<s:Label text="{appointment.location}" styleName="darkGray12" />
+				</mx:FormItem>
+				
+				<mx:FormItem label="Reason:" labelWidth="75" labelStyleName="mediumTextBlackBold">
+					<s:Label text="{appointment.reason}" styleName="darkGray12" />
+				</mx:FormItem>
+				
+				<mx:FormItem label="Prerequisite:" labelWidth="75" labelStyleName="mediumTextBlackBold">
+					<s:Label text="{appointment.prerequisite}" styleName="darkGray12" />
+				</mx:FormItem>
+				
+			</s:VGroup>
+			
+		</s:BorderContainer>
+		
+	</s:Group>
+	
+	<s:Group width="100%">
+		<s:layout>
+			<s:BasicLayout />
+		</s:layout>
+		<s:HGroup gap="10" right="0">
+			<s:Button label="Accept Request" width="122" height="24" click="accept();" skinClass="skins.general.IconButtonSkin" left="0" />
+			<s:Button label="Cancel" width="46" height="24" click="cancel();" skinClass="skins.general.IconButtonSkin" />
+		</s:HGroup>
+	</s:Group>
+	
+</s:TitleWindow>

@@ -18,6 +18,7 @@
 			import components.appointments.RequestItem;
 			import components.itemrenderers.DailyCustomChartLabel;
 			import components.itemrenderers.WeeklyCustomChartLabel;
+			import components.popups.AcceptAppointmentRequestPopup;
 			import components.popups.AddAppointmentPopup;
 			import components.popups.AppointmentChangedConfirmation;
 			
@@ -41,8 +42,10 @@
 			import mx.charts.events.ChartItemEvent;
 			import mx.charts.series.ColumnSeries;
 			import mx.charts.series.ColumnSet;
+			import mx.charts.series.items.ColumnSeriesItem;
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
+			import mx.core.IFlexDisplayObject;
 			import mx.events.CalendarLayoutChangeEvent;
 			import mx.events.CloseEvent;
 			import mx.events.CollectionEvent;
@@ -74,12 +77,51 @@
 			[Bindable] private var viewRangeEndDate:Date;
 			[Bindable] private var daysInRange:ArrayCollection;
 			
-			[Bindable] private var selectedAppointment:Appointment;
+ 			private var _selectedAppointment:Appointment;
 			
 			private var addAppointmentPopup:AddAppointmentPopup;
+			private var acceptRequestPopup:AcceptAppointmentRequestPopup;
 			
 			private var _dirty:Boolean;
 			
+			[Bindable]
+			public function get selectedAppointment():Appointment
+			{
+				return _selectedAppointment;
+			}
+
+			public function set selectedAppointment(value:Appointment):void
+			{
+				_selectedAppointment = value;
+				
+				var i:int;
+				var series:ColumnSeries;
+				
+				if( _selectedAppointment )
+				{
+					for(i;i<chart.series.length;i++)
+					{
+						series = ColumnSeries(chart.series[i]);
+						
+						for each(var data:ColumnSeriesItem in series.items)
+						{
+							if( data.item == _selectedAppointment )
+							{
+								series.selectedItem = data;
+								break;
+							}
+						}
+					}
+				}
+				else
+				{
+					for(i=0;i<chart.series.length;i++)
+					{
+						series = ColumnSeries(chart.series[i]);
+					}
+				}
+			}
+
 			public function get dirty():Boolean
 			{
 				return _dirty;
@@ -118,12 +160,21 @@
 				showAppointmentPopup( appointment, AddAppointmentPopup.MODE_ADD );
 			}
 			
-			private function onEditAppointmentClick( event:MouseEvent ):void
+			private function onEditOrAcceptAppointmentClick( event:MouseEvent ):void
 			{
-				showAppointmentPopup( selectedAppointment.clone(), AddAppointmentPopup.MODE_EDIT );
+				if( selectedAppointment.isPending )
+				{
+					acceptAppointment( selectedAppointment );
+					
+					selectedAppointment = null;
+				}
+				else
+				{
+					showAppointmentPopup( selectedAppointment.clone(), AddAppointmentPopup.MODE_EDIT );
+				}
 			}
 			
-			private function onCancelAppointmentClick( event:MouseEvent ):void
+			private function onCancelOrDeclineAppointmentClick( event:MouseEvent ):void
 			{
 				cancelAppointment();
 			}
@@ -134,7 +185,7 @@
 			
 			private function showAppointmentPopup( appointment:Appointment, mode:String ):void
 			{
-				if( addAppointmentPopup ) PopUpManager.removePopUp( addAppointmentPopup );
+				removePopUp( addAppointmentPopup );
 				
 				addAppointmentPopup = new AddAppointmentPopup();
 				addAppointmentPopup.mode = mode;
@@ -172,6 +223,20 @@
 				PopUpManager.centerPopUp( popup );
 			}
 			
+			private function onAddAppointmentCancel(event:Event=null):void
+			{
+				if( !addAppointmentPopup ) return;
+				
+				addAppointmentPopup.removeEventListener( AppointmentEvent.ADD, addAppointment );
+				addAppointmentPopup.removeEventListener( AppointmentEvent.SAVE, saveAppointment );
+				addAppointmentPopup.removeEventListener( AppointmentEvent.CANCEL, cancelAppointment );
+				addAppointmentPopup.removeEventListener( Event.CANCEL, onAddAppointmentCancel );
+				addAppointmentPopup.removeEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
+				addAppointmentPopup.removeEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
+				
+				removePopUp( addAppointmentPopup );
+			}
+			
 			private function cancelAppointment( event:AppointmentEvent = null ):void
 			{
 				Alert.show("Are you sure you want to cancel this appointment?", "Confirm", Alert.YES|Alert.NO, null, onCancelAppointmentConfirm, null, Alert.NO);
@@ -192,20 +257,6 @@
 				appointments.removeItemAt( appointments.getItemIndex(appointment) );
 				
 				selectedAppointment = null;
-			}
-			
-			private function onAddAppointmentCancel(event:Event=null):void
-			{
-				if( !addAppointmentPopup ) return;
-				
-				addAppointmentPopup.removeEventListener( AppointmentEvent.ADD, addAppointment );
-				addAppointmentPopup.removeEventListener( AppointmentEvent.SAVE, saveAppointment );
-				addAppointmentPopup.removeEventListener( AppointmentEvent.CANCEL, cancelAppointment );
-				addAppointmentPopup.removeEventListener( Event.CANCEL, onAddAppointmentCancel );
-				addAppointmentPopup.removeEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
-				addAppointmentPopup.removeEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
-				
-				PopUpManager.removePopUp( addAppointmentPopup );
 			}
 			
 			private function onShowAutoComplete( event:AutoCompleteEvent ):void
@@ -408,10 +459,16 @@
 					return null;
 			}
 			
-			private function getProviderName(item:Appointment):String
+			private function horizontalAxisCategoryFunction(axis:AxisBase, item:*):Object 
 			{
-				return item.provider.lastName;
+				if( item is Date ) 
+					return item;
+				else if( item is ProviderModel ) 
+					return ProviderModel(item).lastName;
+				return( Appointment(item).patient.id );
 			}
+			
+			//	chart label functions
 			
 			private function getTimeLabel(item:Object, prevValue:Object, axis:IAxis):String 
 			{
@@ -427,6 +484,11 @@
 				return Constants.DAYS_ABBR[ item.day ] + ', ' + Constants.MONTHS_ABBR[ item.month ] + ' ' + item.date;
 			}
 			
+			private function getProviderName(item:Appointment):String
+			{
+				return item.provider.lastName;
+			}
+			
 			private function getDataTip(element:ChartItem, series:Series):String
 			{
 				var appointment:Appointment = Appointment( element.item );
@@ -439,14 +501,7 @@
 				return controller.getFill( appointment.isPending ? Appointment.TYPE_PENDING : appointment.type );
 			}
 			
-			private function horizontalAxisCategoryFunction(axis:AxisBase, item:*):Object 
-			{
-				if( item is Date ) 
-					return item;
-				else if( item is ProviderModel ) 
-					return ProviderModel(item).lastName;
-				return( Appointment(item).patient.id );
-			}
+			//	appointment misc
 			
 			private function onAppointmentsChange( event:CollectionEvent = null ):void
 			{
@@ -473,6 +528,8 @@
 				selectedAppointment = Appointment(ColumnChart(event.currentTarget).selectedChartItem.item);
 			}
 			
+			//	selected provider management
+			
 			private function onChangeSelectedProviders(event:Event):void
 			{
 				updateSelectedProviders();
@@ -490,6 +547,8 @@
 				dirty = true;
 			}
 			
+			//	appointment request view/decline/accept
+			
 			private function refreshRequestList():void
 			{
 				requests.removeAllElements();
@@ -501,8 +560,8 @@
 						var item:RequestItem = new RequestItem();
 						item.appointment = a;
 						item.addEventListener( AppointmentEvent.VIEW, onViewRequest );
-						item.addEventListener( AppointmentEvent.ACCEPT, onAcceptRequest );
 						item.addEventListener( AppointmentEvent.DECLINE, onDeclineRequest );
+						item.addEventListener( AppointmentEvent.ACCEPT, onAcceptRequest );
 						requests.addElement( item );
 					}
 				}
@@ -513,16 +572,54 @@
 				selectedAppointment = event.appointment;
 			}
 			
-			private function onAcceptRequest(event:AppointmentEvent):void
-			{
-				event.appointment.isPending = false;
-				refreshRequestList();
-			}
-			
 			private function onDeclineRequest(event:AppointmentEvent):void
 			{
 				removeAppointment( event.appointment );
 				refreshRequestList();
+			}
+			
+			private function onAcceptRequest(event:AppointmentEvent):void
+			{
+				acceptRequestPopup = new AcceptAppointmentRequestPopup();
+				acceptRequestPopup.appointment = event.appointment;
+				acceptRequestPopup.addEventListener( AppointmentEvent.ACCEPT, onAcceptConfirm );
+				acceptRequestPopup.addEventListener( Event.CANCEL, onAcceptCancel );
+				
+				PopUpManager.addPopUp( acceptRequestPopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
+				PopUpManager.centerPopUp( acceptRequestPopup );
+			}
+			
+			private function onAcceptConfirm(event:AppointmentEvent):void
+			{
+				onAcceptCancel();	
+				
+				acceptAppointment( event.appointment );
+			}
+			
+			private function onAcceptCancel(event:Event=null):void
+			{
+				acceptRequestPopup.removeEventListener( AppointmentEvent.ACCEPT, onAcceptConfirm );
+				acceptRequestPopup.removeEventListener( Event.CANCEL, onAcceptCancel );
+				
+				removePopUp( acceptRequestPopup );
+			}
+			
+			private function acceptAppointment( appointment:Appointment ):void
+			{
+				appointment.isPending = false;
+				refreshRequestList();
+			}
+			
+			//	general
+			
+			private function removePopUp( popup:IFlexDisplayObject ):void
+			{
+				if( popup 
+					&& popup.parent )
+				{
+					PopUpManager.removePopUp( popup );
+					popup = null;
+				}
 			}
 			
 			private function init():void
@@ -857,8 +954,8 @@
 									<s:Spacer height="15" />
 									
 									<s:VGroup horizontalAlign="center" width="100%">
-										<s:Button label="Edit Appointment" width="122" height="24" click="onEditAppointmentClick(event)" styleName="tightButton" />
-										<s:Button label="Cancel Appointment" width="122" height="24" click="onCancelAppointmentClick(event)" styleName="tightButton" />
+										<s:Button label="{selectedAppointment.isPending?'Accept Request':'Edit Appointment'}" width="122" height="24" click="onEditOrAcceptAppointmentClick(event)" styleName="tightButton" />
+										<s:Button label="{selectedAppointment.isPending?'Decline Request':'Cancel Appointment'}" width="122" height="24" click="onCancelOrDeclineAppointmentClick(event)" styleName="tightButton" />
 									</s:VGroup>
 									
 								</s:VGroup>
