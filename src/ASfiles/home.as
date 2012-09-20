@@ -42,6 +42,9 @@ private function init():void
 	providersXMLdata.send();
 	
 	if( ProviderConstants.DEBUG ) this.currentState = "providerHome";
+	
+	this.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
+	this.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
 }
 
 [Bindable] public var fullname:String;
