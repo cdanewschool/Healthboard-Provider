@@ -8,11 +8,13 @@ package components.itemrenderers
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	
+	import mx.charts.AxisLabel;
 	import mx.charts.AxisRenderer;
 	import mx.charts.CategoryAxis;
 	import mx.charts.chartClasses.ChartLabel;
 	import mx.collections.ArrayCollection;
 	import mx.controls.Button;
+	import mx.managers.CursorManager;
 	
 	import spark.components.DropDownList;
 	import spark.components.List;
@@ -70,6 +72,8 @@ package components.itemrenderers
 			anchor.popUpPosition = "below";
 			anchor.setStyle('chromeColor','0xffffff');
 			addChild( anchor );
+			
+			getChildAt(0).addEventListener( MouseEvent.CLICK, onLabelClick );
 		}
 		
 		override protected function updateDisplayList(w:Number, h:Number):void 
@@ -117,6 +121,15 @@ package components.itemrenderers
 			{
 				dispatchEvent( new AppointmentEvent( AppointmentEvent.CANCEL_ALL, true ) );
 			}
+		}
+		
+		private function onLabelClick( event:MouseEvent ):void
+		{
+			event.stopPropagation();
+			
+			var evt:AppointmentEvent = new AppointmentEvent( AppointmentEvent.VIEW_PROVIDER, true );
+			evt.data = AxisLabel(data).value;
+			dispatchEvent( evt );
 		}
 	}
 }

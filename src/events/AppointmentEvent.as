@@ -3,6 +3,7 @@ package events
 	import flash.events.Event;
 	
 	import models.Appointment;
+	import models.ProviderModel;
 	
 	public class AppointmentEvent extends Event
 	{
@@ -15,7 +16,10 @@ package events
 		public static const ACCEPT:String = "AppointmentEvent.ACCEPT";
 		public static const DECLINE:String = "AppointmentEvent.DECLINE";
 		
+		public static const VIEW_PROVIDER:String = "AppointmentEvent.VIEW_PROVIDER";
+		
 		public var appointment:Appointment;
+		public var data:*;
 		
 		public function AppointmentEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

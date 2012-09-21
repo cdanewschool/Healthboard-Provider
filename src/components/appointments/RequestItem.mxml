@@ -49,6 +49,6 @@
 		dataProvider="{actions}" 
 		itemClick="onActionClick(event)" 
 		linkButtonStyleName="linkBtnBlue" fontSize="9" contentBackgroundAlpha="0" 
-		paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" horizontalGap="2" />
+		paddingLeft="-2" paddingRight="0" paddingTop="-4" paddingBottom="0" horizontalGap="2" />
 	
 </s:VGroup>

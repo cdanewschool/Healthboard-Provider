@@ -5,7 +5,7 @@
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:components="components.*"
 	width="100%" height="100%" 
-	creationComplete="init()" xmlns:plus="external.TabBarPlus.plus.*">
+	creationComplete="init()" xmlns:plus="external.TabBarPlus.plus.*" xmlns:appointments="components.appointments.*">
 	
 	<fx:Metadata>
 		[Event(name="navigate", type="events.ApplicationEvent")]
@@ -78,6 +78,7 @@
 			[Bindable] private var daysInRange:ArrayCollection;
 			
  			private var _selectedAppointment:Appointment;
+			[Bindable] private var selectedProvider:ProviderModel;
 			
 			private var addAppointmentPopup:AddAppointmentPopup;
 			private var acceptRequestPopup:AcceptAppointmentRequestPopup;
@@ -340,6 +341,7 @@
 					
 					renderer.labelRenderer = new ClassFactory(DailyCustomChartLabel);
 					renderer.addEventListener( AppointmentEvent.CANCEL_ALL, onCancelAllForProvider );
+					renderer.addEventListener( AppointmentEvent.VIEW_PROVIDER, onViewProvider );
 					renderer.addEventListener( MessageEvent.MESSAGE_ALL, onMessageAllForProvider );
 					
 					dateLabel.text = Constants.DAYS[ viewRangeStartDate.day ] + ', ' + Constants.MONTHS[ viewRangeStartDate.month ] + ' ' + viewRangeStartDate.date;
@@ -423,6 +425,20 @@
 			private function onCancelAllForProvider( event:AppointmentEvent ):void
 			{
 				//	cancel all appointments for this provider?
+			}
+			
+			private function onViewProvider( event:AppointmentEvent ):void
+			{
+				selectedAppointment = null;
+				selectedProvider = null;
+				
+				for each(var provider:ProviderModel in controller.model.selectedProviders)
+				{
+					if( provider.lastName == event.data )
+					{
+						selectedProvider = provider;
+					}
+				}
 			}
 			
 			private function selectMode(event:IndexChangeEvent):void
@@ -802,7 +818,7 @@
 															id="chart"
 															backgroundElements="{gridBackground}" columnWidthRatio="1"
 															dataProvider="{appointments}" showDataTips="false" width="650" height="800" paddingLeft="40" 
-															selectionMode="single" change="onSelectAppointment(event)" chartClick="{selectedAppointment=null}"
+															selectionMode="single" change="onSelectAppointment(event)" chartClick="{selectedAppointment=null;selectedProvider=null}"
 															itemRollOverColor="0x00adee" itemSelectionColor="0x00adee" creationComplete="updateView()" >
 															
 															<mx:horizontalAxis>
@@ -862,10 +878,10 @@
 							<s:VGroup  width="180" paddingTop="20">
 								<s:Label text="Appointment Details" styleName="greenBold12" width="100%" textAlign="center" />
 								
-								<s:Label text="Select an appointment to view details" styleName="gray9Italic" width="100%" textAlign="center" visible="{selectedAppointment==null}" includeInLayout="{selectedAppointment==null}" />
-								
 								<s:VGroup visible="{selectedAppointment!=null}" includeInLayout="{selectedAppointment!=null}" paddingTop="15" gap="0">
 								
+									<s:Label text="Select an appointment to view details" styleName="gray9Italic" width="100%" textAlign="center" visible="{selectedAppointment==null}" includeInLayout="{selectedAppointment==null}" />
+									
 									<s:Label text="{selectedAppointment.provider.fullName}" styleName="blue9SemiBold" width="100%" textAlign="center" />
 									
 									<s:Spacer height="10" />
@@ -959,6 +975,8 @@
 									</s:VGroup>
 									
 								</s:VGroup>
+								
+								<appointments:ProviderScheduleList id="providerScheduleList" visible="{selectedProvider!=null}" provider="{selectedProvider}" date="{viewRangeStartDate}"  paddingTop="15" paddingLeft="10" />
 								
 							</s:VGroup>
 							

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark"  
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	width="160">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import controllers.AppointmentsController;
+			
+			import models.Appointment;
+			import models.ProviderModel;
+			import models.UserModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.graphics.BitmapFill;
+			import mx.graphics.IFill;
+			
+			import spark.components.BorderContainer;
+			import spark.components.HGroup;
+			import spark.core.SpriteVisualElement;
+			
+			import utils.DateUtil;
+
+			private var _provider:ProviderModel;
+			private var _date:Date;
+			
+			private var dirty:Boolean;
+			
+			public function get date():Date
+			{
+				return _date;
+			}
+
+			public function set date(value:Date):void
+			{
+				_date = value;
+				
+				dirty = true;
+				invalidateProperties();
+			}
+
+			public function get provider():ProviderModel
+			{
+				return _provider;
+			}
+
+			public function set provider(value:ProviderModel):void
+			{
+				_provider = value;
+				
+				dirty = true;
+				invalidateProperties();
+			}
+
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if( dirty )
+				{
+					list.removeAllElements();
+					
+					if( !date || !provider ) return;
+					
+					var appointments:ArrayCollection = AppointmentsController.getInstance().getAppointments( provider.id, UserModel.TYPE_PROVIDER, date );
+					
+					for(var i:int=0;i<appointments.length;i++)
+					{
+						var appointment:Appointment = Appointment( appointments.getItemAt(i) );
+						
+						var row:HGroup = new HGroup();
+						list.addElement( row );
+						
+						var square:BorderContainer = new BorderContainer();
+						square.width = 8;
+						square.height = 7;
+						square.backgroundFill = AppointmentsController.getInstance().getFill( appointment.type );;
+						row.addElement( square );
+						
+						var date:Label = new Label();
+						date.width = 50;
+						date.text = DateUtil.formatTimeFromDate( appointment.from, false ) + '-' + DateUtil.formatTimeFromDate( appointment.to, false );
+						date.styleName = "gray9";
+						row.addElement( date );
+						
+						var patient:Label = new Label();
+						patient.text = appointment.patient ? appointment.patient.fullName : 'Conference';
+						patient.styleName = "gray9";
+						patient.setStyle('paddingLeft', 5);
+						row.addElement( patient );
+					}
+					
+					providerName.text = provider.fullName;
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<s:Label id="providerName" styleName="blue9SemiBold" width="100%" textAlign="center" />
+	
+	<s:Line xFrom="5" xTo="150">
+		<s:stroke>
+			<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+		</s:stroke>
+	</s:Line>
+	
+	<s:VGroup id="list" />
+	
+</s:VGroup>
