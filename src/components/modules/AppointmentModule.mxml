@@ -44,16 +44,19 @@
 			import mx.charts.series.ColumnSet;
 			import mx.charts.series.items.ColumnSeriesItem;
 			import mx.collections.ArrayCollection;
+			import mx.collections.Sort;
 			import mx.controls.Alert;
 			import mx.core.IFlexDisplayObject;
 			import mx.events.CalendarLayoutChangeEvent;
 			import mx.events.CloseEvent;
 			import mx.events.CollectionEvent;
 			import mx.events.DateChooserEvent;
+			import mx.events.DragEvent;
 			import mx.events.ItemClickEvent;
 			import mx.graphics.IFill;
 			import mx.managers.PopUpManager;
 			
+			import spark.collections.SortField;
 			import spark.components.BorderContainer;
 			import spark.events.IndexChangeEvent;
 			import spark.events.ListEvent;
@@ -219,6 +222,11 @@
 				
 				onAddAppointmentCancel(null);
 				
+				showAppointmentChanged();
+			}
+			
+			private function showAppointmentChanged():void
+			{
 				var popup:AppointmentChangedConfirmation = new AppointmentChangedConfirmation();
 				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
 				PopUpManager.centerPopUp( popup );
@@ -355,7 +363,6 @@
 					viewRangeEndDate.setTime( viewRangeStartDate.time + (DateUtil.WEEK - DateUtil.DAY) );
 					
 					var series:Array = [];
-					var providers:Array = [];
 					
 					daysInRange = new ArrayCollection();
 					
@@ -366,22 +373,17 @@
 						daysInRange.addItem( day );
 					}
 					
-					for each(var a:Appointment in appointments)
+					for(i=0;i<controller.model.selectedProviders.length;i++)
 					{
-						if( providers.indexOf( a.provider.id ) == -1 
-							&& ProviderModel(a.provider).selected )
-						{
-							column = new ColumnSeries();
-							column.id = a.provider.id.toString();
-							column.labelFunction = getProviderName;
-							column.dataFunction = valueFunctionWeek;
-							column.minField = 'anything';
-							column.fillFunction = getFill;
-							column.dataProvider = controller.getAppointments( a.provider.id, UserModel.TYPE_PROVIDER );
-							series.push( column );
-							
-							providers.push( a.provider.id );
-						}
+						var provider:ProviderModel = ProviderModel( controller.model.selectedProviders.getItemAt(i) );
+						column = new ColumnSeries();
+						column.id = provider.id.toString();
+						column.labelFunction = getProviderName;
+						column.dataFunction = valueFunctionWeek;
+						column.minField = 'anything';
+						column.fillFunction = getFill;
+						column.dataProvider = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER );
+						series.push( column );
 					}
 					
 					hAxis = new CategoryAxis();
@@ -534,7 +536,13 @@
 					}
 				}
 				
-				providers = controller.model.selectedProviders = new ArrayCollection( p );
+				providers = new ArrayCollection( p );
+				controller.model.selectedProviders = new ArrayCollection( p );
+				
+				var sort:Sort = new Sort();
+				sort.fields = [ new SortField('lastName') ];
+				controller.model.selectedProviders.sort = sort;
+				controller.model.selectedProviders.refresh();
 				
 				dirty = true;
 			}
@@ -638,6 +646,76 @@
 				}
 			}
 			
+			private function onDragDrop(event:DragEvent):void
+			{
+				var horizontalAxisRenderer:AxisRenderer = AxisRenderer( chart.horizontalAxisRenderers[0] );
+				var horizontalDataProvider:ArrayCollection = ArrayCollection( CategoryAxis(chart.horizontalAxis).dataProvider );
+				
+				var verticalAxisRenderer:AxisRenderer = AxisRenderer( chart.verticalAxisRenderers[0] );
+				
+				var item:ColumnSeriesItem = ColumnSeriesItem( event.dragSource.dataForFormat("chartitems")[0] );
+				var series:ColumnSeries = ColumnSeries(item.itemRenderer.parent);
+				var appointment:Appointment = Appointment(item.item);
+				var numColumns:int = CategoryAxis( chart.horizontalAxis ).dataProvider.length;
+				var columnWidth:Number = series.width / numColumns;
+				
+				var coords:Point = new Point(event.localX, event.localY);
+				coords = chart.localToGlobal( coords );
+				coords = item.itemRenderer.parent.globalToLocal( coords );
+				
+				var xPercentage:Number = ( coords.x / series.width );
+				var yPercentage:Number = ( coords.y / series.height );
+				
+				var columnIndex:int = Math.max( 0, Math.floor( numColumns * xPercentage ) );
+				
+				//	things that can change for a dragged item
+				var from:Date = new Date( appointment.from.fullYear, appointment.from.month, appointment.from.date );
+				var to:Date = new Date();
+				var provider:ProviderModel;
+				
+				//	update x axis values
+				if( mode == MODE_DAY )
+				{
+					provider = ProviderModel( ArrayCollection( CategoryAxis(chart.horizontalAxis).dataProvider ).getItemAt( columnIndex ) );
+				}
+				else if( mode == MODE_WEEK )
+				{
+					var numSubColumns:int = controller.model.selectedProviders.length;
+					var subColumnWidth:Number = columnWidth/numSubColumns;
+					
+					var providerIndex:int = Math.max( 0, Math.floor( (numColumns * numSubColumns) * xPercentage) ) % (columnIndex * numSubColumns);
+					providerIndex = Math.floor( Math.max( 0, (coords.x - columnWidth * columnIndex) ) / subColumnWidth );
+					provider = ProviderModel( controller.model.selectedProviders.getItemAt( providerIndex ) );
+					
+					var date:Date = daysInRange.getItemAt( columnIndex ) as Date;
+					from = new Date( date.fullYear, date.month, date.date );
+					to = new Date( date.fullYear, date.month, date.date );
+				}
+				
+				//	update y axis values
+				var ySpread:int = LinearAxis(chart.verticalAxis).maximum - LinearAxis(chart.verticalAxis).minimum;
+				var yValueNew:int = LinearAxis(chart.verticalAxis).minimum + ( ySpread * yPercentage );
+				var yFitValue:int = DateUtil.HOUR/2;
+				
+				from.time += yValueNew;
+				from.time = Math.floor( from.time / yFitValue ) * yFitValue;	//	fit to nearest half hour
+
+				to.time = from.time + ( appointment.to.time - appointment.from.time );
+				
+				if( appointment.from.time != from.time
+					|| appointment.to.time != to.time
+					|| appointment.provider.id != provider.id )
+				{
+					appointment.from = from;
+					appointment.to = to;
+					appointment.provider = provider;
+					
+					showAppointmentChanged();
+					
+					selectedAppointment = null;
+				}
+			}
+			
 			private function init():void
 			{
 				mode = MODE_DAY;
@@ -680,7 +758,7 @@
 			
 			<mx:GridLines 
 				horizontalChangeCount="1" verticalChangeCount="1"
-				horizontalTickAligned="false" verticalTickAligned="true"
+				horizontalTickAligned="true" verticalTickAligned="true"
 				gridDirection="both">
 				
 				<mx:horizontalStroke>
@@ -819,6 +897,7 @@
 															backgroundElements="{gridBackground}" columnWidthRatio="1"
 															dataProvider="{appointments}" showDataTips="false" width="650" height="800" paddingLeft="40" 
 															selectionMode="single" change="onSelectAppointment(event)" chartClick="{selectedAppointment=null;selectedProvider=null}"
+															dragEnabled="true" dropEnabled="true" dragDrop="onDragDrop(event)"
 															itemRollOverColor="0x00adee" itemSelectionColor="0x00adee" creationComplete="updateView()" >
 															
 															<mx:horizontalAxis>
@@ -826,7 +905,7 @@
 															</mx:horizontalAxis>
 															
 															<mx:verticalAxis>
-																<mx:LinearAxis id="yAxis" minimum="{DateUtil.HOUR*6}" maximum="{DateUtil.HOUR*17}" labelFunction="getTimeLabel" interval="{DateUtil.HOUR}" direction="inverted" />
+																<mx:LinearAxis id="yAxis" minimum="{DateUtil.HOUR*6}" maximum="{DateUtil.HOUR*17}" labelFunction="getTimeLabel" interval="{DateUtil.HOUR}" minorInterval="{DateUtil.HOUR/4}" direction="inverted" alignLabelsToInterval="false" />
 															</mx:verticalAxis>
 															
 															<mx:series>
@@ -838,7 +917,7 @@
 															</mx:horizontalAxisRenderers>
 															
 															<mx:verticalAxisRenderers>
-																<mx:AxisRenderer axis="{yAxis}" axisStroke="{yAxisStroke}" styleName="white12" showLine="true" tickPlacement="none" minorTickPlacement="none" />
+																<mx:AxisRenderer axis="{yAxis}" axisStroke="{yAxisStroke}" styleName="white12" showLine="true" tickPlacement="inside" minorTickPlacement="inside" labelAlign="bottom" labelGap="0" />
 															</mx:verticalAxisRenderers>
 															
 														</mx:ColumnChart>
@@ -878,9 +957,9 @@
 							<s:VGroup  width="180" paddingTop="20">
 								<s:Label text="Appointment Details" styleName="greenBold12" width="100%" textAlign="center" />
 								
-								<s:VGroup visible="{selectedAppointment!=null}" includeInLayout="{selectedAppointment!=null}" paddingTop="15" gap="0">
+								<s:Label text="Select an appointment to view details" styleName="gray9Italic" width="100%" textAlign="center" visible="{selectedAppointment==null &amp;&amp; selectedProvider==null}" includeInLayout="{selectedAppointment==null &amp;&amp; selectedProvider==null}" />
 								
-									<s:Label text="Select an appointment to view details" styleName="gray9Italic" width="100%" textAlign="center" visible="{selectedAppointment==null}" includeInLayout="{selectedAppointment==null}" />
+								<s:VGroup visible="{selectedAppointment!=null}" includeInLayout="{selectedAppointment!=null}" paddingTop="15" gap="0">
 									
 									<s:Label text="{selectedAppointment.provider.fullName}" styleName="blue9SemiBold" width="100%" textAlign="center" />
 									
