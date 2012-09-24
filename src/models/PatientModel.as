@@ -1,5 +1,6 @@
 package models
 {
+	[Bindable]
 	public class PatientModel extends UserModel
 	{
 		public var dob:String;
