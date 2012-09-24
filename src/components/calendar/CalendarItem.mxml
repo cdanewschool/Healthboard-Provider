@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	autoDrawBackground="false" 
+	creationComplete="init()">
+	
+	<fx:Script>
+		<![CDATA[
+			import components.appointments.ProviderOverviewItem;
+			
+			import controllers.AppointmentsController;
+			
+			import models.ProviderModel;
+			
+			import mx.collections.ArrayCollection;
+			
+			private function updateState():void
+			{
+				if( dayLabel ) dayLabel.styleName = selected ? 'calendarSelectedDay' : 'lightGray11';
+				if( providerList && border ) providerList.alpha = border.alpha = selected ? 1 : .45;
+			}
+			
+			override public function set selected(value:Boolean):void
+			{
+				super.selected = value;
+				
+				updateState();
+			}
+			
+			private function init():void
+			{
+				var day:Date = new Date();
+				day.time = parseInt( data.toString() );
+				
+				dayLabel.text = day.date.toString();
+				
+				var providers:ArrayCollection = AppointmentsController.getInstance().model.selectedProviders;
+				
+				for each(var provider:ProviderModel in providers)
+				{
+					var overview:ProviderOverviewItem = new ProviderOverviewItem();
+					overview.provider = provider;
+					overview.day = day;
+					overview.width = 76;
+					overview.height = providerList.height / providers.length;
+					providerList.addElement( overview );
+				}
+				
+				updateState();
+			}
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer id="border" borderColor="0xffffff" backgroundAlpha="0" width="100%" height="100%" left="-2">
+		
+		<s:layout>
+			<s:BasicLayout  />
+		</s:layout>
+		
+		<s:Label id="dayLabel" width="20" x="75" y="5" styleName="lightGray11" fontSize="11" />
+		
+		<s:VGroup id="providerList" gap="2" x="10" y="20" height="60" />
+		
+	</s:BorderContainer>
+	
+</s:ItemRenderer>

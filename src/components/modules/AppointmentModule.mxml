@@ -5,7 +5,7 @@
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:components="components.*"
 	width="100%" height="100%" 
-	creationComplete="init()" xmlns:plus="external.TabBarPlus.plus.*" xmlns:appointments="components.appointments.*">
+	creationComplete="init()" xmlns:plus="external.TabBarPlus.plus.*" xmlns:appointments="components.appointments.*" xmlns:calendar="components.calendar.*">
 	
 	<fx:Metadata>
 		[Event(name="navigate", type="events.ApplicationEvent")]
@@ -35,13 +35,11 @@
 			
 			import mx.charts.CategoryAxis;
 			import mx.charts.ChartItem;
-			import mx.charts.DateTimeAxis;
 			import mx.charts.chartClasses.AxisBase;
 			import mx.charts.chartClasses.IAxis;
 			import mx.charts.chartClasses.Series;
 			import mx.charts.events.ChartItemEvent;
 			import mx.charts.series.ColumnSeries;
-			import mx.charts.series.ColumnSet;
 			import mx.charts.series.items.ColumnSeriesItem;
 			import mx.collections.ArrayCollection;
 			import mx.collections.Sort;
@@ -50,16 +48,15 @@
 			import mx.events.CalendarLayoutChangeEvent;
 			import mx.events.CloseEvent;
 			import mx.events.CollectionEvent;
-			import mx.events.DateChooserEvent;
+			import mx.events.CollectionEventKind;
 			import mx.events.DragEvent;
-			import mx.events.ItemClickEvent;
 			import mx.graphics.IFill;
 			import mx.managers.PopUpManager;
 			
 			import spark.collections.SortField;
 			import spark.components.BorderContainer;
 			import spark.events.IndexChangeEvent;
-			import spark.events.ListEvent;
+			import spark.skins.spark.ButtonBarSkin;
 			
 			import utils.DateUtil;
 			
@@ -68,26 +65,46 @@
 			[Bindable] private var appointments:ArrayCollection;
 			[Bindable] private var providers:ArrayCollection;
 			
-			private const MODE_DAY:String = "modeDay";
-			private const MODE_WEEK:String = "modeWeek";
-			private const MODE_MONTH:String = "modeMonth";
+			private const MODE_DAY:String = "day";
+			private const MODE_WEEK:String = "week";
+			private const MODE_MONTH:String = "month";
 			
 			[Bindable] private var viewModes:ArrayCollection = new ArrayCollection( [ { value: MODE_DAY, label: "Daily View" }, { value: MODE_WEEK, icon: "images/btnCalendarWeek.png", label:"Weekly View" }, { value: MODE_MONTH, icon: "images/calendar.png", label:"Monthly View" } ] );
-			
-			private var _mode:String;
-			
+				
 			[Bindable] private var viewRangeStartDate:Date;
 			[Bindable] private var viewRangeEndDate:Date;
+			[Bindable] private var selectedDate:Date;
 			[Bindable] private var daysInRange:ArrayCollection;
 			
  			private var _selectedAppointment:Appointment;
-			[Bindable] private var selectedProvider:ProviderModel;
+ 			private var _selectedProvider:ProviderModel;
 			
 			private var addAppointmentPopup:AddAppointmentPopup;
 			private var acceptRequestPopup:AcceptAppointmentRequestPopup;
 			
 			private var _dirty:Boolean;
 			
+			/**
+			 * The seleted providers. For this component, this means the providers whose
+			 * appointments are included in the view (i.e. chart, etc)
+			*/
+			[Bindable]
+			public function get selectedProvider():ProviderModel
+			{
+				return _selectedProvider;
+			}
+
+			public function set selectedProvider(value:ProviderModel):void
+			{
+				_selectedProvider = value;
+				
+				invalidateProperties();
+			}
+
+			/**
+			 * The selected apointment. This affects whether or not apointment data is shown
+			 * in the right sidebar, amongst other things.
+			*/
 			[Bindable]
 			public function get selectedAppointment():Appointment
 			{
@@ -98,14 +115,14 @@
 			{
 				_selectedAppointment = value;
 				
-				var i:int;
-				var series:ColumnSeries;
-				
+				//	since this could have been set in some way other than clicking
+				//	the item on the chart, try to select the corresponding chart item
+				//	(keeping in mind that the associated day may not be currently visible)
 				if( _selectedAppointment )
 				{
-					for(i;i<chart.series.length;i++)
+					for(var i:int=0;i<chart.series.length;i++)
 					{
-						series = ColumnSeries(chart.series[i]);
+						var series:ColumnSeries = ColumnSeries(chart.series[i]);
 						
 						for each(var data:ColumnSeriesItem in series.items)
 						{
@@ -117,13 +134,8 @@
 						}
 					}
 				}
-				else
-				{
-					for(i=0;i<chart.series.length;i++)
-					{
-						series = ColumnSeries(chart.series[i]);
-					}
-				}
+				
+				invalidateProperties();
 			}
 
 			public function get dirty():Boolean
@@ -142,6 +154,7 @@
 			{
 				super.commitProperties();
 				
+				//	see if we need to refresh the view
 				if( dirty )
 				{
 					refreshRequestList();
@@ -150,11 +163,39 @@
 					
 					dirty = false;
 				}
+				
+				//	set dataprovider on provider schedule list component (right-hand side-bar)
+				if( currentState == MODE_MONTH )
+				{
+					providerScheduleList.providers = controller.model.selectedProviders;
+				}
+				else if( currentState == MODE_DAY )
+				{
+					providerScheduleList.providers = selectedProvider ? new ArrayCollection( [selectedProvider] ) : null;
+				}
+				else
+				{
+					providerScheduleList.providers = null;
+				}
+				
+				//	update label for first calendar view-mode select button
+				if( selectedDate )
+				{
+					//	index gets lost with dataprovider update, so save
+					var index:int = modeSelect.selectedIndex;
+					//	trick buttonbar component into redrawing labels
+					viewModes.dispatchEvent( new CollectionEvent( CollectionEvent.COLLECTION_CHANGE, false, false, CollectionEventKind.ADD ) );
+					//	re-set index
+					modeSelect.selectedIndex = index;
+				}
+				
+				//	update labels
+				patientName.label = selectedAppointment ? selectedAppointment.patient.fullName : '';
+				providerName.text = selectedAppointment ? selectedAppointment.provider.fullName : '';
 			}
 			
 			private function onHeaderSearch():void
 			{
-				
 			}
 			
 			private function onAddAppointmentClick( event:MouseEvent ):void
@@ -278,37 +319,28 @@
 				dispatchEvent( event );
 			}
 			
-			private function onNavigateClick( event:MouseEvent, direction:int ):void
-			{
-			}
-			
 			private function onSelectDate( event:CalendarLayoutChangeEvent ):void
 			{
-				//txtDate.text = dateChooser.displayedMonth + 1 + '/' + dateChooser.selectedDate.date + '/' + dateChooser.displayedYear;
+				selectedDate = event.currentTarget.selectedDate;
+				
+				if( currentState != MODE_MONTH ) dirty = true;
 			}
 			
 			[Bindable]
-			public function get mode():String
+			override public function set currentState(value:String):void
 			{
-				return _mode;
-			}
-			
-			public function set mode(value:String):void
-			{
-				_mode = value;
+				super.currentState = value;
 				
 				dirty = true;
 			}
 			
 			private function updateView():void
 			{
-				if( mode == null || controller == null ) return;
+				if( controller == null ) return;
 				if( !dirty ) return;
 				
 				var hAxis:IAxis;
 				var column:ColumnSeries;
-				
-				var today:Date = ApplicationController.getInstance().today;
 				
 				var renderer:AxisRenderer = new AxisRenderer();
 				renderer.placement = "top";
@@ -319,9 +351,9 @@
 				renderer.setStyle('minorTickPlacement', 'none');
 				renderer.setStyle('labelAlign', 'center');
 				
-				if( _mode == MODE_DAY )
+				if( currentState == MODE_DAY )
 				{
-					viewRangeStartDate = new Date( today.fullYear, today.month, today.date );
+					viewRangeStartDate = new Date( selectedDate.fullYear, selectedDate.month, selectedDate.date );
 					
 					viewRangeEndDate = new Date();
 					viewRangeEndDate.setTime( viewRangeStartDate.time + (DateUtil.DAY - DateUtil.SECOND) );
@@ -354,9 +386,9 @@
 					
 					dateLabel.text = Constants.DAYS[ viewRangeStartDate.day ] + ', ' + Constants.MONTHS[ viewRangeStartDate.month ] + ' ' + viewRangeStartDate.date;
 				}
-				else if( _mode == MODE_WEEK )
+				else if( currentState == MODE_WEEK )
 				{
-					viewRangeStartDate = new Date( today.fullYear, viewRangeStartDate.month, viewRangeStartDate.date );
+					viewRangeStartDate = new Date( selectedDate.fullYear, selectedDate.month, selectedDate.date );
 					viewRangeStartDate.setTime( viewRangeStartDate.time - (DateUtil.DAY * viewRangeStartDate.day) );
 					
 					viewRangeEndDate = new Date();
@@ -401,18 +433,20 @@
 					chart.horizontalAxisRenderers = [renderer];
 					chart.series = series;
 				}
-				else if( _mode == MODE_MONTH )
+				else if( currentState == MODE_MONTH )
 				{
-					viewRangeStartDate = new Date();
-					viewRangeStartDate.setTime( today.time - (DateUtil.DAY * today.date) );
+					viewRangeStartDate = new Date( selectedDate.fullYear, selectedDate.month, selectedDate.date );
+					viewRangeStartDate.setTime( viewRangeStartDate.time - (DateUtil.DAY * viewRangeStartDate.day) );
 					
 					viewRangeEndDate = new Date();
-					viewRangeEndDate.setTime( viewRangeStartDate.time + (DateUtil.MONTH) );
+					viewRangeEndDate.setTime( viewRangeStartDate.time + (DateUtil.WEEK - DateUtil.DAY) );
+					
+					monthLabel.text = Constants.MONTHS[selectedDate.month] + ', ' + selectedDate.fullYear;
 				}
 				
 				if( dateChooser )
 				{
-					dateChooser.selectedDate = today;
+					dateChooser.selectedDate = selectedDate;
 					dateChooser.selectedRanges = [ {rangeStart:viewRangeStartDate, rangeEnd:viewRangeEndDate} ];
 				}
 				
@@ -445,7 +479,7 @@
 			
 			private function selectMode(event:IndexChangeEvent):void
 			{
-				mode = ButtonBar(event.currentTarget).selectedItem.value;
+				currentState = ButtonBar(event.currentTarget).selectedItem.value;
 			}
 			
 			private function valueFunctionDay(series:Series, item:Appointment, fieldName:String):Object 
@@ -517,6 +551,19 @@
 			{
 				var appointment:Appointment = Appointment( element.item );
 				return controller.getFill( appointment.isPending ? Appointment.TYPE_PENDING : appointment.type );
+			}
+			
+			private function getCalendarModeLabel( item:Object ):String
+			{
+				var index:int = viewModes.getItemIndex( item );
+				
+				if( index == 0
+					&& selectedDate )
+				{
+					return selectedDate.date.toString();
+				}
+				
+				return null;
 			}
 			
 			//	appointment misc
@@ -674,11 +721,11 @@
 				var provider:ProviderModel;
 				
 				//	update x axis values
-				if( mode == MODE_DAY )
+				if( currentState == MODE_DAY )
 				{
 					provider = ProviderModel( ArrayCollection( CategoryAxis(chart.horizontalAxis).dataProvider ).getItemAt( columnIndex ) );
 				}
-				else if( mode == MODE_WEEK )
+				else if( currentState == MODE_WEEK )
 				{
 					var numSubColumns:int = controller.model.selectedProviders.length;
 					var subColumnWidth:Number = columnWidth/numSubColumns;
@@ -716,9 +763,27 @@
 				}
 			}
 			
+			private function navigate( direction:int = 1 ):void
+			{
+				if( currentState == MODE_MONTH )
+				{
+					selectedDate.time += (DateUtil.MONTH * direction);
+				}
+				else if( currentState == MODE_WEEK )
+				{
+					selectedDate.time += (DateUtil.WEEK * direction);
+				}
+				else if( currentState == MODE_DAY )
+				{
+					selectedDate.time += (DateUtil.DAY * direction);
+				}
+				
+				dirty = true;
+			}
+			
 			private function init():void
 			{
-				mode = MODE_DAY;
+				currentState = MODE_DAY;
 				
 				controller = AppointmentsController.getInstance();
 				
@@ -744,11 +809,19 @@
 					legend.addElement( container );
 				}
 				
+				selectedDate = ApplicationController.getInstance().today;
+				
 				onAppointmentsChange();
 			}
 			
 		]]>
 	</fx:Script>
+	
+	<s:states>
+		<s:State name="day" />
+		<s:State name="week" />
+		<s:State name="month" />
+	</s:states>
 	
 	<fx:Declarations>
 		<mx:SolidColorStroke id="xAxisStroke" color="0xB3B3B3" alpha=".1" />
@@ -796,18 +869,20 @@
 						<!--	header	-->
 						<s:BorderContainer width="100%" height="40" borderVisible="false" backgroundColor="0x717070">
 							
-							<s:HGroup verticalAlign="middle" height="40" paddingLeft="10">
+							<s:Group height="40" y="5">
+								
+								<s:layout>
+									<s:BasicLayout />
+								</s:layout>
 								
 								<!--	buttons	-->
-								<s:HGroup>
+								<s:HGroup x="5" y="5">
 									<s:Button label="+ Add Appointment" width="107" height="24" click="onAddAppointmentClick(event)" skinClass="skins.general.IconButtonSkin" />
 									<s:Button label="Print Appointments" width="107" height="24" click="onPrintAppointmentClick(event)" skinClass="skins.general.IconButtonSkin" />
 								</s:HGroup>
 								
-								<s:Spacer width="100" />
-								
 								<!--	filter thing	-->
-								<s:HGroup verticalAlign="middle">
+								<s:HGroup verticalAlign="middle" x="435" y="5">
 									<s:Label text="Show:" styleName="white12" />
 									<components:MultiSelectDropDownList 
 										id="providerSelect"
@@ -816,29 +891,33 @@
 										itemRenderer="components.itemrenderers.selectable.ProviderSelectableItemRenderer" selectionChange="onChangeSelectedProviders(event)"  />
 								</s:HGroup>
 								
-								<s:Spacer width="30" />
+								<s:HGroup x="630" y="5" gap="0">
+									<s:Button width="24" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('images/arrowLeft.png')" click="navigate(-1)" />
+									<s:Button width="24" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('images/arrowRight.png')" click="navigate()"/>
+								</s:HGroup>
 								
-								<!--	filter thing	-->
-								<s:HGroup>
+								<!--	mode selector	-->
+								<s:HGroup x="710" y="5">
 									
 									<s:ButtonBar 
 										id="modeSelect" 
 										styleName="greyButtonBar"
-										width="95" selectedIndex="0"
-										dataProvider="{viewModes}" labelField="label" iconField="icon" change="selectMode(event)"
+										height="24" width="95" selectedIndex="0" requireSelection="true"
+										dataProvider="{viewModes}" iconField="icon" change="selectMode(event)"
+										labelFunction="getCalendarModeLabel"
 										firstButton="skins.general.IconButtonSkin"
 										middleButton="skins.general.IconButtonSkin"
-										lastButton="skins.general.IconButtonSkin" fontSize="11">
+										lastButton="skins.general.IconButtonSkin" fontSize="12">
 										
 										<s:layout>
-											<s:ButtonBarHorizontalLayout gap="0" />
+											<s:ButtonBarHorizontalLayout gap="-2"  />
 										</s:layout>
 										
 									</s:ButtonBar>
 									
 								</s:HGroup>
 								
-							</s:HGroup>
+							</s:Group>
 							
 						</s:BorderContainer>
 						
@@ -862,9 +941,9 @@
 								<!--	calendar	-->
 								<mx:DateChooser 
 									width="150" height="200"
-									id="dateChooser" showToday="true" 
+									id="dateChooser" showToday="true"
 									contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" headerStyleName="dateChooserVitalGrayHeader"
-									fontSize="11" 
+									fontSize="11"
 									change="onSelectDate(event)" />
 								
 							</s:VGroup>
@@ -877,12 +956,16 @@
 							
 							<s:BorderContainer id="calendarContainer" backgroundColor="0x3C3C3B" width="662" height="568">
 								
-								<s:HGroup x="10" y="10" gap="45">
+								<s:HGroup x="10" y="10" gap="45" includeIn="day,week">
 									<s:Label id="yearLabel" styleName="greenBold12" width="100%" textAlign="center" />
-									<s:Label id="dateLabel" visible="{mode==MODE_DAY}" includeInLayout="{mode==MODE_DAY}" styleName="white11" />
+									<s:Label id="dateLabel" includeIn="day" styleName="white11" />
 								</s:HGroup>
 								
-								<mx:ViewStack id="calendarViews" borderVisible="false" width="662" height="504" y="30">
+								<s:Group x="10" y="10" includeIn="month" width="100%">
+									<s:Label id="monthLabel" styleName="greenBold12" width="100%" textAlign="center" />
+								</s:Group>
+								
+								<mx:ViewStack id="calendarViews" borderVisible="false" width="662" height="504" y="30" selectedIndex="{currentState==MODE_MONTH?1:0}">
 									
 									<s:NavigatorContent>
 										
@@ -930,6 +1013,14 @@
 											
 									</s:NavigatorContent>
 									
+									<s:NavigatorContent>
+										<calendar:CalendarComponent 
+											id="monthView" 
+											width="662" height="504" 
+											itemRenderer="components.calendar.CalendarItem" 
+											selectedDate="{selectedDate}" change="onSelectDate(event)"  />
+									</s:NavigatorContent>
+									
 								</mx:ViewStack>
 								
 								<s:BorderContainer backgroundColor="0x4A4A49" width="100%" height="34" y="{calendarContainer.height-34}">
@@ -961,7 +1052,7 @@
 								
 								<s:VGroup visible="{selectedAppointment!=null}" includeInLayout="{selectedAppointment!=null}" paddingTop="15" gap="0">
 									
-									<s:Label text="{selectedAppointment.provider.fullName}" styleName="blue9SemiBold" width="100%" textAlign="center" />
+									<s:Label id="providerName" styleName="blue9SemiBold" width="100%" textAlign="center" />
 									
 									<s:Spacer height="10" />
 									
@@ -994,7 +1085,7 @@
 									<s:Spacer height="10" />
 									
 									<mx:FormItem label="Patient" labelWidth="60" height="16" labelStyleName="white9Bold">
-										<mx:LinkButton label="{selectedAppointment.patient.fullName}" styleName="linkBtnBlue" fontSize="9" paddingLeft="-10"/>
+										<mx:LinkButton id="patientName" styleName="linkBtnBlue" fontSize="9" paddingLeft="-10"/>
 									</mx:FormItem>
 									<mx:FormItem label="Telephone:" labelWidth="60" height="16" labelStyleName="white9Bold" >
 										<s:Label text="{selectedAppointment.patient.phone}" styleName="white9" paddingLeft="-10"/>
@@ -1055,7 +1146,14 @@
 									
 								</s:VGroup>
 								
-								<appointments:ProviderScheduleList id="providerScheduleList" visible="{selectedProvider!=null}" provider="{selectedProvider}" date="{viewRangeStartDate}"  paddingTop="15" paddingLeft="10" />
+								<appointments:ProviderScheduleList 
+									id="providerScheduleList" 
+									visible="{providerScheduleList.providers!=null}" 
+									date="{selectedDate}" 
+									paddingTop="15" paddingLeft="10" 
+									showOverview="{currentState==MODE_MONTH}"
+									titleAlign="{currentState==MODE_MONTH?'left':'center'}"
+									titleStyleName="{currentState==MODE_MONTH?'white9Bold':'blue9SemiBold'}" />
 								
 							</s:VGroup>
 							

@@ -3,10 +3,10 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark"  
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	width="160">
+	gap="25" width="160">
 	
 	<fx:Declarations>
-		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:SolidColorStroke id="stroke" color="0x9E9E9E" weight="1" />
 	</fx:Declarations>
 	
 	<fx:Script>
@@ -23,15 +23,61 @@
 			
 			import spark.components.BorderContainer;
 			import spark.components.HGroup;
+			import spark.components.Label;
 			import spark.core.SpriteVisualElement;
+			import spark.primitives.Line;
 			
 			import utils.DateUtil;
 
-			private var _provider:ProviderModel;
+			private var _providers:ArrayCollection;
 			private var _date:Date;
 			
 			private var dirty:Boolean;
 			
+			private var _showOverview:Boolean = false;
+			
+			private var _titleStyleName:String = "blue9SemiBold";
+			private var _titleAlign:String = "left";
+			
+			public function get showOverview():Boolean
+			{
+				return _showOverview;
+			}
+
+			public function set showOverview(value:Boolean):void
+			{
+				_showOverview = value;
+				
+				dirty = true;
+				invalidateProperties();
+			}
+
+			public function get titleAlign():String
+			{
+				return _titleAlign;
+			}
+
+			public function set titleAlign(value:String):void
+			{
+				_titleAlign = value;
+				
+				dirty = true;
+				invalidateProperties();
+			}
+
+			public function get titleStyleName():String
+			{
+				return _titleStyleName;
+			}
+
+			public function set titleStyleName(value:String):void
+			{
+				_titleStyleName = value;
+				
+				dirty = true;
+				invalidateProperties();
+			}
+
 			public function get date():Date
 			{
 				return _date;
@@ -45,14 +91,15 @@
 				invalidateProperties();
 			}
 
-			public function get provider():ProviderModel
+			[Bindable]
+			public function get providers():ArrayCollection
 			{
-				return _provider;
+				return _providers;
 			}
 
-			public function set provider(value:ProviderModel):void
+			public function set providers(value:ArrayCollection):void
 			{
-				_provider = value;
+				_providers = value;
 				
 				dirty = true;
 				invalidateProperties();
@@ -64,52 +111,75 @@
 				
 				if( dirty )
 				{
-					list.removeAllElements();
+					removeAllElements();
 					
-					if( !date || !provider ) return;
+					if( !date || !providers ) return;
 					
-					var appointments:ArrayCollection = AppointmentsController.getInstance().getAppointments( provider.id, UserModel.TYPE_PROVIDER, date );
-					
-					for(var i:int=0;i<appointments.length;i++)
+					for each(var provider:ProviderModel in providers)
 					{
-						var appointment:Appointment = Appointment( appointments.getItemAt(i) );
+						var group:VGroup = new VGroup();
+						addElement( group );
 						
-						var row:HGroup = new HGroup();
-						list.addElement( row );
+						var label:Label = new Label();
+						label.styleName = titleStyleName;
+						label.percentWidth = 100;
+						label.setStyle('textAlign', titleAlign);
+						label.text = provider.fullName;
+						group.addElement( label );
 						
-						var square:BorderContainer = new BorderContainer();
-						square.width = 8;
-						square.height = 7;
-						square.backgroundFill = AppointmentsController.getInstance().getFill( appointment.type );;
-						row.addElement( square );
+						if( showOverview )
+						{
+							var overview:ProviderOverviewItem = new ProviderOverviewItem();
+							overview.provider = provider;
+							overview.day = date;
+							overview.width = 145;
+							overview.height = 8;
+							overview.showLabel = false;
+							group.addElement( overview );
+						}
+						else
+						{
+							var line:Line = new Line();
+							line.xFrom = 5;
+							line.xTo = 150;
+							line.stroke = stroke;
+							group.addElement( line );
+						}
 						
-						var date:Label = new Label();
-						date.width = 50;
-						date.text = DateUtil.formatTimeFromDate( appointment.from, false ) + '-' + DateUtil.formatTimeFromDate( appointment.to, false );
-						date.styleName = "gray9";
-						row.addElement( date );
+						var list:VGroup = new VGroup();
+						group.addElement( list );
 						
-						var patient:Label = new Label();
-						patient.text = appointment.patient ? appointment.patient.fullName : 'Conference';
-						patient.styleName = "gray9";
-						patient.setStyle('paddingLeft', 5);
-						row.addElement( patient );
+						var appointments:ArrayCollection = AppointmentsController.getInstance().getAppointments( provider.id, UserModel.TYPE_PROVIDER, date );
+						
+						for(var i:int=0;i<appointments.length;i++)
+						{
+							var appointment:Appointment = Appointment( appointments.getItemAt(i) );
+							
+							var row:HGroup = new HGroup();
+							list.addElement( row );
+							
+							var square:BorderContainer = new BorderContainer();
+							square.width = 8;
+							square.height = 7;
+							square.backgroundFill = AppointmentsController.getInstance().getFill( appointment.type );;
+							row.addElement( square );
+							
+							var date:Label = new Label();
+							date.width = 50;
+							date.text = DateUtil.formatTimeFromDate( appointment.from, false ) + '-' + DateUtil.formatTimeFromDate( appointment.to, false );
+							date.styleName = "gray9";
+							row.addElement( date );
+							
+							var patient:Label = new Label();
+							patient.text = appointment.patient ? appointment.patient.fullName : 'Conference';
+							patient.styleName = "gray9";
+							patient.setStyle('paddingLeft', 5);
+							row.addElement( patient );
+						}
 					}
-					
-					providerName.text = provider.fullName;
 				}
 			}
 		]]>
 	</fx:Script>
-	
-	<s:Label id="providerName" styleName="blue9SemiBold" width="100%" textAlign="center" />
-	
-	<s:Line xFrom="5" xTo="150">
-		<s:stroke>
-			<s:SolidColorStroke color="0x9E9E9E" weight="1" />
-		</s:stroke>
-	</s:Line>
-	
-	<s:VGroup id="list" />
 	
 </s:VGroup>
