@@ -4,7 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
-	width="400" height="300" creationComplete="init()">
+	width="305" creationComplete="init()">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -108,7 +108,7 @@
 							</fx:Script>
 							<s:Label text="{data.firstName + ' ' + data.lastName}" color="0xAEDBE2" fontSize="12" paddingLeft="10" width="124" fontFamily="myMyriad" />
 							<mx:HBox width="16" paddingTop="0">
-								<s:Image source="@Embed('images/messagesEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{data.rowIndex == outerDocument.teamRollOverRowIndex}" />
+								<s:Image id="iconImage" source="@Embed('images/messagesEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
 							</mx:HBox>
 						</mx:HBox>
 					</fx:Component>

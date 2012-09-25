@@ -12,6 +12,12 @@
 			   minWidth="1024" minHeight="768"
 			   creationComplete="init()" xmlns:modules="components.modules.*" xmlns:widgets="components.widgets.*">
 
+	<fx:Script>
+		<![CDATA[
+			import controllers.AppointmentsController;
+		]]>
+	</fx:Script>
+
 	<fx:Script source="ASfiles/home.as" />
 	<fx:Script source="ASfiles/messages.as" />
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/home.as" />
@@ -89,6 +95,10 @@
 						url="data/providers.xml"
 						result="providersResultHandler(event)" />
 		
+		<mx:HTTPService id="appointmentsXMLdata"
+						url="data/appointments.xml"
+						result="AppointmentsController.getInstance().resultHandler(event)" />
+
 		<s:SolidColor id="colorMedicalRecordsOutpatient" color="0x71B2D1" /><!--also used for Medication's "Prescription Drugs"-->
 		<s:SolidColor id="colorMedicalRecordsInpatient" color="0xDC9D00" /><!--also used for Medication's "Supplements"-->
 		<s:SolidColor id="colorMedicationsOverTheCounterDrugs" color="0xE5B0B5" />
@@ -244,7 +254,7 @@
 					<mx:LinkButton label="{user.available == UserModel.STATE_AVAILABLE ? 'Available' : 'Unavailable'}" click="toggleAvailability(event)" toolTip="{user.available == UserModel.STATE_AVAILABLE ? 'Change status to unavailable' : 'Change status to available'}" styleName="linkBtnYellow" />
 					<mx:LinkButton id="btnProfile" label="{fullname}" color="0xAEDBE2" textRollOverColor="0xAEDBE2" textSelectedColor="0xAEDBE2" skin="{null}" click="{currentState='profile'}" rollOver="btnProfile.styleName='linkBtnUnderline';" rollOut="btnProfile.styleName='linkBtn';" />
 					
-					<mx:LinkButton id="btnLogout" label="Logout XXXX" color="0xE6E6E6" textRollOverColor="0xE6E6E6" textSelectedColor="0xE6E6E6" skin="{null}" paddingLeft="1" click="{currentState='default'}" rollOver="btnLogout.styleName='linkBtnUnderline';" rollOut="btnLogout.styleName='linkBtn';" />
+					<mx:LinkButton id="btnLogout" label="Logout" color="0xE6E6E6" textRollOverColor="0xE6E6E6" textSelectedColor="0xE6E6E6" skin="{null}" paddingLeft="1" click="{currentState='default'}" rollOver="btnLogout.styleName='linkBtnUnderline';" rollOut="btnLogout.styleName='linkBtn';" />
 					
 					<s:HGroup paddingTop="-6" paddingLeft="-9">
 						<s:DropDownList id="dropDownView" dropShadowVisible="false" skinClass="skins.general.MyOptionsDropDownListSkin" color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" contentBackgroundColor="0xFFFFFF" width="35" fontSize="12"><!--change="dropDownView_changeHandler(event)"--> 
@@ -320,9 +330,9 @@
 											</s:HGroup>
 										</enhancedtitlewindow:EnhancedTitleWindow>
 										
-										<widgets:ChatWidget id="widgetChat" width="305" title="Chat" collapsible="true" headerClickable="false" module="modChat" showCloseButton="false" titleBarHeight="30" model="{chatModel}" user="{user}" showAutocomplete="onShowAutoComplete(event)" hideAutocomplete="onHideAutoComplete(event)" />
+										<widgets:ChatWidget id="widgetChat" width="305" title="Chat" collapsible="true" headerClickable="true" module="modChat" showCloseButton="false" titleBarHeight="30" model="{chatModel}" user="{user}" />
 										
-										<widgets:TeamWidget id="widgetTeam" width="305" height="374" title="Team Profile" collapsible="false" headerClickable="true" showCloseButton="false" titleBarHeight="30" model="{providersModel}" module="modTeam" collapsed="onTeamWidgetCollapse(event)" />
+										<widgets:TeamWidget id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="true" showCloseButton="false" titleBarHeight="30" model="{providersModel}" module="modTeam" collapsed="onTeamWidgetCollapse(event)" />
 									
 									</s:VGroup>
 									<s:VGroup gap="17">
@@ -421,79 +431,8 @@
 											</mx:DataGrid>
 										</enhancedtitlewindow:EnhancedTitleWindow>
 										
-										<enhancedtitlewindow:EnhancedTitleWindow id="widgetAppointments" width="633" title="Appointments (4)" collapsible="true" headerClickable="false" module="modAppointments" showCloseButton="false" titleBarHeight="30">
-											<enhancedtitlewindow:layout>
-												<s:HorizontalLayout paddingLeft="10" gap="0"/>
-											</enhancedtitlewindow:layout>
-											<s:Spacer height="200" />
-											<!--<s:VGroup width="100%" click="{this.currentState='modNutrition'}">
-											<s:HGroup width="100%" paddingTop="31" paddingBottom="16">
-											<s:Image source="{!hasMealBeenSubmitted ? plateEmptyWidget : mealType == 'full' ? plateFullWidget : platePartialWidget}" />
-											</s:HGroup>
-											<s:Line xFrom="0" xTo="224">
-											<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-											</s:stroke>
-											</s:Line>
-											<s:HGroup paddingTop="9" paddingLeft="4" gap="16" verticalAlign="middle">
-											<s:Image source="@Embed('images/nutritionJournalFood.png')" />
-											<s:Label fontSize="14" color="0xFFFFFF" text="{arrNutSummaryCalories.getItemAt(0).calories}" textAlign="right" width="63" />
-											<s:Label fontSize="12" color="0x868686" text="Calories Consumed" />
-											</s:HGroup>
-											<s:HGroup paddingBottom="5" paddingLeft="4" gap="16" verticalAlign="middle">
-											<s:Image source="@Embed('images/nutritionJournalExercise.png')" />
-											<s:Label fontSize="14" color="0xFFFFFF" text="- 0" textAlign="right" width="63" />
-											<s:Label fontSize="12" color="0x868686" text="Calories Burned" />
-											</s:HGroup>
-											<s:Line xFrom="0" xTo="224">
-											<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-											</s:stroke>
-											</s:Line>
-											<s:HGroup paddingTop="7" gap="15">
-											<s:Label text="{arrNutSummaryCalories.getItemAt(0).calories}" styleName="orangeStandout" width="99" textAlign="right" />
-											<s:Label text="{'of 2,000 Total\nDaily Calories'}" color="0x868686" fontSize="12" paddingTop="2" />
-											</s:HGroup>
-											</s:VGroup>
-											<s:Line yFrom="0" yTo="292">
-											<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-											</s:stroke>
-											</s:Line>
-											<s:VGroup click="{this.currentState='modNutrition'}">
-											<s:VGroup width="67" horizontalAlign="center" paddingTop="11" paddingBottom="4">
-											<s:Label text="Sodium" fontSize="12" color="0x868686" />
-											<s:Image source="{!hasMealBeenSubmitted ? sodiumEmpty : mealType == 'full' ? sodiumFull : sodiumPartial}" />
-											</s:VGroup>
-											<s:Line xFrom="0" xTo="67">
-											<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-											</s:stroke>
-											</s:Line>
-											<s:VGroup width="67" horizontalAlign="center" paddingTop="3" paddingBottom="-3">
-											<s:Label text="Sugars" fontSize="12" color="0x868686" />
-											<s:Image source="{!hasMealBeenSubmitted ? sugarsEmpty : sugarsFull}" />
-											</s:VGroup>
-											<s:Line xFrom="0" xTo="67">
-											<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-											</s:stroke>
-											</s:Line>
-											<s:VGroup width="67" horizontalAlign="center" paddingTop="3" paddingBottom="4">
-											<s:Label text="Fats &amp; Oils" fontSize="12" color="0x868686" />
-											<s:Image source="{!hasMealBeenSubmitted ? fatsOilsEmpty : fatsOilsPartial}" />
-											</s:VGroup>
-											<s:Line xFrom="0" xTo="67">
-											<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-											</s:stroke>
-											</s:Line>
-											<s:VGroup width="67" horizontalAlign="center" paddingTop="5">
-											<s:Label text="Alcohol" fontSize="12" color="0x868686" />
-											<s:Image source="{!hasMealBeenSubmitted ? alcoholEmpty : alcoholFull}" />
-											</s:VGroup>
-											</s:VGroup>-->
-										</enhancedtitlewindow:EnhancedTitleWindow>
+										<widgets:AppointmentsWidget id="widgetAppointments" module="modAppointments" width="633" headerClickable="true" collapsible="true"/>
+
 									</s:VGroup>
 								</s:HGroup>
 							</s:NavigatorContent>
@@ -863,6 +802,9 @@
 							
 							<!--	team profile	-->
 							<modules:TeamModule id="modTeam" model="{providersModel}" navigate="navigate(event)" />
+							
+							<!--	appointments	-->
+							<modules:AppointmentModule id="modAppointments" navigate="navigate(event)" />
 							
 						</mx:ViewStack>
 					</s:NavigatorContent>

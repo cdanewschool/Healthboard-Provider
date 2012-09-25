@@ -19,6 +19,11 @@
 			[Bindable] public var searchPlaceholder:String;
 			[Bindable] public var searchFunction:Function;
 			
+			[Bindable] public var actionCount:int = 0;
+			
+			[Bindable] public var actionPrefix:String = "You have";
+			[Bindable] public var actionSuffix:String = "new messages";
+			
 			private function onHeaderClick(event:MouseEvent):void
 			{
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
@@ -47,6 +52,12 @@
 	<s:Image source="{icon}" buttonMode="true" click="onHeaderClick(event)" />
 	<s:Label id="lblBreadcrumbPatient" text="{title}" color="0xFFFFFF" fontSize="22" fontWeight="bold" paddingTop="2" paddingLeft="3" />
 	<s:Label text="▼" fontSize="10" color="0xFFFFFF" paddingTop="4" paddingLeft="12" />
+	
+	<s:HGroup visible="{actionCount>0}" includeInLayout="{actionCount>0}">
+		<s:Label text="{actionPrefix}" styleName="moduleSubtitleItalic" paddingLeft="30" />
+		<s:Label text="{actionCount}" styleName="moduleSubtitleItalic moduleSubtitleNumber" />
+		<s:Label text="new {actionSuffix?actionSuffix.toLowerCase():''}" styleName="moduleSubtitleItalic" />
+	</s:HGroup>
 	
 	<s:Spacer width="100%" />
 

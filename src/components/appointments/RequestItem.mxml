@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  width="100" gap="5">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import events.AppointmentEvent;
+			
+			import models.Appointment;
+			import models.ProviderModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.ItemClickEvent;
+			
+			[Bindable] public var appointment:Appointment;
+			
+			[Bindable] private var actions:ArrayCollection = new ArrayCollection( ['View','Accept','Decline'] );
+			
+			private function onActionClick(event:ItemClickEvent):void
+			{
+				var evt:AppointmentEvent;
+				
+				if( event.index == 0 )
+					evt = new AppointmentEvent( AppointmentEvent.VIEW );
+				else if( event.index == 1 )
+					evt = new AppointmentEvent( AppointmentEvent.ACCEPT );
+				else if( event.index == 2 )
+					evt = new AppointmentEvent( AppointmentEvent.DECLINE );
+				
+				evt.appointment = appointment;
+				dispatchEvent( evt );
+			}
+		]]>
+	</fx:Script>
+	
+	<s:Label text="{appointment.patient.fullName}" styleName="gray9" />
+	
+	<s:Label text="{appointment.provider.lastName + ', ' + ProviderModel(appointment.provider).role + '-' + Appointment.getTypeByKey(appointment.type).label}" styleName="gray9" />
+	
+	<s:Label text="{appointment.fromDateString()}" styleName="gray9" />
+	
+	<mx:LinkBar 
+		dataProvider="{actions}" 
+		itemClick="onActionClick(event)" 
+		linkButtonStyleName="linkBtnBlue" fontSize="9" contentBackgroundAlpha="0" 
+		paddingLeft="-2" paddingRight="0" paddingTop="-4" paddingBottom="0" horizontalGap="2" />
+	
+</s:VGroup>

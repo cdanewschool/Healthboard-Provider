@@ -4,7 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
-	width="305" height="112"
+	width="305" 
 	stateChangeComplete="onStateChange(event)"
 	creationComplete="init()">
 	
@@ -236,8 +236,6 @@
 			{
 				search.text = ChatSearch.SEARCH_PLACEHOLDER;
 				
-				contentGroup.clipAndEnableScrolling = false;
-				
 				connectionTimer = new Timer(1000,1);
 				connectionTimer.addEventListener(TimerEvent.TIMER_COMPLETE,onConnectionTimerComplete);
 			}
@@ -246,7 +244,7 @@
 	</fx:Script>
 	
 	<enhancedtitlewindow:layout>
-		<s:BasicLayout />
+		<s:VerticalLayout />
 	</enhancedtitlewindow:layout>
 	
 	<s:VGroup gap="5" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">

@@ -14,13 +14,21 @@
 		
 		<fx:Array id="gridBackground">
 			
-			<mx:GridLines 
+			<mx:GridLines  
 				horizontalChangeCount="1" verticalChangeCount="1"
-				horizontalTickAligned="false" verticalTickAligned="false"
+				horizontalTickAligned="false" verticalTickAligned="true"
 				gridDirection="both">
 				
+				<mx:horizontalOriginStroke>
+					<mx:SolidColorStroke color="0x3C3C3B" alpha="0" />
+				</mx:horizontalOriginStroke>
+				
+				<mx:verticalOriginStroke>
+					<mx:SolidColorStroke color="0x3C3C3B" alpha="0" />
+				</mx:verticalOriginStroke>
+				
 				<mx:horizontalFill>
-					<mx:SolidColor color="0x3C3C3B" alpha="1"/>
+					<mx:SolidColor color="0x3C3C3B" alpha="1"  />
 				</mx:horizontalFill>
 				
 				<mx:horizontalAlternateFill>
@@ -127,8 +135,7 @@
 			private function getFill(element:ChartItem, index:Number):IFill 
 			{
 				var appointment:Appointment = Appointment( appointments.getItemAt( index ) );
-				
-				return controller.getFill( appointment.type );
+				return controller.getFill( appointment.isPending ? Appointment.TYPE_PENDING : appointment.type );
 			}
 			
 			private function verticalAxisCategoryFunction(axis:AxisBase, item:ProviderModel):Object 
@@ -198,7 +205,7 @@
 	
 	<s:Spacer height="5"/> 
 	
-	<mx:BarChart id="chart" dataProvider="{appointments}" showDataTips="false" backgroundElements="{gridBackground}" width="100%" height="100" barWidthRatio=".5">
+	<mx:BarChart id="chart" dataProvider="{appointments}" showDataTips="false" backgroundElements="{gridBackground}" width="100%" height="100" barWidthRatio=".4">
 		
 		<mx:horizontalAxis>
 			<mx:LinearAxis id="xAxis" minimum="{DateUtil.HOUR*6}" maximum="{DateUtil.HOUR*17}" labelFunction="getTimeLabel" interval="{DateUtil.HOUR}" />
@@ -211,13 +218,12 @@
 		<mx:series>
 			<mx:BarSeries
 				id="appointmentTime"
-				displayName="asdfs"
 				dataFunction="valueFunction" minField="x"
 				fillFunction="getFill" />
 		</mx:series>
 		
 		<mx:horizontalAxisRenderers>
-			<mx:AxisRenderer axis="{xAxis}" axisStroke="{xAxisStroke}" styleName="white12" showLine="true" placement="top" tickPlacement="none" minorTickPlacement="none" />
+			<mx:AxisRenderer axis="{xAxis}" axisStroke="{xAxisStroke}" styleName="white12" showLine="true" placement="top" tickPlacement="none" minorTickPlacement="none" labelAlign="center"/>
 		</mx:horizontalAxisRenderers>
 		
 		<mx:verticalAxisRenderers>
@@ -234,6 +240,6 @@
 	
 	<s:Spacer height="5"/> 
 	
-	<s:HGroup id="legend" gap="40" />
+	<s:HGroup id="legend" gap="50" />
 	
 </enhancedtitlewindow:EnhancedTitleWindow>

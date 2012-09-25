@@ -24,15 +24,23 @@
 	
 	<!-- 10/12/2012 -->
 	<appointment patient_id='125' provider_id='0' from='10/12/2012 07:00:00' to='10/12/2012 08:00:00' type='conferenceWeb' reason='Appointment' />	<!-- berg -->
-	<appointment patient_id='126' provider_id='0' from='10/12/2012 09:30:00' to='10/12/2012 10:00:00' type='pending' reason='Appointment' prerequisite='Diagnostic Studies' />	<!-- berg -->
+	<appointment patient_id='126' provider_id='0' from='10/12/2012 09:30:00' to='10/12/2012 10:00:00' type='visit' reason='Appointment' is_pending='true'>
+		<prerequisites>
+			<prerequisite id='xray' title='Diagnostic Studies' date='03/06/2012 08:30:00' ordered_by_id='0' interpreted_by='Dr. Sam Huntsman' />
+		</prerequisites>
+	</appointment>	<!-- berg -->
 	<appointment patient_id='123' provider_id='0' from='10/12/2012 11:30:00' to='10/12/2012 12:00:00' type='conferenceWeb' />	<!-- berg -->
 	<appointment patient_id='127' provider_id='1' from='10/12/2012 06:30:00' to='10/12/2012 07:30:00' type='visit' />	<!-- greenfield -->
 	<appointment patient_id='128' provider_id='1' from='10/12/2012 09:30:00' to='10/12/2012 10:00:00' type='conferenceWeb' />	<!-- greenfield -->
 	<appointment patient_id='129' provider_id='1' from='10/12/2012 10:30:00' to='10/12/2012 11:30:00' type='conferencePhone' />	<!-- greenfield -->
 	<appointment provider_id='2' from='10/12/2012 07:30:00' to='10/12/2012 08:30:00' type='other' />	<!-- mckinley -->
-	<appointment patient_id='124' provider_id='2' from='10/12/2012 08:30:00' to='10/12/2012 09:00:00' type='pending' />	<!-- mckinley -->
+	<appointment patient_id='124' provider_id='2' from='10/12/2012 08:30:00' to='10/12/2012 09:00:00' type='visit' is_pending='true' />	<!-- mckinley -->
 	<appointment patient_id='130' provider_id='2' from='10/12/2012 10:00:00' to='10/12/2012 11:00:00' type='vsit' />	<!-- mckinley -->
 	
-	<appointment patient_id='130' provider_id='2' from='10/14/2012 10:00:00' to='10/14/2012 11:00:00' type='vsit' />	<!-- mckinley -->
+	<!-- 10/15/2012 -->
+	<appointment patient_id='124' provider_id='0' from='10/15/2012 11:00:00' to='10/15/2012 12:00:00' type='conferencePhone' is_pending='true' />	<!-- berg -->
+	
+	<!-- 10/18/2012 -->
+	<appointment patient_id='124' provider_id='0' from='10/18/2012 11:45:00' to='10/18/2012 13:00:00' type='visit' is_pending='true' />	<!-- berg -->
 	
 </appointments>
