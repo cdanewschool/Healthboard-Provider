@@ -5,6 +5,7 @@ package components.itemrenderers
 	import events.AppointmentEvent;
 	import events.MessageEvent;
 	
+	import flash.display.DisplayObject;
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	
@@ -19,6 +20,7 @@ package components.itemrenderers
 	import spark.components.DropDownList;
 	import spark.components.List;
 	import spark.components.PopUpAnchor;
+	import spark.core.SpriteVisualElement;
 	import spark.events.IndexChangeEvent;
 	
 	public class DailyCustomChartLabel extends ChartLabel
@@ -26,6 +28,7 @@ package components.itemrenderers
 		private var button:Button;
 		private var anchor:PopUpAnchor;
 		private var list:List;
+		private var labelHitArea:SpriteVisualElement;
 		
 		private var options:ArrayCollection = new ArrayCollection( ['Message All','Cancel All'] );
 		
@@ -37,6 +40,7 @@ package components.itemrenderers
 			super();
 			
 			setStyle('paddingLeft',5);
+			setStyle('paddingTop',2);
 		}
 		
 		override protected function createChildren():void
@@ -73,14 +77,24 @@ package components.itemrenderers
 			anchor.setStyle('chromeColor','0xffffff');
 			addChild( anchor );
 			
-			getChildAt(0).addEventListener( MouseEvent.CLICK, onLabelClick );
+			labelHitArea = new SpriteVisualElement();
+			labelHitArea.buttonMode = true;
+			labelHitArea.addEventListener( MouseEvent.CLICK, onLabelClick );
+			addChildAt( labelHitArea, 1 );
 		}
 		
 		override protected function updateDisplayList(w:Number, h:Number):void 
 		{
 			super.updateDisplayList(w, h);
 			
-			getChildAt(0).x = getStyle('paddingLeft');
+			var _label:DisplayObject = getChildAt(0);
+			
+			_label.x = getStyle('paddingLeft');
+			_label.y = getStyle('paddingTop');
+			
+			labelHitArea.graphics.clear();
+			labelHitArea.graphics.beginFill(0x000000,0);
+			labelHitArea.graphics.drawRect(_label.x,_label.y,_label.width,_label.height);
 			
 			button.x = anchor.x = w - button.width;
 			button.height = h;
