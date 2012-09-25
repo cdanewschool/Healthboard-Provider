@@ -660,6 +660,8 @@
 						requests.addElement( item );
 					}
 				}
+				
+				header.actionCount = requests.numElements;
 			}
 			
 			private function onViewRequest(event:AppointmentEvent):void
@@ -894,7 +896,11 @@
 		<s:VerticalLayout />
 	</s:layout>
 	
-	<components:ModuleHeader id="header" title="Appointments" icon="@Embed('images/patientHome.png')" showSearch="true" searchPlaceholder="Search Appointments" searchFunction="{onHeaderSearch}" />
+	<components:ModuleHeader 
+		id="header" 
+		title="Appointments" icon="@Embed('images/patientHome.png')" 
+		showSearch="true" searchPlaceholder="Search Appointments" searchFunction="{onHeaderSearch}"
+		actionSuffix="requests in need of confirmation." />
 	
 	<s:Group y="15">
 		
