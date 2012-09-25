@@ -21,6 +21,7 @@
 			import components.popups.AcceptAppointmentRequestPopup;
 			import components.popups.AddAppointmentPopup;
 			import components.popups.AppointmentChangedConfirmation;
+			import components.popups.AppointmentReportPopup;
 			import components.popups.ViewAttachmentPopup;
 			
 			import controllers.ApplicationController;
@@ -84,6 +85,7 @@
 			
 			private var addAppointmentPopup:AddAppointmentPopup;
 			private var acceptRequestPopup:AcceptAppointmentRequestPopup;
+			private var printAppointmentsPopup:AppointmentReportPopup;
 			
 			private var _dirty:Boolean;
 			
@@ -241,6 +243,13 @@
 			
 			private function onPrintAppointmentClick( event:MouseEvent ):void
 			{
+				printAppointmentsPopup = new AppointmentReportPopup();
+				printAppointmentsPopup.providers = controller.model.selectedProviders;
+				printAppointmentsPopup.from = viewRangeStartDate;
+				printAppointmentsPopup.to = viewRangeEndDate;
+				
+				PopUpManager.addPopUp( printAppointmentsPopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
+				PopUpManager.centerPopUp( printAppointmentsPopup );
 			}
 			
 			private function showAppointmentPopup( appointment:Appointment, mode:String ):void
