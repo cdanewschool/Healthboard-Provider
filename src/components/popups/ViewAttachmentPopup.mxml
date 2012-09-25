@@ -9,22 +9,51 @@
 	<fx:Script>
 		<![CDATA[
 			import models.FileUpload;
+			import models.ImageReference;
 			
 			import mx.managers.PopUpManager;
 			
 			[Bindable] public var file:FileUpload;
+			[Bindable] public var fileReferences:Vector.<ImageReference>;
+			
+			[Bindable] private var currentFileID:int;
+			
+			private var current:ImageReference;
 			
 			private function onComplete():void
 			{
 				width = attachment.bitmapData.width + container.paddingLeft + container.paddingRight;
-				height = attachment.bitmapData.height + container.paddingTop + container.paddingBottom;
+				height = attachment.bitmapData.height + container.paddingTop + Math.max(container.paddingBottom, caption.measuredHeight);
 				
 				PopUpManager.centerPopUp( this );
 			}
 			
+			private function showImage( id:int = 0 ):void
+			{
+				var image:ImageReference = fileReferences[0];
+				attachment.source = image.filePath;
+				
+				currentFileID = id;
+				caption.text = image.caption + '\n' + ((currentFileID+1) + ' of ' + fileReferences.length);
+			}
+			
+			private function navigate( direction:int = 1 ):void
+			{
+				showImage( direction == -1 ? Math.max( 0, currentFileID + direction ) : Math.min( fileReferences.length-1, currentFileID + direction ) );
+			}
+			
 			private function init():void
 			{
-				caption.text = file.name + " " + file.fileSize;
+				if( fileReferences != null 
+					&& fileReferences.length )
+				{
+					showImage( 0 );
+				}
+				else
+				{
+					attachment.source = file.data;
+					caption.text = file.name + " " + file.fileSize;
+				}
 			}
 			
 		]]>
@@ -32,13 +61,21 @@
 	
 	<s:HGroup id="container" paddingLeft="30" paddingTop="30" paddingRight="30" paddingBottom="30">
 		
-		<s:Image id="attachment" source="{file.data}" complete="onComplete()" />
+		<s:Image id="attachment" complete="onComplete()" />
 		
 	</s:HGroup>
 	
-	<s:Label id="caption" horizontalCenter="0" bottom="4" styleName="black12" />
+	<mx:Text id="caption" bottom="10" styleName="black12" width="{width - 30}" paddingLeft="30" paddingRight="30" />
 	
 	<s:Button id="closeButton" skinClass="skins.general.CustomTitleWindowCloseButtonSkin"
 			  width="25" height="25" right="-11" top="-14" click="{PopUpManager.removePopUp(this)}" />
+	
+	<s:BorderContainer left="29" top="{30 + attachment.height*.5}" width="49" height="24" visible="{fileReferences &amp;&amp; fileReferences.length}" borderAlpha="0">
+		<mx:LinkButton label="Prev" styleName="linkBtnDarkBlue" click="navigate(-1)" enabled="{currentFileID>0}" left="10" />
+	</s:BorderContainer>
+	
+	<s:BorderContainer right="29" top="{30 + attachment.height*.5}" width="49" height="24" visible="{fileReferences &amp;&amp; fileReferences.length}" borderAlpha="0">
+		<mx:LinkButton label="Next" styleName="linkBtnDarkBlue" click="navigate(1)" enabled="{fileReferences &amp;&amp; currentFileID &lt; fileReferences.length-1}" right="10" />
+	</s:BorderContainer>
 	
 </s:BorderContainer>

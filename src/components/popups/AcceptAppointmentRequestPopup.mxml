@@ -98,7 +98,7 @@
 				</mx:FormItem>
 				
 				<mx:FormItem label="Prerequisite:" labelWidth="75" labelStyleName="mediumTextBlackBold">
-					<s:Label text="{appointment.prerequisite}" styleName="darkGray12" />
+					<s:Label text="{appointment.getPrerequisitesString()}" styleName="darkGray12" />
 				</mx:FormItem>
 				
 			</s:VGroup>

@@ -21,6 +21,7 @@
 			import components.popups.AcceptAppointmentRequestPopup;
 			import components.popups.AddAppointmentPopup;
 			import components.popups.AppointmentChangedConfirmation;
+			import components.popups.ViewAttachmentPopup;
 			
 			import controllers.ApplicationController;
 			import controllers.AppointmentsController;
@@ -30,6 +31,8 @@
 			import events.MessageEvent;
 			
 			import models.Appointment;
+			import models.AppointmentPrerequisite;
+			import models.ImageReference;
 			import models.ProviderModel;
 			import models.UserModel;
 			
@@ -132,6 +135,18 @@
 								break;
 							}
 						}
+					}
+					
+					prerequisites.removeAllElements();
+					
+					for each(var prereq:AppointmentPrerequisite in selectedAppointment.prerequisites)
+					{
+						var lb:LinkButton = new LinkButton();
+						lb.label = prereq.title;
+						lb.styleName = "linkBtnBlue";
+						lb.setStyle("fontSize",9);
+						lb.addEventListener( MouseEvent.CLICK, onPrerequisitesClick );
+						prerequisites.addElement( lb );
 					}
 				}
 				
@@ -693,6 +708,25 @@
 				}
 			}
 			
+			private function onPrerequisitesClick(event:MouseEvent):void
+			{
+				var images:Vector.<ImageReference> = new Vector.<ImageReference>;
+				
+				for each(var pre:AppointmentPrerequisite in selectedAppointment.prerequisites)
+				{
+					var image:ImageReference = new ImageReference();
+					image.filePath = pre.path;
+					image.caption = pre.toString();
+					images.push( image );
+				}
+				
+				var popup:ViewAttachmentPopup = new ViewAttachmentPopup();
+				ViewAttachmentPopup(popup).fileReferences = images;
+					
+				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
+				PopUpManager.centerPopUp( popup );
+			}
+			
 			private function onDragDrop(event:DragEvent):void
 			{
 				var horizontalAxisRenderer:AxisRenderer = AxisRenderer( chart.horizontalAxisRenderers[0] );
@@ -1121,8 +1155,8 @@
 									
 									<s:Spacer height="10" />
 									
-									<mx:FormItem label="Prerequisite:" labelWidth="60" height="24" labelStyleName="white9Bold">
-										<s:Label text="{selectedAppointment.prerequisite ? selectedAppointment.prerequisite : 'None'}" styleName="white9" fontSize="9" paddingLeft="-10"/>
+									<mx:FormItem label="Prerequisite:" labelWidth="60" labelStyleName="white9Bold">
+										<s:VGroup id="prerequisites" paddingLeft="-10" gap="-4"/>
 									</mx:FormItem>
 									
 									<s:Spacer height="10" />

@@ -67,9 +67,10 @@ package models
 		public var type:String;
 		
 		public var reason:String;
-		public var prerequisite:String;
 		
 		public var location:String;
+		
+		public var prerequisites:ArrayCollection;
 		
 		public function Appointment()
 		{
@@ -91,11 +92,24 @@ package models
 			return Constants.MONTHS_ABBR[ date.month ] + ' ' + date.date + ', ' +  date.fullYear + ' at ' + DateUtil.formatTimeFromDate( date ); 
 		}
 		
+		public function getPrerequisitesString():String
+		{
+			if( prerequisites.length ) 
+			{
+				var items:Array = [];
+				for each(var prerequisite:AppointmentPrerequisite in prerequisites) 
+					items.push( prerequisite.title );
+				return items.join('; ');
+			}
+			
+			return 'None';
+		}
+		
 		public function toString():String
 		{
 			var str:String = from.month + '/' + from.date + '/' + from.fullYear + ' ';
 			str += 'appointment at ' + DateUtil.formatTimeFromDate( from ) + ' with ' + patient.fullName;
-			if( prerequisite ) str += '\nPrerequisite: ' + prerequisite;
+			str += '\nPrerequisite: ' + getPrerequisitesString();
 			
 			return str;
 		}
@@ -134,7 +148,7 @@ package models
 			
 			for (var prop:String in data)
 			{
-				if( prop == "from" || prop == "to" ) continue;
+				if( prop == "from" || prop == "to" || prop == "prerequisites" ) continue;
 				
 				if( val.hasOwnProperty( prop ) )
 				{
@@ -152,6 +166,31 @@ package models
 			val.provider = ApplicationController.getInstance().getUser( data.provider_id, UserModel.TYPE_PROVIDER );
 			
 			val.isPending = String(data.is_pending) == 'true';
+			
+			var prerequisites:ArrayCollection = new ArrayCollection();
+			
+			if( data.hasOwnProperty('prerequisites') )
+			{
+				var prerequisite:AppointmentPrerequisite;
+				
+				if( data.prerequisites.prerequisite is ArrayCollection )
+				{
+					for each( var p:* in data.prerequisites.prerequisite)
+					{
+						prerequisite = AppointmentPrerequisite.fromObj( p );
+						prerequisite.patient = val.patient;
+						prerequisites.addItem( prerequisite );
+					}
+				}
+				else
+				{
+					prerequisite = AppointmentPrerequisite.fromObj( data.prerequisites.prerequisite );
+					prerequisite.patient = val.patient;
+					prerequisites.addItem( prerequisite );
+				}
+			}
+			
+			val.prerequisites = prerequisites;
 			
 			return val;
 		}
