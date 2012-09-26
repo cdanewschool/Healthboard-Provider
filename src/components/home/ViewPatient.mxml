@@ -238,12 +238,12 @@
 								<s:layout>
 									<s:VerticalLayout horizontalAlign="center" paddingTop="7" gap="1" />
 								</s:layout>
-								<s:Label fontSize="16" text="{parentApplication.appointments.getItemAt(parentApplication.currentAppt).month}" filters="{[new DropShadowFilter(4,45,0,0.4)]}" />	<!--text="{String(arrMonths[today.getMonth()]).toUpperCase()}"-->
-								<s:Label fontSize="72" text="{parentApplication.appointmentsgetItemAt(parentApplication.currentAppt).date}" filters="{[new DropShadowFilter(4,45,0,0.4)]}" />	<!-- text="{today.getDate()}"-->
+								<s:Label fontSize="16" text="{parentApplication.appointments[parentApplication.currentAppt].month}" filters="{[new DropShadowFilter(4,45,0,0.4)]}" />	<!--text="{String(arrMonths[today.getMonth()]).toUpperCase()}"-->
+								<s:Label fontSize="72" text="{parentApplication.appointments[parentApplication.currentAppt].date}" filters="{[new DropShadowFilter(4,45,0,0.4)]}" />	<!-- text="{today.getDate()}"-->
 							</s:BorderContainer>
 							<s:VGroup paddingLeft="9">
-								<mx:LinkButton id="btnApptTime" label="{parentApplication.appointmentsgetItemAt(parentApplication.currentAppt).daytime}" color="0xFBB03B" fontSize="16" fontWeight="bold" textRollOverColor="0xFBB03B" textSelectedColor="0xFBB03B" skin="{null}" rollOver="{btnApptTime.styleName='linkBtnUnderline';}" rollOut="btnApptTime.styleName='linkBtn';" paddingLeft="-3" click="{this.currentState='modCalendar';}" /><!--if(shouldAddInitialAppointments) onApplicationStart();-->	<!--text="{arrWeekdays[today.getDay()] + ' 11:00 AM'}"-->
-								<s:Label color="0x868686" fontSize="12" text="{parentApplication.appointmentsgetItemAt(parentApplication.currentAppt).details}" paddingBottom="-9" paddingTop="-3" />		<!--text="{'Physical Examination\nDr. Berg\n(999) 999-9999'}"-->
+								<mx:LinkButton id="btnApptTime" label="{parentApplication.appointments[parentApplication.currentAppt].daytime}" color="0xFBB03B" fontSize="16" fontWeight="bold" textRollOverColor="0xFBB03B" textSelectedColor="0xFBB03B" skin="{null}" rollOver="{btnApptTime.styleName='linkBtnUnderline';}" rollOut="btnApptTime.styleName='linkBtn';" paddingLeft="-3" click="{this.currentState='modCalendar';}" /><!--if(shouldAddInitialAppointments) onApplicationStart();-->	<!--text="{arrWeekdays[today.getDay()] + ' 11:00 AM'}"-->
+								<s:Label color="0x868686" fontSize="12" text="{parentApplication.appointments[parentApplication.currentAppt].details}" paddingBottom="-9" paddingTop="-3" />		<!--text="{'Physical Examination\nDr. Berg\n(999) 999-9999'}"-->
 								<mx:LinkButton id="btnViewMap" label="View Map »" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnViewMap.styleName='linkBtnUnderline';}" rollOut="btnViewMap.styleName='linkBtn';" paddingLeft="-2" />
 							</s:VGroup>
 						</s:HGroup>
@@ -330,12 +330,12 @@
 								<mx:DataGridColumn dataField="date" headerText="Time" width="86" />
 								<mx:DataGridColumn dataField="type" headerText="Type" width="102" />
 								<mx:DataGridColumn dataField="alert" headerText="Alert" width="143" />
-								<mx:DataGridColumn dataField="description" headerText="Description" paddingLeft="5">
+								<mx:DataGridColumn dataField="description" headerText="Description" paddingLeft="5" fontFamily="myMyriad">
 									<mx:itemRenderer>
 										<fx:Component>
 											<mx:HBox width="100%" paddingTop="0" horizontalScrollPolicy="off">
 												<!--<fx:Script>
-													<![CDATA[
+												<![CDATA[
 														import components.nutrition.saveMealWindow;
 														import mx.managers.PopUpManager;
 														protected function nutDeleteHandler(event:MouseEvent):void {
@@ -688,7 +688,7 @@
 														
 														<s:HGroup width="140" gap="-2">
 															<mx:LinkButton icon.expanded="@Embed(source='images/smallArrowGray.png')" icon.collapsed="@Embed(source='images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.vital}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedVitals++;} else {this.currentState = 'expanded'; outerDocument.collapsedVitals--;}}" />
-															<mx:Label text="{'(Last: ' + parentApplication.getDate(data.chart.getItemAt(0).data.getItemAt(data.chart.getItemAt(0).data.length - 1).date) + ')'}" fontSize="12" color="0x868686" paddingTop="1" />
+															<mx:Label text="{'(Last: ' + parentApplication.getDate(data.chart[0].data[data.chart[0].data.length - 1].date) + ')'}" fontSize="12" color="0x868686" paddingTop="1" />
 														</s:HGroup>
 														
 														<s:Group includeIn="expanded"><!--includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}"-->
@@ -749,38 +749,38 @@
 															<s:VGroup gap="3" color="0x868686">
 																<s:VGroup includeInLayout="{data.vital == 'Weight'}" visible="{data.vital == 'Weight'}" gap="-3">
 																	<s:HGroup verticalAlign="baseline" gap="4">
-																		<s:Label id="lblWeight" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart.getItemAt(0).data.getItemAt(data.chart.getItemAt(0).data.length - 1).value}" />
+																		<s:Label id="lblWeight" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
 																		<s:Label fontSize="12" text="pounds" />
 																	</s:HGroup>
 																</s:VGroup>
 																
 																<s:HGroup includeInLayout="{data.vital == 'Blood pressure'}" visible="{data.vital == 'Blood pressure'}" verticalAlign="baseline" gap="0">
-																	<s:Label id="lblBloodPressure1" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart.getItemAt(0).data.getItemAt(data.chart.getItemAt(0).data.length - 1).value}" />
+																	<s:Label id="lblBloodPressure1" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
 																	<s:Label fontSize="24" text="/" color="0xFFFFFF" fontWeight="bold" />
-																	<s:Label id="lblBloodPressure2" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart.getItemAt(0).data.getItemAt(data.chart.getItemAt(0).data.length - 1).value2}" />
+																	<s:Label id="lblBloodPressure2" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value2}" />
 																	<s:Label fontSize="12" text="mmHg" paddingLeft="3" />
 																</s:HGroup>
 																
 																<s:HGroup includeInLayout="{data.vital == 'Heart rate'}" visible="{data.vital == 'Heart rate'}" verticalAlign="baseline" gap="4">
-																	<s:Label id="lblHeartRate" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart.getItemAt(0).data.getItemAt(data.chart.getItemAt(0).data.length - 1).value}" />
+																	<s:Label id="lblHeartRate" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
 																	<s:Label fontSize="12" text="beats / minute" />
 																</s:HGroup>
 																
 																<s:HGroup includeInLayout="{data.vital == 'Respiratory'}" visible="{data.vital == 'Respiratory'}" verticalAlign="baseline" gap="4">
-																	<s:Label id="lblRespiratory" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart.getItemAt(0).data.getItemAt(data.chart.getItemAt(0).data.length - 1).value}" />
+																	<s:Label id="lblRespiratory" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
 																	<s:Label fontSize="12" text="breaths / minute" />
 																</s:HGroup>
 																
 																<s:HGroup includeInLayout="{data.vital == 'Temperature'}" visible="{data.vital == 'Temperature'}" verticalAlign="baseline" gap="1">
-																	<s:Label id="lblTemperature" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart.getItemAt(0).data.getItemAt(data.chart.getItemAt(0).data.length - 1).value}" />
+																	<s:Label id="lblTemperature" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
 																	<s:Label fontSize="24" text="°" />
 																	<s:Label fontSize="12" text="Fahrenheit" />
 																</s:HGroup>
 																
 																<s:HGroup includeInLayout="{data.vital == 'Height'}" visible="{data.vital == 'Height'}" verticalAlign="baseline" gap="4">
-																	<s:Label id="lblHeightFeet" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{Math.floor(data.chart.getItemAt(0).data.getItemAt(data.chart.getItemAt(0).data.length - 1).value / 12)}" />
+																	<s:Label id="lblHeightFeet" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{Math.floor(data.chart[0].data[data.chart[0].data.length - 1].value / 12)}" />
 																	<s:Label fontSize="12" text="feet" />
-																	<s:Label id="lblHeightInches" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart.getItemAt(0).data.getItemAt(data.chart.getItemAt(0).data.length - 1).value % 12}" />
+																	<s:Label id="lblHeightInches" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value % 12}" />
 																	<s:Label fontSize="12" text="inches" />
 																</s:HGroup>
 																
