@@ -168,7 +168,7 @@
 					legend.addElement( container );
 				}
 				
-				subtitle = Constants.DAYS_ABBR[ today.day ] + ', ' + Constants.MONTHS_ABBR[ today.month ] + ' ' + today.date;
+				subtitle = parentApplication.dateFormatterDay.format(new Date());  //Constants.DAYS_ABBR[ today.day ] + ', ' + Constants.MONTHS_ABBR[ today.month ] + ' ' + today.date;
 			}
 		]]>
 	</fx:Script>

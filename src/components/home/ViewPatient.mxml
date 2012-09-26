@@ -537,7 +537,7 @@
 									</mx:columns>
 								</mx:DataGrid>
 							</enhancedtitlewindow:EnhancedTitleWindow>
-							<enhancedtitlewindow:EnhancedTitleWindow id="widgetNutrition" width="305" title="Nutrition" collapsible="true" headerClickable="false" module="modNutrition" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" visible="{widgetNutritionOpen}" includeInLayout="{widgetNutritionOpen}">
+							<enhancedtitlewindow:EnhancedTitleWindow id="widgetNutrition" width="305" title="Nutrition" subtitle="{parentApplication.dateFormatterDay.format(new Date())}" collapsible="true" headerClickable="false" module="modNutrition" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" visible="{widgetNutritionOpen}" includeInLayout="{widgetNutritionOpen}">
 								<enhancedtitlewindow:layout>
 									<s:HorizontalLayout paddingLeft="10" gap="0"/>
 								</enhancedtitlewindow:layout>
