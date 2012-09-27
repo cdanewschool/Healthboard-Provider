@@ -2,11 +2,12 @@
 <enhancedtitlewindow:EnhancedTitleWindow 
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
-	xmlns:mx="library://ns.adobe.com/flex/mx" showCloseButton="false"
-	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
-	width="268" maxHeight="467" collapsible="true" headerClickable="false"
+	xmlns:mx="library://ns.adobe.com/flex/mx" showCloseButton="true"
+	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*"
+	closeButtonSkinClass="spark.skins.spark.TitleWindowCloseButtonSkin"
+	width="268" maxHeight="467" collapsible="true" headerClickable="false" titleBarHeight="30"
 	backgroundAlpha="1" backgroundColor="0x3C3C3B" borderColor="0xF29222" cornerRadius="5" 
-	styleName="teamProfileTitle" 
+	styleName="teamProfileTitle"  
 	controlBarVisible="true" close="onClose(event)" 
 	resize="resize(event)" creationComplete="init()">
 	
@@ -249,7 +250,11 @@
 				{
 					Alert.show("You don't seem to have a camera.");
 				}
-				
+			}
+			
+			private function onTargetUserImageLoadError(event:IOErrorEvent):void
+			{
+				Image(event.currentTarget).source = chat.targetUser.getDefaultProfilePictureURL( 'big' );
 			}
 			
 			private function init():void
@@ -299,7 +304,7 @@
 	<s:Group includeIn="videoChat">
 		
 		<s:BorderContainer borderColor="0xBBBDBF" borderWeight="1" width="240" height="184">
-			<s:Image id="targetUserPic" width="240" height="184" creationComplete="{targetUserPic.source = chat.targetUser.getProfilePictureURL('medium')}" />
+			<s:Image id="targetUserPic" width="240" height="184" creationComplete="{targetUserPic.source = chat.targetUser.getProfilePictureURL('big')}" ioError="onTargetUserImageLoadError(event)" />
 		</s:BorderContainer>
 		
 		<s:BorderContainer borderColor="0xBBBDBF" borderWeight="1" width="78" height="55" right="5" bottom="5" > 
