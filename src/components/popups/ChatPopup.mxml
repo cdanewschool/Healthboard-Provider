@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:TitleWindow 
+<enhancedtitlewindow:EnhancedTitleWindow 
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
-	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	width="268" maxHeight="467"
+	xmlns:mx="library://ns.adobe.com/flex/mx" showCloseButton="false"
+	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
+	width="268" maxHeight="467" collapsible="true" headerClickable="false"
 	backgroundAlpha="1" backgroundColor="0x3C3C3B" borderColor="0xF29222" cornerRadius="5" 
-	skinClass="external.skins.TitleWindowSkin" styleName="teamProfileTitle" 
+	styleName="teamProfileTitle" 
 	controlBarVisible="true" close="onClose(event)" 
 	resize="resize(event)" creationComplete="init()">
 	
@@ -168,7 +169,10 @@
 			
 			private function copyChat( event:MouseEvent ):void
 			{
-				System.setClipboard( chat.log );
+				var log:String = chat.log;
+				log = log.replace( /<\/*font\s*[^>]*>/g, '' );
+					
+				System.setClipboard( log );
 			}
 			
 			private function onUpdate( event:TimerEvent ):void
@@ -203,6 +207,8 @@
 			{
 				chat.endTime = new Date();
 				user.addChat( chat );
+				
+				sourceUserVideo.source = null;
 				
 				PopUpManager.removePopUp(this);
 			}
@@ -276,17 +282,17 @@
 		]]>
 	</fx:Script>
 	
-	<s:states>
+	<enhancedtitlewindow:states>
 		<s:State name="textChat" />
 		<s:State name="voiceChat" />
 		<s:State name="videoChat" />
-	</s:states>
+	</enhancedtitlewindow:states>
 	
-	<s:controlBarContent />
+	<enhancedtitlewindow:controlBarContent />
 	
-	<s:layout>
+	<enhancedtitlewindow:layout>
 		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
-	</s:layout>
+	</enhancedtitlewindow:layout>
 	
 	<s:Image includeIn="voiceChat" source="@Embed('images/chatPhoneReadout.jpg')" />
 	
@@ -337,7 +343,7 @@
 		
 		<s:List id="output" width="240" height="117" dataProvider="{chat.messages}" itemRenderer="components.itemrenderers.ChatMessageRenderer" rollOverColor="0x808080" contentBackgroundColor="0xE6E6E6">
 			<s:layout>
-				<s:VerticalLayout variableRowHeight="true" paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5" gap="0" />
+				<s:VerticalLayout variableRowHeight="true" paddingLeft="0" paddingTop="0" paddingRight="0" paddingBottom="0" gap="0" />
 			</s:layout>
 		</s:List>
 		
@@ -363,4 +369,4 @@
 		
 	</s:HGroup>
 	
-</s:TitleWindow>
+</enhancedtitlewindow:EnhancedTitleWindow>

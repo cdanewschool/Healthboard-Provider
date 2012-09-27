@@ -100,7 +100,7 @@
 			<s:HGroup gap="22" paddingTop="11" paddingLeft="32" minHeight="591">
 				<s:VGroup gap="17">
 					<!-- see http://blog.9mmedia.com/?p=535 -->
-					<enhancedtitlewindow:EnhancedTitleWindow id="widgetPatientProfile" width="305" title="Patient Profile" collapsible="true" headerClickable="false" module="modPatientProfile" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" visible="{widgetPatientProfileOpen}" includeInLayout="{widgetPatientProfileOpen}">
+					<enhancedtitlewindow:EnhancedTitleWindow id="widgetPatientProfile" width="305" title="Patient Profile" collapsible="true" headerClickable="false" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" visible="{widgetPatientProfileOpen}" includeInLayout="{widgetPatientProfileOpen}">
 						<enhancedtitlewindow:layout>
 							<s:VerticalLayout paddingLeft="10" paddingTop="12" paddingRight="10" paddingBottom="10"/>
 						</enhancedtitlewindow:layout>
@@ -309,7 +309,7 @@
 					</enhancedtitlewindow:EnhancedTitleWindow>
 				</s:VGroup>
 				<s:VGroup gap="17">
-					<enhancedtitlewindow:EnhancedTitleWindow id="widgetHealthFocus" width="633" title="Health Focus (15)" collapsible="true" headerClickable="false" module="modHealthFocus" showCloseButton="false" titleBarHeight="30" color="0xFFFFFF">
+					<enhancedtitlewindow:EnhancedTitleWindow id="widgetHealthFocus" width="633" title="Health Focus (15)" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" color="0xFFFFFF">
 						<mx:DataGrid dataProvider="{healthFocusData}" fontFamily="myMyriadNoCFF"
 									 width="100%" 
 									 color="0xFFFFFF" verticalAlign="middle"

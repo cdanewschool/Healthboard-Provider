@@ -45,8 +45,6 @@
 			
 			private function init():void
 			{
-			
-				
 				var time:Date = ChatMessage(data).time;
 				var attachments:ArrayCollection = ChatMessage(data).attachments;
 				
@@ -84,6 +82,6 @@
 		]]>
 	</fx:Script>
 	
-	<s:RichEditableText id="message" width="100%" editable="false" selectable="false" styleName="black12" />
+	<s:RichEditableText id="message" width="100%" editable="false" selectable="false" styleName="black12" paddingLeft="3" paddingTop="3" paddingRight="3" paddingBottom="3" />
 	
 </s:ItemRenderer>
