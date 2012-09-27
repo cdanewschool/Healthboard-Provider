@@ -15,6 +15,7 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import events.ApplicationEvent;
 			import events.EnhancedTitleWindowEvent;
 			
 			import models.ProvidersModel;
@@ -24,6 +25,8 @@
 			import mx.events.ListEvent;
 			
 			import spark.events.IndexChangeEvent;
+			
+			private const SEARCH_PLACEHOLDER:String = "Search";
 			
 			[Bindable] public var model:ProvidersModel;
 			
@@ -46,8 +49,18 @@
 				providerTeamSelect.selectedIndex = 0;
 			}
 			
+			private function onHeaderClick(event:EnhancedTitleWindowEvent):void
+			{
+				providerSearch.text = SEARCH_PLACEHOLDER;
+				providerTeamSelect.selectedIndex = 0;
+				
+				model.reset();
+			}
+			
 			private function init():void
 			{
+				addEventListener( EnhancedTitleWindowEvent.HEADER_CLICKED, onHeaderClick );
+				
 				BindingUtils.bindSetter( onSetTeam, model, 'providerTeams' );
 			}
 			
@@ -64,7 +77,7 @@
 		<s:DropDownList id="providerTeamSelect" dataProvider="{model.providerTeams}" labelField="label" width="90" height="24" change="model.selectedProviderTeam = providerTeamSelect.selectedItem.value;" styleName="dropDownListDark" />
 		<!--<s:DropDownList id="providerSort" dataProvider="{providerSortFields}" width="69" selectedIndex="0" change="sortProviders(event)" />-->
 		<s:HGroup gap="0" verticalAlign="middle" >
-			<s:TextInput id="providerSearch" text="Search" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="125" height="24" click="{if(providerSearch.text == 'Search') providerSearch.text=''}" change="{model.searchText = providerSearch.text}" />
+			<s:TextInput id="providerSearch" text="{SEARCH_PLACEHOLDER}" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="125" height="24" click="{if(providerSearch.text == SEARCH_PLACEHOLDER) providerSearch.text=''}" change="{model.searchText = providerSearch.text}" />
 			<s:Button styleName="searchButtonIcon" width="24" height="24" />
 		</s:HGroup>
 	</s:HGroup>

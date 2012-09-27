@@ -4,6 +4,10 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" height="40" width="100%">
 	
+	<fx:Metadata>
+		[Event(name="navigate", type="events.ApplicationEvent")]
+	</fx:Metadata>
+	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -26,6 +30,8 @@
 			
 			private function onHeaderClick(event:MouseEvent):void
 			{
+				search.text = searchPlaceholder;
+				
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
 				evt.data = 0;
 				dispatchEvent( evt );

@@ -333,7 +333,7 @@
 										
 										<widgets:ChatWidget id="widgetChat" width="305" title="Chat" collapsible="true" headerClickable="false" module="modChat" showCloseButton="false" titleBarHeight="30" model="{chatModel}" user="{user}" />
 										
-										<widgets:TeamWidget id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" model="{providersModel}" module="modTeam" collapsed="onTeamWidgetCollapse(event)" />
+										<widgets:TeamWidget id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" model="{providersModel}" module="modTeam" />
 									
 									</s:VGroup>
 									<s:VGroup gap="17">

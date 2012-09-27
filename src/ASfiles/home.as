@@ -206,11 +206,6 @@ private function providersResultHandler(event:ResultEvent):void {
 private var autocompleteCallback:Function;
 private var autocomplete:AutoComplete;
 
-public function onTeamWidgetCollapse(event:EnhancedTitleWindowEvent ):void
-{
-	providersModel.reset();
-}
-
 private function onShowAutoComplete( event:AutoCompleteEvent ):void
 {
 	if( autocomplete 

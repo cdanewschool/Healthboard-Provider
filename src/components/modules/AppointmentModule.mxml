@@ -503,6 +503,9 @@
 			
 			private function selectMode(event:IndexChangeEvent):void
 			{
+				selectedAppointment = null;
+				selectedProvider = null;
+				
 				currentState = ButtonBar(event.currentTarget).selectedItem.value;
 			}
 			
@@ -1197,7 +1200,7 @@
 								
 								<appointments:ProviderScheduleList 
 									id="providerScheduleList" 
-									visible="{providerScheduleList.providers!=null}" 
+									visible="{providerScheduleList.providers!=null &amp;&amp; selectedAppointment!=null}" includeInLayout="{providerScheduleList.visible}"
 									date="{selectedDate}" 
 									paddingTop="15" paddingLeft="10" 
 									showOverview="{currentState==MODE_MONTH}"

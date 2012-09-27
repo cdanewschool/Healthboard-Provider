@@ -104,16 +104,14 @@
 				tabsTeamMembers.selectedIndex = viewStackTeamMembers.selectedIndex;
 			}
 			
-			private function onHeaderClick(event:MouseEvent):void
-			{
-				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE );
-				evt.data = 0;
-				dispatchEvent( evt );
-			}
-			
 			private function onHeaderSearch():void
 			{
 				model.searchText = header.searchText;
+			}
+			
+			private function onHeaderClick(event:ApplicationEvent):void
+			{
+				model.reset();
 			}
 			
 			protected function onTeamClick(event:ListEvent):void 
@@ -137,7 +135,7 @@
 		<s:VerticalLayout />
 	</s:layout>
 	
-	<components:ModuleHeader id="header" title="Team Profile" icon="@Embed('images/patientHome.png')" showSearch="true" searchPlaceholder="Search Patients" searchFunction="{onHeaderSearch}" />
+	<components:ModuleHeader id="header" title="Team Profile" icon="@Embed('images/patientHome.png')" showSearch="true" searchPlaceholder="Search Patients" searchFunction="{onHeaderSearch}" navigate="onHeaderClick(event)" />
 	
 	<s:HGroup width="100%" paddingTop="30">
 		
