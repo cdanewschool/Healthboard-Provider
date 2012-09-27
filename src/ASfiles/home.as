@@ -273,3 +273,8 @@ private function toggleAvailability(event:MouseEvent):void
 	
 	button.setStyle('color',user.available == UserModel.STATE_AVAILABLE ? 0xCCCC33 : 0xB3B3B3 );
 }
+
+public function falsifyWidget(widget:String):void 
+{
+}
+
