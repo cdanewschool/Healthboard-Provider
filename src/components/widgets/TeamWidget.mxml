@@ -55,7 +55,7 @@
 	</fx:Script>
 	
 	<enhancedtitlewindow:layout>
-		<s:VerticalLayout paddingLeft="0" paddingTop="10" paddingRight="10" paddingBottom="20"/>
+		<s:VerticalLayout paddingLeft="0" paddingTop="10" paddingRight="10" paddingBottom="0"/>
 	</enhancedtitlewindow:layout>
 	
 	<s:Spacer height="-5" />
@@ -77,13 +77,13 @@
 	<mx:DataGrid 
 		id="providerLists"
 		buttonMode="false" selectable="true" 
-		width="300" height="300" fontFamily="myMyriadNoCFF"
+		width="300" height="320" fontFamily="myMyriadNoCFF"
 		color="0xFFFFFF" verticalAlign="middle" 
 		dataProvider="{model.providers}"
 		headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeaderAlternative" headerHeight="30" paddingTop="6"
 		borderVisible="false" horizontalGridLines="true" horizontalGridLineColor="0x444442" verticalGridLines="true" 
 		alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-		horizontalScrollPolicy="off" verticalScrollPolicy="off" rowHeight="22" horizontalSeparatorSkin="{null}" 
+		horizontalScrollPolicy="off" verticalScrollPolicy="on" rowHeight="22" horizontalSeparatorSkin="{null}" 
 		itemRollOver="onTeamRollOver(event)" itemRollOut="teamRollOverRowIndex=-1">
 		<mx:columns>
 			<mx:DataGridColumn dataField="team" width="36" headerText="Team" />
@@ -100,7 +100,7 @@
 			<mx:DataGridColumn headerText="Name">
 				<mx:itemRenderer>
 					<fx:Component>
-						<mx:HBox horizontalScrollPolicy="off" width="134">
+						<mx:HBox horizontalScrollPolicy="off" width="130">
 							<fx:Script>
 								<![CDATA[
 									import mx.collections.ListCollectionView;
