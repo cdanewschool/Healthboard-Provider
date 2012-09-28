@@ -265,7 +265,7 @@
 								
 								<s:VGroup paddingTop="40">
 									
-									<s:Label styleName="greenBoldText" text="{model.selectedProviderTeam>-1?'Team ' + (model.selectedProviderTeam+1):'All Teams'}" paddingLeft="10" />
+									<s:Label styleName="greenBoldText" text="{model.selectedProviderTeam>-1?'Team ' + (model.selectedProviderTeam):'All Teams'}" paddingLeft="10" />
 									
 									<mx:ViewStack selectedIndex="{model.selectedProviderTeam==-1?0:1}" paddingBottom="20" resizeToContent="true">
 										

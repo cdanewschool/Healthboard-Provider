@@ -26,7 +26,8 @@ package models
 		
 		public function reset():void
 		{
-			selectedProviderTeam = 0;
+			selectedProviderTeam = -1;
+			
 			searchText = "";
 			sortField = null;
 		}
