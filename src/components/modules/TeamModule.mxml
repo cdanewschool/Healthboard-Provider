@@ -15,6 +15,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import ASfiles.ProviderConstants;
+			
 			import components.popups.UserContextMenu;
 			import components.provider.ProviderProfile;
 			import components.provider.ViewProvider;
@@ -70,7 +72,10 @@
 				}
 				else if( event.type == ProfileEvent.SEND_MESSAGE )
 				{
-					
+					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+					evt.data = ProviderConstants.MODULE_MESSAGES;
+					evt.users = [ event.user ];
+					dispatchEvent( evt );
 				}
 				else if( event.type == ProfileEvent.START_CHAT )
 				{
@@ -169,7 +174,12 @@
 			
 			protected function onTeamClick(event:ListEvent):void 
 			{
-				showTeamMember( ProviderModel(event.itemRenderer.data) );
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				evt.data = ProviderConstants.MODULE_MESSAGES;
+				evt.users = [ DataGrid(event.currentTarget).selectedItem ];
+				dispatchEvent( evt );
+				
+				//showTeamMember( ProviderModel(event.itemRenderer.data) );
 			}
 			
 			protected function onTeamSelect(event:ProviderEvent):void 

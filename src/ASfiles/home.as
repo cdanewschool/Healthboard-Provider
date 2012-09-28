@@ -275,6 +275,13 @@ private function onNavigate(event:ApplicationEvent):void
 			{
 				this.viewStackProviderModules.selectedChild = this.viewStackProviderModules.getChildByName( module ) as INavigatorContent;
 				
+				if( event.data == ProviderConstants.MODULE_MESSAGES )
+				{
+					createNewMessage( 1 );
+					
+					viewStackMessages.selectedIndex = viewStackMessages.length - 2;
+				}
+				
 				if( this.viewStackMain.selectedIndex != 0 )
 				{
 					this.viewStackMain.selectedIndex = 0;

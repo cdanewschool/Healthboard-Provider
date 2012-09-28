@@ -6,5 +6,8 @@ package ASfiles
 		
 		/*	corresponds to index of desired user in providers.xml	*/
 		public static const USER_ID:int = 0;
+		
+		public static const MODULE_MESSAGES:String = "modMessages";
+		
 	}
 }

@@ -15,6 +15,8 @@
 		<![CDATA[
 			import ASclasses.Constants;
 			
+			import ASfiles.ProviderConstants;
+			
 			import components.appointments.RequestItem;
 			import components.itemrenderers.DailyCustomChartLabel;
 			import components.itemrenderers.WeeklyCustomChartLabel;
@@ -27,6 +29,7 @@
 			import controllers.ApplicationController;
 			import controllers.AppointmentsController;
 			
+			import events.ApplicationEvent;
 			import events.AppointmentEvent;
 			import events.AutoCompleteEvent;
 			import events.MessageEvent;
@@ -37,9 +40,11 @@
 			import models.ProviderModel;
 			import models.UserModel;
 			
+			import mx.charts.AxisLabel;
 			import mx.charts.CategoryAxis;
 			import mx.charts.ChartItem;
 			import mx.charts.chartClasses.AxisBase;
+			import mx.charts.chartClasses.ChartLabel;
 			import mx.charts.chartClasses.IAxis;
 			import mx.charts.chartClasses.Series;
 			import mx.charts.events.ChartItemEvent;
@@ -479,7 +484,35 @@
 			
 			private function onMessageAllForProvider( event:MessageEvent ):void
 			{
-				//	send message to all patients for this provider?
+				var provider:ProviderModel;
+				
+				for(var i:int=0;i<controller.model.selectedProviders.length;i++)
+				{
+					if( ProviderModel(controller.model.selectedProviders[i]).lastName == ChartLabel(event.target).data.value )
+					{
+						provider = ProviderModel(controller.model.selectedProviders[i]);
+						
+						break;
+					}
+				}
+				
+				if( !provider ) return;
+				
+				var patients:Array = [];
+				
+				var appointments:ArrayCollection = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER, viewRangeStartDate );
+				for each(var appointment:Appointment in appointments)
+				{
+					if( patients.indexOf( appointment.patient ) == -1 )
+					{
+						patients.push( appointment.patient );
+					}
+				}
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				evt.data = ProviderConstants.MODULE_MESSAGES;
+				evt.users = patients;
+				dispatchEvent( evt );
 			}
 			
 			private function onCancelAllForProvider( event:AppointmentEvent ):void

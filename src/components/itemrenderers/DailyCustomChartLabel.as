@@ -135,6 +135,8 @@ package components.itemrenderers
 			{
 				dispatchEvent( new AppointmentEvent( AppointmentEvent.CANCEL_ALL, true ) );
 			}
+			
+			anchor.displayPopUp = false;
 		}
 		
 		private function onLabelClick( event:MouseEvent ):void
