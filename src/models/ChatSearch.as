@@ -1,10 +1,19 @@
 package models
 {
+	import events.ChatEvent;
+	
+	import flash.events.EventDispatcher;
+	
 	import mx.collections.ArrayCollection;
 
 	[Bindable] 
-	public class ChatSearch
+	public class ChatSearch extends EventDispatcher
 	{
+		public static const STATE_DEFAULT:String = "default";
+		public static const STATE_CONNECTED:String = "connected";
+		public static const STATE_CONNECTING:String = "connecting";
+		public static const STATE_DECLINED:String = "declined";
+		
 		public static const SEARCH_PLACEHOLDER:String = "Search name";
 		
 		public var chatGroups:ArrayCollection = new ArrayCollection( ["All","Patients","Providers"] );
@@ -15,6 +24,13 @@ package models
 		private var _searchText:String;
 		
 		public var dataProvider:ArrayCollection;
+		
+		private var _state:String;
+		
+		public var user:UserModel;
+		public var targetUser:UserModel;
+		
+		public var mode:String;
 		
 		public function ChatSearch()
 		{
@@ -103,6 +119,27 @@ package models
 		{
 			_patients = value;
 			updateDataProvider();
+		}
+
+		public function get state():String
+		{
+			return _state;
+		}
+
+		public function set state(value:String):void
+		{
+			var changed:Boolean = value != _state;
+			_state = value;
+			
+			if( changed )
+			{
+				dispatchEvent( new ChatEvent( ChatEvent.STATE_CHANGE ) );
+				
+				if( state == STATE_DEFAULT )
+				{
+					dispatchEvent( new ChatEvent( ChatEvent.CANCEL ) );
+				}
+			}
 		}
 
 

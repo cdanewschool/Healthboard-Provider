@@ -5,7 +5,6 @@
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
 	width="305" 
-	stateChangeComplete="onStateChange(event)"
 	creationComplete="init()">
 	
 	<enhancedtitlewindow:states>
@@ -26,60 +25,36 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import components.AutoComplete;
 			import components.popups.ChatHistoryPopup;
-			import components.popups.ChatPopup;
-			import components.popups.ChatRequestDeniedPopup;
-			import components.popups.VerifyCredentialsPopup;
 			import components.popups.ViewAttachmentPopup;
+			
+			import controllers.ChatController;
 			
 			import events.ApplicationEvent;
 			import events.AuthenticationEvent;
 			import events.AutoCompleteEvent;
+			import events.ChatEvent;
 			
 			import models.Chat;
 			import models.ChatSearch;
 			import models.FileUpload;
 			import models.UserModel;
 			
-			import mx.collections.ArrayCollection;
-			import mx.core.Application;
 			import mx.core.IFlexDisplayObject;
 			import mx.events.CloseEvent;
-			import mx.events.FlexEvent;
-			import mx.events.StateChangeEvent;
 			import mx.managers.PopUpManager;
 			
 			import spark.components.List;
-			import spark.components.TitleWindow;
 			import spark.events.IndexChangeEvent;
-			import spark.events.ListEvent;
-			import spark.events.PopUpEvent;
 			import spark.events.TextOperationEvent;
 			
-			import utils.DateUtil;
-			
-			[Bindable] public var model:ChatSearch;
+			[Bindable] private var model:ChatSearch;
 			
 			[Bindable] public var user:UserModel;
 			[Bindable] private var targetUser:UserModel;
 			
-			private var selectedChatMode:String;
-			
 			private var chatPopup:IFlexDisplayObject;
 			private var popup:IFlexDisplayObject;
-			
-			private var connectionTimer:Timer;
-			
-			private function onStateChange(event:FlexEvent):void
-			{
-				if( currentState == "connecting" )
-				{
-					connectionTimer.reset();
-					connectionTimer.delay = DateUtil.SECOND * Math.round( Math.random() * 5 );
-					connectionTimer.start();
-				}
-			}
 			
 			private function onGroupSelect(event:IndexChangeEvent):void
 			{
@@ -92,17 +67,9 @@
 			{
 				if( !targetUser ) return;
 				
-				selectedChatMode = ButtonBar(event.currentTarget).selectedItem.data;
+				model.mode = ButtonBar(event.currentTarget).selectedItem.data;
 				
-				if( popup) PopUpManager.removePopUp( popup );
-				
-				popup = new VerifyCredentialsPopup();
-				VerifyCredentialsPopup(popup).user = user;
-				popup.addEventListener( Event.CANCEL, onPopupCancel );
-				popup.addEventListener( AuthenticationEvent.SUCCESS, onAuthenticationSuccess );
-				
-				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
-				PopUpManager.centerPopUp( popup );
+				ChatController.getInstance().chat( user, targetUser );
 			}
 			
 			private function viewHistory(event:MouseEvent):void
@@ -113,7 +80,6 @@
 				popup = new ChatHistoryPopup();
 				ChatHistoryPopup(popup).user = user;
 				ChatHistoryPopup(popup).chat = model;
-				popup.addEventListener( AuthenticationEvent.SUCCESS, onAuthenticationSuccess );
 				
 				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
 				PopUpManager.centerPopUp( popup );
@@ -136,84 +102,6 @@
 				dispatchEvent( evt );
 			}
 			
-			private function onAuthenticationSuccess(event:AuthenticationEvent):void
-			{
-				currentState = "connecting";
-			}
-			
-			private function onConnectionTimerComplete(event:TimerEvent):void
-			{
-				if( !targetUser ) return;
-				
-				if( targetUser.available == UserModel.STATE_AVAILABLE )
-				{
-					currentState = "connected";
-					
-					var chat:Chat = new Chat( user, targetUser, new Date() );
-					chat.mode = selectedChatMode;
-					
-					chatPopup = new ChatPopup();
-					ChatPopup(chatPopup).chat = chat;
-					ChatPopup(chatPopup).user = user;
-					chatPopup.addEventListener( ApplicationEvent.VIEW_FILE, onViewAttachment );
-					chatPopup.addEventListener( CloseEvent.CLOSE, onChatClose );
-					
-					PopUpManager.addPopUp( chatPopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), false );
-					
-					//	log chat?
-				}
-				else
-				{
-					//	show "communication request denied" popup
-					if( popup) PopUpManager.removePopUp( popup );
-					
-					popup = new ChatRequestDeniedPopup();
-					ChatRequestDeniedPopup(popup).user = targetUser;
-					popup.addEventListener( CloseEvent.CLOSE, onPopupClose );
-					
-					PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
-					PopUpManager.centerPopUp( popup );
-				}
-			}
-			
-			private function onViewAttachment( event:ApplicationEvent ):void
-			{
-				if( event.data is FileUpload )
-				{
-					var attachment:FileUpload = FileUpload( event.data );
-					
-					if( popup) PopUpManager.removePopUp( popup );
-					
-					popup = new ViewAttachmentPopup();
-					ViewAttachmentPopup(popup).file = attachment;
-					popup.addEventListener( CloseEvent.CLOSE, onPopupClose );
-					
-					PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
-				}
-			}
-			
-			private function onChatClose( event:CloseEvent ):void
-			{
-				reset();
-			}
-			
-			private function onPopupCancel( event:Event ):void
-			{
-				reset();
-			}
-			
-			private function onPopupClose( event:CloseEvent ):void
-			{
-				reset();
-			}
-			
-			private function reset():void
-			{
-				currentState = "default";
-				chatType.selectedItem = null;
-				search.text = "";
-			}
-			
 			protected function selectResult(event:IndexChangeEvent):void
 			{
 				var user:UserModel = List(event.currentTarget).selectedItem;
@@ -232,12 +120,26 @@
 				return item.firstName + ' ' + item.lastName;
 			}
 			
+			private function onChatStateChange(event:ChatEvent):void
+			{
+				currentState = ChatSearch(event.currentTarget).state;
+			}
+			
+			private function onChatCancel(event:ChatEvent):void
+			{
+				chatType.selectedItem = null;
+				search.text = "";
+			}
+			
 			private function init():void
 			{
-				search.text = ChatSearch.SEARCH_PLACEHOLDER;
+				model = ChatController.getInstance().model;
 				
-				connectionTimer = new Timer(1000,1);
-				connectionTimer.addEventListener(TimerEvent.TIMER_COMPLETE,onConnectionTimerComplete);
+				search.text = ChatSearch.SEARCH_PLACEHOLDER;
+				filterGroup.selectedIndex = 0;
+				
+				ChatController.getInstance().model.addEventListener( ChatEvent.STATE_CHANGE, onChatStateChange );
+				ChatController.getInstance().model.addEventListener( ChatEvent.CANCEL, onChatCancel );
 			}
 			
 		]]>
@@ -251,7 +153,7 @@
 		
 		<s:HGroup gap="10">
 			
-			<s:DropDownList dataProvider="{model.chatGroups}" width="75" change="onGroupSelect(event)" labelField="firstName" selectedIndex="0" styleName="dropDownListDark" />
+			<s:DropDownList id="filterGroup" dataProvider="{model.chatGroups}" width="75" change="onGroupSelect(event)" labelField="firstName" styleName="dropDownListDark" />
 			
 			<s:HGroup id="searchBox" gap="-1">
 				<s:TextInput id="search" includeIn="default" styleName="{search.text == ChatSearch.SEARCH_PLACEHOLDER ? 'searchPlaceholder' : 'whiteText11'}" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="174" height="24" focusIn="showResults()" change="onSearchChange(event)" click="{if(search.text == ChatSearch.SEARCH_PLACEHOLDER) search.text=''}" />

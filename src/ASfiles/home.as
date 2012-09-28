@@ -4,6 +4,7 @@ import components.AutoComplete;
 import components.home.ViewPatient;
 
 import controllers.ApplicationController;
+import controllers.ChatController;
 
 import events.ApplicationEvent;
 import events.AutoCompleteEvent;
@@ -112,7 +113,7 @@ private function patientsResultHandler(event:ResultEvent):void {
 	
 	patientsData = patients;
 	
-	controller.patients = chatModel.patients = patientsData;
+	controller.patients = ChatController.getInstance().model.patients = patientsData;
 
 	initChatHistory();
 }
@@ -172,7 +173,6 @@ private function filterPatientsSearch(item:Object):Boolean {
 }
 
 [Bindable] public var providersModel:ProvidersModel = new ProvidersModel();
-[Bindable] public var chatModel:ChatSearch = new ChatSearch();
 [Bindable] public var user:UserModel;	//	logged-in user, i.e. Dr. Berg
 
 private function providersResultHandler(event:ResultEvent):void {
@@ -198,7 +198,7 @@ private function providersResultHandler(event:ResultEvent):void {
 	providersModel.providers = providers;
 	providersModel.providerTeams = new ArrayCollection( teams );
 	
-	controller.providers = chatModel.providers = providers;
+	controller.providers = ChatController.getInstance().model.providers = providers;
 	
 	initChatHistory();
 }
@@ -245,7 +245,7 @@ private function onAutocompleteSelect( event:IndexChangeEvent ):void
 
 private function initChatHistory():void
 {
-	if( !chatModel.providers || !chatModel.patients ) return;
+	if( !ChatController.getInstance().model.providers || !ChatController.getInstance().model.patients ) return;
 	
 	var user:UserModel = controller.getUser( ProviderConstants.USER_ID, UserModel.TYPE_PROVIDER );
 	
