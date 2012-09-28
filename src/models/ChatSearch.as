@@ -14,6 +14,19 @@ package models
 		public static const STATE_CONNECTING:String = "connecting";
 		public static const STATE_DECLINED:String = "declined";
 		
+		public static const MODE_TEXT:String = "text";
+		public static const MODE_VOICE:String = "voice";
+		public static const MODE_VIDEO:String = "video";
+		
+		public static const MODES:ArrayCollection = new ArrayCollection
+			( 
+				[
+					{label:"Text",icon:"images/button_icons/text.png",data:MODE_TEXT},
+					{label:"Voice",icon:"images/button_icons/voice.png",data:MODE_VOICE},
+					{label:"Video",icon:"images/button_icons/video.png",data:MODE_VIDEO}
+				] 
+			);
+		
 		public static const SEARCH_PLACEHOLDER:String = "Search name";
 		
 		public var chatGroups:ArrayCollection = new ArrayCollection( ["All","Patients","Providers"] );
@@ -34,7 +47,9 @@ package models
 		
 		public function ChatSearch()
 		{
-			super();	
+			super();
+			
+			mode = MODE_TEXT;
 		}
 
 		public function getUser( id:int, type:String = null ):UserModel
@@ -75,6 +90,18 @@ package models
 			if( valid && search != "" && search != SEARCH_PLACEHOLDER ) valid = item.firstName.toLowerCase().indexOf( search ) > -1 || item.lastName.toLowerCase().indexOf( search ) > -1;
 			
 			return valid;
+		}
+		
+		public static function getModeIndex( mode:String ):int
+		{
+			for(var i:int=0;i<MODES.length;i++)
+			{
+				if( MODES[i].data == mode )
+				{
+					return i;
+				}
+			}
+			return -1;
 		}
 		
 		public function get selectedChatGroup():int

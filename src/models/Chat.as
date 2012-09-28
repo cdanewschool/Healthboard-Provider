@@ -9,19 +9,6 @@ package models
 	[Bindable]
 	public class Chat
 	{
-		public static const MODE_TEXT:String = "text";
-		public static const MODE_VOICE:String = "voice";
-		public static const MODE_VIDEO:String = "video";
-		
-		public static const MODES:ArrayCollection = new ArrayCollection
-			( 
-				[
-					{label:"Text",icon:"images/button_icons/text.png",data:MODE_TEXT},
-					{label:"Voice",icon:"images/button_icons/voice.png",data:MODE_VOICE},
-					{label:"Video",icon:"images/button_icons/video.png",data:MODE_VIDEO}
-				] 
-			);
-		
 		public var startTime:Date;
 		public var endTime:Date;
 		
@@ -29,8 +16,6 @@ package models
 		public var targetUser:UserModel;
 		
 		public var messages:ArrayCollection;
-		
-		public var mode:String = MODE_TEXT;
 		
 		public function Chat( sourceUser:UserModel, targetUser:UserModel = null, startTime:Date = null, endTime:Date = null )
 		{
@@ -70,18 +55,6 @@ package models
 		public function get label():String
 		{
 			return "" + (startTime.hours + ':' + startTime.minutes) + '-' + (endTime.hours + ':' + endTime.minutes) + ', ' + (Constants.MONTHS[endTime.month] + ' ' + endTime.date + ', ' + endTime.fullYear ) + ' - ' + targetUser.fullName;
-		}
-		
-		public static function getModeIndex( mode:String ):int
-		{
-			for(var i:int=0;i<MODES.length;i++)
-			{
-				if( MODES[i].data == mode )
-				{
-					return i;
-				}
-			}
-			return -1;
 		}
 	}
 }

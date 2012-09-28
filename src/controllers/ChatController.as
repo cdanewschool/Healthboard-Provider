@@ -76,7 +76,6 @@ package controllers
 				model.state = ChatSearch.STATE_CONNECTED;
 				
 				var chat:Chat = new Chat( model.user, model.targetUser, new Date() );
-				chat.mode = model.mode;
 				
 				popup = new ChatPopup();
 				ChatPopup(popup).chat = chat;
