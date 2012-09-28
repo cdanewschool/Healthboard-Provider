@@ -48,6 +48,7 @@ private function init():void
 	
 	this.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
 	this.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
+	this.addEventListener( ApplicationEvent.NAVIGATE, onNavigate );
 }
 
 [Bindable] public var fullname:String;
@@ -122,7 +123,7 @@ private function patientsResultHandler(event:ResultEvent):void {
 
 public var arrOpenPatients:Array = new Array();
 protected function dgPatients_itemClickHandler(event:ListEvent):void {
-	var myData:Object = event.itemRenderer.data;
+	var myData:PatientModel = PatientModel( event.itemRenderer.data );
 	var isPatientAlreadyOpen:Boolean = false;
 	for(var i:uint = 0; i < arrOpenPatients.length; i++) {
 		if(arrOpenPatients[i] == myData) {
@@ -258,7 +259,7 @@ private function initChatHistory():void
 	appointmentsXMLdata.send();
 }
 
-private function navigate(event:ApplicationEvent):void
+private function onNavigate(event:ApplicationEvent):void
 {
 	if( event.data is int )
 	{
@@ -271,7 +272,14 @@ private function navigate(event:ApplicationEvent):void
 			var module:String = event.data.toString();
 			
 			if( this.viewStackProviderModules.getChildByName( module ) ) 
+			{
 				this.viewStackProviderModules.selectedChild = this.viewStackProviderModules.getChildByName( module ) as INavigatorContent;
+				
+				if( this.viewStackMain.selectedIndex != 0 )
+				{
+					this.viewStackMain.selectedIndex = 0;
+				}
+			}
 		}
 	}
 }

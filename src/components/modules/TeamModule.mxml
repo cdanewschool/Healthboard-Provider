@@ -101,7 +101,6 @@
 					{
 						var profile:ProviderProfile = new ProviderProfile();
 						profile.title = item.role + " Profile";
-						profile.toolTip = "nothing";
 						profile.provider = item;
 						profile.setStyle('dropShadowVisible',false);
 						profile.addEventListener( ProviderEvent.SELECT, onTeamSelect );
@@ -188,8 +187,6 @@
 				userOptions.y = stage.mouseY;
 				
 				PopUpManager.addPopUp( userOptions, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
-				
-				addEventListener( MouseEvent.CLICK, onClick );
 			}
 			
 			private function onClick( event:MouseEvent ):void
@@ -209,7 +206,7 @@
 			
 			private function init():void
 			{
-				
+				addEventListener( MouseEvent.CLICK, onClick );
 			}
 			
 		]]>

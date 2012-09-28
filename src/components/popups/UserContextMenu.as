@@ -91,16 +91,16 @@ package components.popups
 			
 			row = new HGroup();
 			row.gap = 1;
+			row..setStyle('paddingLeft',3);
 			row.verticalAlign = "middle";
 			rows.addElement( row );
 			
 			icon = new Image();
 			icon.source = new profileIcon();
-			icon.setStyle('paddingLeft',10);
 			row.addElement( icon );
 			
 			button = new LinkButton();
-			button.label = "View Profile";
+			button.label = "View profile";
 			button.styleName = "linkBtnYellow";
 			button.setStyle("fontSize",11);
 			button.addEventListener(MouseEvent.CLICK,onViewProfileClick);

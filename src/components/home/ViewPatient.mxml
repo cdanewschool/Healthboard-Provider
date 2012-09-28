@@ -4,20 +4,97 @@
 					xmlns:mx="library://ns.adobe.com/flex/mx"
 					xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*"
 					xmlns:radarchart="fr.kapit.radarchart.*"
-					label="{patientName}" creationComplete="{init(); healthFocusXMLdata.send()}">
+					label="{patient.fullName}" creationComplete="{init(); healthFocusXMLdata.send()}">
 	<s:layout>
 		<s:VerticalLayout paddingTop="15"/>
 	</s:layout>
 	<fx:Script>
 		<![CDATA[
+			import components.popups.UserContextMenu;
+			
+			import controllers.ApplicationController;
+			import controllers.AppointmentsController;
+			import controllers.ChatController;
+			
+			import events.ApplicationEvent;
+			import events.ProfileEvent;
+			
+			import models.PatientModel;
+			
 			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
 			import mx.rpc.events.ResultEvent;
 			
 			import spark.filters.DropShadowFilter;
-			[Bindable] public var patient:Object;
-			[Bindable] private var patientName:String;
-			private function init():void {
-				patientName = patient.firstName + " " + patient.lastName;
+			
+			[Bindable] public var patient:PatientModel;
+			
+			private var userOptions:UserContextMenu;
+			
+			private function init():void 
+			{
+				addEventListener( MouseEvent.CLICK, onClick );
+			}
+			
+			private function onClick( event:MouseEvent ):void
+			{
+				if( userOptions 
+					&& userOptions.parent 
+					&& !userOptions.hitTestPoint( event.stageX, event.stageY ) )
+				{
+					closeContextMenu();
+				}
+			}
+			
+			protected function onPatientNameClick(event:MouseEvent):void 
+			{
+				if( userOptions ) closeContextMenu();
+				
+				userOptions = new UserContextMenu();
+				userOptions.user = patient;
+				userOptions.addEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
+				userOptions.addEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
+				userOptions.addEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );
+				userOptions.addEventListener( ProfileEvent.START_CHAT, onUserAction );
+				
+				userOptions.x = stage.mouseX;
+				userOptions.y = stage.mouseY;
+				
+				PopUpManager.addPopUp( userOptions, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
+			}
+			
+			private function closeContextMenu():void
+			{
+				userOptions.removeEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
+				userOptions.removeEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
+				userOptions.removeEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );
+				userOptions.removeEventListener( ProfileEvent.START_CHAT, onUserAction );
+				
+				PopUpManager.removePopUp( userOptions );
+			}
+			
+			private function onUserAction( event:ProfileEvent ):void
+			{
+				if( event.type == ProfileEvent.VIEW_PROFILE )
+				{
+					//	implement
+				}
+				else if( event.type == ProfileEvent.VIEW_APPOINTMENTS )
+				{
+					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+					evt.data = "modAppointments";
+					dispatchEvent( evt );
+				}
+				else if( event.type == ProfileEvent.SEND_MESSAGE )
+				{
+					
+				}
+				else if( event.type == ProfileEvent.START_CHAT )
+				{
+					ChatController.getInstance().chat( ApplicationController.getInstance().user, event.user );
+				}
+				
+				closeContextMenu();
 			}
 			
 			[Bindable] private var widgetLibraryOpen:Boolean = false;
@@ -87,9 +164,9 @@
 		
 		<s:Image source="@Embed('images/patientHome.png')" buttonMode="true" />
 		<s:HGroup color="0xFFFFFF" verticalAlign="middle" paddingLeft="-7" gap="-4" fontSize="22">
-			<s:Label id="lblBreadcrumbPatient" text="{patientName}" fontWeight="bold" paddingTop="2" paddingLeft="10" />
+			<s:Label id="lblBreadcrumbPatient" text="{patient.fullName}" fontWeight="bold" paddingTop="2" paddingLeft="10" />
 			<mx:LinkButton id="btnBreadcrumbPatient" visible="false" includeInLayout="false"
-						   label="{patientName}"
+						   label="{patient.fullName}"
 						   textRollOverColor="0xFFFFFF" textSelectedColor="0xFFFFFF" skin="{null}"
 						   rollOver="btnBreadcrumbPatient.styleName='linkBtnUnderline';" rollOut="btnBreadcrumbPatient.styleName='linkBtn';" />
 		</s:HGroup>
@@ -104,7 +181,7 @@
 						<enhancedtitlewindow:layout>
 							<s:VerticalLayout paddingLeft="10" paddingTop="12" paddingRight="10" paddingBottom="10"/>
 						</enhancedtitlewindow:layout>
-						<s:Label text="{patientName}" color="0xAEDEE4" fontSize="16" fontWeight="bold" />
+						<mx:LinkButton label="{patient.fullName}" styleName="linkBtnBlue" fontSize="16" fontWeight="bold" click="onPatientNameClick(event)" />
 						<s:HGroup color="0xFFFFFF" fontSize="12" paddingTop="8">
 							<s:Image source="@Embed('images/profilePicSmall.png')" />
 							<s:Label text="{'Patient ID:\nSSN:\nDOB:\nSex:\nRank/OS:'}" textAlign="right" paddingLeft="4" lineHeight="16" paddingTop="2" />

@@ -808,10 +808,10 @@
 							</s:NavigatorContent>
 							
 							<!--	team profile	-->
-							<modules:TeamModule id="modTeam" model="{providersModel}" navigate="navigate(event)" />
+							<modules:TeamModule id="modTeam" model="{providersModel}" />
 							
 							<!--	appointments	-->
-							<modules:AppointmentModule id="modAppointments" navigate="navigate(event)" />
+							<modules:AppointmentModule id="modAppointments" />
 							
 						</mx:ViewStack>
 					</s:NavigatorContent>
