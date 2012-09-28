@@ -7,7 +7,7 @@
 			   xmlns:plus="external.TabBarPlus.plus.*"
 			   xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*"
 			   xmlns:general="components.general.*"
-				xmlns:ASclasses="ASclasses.*"
+			   xmlns:ASclasses="ASclasses.*"
 			   fontFamily="myMyriad"
 			   minWidth="1024" minHeight="768"
 			   creationComplete="init()" xmlns:modules="components.modules.*" xmlns:widgets="components.widgets.*">
