@@ -56,6 +56,13 @@
 			import controllers.ApplicationController;
 			import controllers.AppointmentsController;
 			
+			import flashx.textLayout.elements.Configuration;
+			import flashx.textLayout.elements.LinkElement;
+			import flashx.textLayout.elements.TextFlow;
+			import flashx.textLayout.events.FlowElementMouseEvent;
+			import flashx.textLayout.formats.TextDecoration;
+			import flashx.textLayout.formats.TextLayoutFormat;
+			
 			import models.Appointment;
 			import models.ProviderModel;
 			import models.UserModel;
@@ -72,6 +79,7 @@
 			import mx.graphics.IFill;
 			
 			import spark.components.BorderContainer;
+			import spark.utils.TextFlowUtil;
 			
 			import utils.DateUtil;
 			
@@ -81,6 +89,8 @@
 			[Bindable] private var providers:ArrayCollection;
 			
 			private var today:Date = ApplicationController.getInstance().today;
+			
+			private var nextAppointment:Appointment;
 			
 			private function onAppointmentsChange( event:CollectionEvent = null ):void
 			{
@@ -97,7 +107,15 @@
 					}
 				}
 				
-				nextAppointmentInfo.text = appointments.length ? Appointment( appointments[0] ).toString() : '';
+				if( appointments.length )
+				{
+					nextAppointment = Appointment( appointments[0] );
+					
+					var txt:String = nextAppointment.toString( true );
+					txt = txt.replace( /\n/g, "<br/>");
+					
+					nextAppointmentInfo.textFlow = TextFlowUtil.importFromString( txt );
+				}
 				
 				providers = new ArrayCollection( p );
 			}
@@ -143,6 +161,27 @@
 				return(item.id);
 			}
 			
+			public function onLinkClick(event:FlowElementMouseEvent):void
+			{
+				var link:Array = LinkElement(event.flowElement).href.split(',');
+				var action:String = link[0];
+				
+				if( action == 'showPatient' )
+				{
+					var id:int = parseInt( link[1] );
+					var patient:UserModel = ApplicationController.getInstance().getUser( id, UserModel.TYPE_PATIENT );
+					
+					//	TODO: show patient
+				}
+				else if( action == "showPrerequisite"
+						&& nextAppointment )
+				{
+					AppointmentsController.getInstance().showPrerequisites( nextAppointment );
+				}
+				
+				event.preventDefault();
+			}
+			
 			private function init():void
 			{
 				controller = AppointmentsController.getInstance();
@@ -168,6 +207,8 @@
 					legend.addElement( container );
 				}
 				
+				nextAppointmentInfo.textFlow.addEventListener( FlowElementMouseEvent.CLICK, onLinkClick );
+				
 				subtitle = parentApplication.dateFormatterDay.format(new Date());  //Constants.DAYS_ABBR[ today.day ] + ', ' + Constants.MONTHS_ABBR[ today.month ] + ' ' + today.date;
 			}
 		]]>
@@ -185,10 +226,10 @@
 			</s:BorderContainer>
 		</s:VGroup>
 		
-		<s:VGroup paddingLeft="10" width="100%">
+		<s:VGroup paddingLeft="10" paddingTop="10" width="100%">
 			
 			<s:HGroup width="100%">
-				<mx:Text id="nextAppointmentInfo" styleName="white12" width="100%" />
+				<s:RichEditableText id="nextAppointmentInfo" styleName="white12" width="100%" editable="false" />
 			</s:HGroup>
 			
 		</s:VGroup>

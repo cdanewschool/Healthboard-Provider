@@ -724,21 +724,7 @@
 			
 			private function onPrerequisitesClick(event:MouseEvent):void
 			{
-				var images:Vector.<ImageReference> = new Vector.<ImageReference>;
-				
-				for each(var pre:AppointmentPrerequisite in selectedAppointment.prerequisites)
-				{
-					var image:ImageReference = new ImageReference();
-					image.filePath = pre.path;
-					image.caption = pre.toString();
-					images.push( image );
-				}
-				
-				var popup:ViewAttachmentPopup = new ViewAttachmentPopup();
-				ViewAttachmentPopup(popup).fileReferences = images;
-					
-				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
-				PopUpManager.centerPopUp( popup );
+				AppointmentsController.getInstance().showPrerequisites( selectedAppointment );
 			}
 			
 			private function onDragDrop(event:DragEvent):void
