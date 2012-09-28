@@ -17,8 +17,11 @@
 
 	<fx:Script>
 		<![CDATA[
+			import controllers.ChatController;
+			
 			import models.Chat;
 			import models.ChatMessage;
+			import models.ChatSearch;
 			import models.FileUpload;
 			import models.UserModel;
 			
@@ -183,14 +186,14 @@
 			
 			private function onUpdateChatMode(event:IndexChangeEvent):void
 			{
-				chat.mode = ButtonBar(event.currentTarget).selectedItem.data;
+				ChatController.getInstance().model.mode = ButtonBar(event.currentTarget).selectedItem.data;
 				
 				initChatMode();
 			}
 			
 			private function initChatMode():void
 			{
-				currentState = chat.mode + 'Chat';
+				currentState = ChatController.getInstance().model.mode + 'Chat';
 			}
 			
 			private function resize(event:ResizeEvent=null):void
@@ -271,7 +274,7 @@
 				
 				volumeSlider.setStyle('accentColor',0xeeeeee);
 				
-				updateMode.selectedIndex = Chat.getModeIndex( chat.mode );
+				updateMode.selectedIndex = ChatSearch.getModeIndex( ChatController.getInstance().model.mode );
 				
 				initChatMode();
 				simulateResponse();
@@ -319,7 +322,7 @@
 			id="updateMode"
 			includeIn="textChat,voiceChat,videoChat"
 			width="71" height="20"
-			dataProvider="{Chat.MODES}" 
+			dataProvider="{ChatSearch.MODES}" 
 			iconField="icon"
 			change="onUpdateChatMode(event)" 
 			firstButton="skins.general.IconButtonSkin"

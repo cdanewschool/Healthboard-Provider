@@ -252,7 +252,7 @@
 				
 				<s:HGroup paddingRight="14">
 					
-					<mx:LinkButton label="{user.available == UserModel.STATE_AVAILABLE ? 'Available' : 'Unavailable'}" click="toggleAvailability(event)" toolTip="{user.available == UserModel.STATE_AVAILABLE ? 'Change status to unavailable' : 'Change status to available'}" styleName="linkBtnYellow" />
+					<mx:LinkButton label="{ApplicationController.getInstance().user.available == UserModel.STATE_AVAILABLE ? 'Available' : 'Unavailable'}" click="toggleAvailability(event)" toolTip="{ApplicationController.getInstance().user.available == UserModel.STATE_AVAILABLE ? 'Change status to unavailable' : 'Change status to available'}" styleName="linkBtnYellow" />
 					<mx:LinkButton id="btnProfile" label="{fullname}" color="0xAEDBE2" textRollOverColor="0xAEDBE2" textSelectedColor="0xAEDBE2" skin="{null}" click="{currentState='profile'}" rollOver="btnProfile.styleName='linkBtnUnderline';" rollOut="btnProfile.styleName='linkBtn';" />
 					
 					<mx:LinkButton id="btnLogout" label="Logout" color="0xE6E6E6" textRollOverColor="0xE6E6E6" textSelectedColor="0xE6E6E6" skin="{null}" paddingLeft="1" click="{currentState='default'}" rollOver="btnLogout.styleName='linkBtnUnderline';" rollOut="btnLogout.styleName='linkBtn';" />
@@ -331,7 +331,7 @@
 											</s:HGroup>
 										</enhancedtitlewindow:EnhancedTitleWindow>
 										
-										<widgets:ChatWidget id="widgetChat" width="305" title="Chat" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" model="{chatModel}" user="{user}" />
+										<widgets:ChatWidget id="widgetChat" width="305" title="Chat" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" />
 										
 										<widgets:TeamWidget id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" model="{providersModel}" module="modTeam" />
 									
@@ -808,10 +808,10 @@
 							</s:NavigatorContent>
 							
 							<!--	team profile	-->
-							<modules:TeamModule id="modTeam" model="{providersModel}" navigate="navigate(event)" />
+							<modules:TeamModule id="modTeam" model="{providersModel}" />
 							
 							<!--	appointments	-->
-							<modules:AppointmentModule id="modAppointments" navigate="navigate(event)" />
+							<modules:AppointmentModule id="modAppointments" />
 							
 						</mx:ViewStack>
 					</s:NavigatorContent>

@@ -1,10 +1,32 @@
 package models
 {
+	import events.ChatEvent;
+	
+	import flash.events.EventDispatcher;
+	
 	import mx.collections.ArrayCollection;
 
 	[Bindable] 
-	public class ChatSearch
+	public class ChatSearch extends EventDispatcher
 	{
+		public static const STATE_DEFAULT:String = "default";
+		public static const STATE_CONNECTED:String = "connected";
+		public static const STATE_CONNECTING:String = "connecting";
+		public static const STATE_DECLINED:String = "declined";
+		
+		public static const MODE_TEXT:String = "text";
+		public static const MODE_VOICE:String = "voice";
+		public static const MODE_VIDEO:String = "video";
+		
+		public static const MODES:ArrayCollection = new ArrayCollection
+			( 
+				[
+					{label:"Text",icon:"images/button_icons/text.png",data:MODE_TEXT},
+					{label:"Voice",icon:"images/button_icons/voice.png",data:MODE_VOICE},
+					{label:"Video",icon:"images/button_icons/video.png",data:MODE_VIDEO}
+				] 
+			);
+		
 		public static const SEARCH_PLACEHOLDER:String = "Search name";
 		
 		public var chatGroups:ArrayCollection = new ArrayCollection( ["All","Patients","Providers"] );
@@ -16,9 +38,18 @@ package models
 		
 		public var dataProvider:ArrayCollection;
 		
+		private var _state:String;
+		
+		public var user:UserModel;
+		public var targetUser:UserModel;
+		
+		public var mode:String;
+		
 		public function ChatSearch()
 		{
-			super();	
+			super();
+			
+			mode = MODE_TEXT;
 		}
 
 		public function getUser( id:int, type:String = null ):UserModel
@@ -59,6 +90,18 @@ package models
 			if( valid && search != "" && search != SEARCH_PLACEHOLDER ) valid = item.firstName.toLowerCase().indexOf( search ) > -1 || item.lastName.toLowerCase().indexOf( search ) > -1;
 			
 			return valid;
+		}
+		
+		public static function getModeIndex( mode:String ):int
+		{
+			for(var i:int=0;i<MODES.length;i++)
+			{
+				if( MODES[i].data == mode )
+				{
+					return i;
+				}
+			}
+			return -1;
 		}
 		
 		public function get selectedChatGroup():int
@@ -103,6 +146,27 @@ package models
 		{
 			_patients = value;
 			updateDataProvider();
+		}
+
+		public function get state():String
+		{
+			return _state;
+		}
+
+		public function set state(value:String):void
+		{
+			var changed:Boolean = value != _state;
+			_state = value;
+			
+			if( changed )
+			{
+				dispatchEvent( new ChatEvent( ChatEvent.STATE_CHANGE ) );
+				
+				if( state == STATE_DEFAULT )
+				{
+					dispatchEvent( new ChatEvent( ChatEvent.CANCEL ) );
+				}
+			}
 		}
 
 

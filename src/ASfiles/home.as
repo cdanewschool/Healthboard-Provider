@@ -4,6 +4,7 @@ import components.AutoComplete;
 import components.home.ViewPatient;
 
 import controllers.ApplicationController;
+import controllers.ChatController;
 
 import events.ApplicationEvent;
 import events.AutoCompleteEvent;
@@ -25,7 +26,9 @@ import models.ProvidersModel;
 import models.UserModel;
 
 import mx.collections.ArrayCollection;
+import mx.containers.ApplicationControlBar;
 import mx.controls.LinkButton;
+import mx.core.INavigatorContent;
 import mx.events.CalendarLayoutChangeEvent;
 import mx.events.ListEvent;
 import mx.managers.PopUpManager;
@@ -45,6 +48,7 @@ private function init():void
 	
 	this.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
 	this.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
+	this.addEventListener( ApplicationEvent.NAVIGATE, onNavigate );
 }
 
 [Bindable] public var fullname:String;
@@ -112,14 +116,14 @@ private function patientsResultHandler(event:ResultEvent):void {
 	
 	patientsData = patients;
 	
-	controller.patients = chatModel.patients = patientsData;
+	controller.patients = ChatController.getInstance().model.patients = patientsData;
 
 	initChatHistory();
 }
 
 public var arrOpenPatients:Array = new Array();
 protected function dgPatients_itemClickHandler(event:ListEvent):void {
-	var myData:Object = event.itemRenderer.data;
+	var myData:PatientModel = PatientModel( event.itemRenderer.data );
 	var isPatientAlreadyOpen:Boolean = false;
 	for(var i:uint = 0; i < arrOpenPatients.length; i++) {
 		if(arrOpenPatients[i] == myData) {
@@ -172,8 +176,6 @@ private function filterPatientsSearch(item:Object):Boolean {
 }
 
 [Bindable] public var providersModel:ProvidersModel = new ProvidersModel();
-[Bindable] public var chatModel:ChatSearch = new ChatSearch();
-[Bindable] public var user:UserModel;	//	logged-in user, i.e. Dr. Berg
 
 private function providersResultHandler(event:ResultEvent):void {
 	
@@ -189,7 +191,7 @@ private function providersResultHandler(event:ResultEvent):void {
 		provider.id = providers.length;
 		providers.addItem( provider );
 		
-		if( provider.id == ProviderConstants.USER_ID ) user = provider;
+		if( provider.id == ProviderConstants.USER_ID ) ApplicationController.getInstance().user = provider;
 		
 		var team:Object = {label:"Team " + provider.team, value: provider.team};
 		if( teams[provider.team] == null ) teams[provider.team] = team;
@@ -198,7 +200,7 @@ private function providersResultHandler(event:ResultEvent):void {
 	providersModel.providers = providers;
 	providersModel.providerTeams = new ArrayCollection( teams );
 	
-	controller.providers = chatModel.providers = providers;
+	controller.providers = ChatController.getInstance().model.providers = providers;
 	
 	initChatHistory();
 }
@@ -245,7 +247,7 @@ private function onAutocompleteSelect( event:IndexChangeEvent ):void
 
 private function initChatHistory():void
 {
-	if( !chatModel.providers || !chatModel.patients ) return;
+	if( !ChatController.getInstance().model.providers || !ChatController.getInstance().model.patients ) return;
 	
 	var user:UserModel = controller.getUser( ProviderConstants.USER_ID, UserModel.TYPE_PROVIDER );
 	
@@ -257,17 +259,36 @@ private function initChatHistory():void
 	appointmentsXMLdata.send();
 }
 
-private function navigate(event:ApplicationEvent):void
+private function onNavigate(event:ApplicationEvent):void
 {
 	if( event.data is int )
 	{
 		viewStackProviderModules.selectedIndex = event.data;
+	}
+	else if( event.data is String )
+	{
+		if( this.currentState == 'providerHome' ) 
+		{
+			var module:String = event.data.toString();
+			
+			if( this.viewStackProviderModules.getChildByName( module ) ) 
+			{
+				this.viewStackProviderModules.selectedChild = this.viewStackProviderModules.getChildByName( module ) as INavigatorContent;
+				
+				if( this.viewStackMain.selectedIndex != 0 )
+				{
+					this.viewStackMain.selectedIndex = 0;
+				}
+			}
+		}
 	}
 }
 
 private function toggleAvailability(event:MouseEvent):void
 {
 	var button:LinkButton = LinkButton(event.currentTarget);
+	
+	var user:UserModel = ApplicationController.getInstance().user;
 	
 	user.available = user.available == UserModel.STATE_AVAILABLE ? UserModel.STATE_UNAVAILABLE : UserModel.STATE_AVAILABLE;
 	
