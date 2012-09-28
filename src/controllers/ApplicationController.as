@@ -12,6 +12,9 @@ package controllers
 		public var patients:ArrayCollection;
 		
 		public var today:Date;
+		
+		[Bindable] public var user:UserModel;	//	logged-in user, i.e. Dr. Berg
+		
 		public function ApplicationController( enforcer:SingletonEnforcer )
 		{
 			today = new Date( 2012, 09, 12 );			//	simulate october 12th

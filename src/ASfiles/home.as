@@ -26,6 +26,7 @@ import models.ProvidersModel;
 import models.UserModel;
 
 import mx.collections.ArrayCollection;
+import mx.containers.ApplicationControlBar;
 import mx.controls.LinkButton;
 import mx.events.CalendarLayoutChangeEvent;
 import mx.events.ListEvent;
@@ -173,7 +174,6 @@ private function filterPatientsSearch(item:Object):Boolean {
 }
 
 [Bindable] public var providersModel:ProvidersModel = new ProvidersModel();
-[Bindable] public var user:UserModel;	//	logged-in user, i.e. Dr. Berg
 
 private function providersResultHandler(event:ResultEvent):void {
 	
@@ -189,7 +189,7 @@ private function providersResultHandler(event:ResultEvent):void {
 		provider.id = providers.length;
 		providers.addItem( provider );
 		
-		if( provider.id == ProviderConstants.USER_ID ) user = provider;
+		if( provider.id == ProviderConstants.USER_ID ) ApplicationController.getInstance().user = provider;
 		
 		var team:Object = {label:"Team " + provider.team, value: provider.team};
 		if( teams[provider.team] == null ) teams[provider.team] = team;
@@ -268,6 +268,8 @@ private function navigate(event:ApplicationEvent):void
 private function toggleAvailability(event:MouseEvent):void
 {
 	var button:LinkButton = LinkButton(event.currentTarget);
+	
+	var user:UserModel = ApplicationController.getInstance().user;
 	
 	user.available = user.available == UserModel.STATE_AVAILABLE ? UserModel.STATE_UNAVAILABLE : UserModel.STATE_AVAILABLE;
 	
