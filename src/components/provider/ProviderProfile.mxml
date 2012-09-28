@@ -17,10 +17,12 @@
 	
 	<fx:Metadata>
 		[Event(name="select", type="flash.events")]
+		[Event(name="showTooltip", type="events.ApplicationEvent")]
 	</fx:Metadata>
 	
 	<fx:Script>
 		<![CDATA[
+			import events.ApplicationEvent;
 			import events.ProviderEvent;
 			
 			import models.ProviderModel;
@@ -42,6 +44,11 @@
 			private function onRollOut(event:MouseEvent):void
 			{
 				setStyle("backgroundAlpha", 0);
+			}
+			
+			private function showTooltip():void
+			{
+				dispatchEvent( new ApplicationEvent( ApplicationEvent.SHOW_TOOLTIP, true ) );
 			}
 			
 			private function init():void
@@ -66,7 +73,7 @@
 		<s:VGroup paddingLeft="10">
 			<mx:LinkButton 
 				label="{(provider.role == 'MD' ? 'Dr. ' : '') + provider.firstName + ' ' + provider.lastName}" 
-				fontSize="14" fontWeight="bold" styleName="linkBtnBlue" click="onSelect(event)" />
+				fontSize="14" fontWeight="bold" styleName="linkBtnBlue" click="onSelect(event)" rollOver="showTooltip()" />
 			<s:HGroup>
 				<s:Label text="Specialty:" textAlign="right" fontSize="12" />
 				<s:Label text="{provider.specialty}" fontSize="12"/>

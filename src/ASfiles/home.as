@@ -28,6 +28,7 @@ import models.UserModel;
 import mx.collections.ArrayCollection;
 import mx.containers.ApplicationControlBar;
 import mx.controls.LinkButton;
+import mx.core.INavigatorContent;
 import mx.events.CalendarLayoutChangeEvent;
 import mx.events.ListEvent;
 import mx.managers.PopUpManager;
@@ -262,6 +263,16 @@ private function navigate(event:ApplicationEvent):void
 	if( event.data is int )
 	{
 		viewStackProviderModules.selectedIndex = event.data;
+	}
+	else if( event.data is String )
+	{
+		if( this.currentState == 'providerHome' ) 
+		{
+			var module:String = event.data.toString();
+			
+			if( this.viewStackProviderModules.getChildByName( module ) ) 
+				this.viewStackProviderModules.selectedChild = this.viewStackProviderModules.getChildByName( module ) as INavigatorContent;
+		}
 	}
 }
 
