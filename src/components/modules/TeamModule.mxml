@@ -146,19 +146,22 @@
 					link.addEventListener( MouseEvent.CLICK, onMessageGroupClick );
 					holder.addElement( link );
 					
-					var spacer:Spacer = new Spacer();
-					spacer.height = 10;
-					holder.addElement( spacer );
-					
-					for each(var teamMember:Object in teamGroup.members)
+					if( model.selectedProviderTeam > -1 )
 					{
-						link = new LinkButton();
-						link.data = teamMember;
-						link.label = teamMember.firstName + ' ' + teamMember.lastName;
-						link.styleName = "linkBtnBlue";
-						link.setStyle('fontSize',12);
-						link.addEventListener( MouseEvent.CLICK, onMessageTeamMemberClick );
-						holder.addElement( link );
+						var spacer:Spacer = new Spacer();
+						spacer.height = 10;
+						holder.addElement( spacer );
+						
+						for each(var teamMember:Object in teamGroup.members)
+						{
+							link = new LinkButton();
+							link.data = teamMember;
+							link.label = teamMember.firstName + ' ' + teamMember.lastName;
+							link.styleName = "linkBtnBlue";
+							link.setStyle('fontSize',12);
+							link.addEventListener( MouseEvent.CLICK, onMessageTeamMemberClick );
+							holder.addElement( link );
+						}
 					}
 					
 					spacer = new Spacer();
@@ -413,7 +416,7 @@
 												<mx:LinkButton label="View Team Schedule" styleName="linkBtnBlue" fontSize="12" click="onTeamScheduleClick(event)" />
 												<mx:LinkButton label="Messages to Team" styleName="linkBtnBlue" fontSize="12" click="onMessageTeamClick(event)" />
 												<s:Spacer height="20"/>
-												<s:VGroup id="teamMessageLinks" width="20%" gap="2" />
+												<s:VGroup id="teamMessageLinks" width="20%" gap="0" />
 											</s:VGroup>
 											
 										</s:VGroup>
