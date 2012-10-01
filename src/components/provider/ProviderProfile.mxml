@@ -9,7 +9,8 @@
 	 controlBarVisible="true" 
 	 creationComplete="init()" 
 	 rollOver="onRollOver(event)" 
-	 rollOut="onRollOut(event)">
+	 rollOut="onRollOut(event)" 
+	 click="onClick(event)">
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
@@ -17,7 +18,6 @@
 	
 	<fx:Metadata>
 		[Event(name="select", type="flash.events")]
-		[Event(name="showTooltip", type="events.ApplicationEvent")]
 	</fx:Metadata>
 	
 	<fx:Script>
@@ -46,9 +46,9 @@
 				setStyle("backgroundAlpha", 0);
 			}
 			
-			private function showTooltip():void
+			private function onClick(event:MouseEvent):void
 			{
-				dispatchEvent( new ApplicationEvent( ApplicationEvent.SHOW_TOOLTIP, true ) );
+				dispatchEvent( new ProviderEvent(ProviderEvent.SELECT, false, false, ProviderModel(provider) ) );
 			}
 			
 			private function onTargetUserImageLoadError(event:IOErrorEvent):void
@@ -78,7 +78,7 @@
 		<s:VGroup paddingLeft="10">
 			<mx:LinkButton 
 				label="{(provider.role == 'MD' ? 'Dr. ' : '') + provider.firstName + ' ' + provider.lastName}" 
-				fontSize="14" fontWeight="bold" styleName="linkBtnBlue" click="onSelect(event)" rollOver="showTooltip()" />
+				fontSize="14" fontWeight="bold" styleName="linkBtnBlue" click="onSelect(event)" />
 			<s:HGroup>
 				<s:Label text="Specialty:" textAlign="right" fontSize="12" />
 				<s:Label text="{provider.specialty}" fontSize="12"/>
