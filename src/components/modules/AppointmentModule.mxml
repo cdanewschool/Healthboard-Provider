@@ -94,6 +94,8 @@
 			
 			private var _dirty:Boolean;
 			
+			private var pendingAppointments:Array;
+			
 			/**
 			 * The seleted providers. For this component, this means the providers whose
 			 * appointments are included in the view (i.e. chart, etc)
@@ -318,24 +320,46 @@
 			
 			private function cancelAppointment( event:AppointmentEvent = null ):void
 			{
-				Alert.show("Are you sure you want to cancel this appointment?", "Confirm", Alert.YES|Alert.NO, null, onCancelAppointmentConfirm, null, Alert.NO);
+				pendingAppointments = [ selectedAppointment ];
+				
+				confirmCancelAppointments();
+			}
+			
+			private function confirmCancelAppointments():void
+			{
+				Alert.show
+					(
+						"Are you sure you want to cancel " + (pendingAppointments.length > 1 ? "these" : "this" ) + " appointment?", "Confirm", 
+						Alert.YES|Alert.NO, null, onCancelAppointmentConfirm, null, Alert.NO
+					);
 			}
 			
 			private function onCancelAppointmentConfirm( event:CloseEvent ):void
 			{
 				if( event.detail == Alert.YES )
 				{
-					removeAppointment( selectedAppointment );
+					removeAppointments( pendingAppointments );
 					
 					onAddAppointmentCancel(null);
+				}
+				
+				pendingAppointments = null;
+			}
+			
+			private function removeAppointments( invalidAppointments:Array ):void
+			{
+				while( invalidAppointments.length )
+				{
+					removeAppointment( invalidAppointments.shift() );
 				}
 			}
 			
 			private function removeAppointment( appointment:Appointment ):void
 			{
-				appointments.removeItemAt( appointments.getItemIndex(appointment) );
+				appointments.removeItemAt( appointments.getItemIndex( appointment ) );
 				
-				selectedAppointment = null;
+				if( selectedAppointment == appointment )
+					selectedAppointment = null;
 			}
 			
 			private function onShowAutoComplete( event:AutoCompleteEvent ):void
@@ -519,7 +543,25 @@
 			
 			private function onCancelAllForProvider( event:AppointmentEvent ):void
 			{
-				//	cancel all appointments for this provider?
+				var provider:ProviderModel;
+				
+				for(var i:int=0;i<controller.model.selectedProviders.length;i++)
+				{
+					if( ProviderModel(controller.model.selectedProviders[i]).lastName == ChartLabel(event.target).data.value )
+					{
+						provider = ProviderModel(controller.model.selectedProviders[i]);
+						
+						break;
+					}
+				}
+				
+				if( !provider ) return;
+				
+				var appointments:ArrayCollection = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER, viewRangeStartDate );
+				
+				pendingAppointments = appointments && appointments.length ? appointments.source : [];
+				
+				confirmCancelAppointments();
 			}
 			
 			private function onViewProvider( event:AppointmentEvent ):void
