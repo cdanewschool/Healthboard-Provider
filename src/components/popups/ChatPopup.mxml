@@ -212,7 +212,7 @@
 				chat.endTime = new Date();
 				user.addChat( chat );
 				
-				sourceUserVideo.source = null;
+				if( sourceUserVideo ) sourceUserVideo.source = null;
 				
 				PopUpManager.removePopUp(this);
 			}
