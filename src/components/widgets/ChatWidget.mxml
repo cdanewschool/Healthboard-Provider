@@ -28,6 +28,7 @@
 			import components.popups.ChatHistoryPopup;
 			import components.popups.ViewAttachmentPopup;
 			
+			import controllers.ApplicationController;
 			import controllers.ChatController;
 			
 			import events.ApplicationEvent;
@@ -69,7 +70,7 @@
 				
 				model.mode = ButtonBar(event.currentTarget).selectedItem.data;
 				
-				ChatController.getInstance().chat( user, targetUser );
+				ChatController.getInstance().chat( ApplicationController.getInstance().user, targetUser );
 			}
 			
 			private function viewHistory(event:MouseEvent):void
