@@ -159,7 +159,7 @@
 							link.label = teamMember.firstName + ' ' + teamMember.lastName;
 							link.styleName = "linkBtnBlue";
 							link.setStyle('fontSize',12);
-							link.addEventListener( MouseEvent.CLICK, onMessageTeamMemberClick );
+							link.addEventListener( MouseEvent.CLICK, onTeamMemberClick );
 							holder.addElement( link );
 						}
 					}
@@ -204,12 +204,10 @@
 				sendMessage( users, group );
 			}
 			
-			private function onMessageTeamMemberClick(event:MouseEvent):void
+			private function onTeamMemberClick(event:MouseEvent):void
 			{
 				var provider:ProviderModel = ProviderModel( LinkButton(event.currentTarget).data );
-				var users:Array = [ provider ];
-				
-				sendMessage( users );
+				showTeamMember( provider );
 			}
 			
 			private function showTeamMember( data:UserModel ):void
