@@ -403,6 +403,7 @@
 					column.labelFunction = getDataTip;
 					column.setStyle('labelPosition','inside');
 					column.setStyle('labelAlign','top');
+					column.setStyle('stroke',whiteStroke);
 					
 					chart.horizontalAxis = hAxis;
 					chart.horizontalAxisRenderers = [renderer];
@@ -443,6 +444,7 @@
 						column.dataFunction = valueFunctionWeek;
 						column.minField = 'anything';
 						column.fillFunction = getFill;
+						column.setStyle('stroke',whiteStroke);
 						column.dataProvider = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER );
 						series.push( column );
 					}
@@ -893,6 +895,7 @@
 	<fx:Declarations>
 		<mx:SolidColorStroke id="xAxisStroke" color="0xB3B3B3" alpha=".1" />
 		<mx:SolidColorStroke id="yAxisStroke" color="0x86888A" alpha="1" />
+		<mx:SolidColorStroke id="whiteStroke" color="0xffffff" alpha="1" weight="0" />
 		
 		<fx:Array id="gridBackground">
 			
