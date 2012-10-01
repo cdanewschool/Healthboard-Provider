@@ -37,6 +37,7 @@
 			import spark.events.IndexChangeEvent;
 			
 			import utils.DateUtil;
+			import utils.StringUtil;
 			
 			public static const MODE_ADD:String = "add";
 			public static const MODE_EDIT:String = "edit";
@@ -161,8 +162,8 @@
 				reason.text = appointment.reason != '' ? appointment.reason : REASON_PLACEHOLDER;
 				
 				fromDate.selectedDate = appointment.from;
-				fromHours.text = appointment.from.hours.toString();
-				fromMinutes.text = appointment.from.minutes.toString();
+				fromHours.text = StringUtil.leftPad( appointment.from.hours.toString() );
+				fromMinutes.text = StringUtil.leftPad( appointment.from.minutes.toString() );
 				
 				//fromDate.text = appointment.from.month + '/' + appointment.from.date + '/' + appointment.from.fullYear;
 				//fromDatePicker.selectedDate = appointment.from;
@@ -170,8 +171,8 @@
 				//toDatePicker.selectedDate = appointment.to;
 				
 				toDate.selectedDate = appointment.to;
-				toHours.text = appointment.to.hours.toString();
-				toMinutes.text = appointment.to.minutes.toString();
+				toHours.text = StringUtil.leftPad( appointment.to.hours.toString() );
+				toMinutes.text = StringUtil.leftPad( appointment.to.minutes.toString() );
 				
 				for(var i:int=0,r:int=0;i<Appointment.APPOINTMENT_TYPES.length;i++)
 				{
@@ -286,15 +287,15 @@
 	<s:HGroup>
 		<mx:FormItem label="Time:" labelWidth="75" labelStyleName="mediumTextBlackBold">
 			<s:HGroup verticalAlign="middle">
-				<s:TextInput id="fromHours" width="25" height="24" restrict="0-9" change="{appointment.from.hours = parseInt(fromHours.text)}" />
-				<s:TextInput id="fromMinutes" width="25" height="24" restrict="0-9" change="{appointment.from.minutes = parseInt(fromMinutes.text)}" />
+				<s:TextInput id="fromHours" width="25" height="24" restrict="0-9" change="{appointment.from.hours = parseInt(fromHours.text);}" focusOut="{fromHours.text = StringUtil.leftPad(fromHours.text)}" />
+				<s:TextInput id="fromMinutes" width="25" height="24" restrict="0-9" change="{appointment.from.minutes = parseInt(fromMinutes.text)}" focusOut="{fromMinutes.text = StringUtil.leftPad(fromMinutes.text)}"/>
 				<s:Label text="hr"/>
 			</s:HGroup>
 		</mx:FormItem>
 		<mx:FormItem label="" labelWidth="40">
 			<s:HGroup verticalAlign="middle">
-				<s:TextInput id="toHours" width="25" height="24" restrict="0-9" change="{appointment.to.hours = parseInt(toHours.text)}" />
-				<s:TextInput id="toMinutes" width="25" height="24" restrict="0-9" change="{appointment.to.minutes = parseInt(toMinutes.text)}" />
+				<s:TextInput id="toHours" width="25" height="24" restrict="0-9" change="{appointment.to.hours = parseInt(toHours.text)}" focusOut="{toHours.text = StringUtil.leftPad(toHours.text)}"/>
+				<s:TextInput id="toMinutes" width="25" height="24" restrict="0-9" change="{appointment.to.minutes = parseInt(toMinutes.text)}" focusOut="{toMinutes.text = StringUtil.leftPad(toMinutes.text)}" />
 				<s:Label text="hr"/>
 			</s:HGroup>
 		</mx:FormItem>
