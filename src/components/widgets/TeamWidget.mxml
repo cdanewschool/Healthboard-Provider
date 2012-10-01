@@ -111,7 +111,7 @@
 		<mx:columns>
 			<mx:DataGridColumn dataField="team" width="36" headerText="Team" />
 			<mx:DataGridColumn dataField="role"  width="53" headerText="Role" />
-			<mx:DataGridColumn width="47" headerText="Status">
+			<mx:DataGridColumn dataField="available" width="47" headerText="Status">
 				<mx:itemRenderer>
 					<fx:Component>
 						<mx:HBox width="27">
@@ -120,7 +120,7 @@
 					</fx:Component>
 				</mx:itemRenderer>
 			</mx:DataGridColumn>
-			<mx:DataGridColumn headerText="Name">
+			<mx:DataGridColumn dataField="lastName" headerText="Name">
 				<mx:itemRenderer>
 					<fx:Component>
 						<mx:HBox horizontalScrollPolicy="off" width="130">
