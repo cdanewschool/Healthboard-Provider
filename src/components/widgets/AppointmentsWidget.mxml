@@ -210,7 +210,7 @@
 				
 				nextAppointmentInfo.textFlow.addEventListener( FlowElementMouseEvent.CLICK, onLinkClick );
 				
-				subtitle = parentApplication.dateFormatterDay.format(new Date());  //Constants.DAYS_ABBR[ today.day ] + ', ' + Constants.MONTHS_ABBR[ today.month ] + ' ' + today.date;
+				subtitle = DateUtil.DATE_FORMATTER_DAY.format( today );
 			}
 		]]>
 	</fx:Script>

@@ -1,5 +1,9 @@
 package utils
 {
+	import flash.globalization.DateTimeFormatter;
+	import flash.globalization.DateTimeStyle;
+	import flash.globalization.LocaleID;
+	
 	import utils.StringUtil;
 	
 	public class DateUtil
@@ -11,6 +15,10 @@ package utils
 		public static const WEEK:Number = DAY * 7;
 		public static const MONTH:Number = WEEK * 4;
 		public static const YEAR:Number = MONTH * 12;
+		
+		public static var DATE_FORMATTER_DAY:DateTimeFormatter = new DateTimeFormatter( LocaleID.DEFAULT, DateTimeStyle.MEDIUM, DateTimeStyle.NONE );
+		
+		DATE_FORMATTER_DAY.setDateTimePattern('EEE, MMM dd');
 		
 		public static function compareDates(date1:Date, date2:Date):Number
 		{
