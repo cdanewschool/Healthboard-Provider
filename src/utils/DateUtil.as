@@ -15,7 +15,6 @@ package utils
 			return date1.time - date2.time;
 		}
 		
-		
 		public static function formatTime( ms:int ):String
 		{
 			var parts:Array = [];
@@ -26,12 +25,11 @@ package utils
 			var minutes:int = Math.floor( ms/MINUTE );
 			ms -= (minutes * MINUTE);
 			
+			var seconds:int = Math.floor( ms/SECOND );
+			ms -= (seconds * SECOND);
+			
 			parts.push( hours<10?'0'+hours:hours );
 			parts.push( minutes<10?'0'+minutes:minutes );
-			
-			var seconds:int = parts.push( Math.floor( ms/SECOND ) );
-			ms -= (seconds * SECOND);
-				
 			parts.push( seconds<10?'0'+seconds:seconds );
 			
 			return parts.join( ':' );
