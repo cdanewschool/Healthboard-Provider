@@ -79,7 +79,7 @@
 				if( popup) PopUpManager.removePopUp( popup );
 				
 				popup = new ChatHistoryPopup();
-				ChatHistoryPopup(popup).user = user;
+				ChatHistoryPopup(popup).user = ApplicationController.getInstance().user;
 				ChatHistoryPopup(popup).chat = model;
 				
 				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );

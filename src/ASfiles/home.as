@@ -37,6 +37,8 @@ import mx.rpc.events.ResultEvent;
 import spark.events.DropDownEvent;
 import spark.events.IndexChangeEvent;
 
+import utils.DateUtil;
+
 private var controller:ApplicationController = ApplicationController.getInstance();
 
 private function init():void
@@ -251,10 +253,27 @@ private function initChatHistory():void
 	
 	var user:UserModel = controller.getUser( ProviderConstants.USER_ID, UserModel.TYPE_PROVIDER );
 	
-	user.addChat( new Chat( user, controller.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,1,17,35),new Date(2012,09,1,17,45) ) );
-	user.addChat( new Chat( user, controller.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,09,23,17,28),new Date(2012,09,23,17,33) ) );
-	user.addChat( new Chat( user, controller.getUser( 123, UserModel.TYPE_PATIENT ), new Date(2012,10,1,17,30),new Date(2012,10,1,17,35) ) );
-	user.addChat( new Chat( user, controller.getUser( 1, UserModel.TYPE_PROVIDER ), new Date(2012,10,11,17,31),new Date(2012,10,11,17,42) ) );
+	var today:Date = ApplicationController.getInstance().today;
+	var time:Number = today.getTime();
+	
+	var defs:Array = 
+		[ 
+			{time: time - (DateUtil.DAY * 1 + DateUtil.DAY * .7 * Math.random()), id: 123, type: UserModel.TYPE_PATIENT},
+			{time: time - (DateUtil.DAY * 3 + DateUtil.DAY * .7 * Math.random()), id: 123, type: UserModel.TYPE_PATIENT},
+			{time: time - (DateUtil.MONTH * .9 + DateUtil.DAY * .7 * Math.random()), id: 123, type: UserModel.TYPE_PATIENT},
+			{time: time - (DateUtil.MONTH * 4 + DateUtil.DAY * 3 + DateUtil.DAY * .7 * Math.random()), id: 1, type: UserModel.TYPE_PROVIDER}
+		];
+	
+	for each(var def:Object in defs)
+	{
+		var start:Date = new Date();
+		start.setTime( def.time );
+		
+		var end:Date = new Date();
+		end.setTime( start.time + (DateUtil.HOUR * Math.random()) );
+		
+		user.addChat( new Chat( user, controller.getUser( def.id, def.type ), start, end ) );
+	}
 	
 	appointmentsXMLdata.send();
 }
