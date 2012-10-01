@@ -33,6 +33,7 @@
 			import models.ProvidersModel;
 			import models.UserModel;
 			
+			import mx.collections.ArrayCollection;
 			import mx.events.ListEvent;
 			import mx.events.ToolTipEvent;
 			import mx.managers.PopUpManager;
@@ -53,6 +54,15 @@
 				update();
 			}
 			
+			private function sendMessage( recipients:Array, alias:String = null ):void
+			{
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				evt.data = ProviderConstants.MODULE_MESSAGES;
+				evt.users = recipients;
+				evt.alias = alias;
+				dispatchEvent( evt );	
+			}
+			
 			private function onUserAction( event:ProfileEvent ):void
 			{
 				if( event.type == ProfileEvent.VIEW_PROFILE )
@@ -67,15 +77,12 @@
 					}
 					
 					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-					evt.data = "modAppointments";
+					evt.data = ProviderConstants.MODULE_APPOINTMENTS;
 					dispatchEvent( evt );
 				}
 				else if( event.type == ProfileEvent.SEND_MESSAGE )
 				{
-					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-					evt.data = ProviderConstants.MODULE_MESSAGES;
-					evt.users = [ event.user ];
-					dispatchEvent( evt );
+					sendMessage( [event.user] );
 				}
 				else if( event.type == ProfileEvent.START_CHAT )
 				{
@@ -131,6 +138,8 @@
 					link.label = "Message to All " + group + "s";
 					link.styleName = "linkBtnBlue";
 					link.setStyle('fontSize',12);
+					link.data = group;
+					link.addEventListener( MouseEvent.CLICK, onMessageGroupClick );
 					holder.addElement( link );
 					
 					var spacer:Spacer = new Spacer();
@@ -140,9 +149,11 @@
 					for each(var teamMember:Object in teamGroup.members)
 					{
 						link = new LinkButton();
+						link.data = teamMember;
 						link.label = teamMember.firstName + ' ' + teamMember.lastName;
 						link.styleName = "linkBtnBlue";
 						link.setStyle('fontSize',12);
+						link.addEventListener( MouseEvent.CLICK, onMessageTeamMemberClick );
 						holder.addElement( link );
 					}
 					
@@ -150,6 +161,48 @@
 					spacer.height = 20;
 					holder.addElement( spacer );
 				}
+			}
+			
+			private function onTeamScheduleClick(event:MouseEvent):void
+			{
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				evt.data = ProviderConstants.MODULE_APPOINTMENTS;
+				dispatchEvent( evt );
+			}
+			
+			private function onMessageTeamClick(event:MouseEvent):void
+			{
+				var users:Array = [];
+				
+				for(var i:int=0;i<teamProfileList.numElements;i++)
+				{
+					users.push( ProviderProfile(teamProfileList.getElementAt(i)).provider );
+				}
+				
+				var alias:String = "All Teams";
+				
+				if( model.selectedProviderTeam > -1 )
+				{
+					alias = "Team " + model.selectedProviderTeam.toString();
+				}
+				
+				sendMessage( users, "Team 1" );
+			}
+			
+			private function onMessageGroupClick(event:MouseEvent):void
+			{
+				var group:String = LinkButton(event.currentTarget).data.toString();
+				var users:Array = model.providerGroups[ group ].members;
+				
+				sendMessage( users, group );
+			}
+			
+			private function onMessageTeamMemberClick(event:MouseEvent):void
+			{
+				var provider:ProviderModel = ProviderModel( LinkButton(event.currentTarget).data );
+				var users:Array = [ provider ];
+				
+				sendMessage( users );
 			}
 			
 			private function showTeamMember( data:UserModel ):void
@@ -178,8 +231,6 @@
 				evt.data = ProviderConstants.MODULE_MESSAGES;
 				evt.users = [ DataGrid(event.currentTarget).selectedItem ];
 				dispatchEvent( evt );
-				
-				//showTeamMember( ProviderModel(event.itemRenderer.data) );
 			}
 			
 			protected function onTeamSelect(event:ProviderEvent):void 
@@ -352,8 +403,8 @@
 										<s:VGroup width="20%">
 											
 											<s:VGroup>
-												<mx:LinkButton label="View Team Schedule" styleName="linkBtnBlue" fontSize="12" />
-												<mx:LinkButton label="Messages to Team" styleName="linkBtnBlue" fontSize="12" />
+												<mx:LinkButton label="View Team Schedule" styleName="linkBtnBlue" fontSize="12" click="onTeamScheduleClick(event)" />
+												<mx:LinkButton label="Messages to Team" styleName="linkBtnBlue" fontSize="12" click="onMessageTeamClick(event)" />
 												<s:Spacer height="20"/>
 												<s:VGroup id="teamMessageLinks" width="20%" gap="2" />
 											</s:VGroup>
