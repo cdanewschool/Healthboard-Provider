@@ -15,6 +15,8 @@
 		<![CDATA[
 			import ASclasses.Constants;
 			
+			import ASfiles.ProviderConstants;
+			
 			import components.appointments.RequestItem;
 			import components.itemrenderers.DailyCustomChartLabel;
 			import components.itemrenderers.WeeklyCustomChartLabel;
@@ -27,6 +29,7 @@
 			import controllers.ApplicationController;
 			import controllers.AppointmentsController;
 			
+			import events.ApplicationEvent;
 			import events.AppointmentEvent;
 			import events.AutoCompleteEvent;
 			import events.MessageEvent;
@@ -37,9 +40,11 @@
 			import models.ProviderModel;
 			import models.UserModel;
 			
+			import mx.charts.AxisLabel;
 			import mx.charts.CategoryAxis;
 			import mx.charts.ChartItem;
 			import mx.charts.chartClasses.AxisBase;
+			import mx.charts.chartClasses.ChartLabel;
 			import mx.charts.chartClasses.IAxis;
 			import mx.charts.chartClasses.Series;
 			import mx.charts.events.ChartItemEvent;
@@ -88,6 +93,8 @@
 			private var printAppointmentsPopup:AppointmentReportPopup;
 			
 			private var _dirty:Boolean;
+			
+			private var pendingAppointments:Array;
 			
 			/**
 			 * The seleted providers. For this component, this means the providers whose
@@ -313,24 +320,46 @@
 			
 			private function cancelAppointment( event:AppointmentEvent = null ):void
 			{
-				Alert.show("Are you sure you want to cancel this appointment?", "Confirm", Alert.YES|Alert.NO, null, onCancelAppointmentConfirm, null, Alert.NO);
+				pendingAppointments = [ selectedAppointment ];
+				
+				confirmCancelAppointments();
+			}
+			
+			private function confirmCancelAppointments():void
+			{
+				Alert.show
+					(
+						"Are you sure you want to cancel " + (pendingAppointments.length > 1 ? "these" : "this" ) + " appointment?", "Confirm", 
+						Alert.YES|Alert.NO, null, onCancelAppointmentConfirm, null, Alert.NO
+					);
 			}
 			
 			private function onCancelAppointmentConfirm( event:CloseEvent ):void
 			{
 				if( event.detail == Alert.YES )
 				{
-					removeAppointment( selectedAppointment );
+					removeAppointments( pendingAppointments );
 					
 					onAddAppointmentCancel(null);
+				}
+				
+				pendingAppointments = null;
+			}
+			
+			private function removeAppointments( invalidAppointments:Array ):void
+			{
+				while( invalidAppointments.length )
+				{
+					removeAppointment( invalidAppointments.shift() );
 				}
 			}
 			
 			private function removeAppointment( appointment:Appointment ):void
 			{
-				appointments.removeItemAt( appointments.getItemIndex(appointment) );
+				appointments.removeItemAt( appointments.getItemIndex( appointment ) );
 				
-				selectedAppointment = null;
+				if( selectedAppointment == appointment )
+					selectedAppointment = null;
 			}
 			
 			private function onShowAutoComplete( event:AutoCompleteEvent ):void
@@ -398,6 +427,7 @@
 					column.labelFunction = getDataTip;
 					column.setStyle('labelPosition','inside');
 					column.setStyle('labelAlign','top');
+					column.setStyle('stroke',whiteStroke);
 					
 					chart.horizontalAxis = hAxis;
 					chart.horizontalAxisRenderers = [renderer];
@@ -438,6 +468,7 @@
 						column.dataFunction = valueFunctionWeek;
 						column.minField = 'anything';
 						column.fillFunction = getFill;
+						column.setStyle('stroke',whiteStroke);
 						column.dataProvider = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER );
 						series.push( column );
 					}
@@ -479,12 +510,58 @@
 			
 			private function onMessageAllForProvider( event:MessageEvent ):void
 			{
-				//	send message to all patients for this provider?
+				var provider:ProviderModel;
+				
+				for(var i:int=0;i<controller.model.selectedProviders.length;i++)
+				{
+					if( ProviderModel(controller.model.selectedProviders[i]).lastName == ChartLabel(event.target).data.value )
+					{
+						provider = ProviderModel(controller.model.selectedProviders[i]);
+						
+						break;
+					}
+				}
+				
+				if( !provider ) return;
+				
+				var patients:Array = [];
+				
+				var appointments:ArrayCollection = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER, viewRangeStartDate );
+				for each(var appointment:Appointment in appointments)
+				{
+					if( patients.indexOf( appointment.patient ) == -1 )
+					{
+						patients.push( appointment.patient );
+					}
+				}
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				evt.data = ProviderConstants.MODULE_MESSAGES;
+				evt.users = patients;
+				dispatchEvent( evt );
 			}
 			
 			private function onCancelAllForProvider( event:AppointmentEvent ):void
 			{
-				//	cancel all appointments for this provider?
+				var provider:ProviderModel;
+				
+				for(var i:int=0;i<controller.model.selectedProviders.length;i++)
+				{
+					if( ProviderModel(controller.model.selectedProviders[i]).lastName == ChartLabel(event.target).data.value )
+					{
+						provider = ProviderModel(controller.model.selectedProviders[i]);
+						
+						break;
+					}
+				}
+				
+				if( !provider ) return;
+				
+				var appointments:ArrayCollection = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER, viewRangeStartDate );
+				
+				pendingAppointments = appointments && appointments.length ? appointments.source : [];
+				
+				confirmCancelAppointments();
 			}
 			
 			private function onViewProvider( event:AppointmentEvent ):void
@@ -724,21 +801,7 @@
 			
 			private function onPrerequisitesClick(event:MouseEvent):void
 			{
-				var images:Vector.<ImageReference> = new Vector.<ImageReference>;
-				
-				for each(var pre:AppointmentPrerequisite in selectedAppointment.prerequisites)
-				{
-					var image:ImageReference = new ImageReference();
-					image.filePath = pre.path;
-					image.caption = pre.toString();
-					images.push( image );
-				}
-				
-				var popup:ViewAttachmentPopup = new ViewAttachmentPopup();
-				ViewAttachmentPopup(popup).fileReferences = images;
-					
-				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
-				PopUpManager.centerPopUp( popup );
+				AppointmentsController.getInstance().showPrerequisites( selectedAppointment );
 			}
 			
 			private function onDragDrop(event:DragEvent):void
@@ -874,6 +937,7 @@
 	<fx:Declarations>
 		<mx:SolidColorStroke id="xAxisStroke" color="0xB3B3B3" alpha=".1" />
 		<mx:SolidColorStroke id="yAxisStroke" color="0x86888A" alpha="1" />
+		<mx:SolidColorStroke id="whiteStroke" color="0xffffff" alpha="1" weight="0" />
 		
 		<fx:Array id="gridBackground">
 			

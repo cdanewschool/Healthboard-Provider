@@ -51,6 +51,11 @@
 				dispatchEvent( new ApplicationEvent( ApplicationEvent.SHOW_TOOLTIP, true ) );
 			}
 			
+			private function onTargetUserImageLoadError(event:IOErrorEvent):void
+			{
+				Image(event.currentTarget).source = provider.getDefaultProfilePictureURL( 'small' );
+			}
+			
 			private function init():void
 			{
 				profilePic.source = provider.getProfilePictureURL();
@@ -66,7 +71,7 @@
 		
 		<s:VGroup paddingTop="0">
 			<s:BorderContainer borderColor="0xE6E6E6" borderWeight="1" width="60" height="75"> 
-				<s:Image id="profilePic" />
+				<s:Image id="profilePic" ioError="onTargetUserImageLoadError(event)" />
 			</s:BorderContainer>
 		</s:VGroup>
 		

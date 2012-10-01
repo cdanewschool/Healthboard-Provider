@@ -123,6 +123,11 @@ package components.itemrenderers
 		private function onClick( event:MouseEvent ):void
 		{
 			anchor.displayPopUp = !anchor.displayPopUp;
+			
+			if( anchor.displayPopUp )
+			{
+				list.selectedItem = null;
+			}
 		}
 		
 		private function onItemSelect( event:IndexChangeEvent ):void
@@ -135,6 +140,8 @@ package components.itemrenderers
 			{
 				dispatchEvent( new AppointmentEvent( AppointmentEvent.CANCEL_ALL, true ) );
 			}
+			
+			anchor.displayPopUp = false;
 		}
 		
 		private function onLabelClick( event:MouseEvent ):void

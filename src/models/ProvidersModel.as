@@ -11,7 +11,7 @@ package models
 	[Bindable] 
 	public class ProvidersModel
 	{
-		public var providers:ArrayCollection = new ArrayCollection();
+		private var _providers:ArrayCollection = new ArrayCollection();
 		public var providerTeams:ArrayCollection = new ArrayCollection();
 		public var providerGroups:Dictionary = new Dictionary();
 		
@@ -26,7 +26,8 @@ package models
 		
 		public function reset():void
 		{
-			selectedProviderTeam = 0;
+			selectedProviderTeam = -1;
+			
 			searchText = "";
 			sortField = null;
 		}
@@ -100,6 +101,18 @@ package models
 		public function set searchText(value:String):void
 		{
 			_searchText = value;
+			filter();
+		}
+
+		public function get providers():ArrayCollection
+		{
+			return _providers;
+		}
+
+		public function set providers(value:ArrayCollection):void
+		{
+			_providers = value;
+			
 			filter();
 		}
 

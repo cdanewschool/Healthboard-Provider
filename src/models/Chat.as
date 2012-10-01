@@ -54,7 +54,7 @@ package models
 		
 		public function get label():String
 		{
-			return "" + (startTime.hours + ':' + startTime.minutes) + '-' + (endTime.hours + ':' + endTime.minutes) + ', ' + (Constants.MONTHS[endTime.month] + ' ' + endTime.date + ', ' + endTime.fullYear ) + ' - ' + targetUser.fullName;
+			return DateUtil.formatTimeFromDate( startTime, false ) + '-' + DateUtil.formatTimeFromDate( endTime, false ) + ', ' + (Constants.MONTHS[endTime.month] + ' ' + endTime.date + ', ' + endTime.fullYear ) + ' - ' + targetUser.fullName;
 		}
 	}
 }

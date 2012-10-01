@@ -28,6 +28,7 @@
 			import components.popups.ChatHistoryPopup;
 			import components.popups.ViewAttachmentPopup;
 			
+			import controllers.ApplicationController;
 			import controllers.ChatController;
 			
 			import events.ApplicationEvent;
@@ -50,7 +51,6 @@
 			
 			[Bindable] private var model:ChatSearch;
 			
-			[Bindable] public var user:UserModel;
 			[Bindable] private var targetUser:UserModel;
 			
 			private var chatPopup:IFlexDisplayObject;
@@ -69,7 +69,7 @@
 				
 				model.mode = ButtonBar(event.currentTarget).selectedItem.data;
 				
-				ChatController.getInstance().chat( user, targetUser );
+				ChatController.getInstance().chat( ApplicationController.getInstance().user, targetUser );
 			}
 			
 			private function viewHistory(event:MouseEvent):void
@@ -78,7 +78,7 @@
 				if( popup) PopUpManager.removePopUp( popup );
 				
 				popup = new ChatHistoryPopup();
-				ChatHistoryPopup(popup).user = user;
+				ChatHistoryPopup(popup).user = ApplicationController.getInstance().user;
 				ChatHistoryPopup(popup).chat = model;
 				
 				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
@@ -87,7 +87,35 @@
 			
 			private function onSearchChange(event:TextOperationEvent):void
 			{
-				model.searchText = TextInput(event.currentTarget).text;
+				var searchText:String = TextInput(event.currentTarget).text;
+				
+				model.searchText = "";
+				
+				var match:Boolean = false;
+				
+				for each(var item:UserModel in model.dataProvider)
+				{
+					if( item.fullName.toLowerCase() == searchText.toLowerCase() )
+					{
+						targetUser = item;
+						
+						searchText = item.fullName;
+						
+						match = true;
+						
+						break;
+					}
+				}
+				
+				if( !match 
+					&& targetUser )
+				{
+					targetUser = null;
+				}
+				
+				model.searchText = searchText;
+				
+				showResults();
 			}
 			
 			private function showResults():void
@@ -117,7 +145,7 @@
 			
 			private function getDisplayName(item:UserModel):String
 			{
-				return item.firstName + ' ' + item.lastName;
+				return item.fullName;
 			}
 			
 			private function onChatStateChange(event:ChatEvent):void
@@ -156,7 +184,7 @@
 			<s:DropDownList id="filterGroup" dataProvider="{model.chatGroups}" width="75" change="onGroupSelect(event)" labelField="firstName" styleName="dropDownListDark" />
 			
 			<s:HGroup id="searchBox" gap="-1">
-				<s:TextInput id="search" includeIn="default" styleName="{search.text == ChatSearch.SEARCH_PLACEHOLDER ? 'searchPlaceholder' : 'whiteText11'}" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="174" height="24" focusIn="showResults()" change="onSearchChange(event)" click="{if(search.text == ChatSearch.SEARCH_PLACEHOLDER) search.text=''}" />
+				<s:TextInput id="search" includeIn="default" styleName="{search.text == ChatSearch.SEARCH_PLACEHOLDER ? 'searchPlaceholder' : 'whiteText11'}" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="174" height="24" change="onSearchChange(event)" click="{if(search.text == ChatSearch.SEARCH_PLACEHOLDER) search.text=''};showResults();" />
 				<s:Label includeIn="connecting" text="{targetUser.fullName} - Connecting..." width="164" height="24" fontSize="10" enabled="false" color="0xFFFFFF" paddingTop="5"/>
 				<s:Label includeIn="declined" text="{targetUser.fullName} - Not online" width="164" height="24" fontSize="10" enabled="false" color="0xFFFFFF" paddingTop="5"/>
 				<s:Label includeIn="connected" text="{targetUser.fullName} - Connected" width="164" height="24" fontSize="10" enabled="false" color="0xFFFFFF" paddingTop="5"/>

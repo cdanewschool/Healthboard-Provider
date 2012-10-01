@@ -10,6 +10,8 @@
 	</s:layout>
 	<fx:Script>
 		<![CDATA[
+			import ASfiles.ProviderConstants;
+			
 			import components.popups.UserContextMenu;
 			
 			import controllers.ApplicationController;
@@ -82,7 +84,7 @@
 				else if( event.type == ProfileEvent.VIEW_APPOINTMENTS )
 				{
 					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-					evt.data = "modAppointments";
+					evt.data = ProviderConstants.MODULE_APPOINTMENTS;
 					dispatchEvent( evt );
 				}
 				else if( event.type == ProfileEvent.SEND_MESSAGE )

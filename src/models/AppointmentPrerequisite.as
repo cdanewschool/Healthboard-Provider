@@ -8,7 +8,7 @@ package models
 
 	public class AppointmentPrerequisite
 	{
-		private static const IMAGE_PATH:String = "images/diagnostic/{PATIENT_NAME}/{ID}.jpg";
+		private static const IMAGE_PATH:String = "images/diagnostic/{ID}.jpg";
 		
 		public var id:String;	//	used to find image (images/diagnostics/[patient_last_name]/[id].jpg)
 		public var title:String;

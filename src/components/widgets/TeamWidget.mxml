@@ -15,6 +15,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import ASfiles.ProviderConstants;
+			
 			import events.ApplicationEvent;
 			import events.EnhancedTitleWindowEvent;
 			
@@ -42,6 +44,14 @@
 			private function onTeamRollOver(event:ListEvent):void
 			{
 				teamRollOverRowIndex = event.rowIndex;
+			}
+			
+			private function onTeamClick(event:ListEvent):void
+			{
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				evt.data = ProviderConstants.MODULE_MESSAGES;
+				evt.users = [ DataGrid(event.currentTarget).selectedItem ];
+				dispatchEvent( evt );
 			}
 			
 			private function onSetTeam(value:Object):void
@@ -97,11 +107,11 @@
 		borderVisible="false" horizontalGridLines="true" horizontalGridLineColor="0x444442" verticalGridLines="true" 
 		alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
 		horizontalScrollPolicy="off" verticalScrollPolicy="on" rowHeight="22" horizontalSeparatorSkin="{null}" 
-		itemRollOver="onTeamRollOver(event)" itemRollOut="teamRollOverRowIndex=-1">
+		itemRollOver="onTeamRollOver(event)" itemRollOut="teamRollOverRowIndex=-1" itemClick="onTeamClick(event)">
 		<mx:columns>
 			<mx:DataGridColumn dataField="team" width="36" headerText="Team" />
 			<mx:DataGridColumn dataField="role"  width="53" headerText="Role" />
-			<mx:DataGridColumn width="47" headerText="Status">
+			<mx:DataGridColumn dataField="available" width="47" headerText="Status">
 				<mx:itemRenderer>
 					<fx:Component>
 						<mx:HBox width="27">
@@ -110,7 +120,7 @@
 					</fx:Component>
 				</mx:itemRenderer>
 			</mx:DataGridColumn>
-			<mx:DataGridColumn headerText="Name">
+			<mx:DataGridColumn dataField="lastName" headerText="Name">
 				<mx:itemRenderer>
 					<fx:Component>
 						<mx:HBox horizontalScrollPolicy="off" width="130">

@@ -1,20 +1,29 @@
 package utils
 {
+	import flash.globalization.DateTimeFormatter;
+	import flash.globalization.DateTimeStyle;
+	import flash.globalization.LocaleID;
+	
+	import utils.StringUtil;
+	
 	public class DateUtil
 	{
-		public static const SECOND:int = 1000;
-		public static const MINUTE:int = SECOND * 60;
-		public static const HOUR:int = MINUTE * 60;
-		public static const DAY:int = HOUR * 24;
-		public static const WEEK:int = DAY * 7;
-		public static const MONTH:int = WEEK * 4;
-		public static const YEAR:int = MONTH * 12;
+		public static const SECOND:Number = 1000;
+		public static const MINUTE:Number = SECOND * 60;
+		public static const HOUR:Number = MINUTE * 60;
+		public static const DAY:Number = HOUR * 24;
+		public static const WEEK:Number = DAY * 7;
+		public static const MONTH:Number = WEEK * 4;
+		public static const YEAR:Number = MONTH * 12;
 		
-		public static function compareDates(date1:Date, date2:Date):int
+		public static var DATE_FORMATTER_DAY:DateTimeFormatter = new DateTimeFormatter( LocaleID.DEFAULT, DateTimeStyle.MEDIUM, DateTimeStyle.NONE );
+		
+		DATE_FORMATTER_DAY.setDateTimePattern('EEE, MMM dd');
+		
+		public static function compareDates(date1:Date, date2:Date):Number
 		{
 			return date1.time - date2.time;
 		}
-		
 		
 		public static function formatTime( ms:int ):String
 		{
@@ -26,13 +35,12 @@ package utils
 			var minutes:int = Math.floor( ms/MINUTE );
 			ms -= (minutes * MINUTE);
 			
-			parts.push( hours<10?'0'+hours:hours );
-			parts.push( minutes<10?'0'+minutes:minutes );
-			
-			var seconds:int = parts.push( Math.floor( ms/SECOND ) );
+			var seconds:int = Math.floor( ms/SECOND );
 			ms -= (seconds * SECOND);
-				
-			parts.push( seconds<10?'0'+seconds:seconds );
+			
+			parts.push( StringUtil.leftPad(hours.toString()) );
+			parts.push( StringUtil.leftPad(minutes.toString()) );
+			parts.push( StringUtil.leftPad(seconds.toString()) );
 			
 			return parts.join( ':' );
 		}
@@ -41,12 +49,12 @@ package utils
 		{
 			var parts:Array = [];
 			
-			parts.push( date.hours<10?'0'+date.hours:date.hours );
-			parts.push( date.minutes<10?'0'+date.minutes:date.minutes );
+			parts.push( StringUtil.leftPad(date.hours.toString()) );
+			parts.push( StringUtil.leftPad(date.minutes.toString()) );
 			
 			if( includeSeconds )
 			{
-				parts.push( date.seconds<10?'0'+date.seconds:date.seconds );
+				parts.push( StringUtil.leftPad(date.seconds.toString()) );
 			}
 			
 			return parts.join( includeColon?':':'');

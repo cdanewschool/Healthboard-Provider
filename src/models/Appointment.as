@@ -69,6 +69,7 @@ package models
 		public var reason:String;
 		
 		public var location:String;
+		public var room:String;
 		
 		public var prerequisites:ArrayCollection;
 		
@@ -92,24 +93,25 @@ package models
 			return Constants.MONTHS_ABBR[ date.month ] + ' ' + date.date + ', ' +  date.fullYear + ' at ' + DateUtil.formatTimeFromDate( date ); 
 		}
 		
-		public function getPrerequisitesString():String
+		public function getPrerequisitesString( actionable:Boolean = false ):String
 		{
 			if( prerequisites.length ) 
 			{
 				var items:Array = [];
 				for each(var prerequisite:AppointmentPrerequisite in prerequisites) 
-					items.push( prerequisite.title );
+					items.push( (actionable?"<a href='showPrerequisite,"+prerequisite.id+"'><span color='0xAEDBE2'>":null) + prerequisite.title +  (actionable?"</span></a>":null) );
 				return items.join('; ');
 			}
 			
 			return 'None';
 		}
 		
-		public function toString():String
+		public function toString( actionable:Boolean = false ):String
 		{
-			var str:String = from.month + '/' + from.date + '/' + from.fullYear + ' ';
-			str += 'appointment at ' + DateUtil.formatTimeFromDate( from ) + ' with ' + patient.fullName;
-			str += '\nPrerequisite: ' + getPrerequisitesString();
+			var str:String = (from.month + 1) + '/' + from.date + '/' + from.fullYear + ' ';
+			str += 'appointment at ' + DateUtil.formatTimeFromDate( from ) + ' with ' + (actionable?"<a href='showPatient,"+patient.id+"'><span color='0xAEDBE2'>":null) + patient.fullName + (actionable?"</span></a>":null);
+			str += '\n' + getTypeByKey( type ).label + (room?' in Room ' + room:null) + (reason?' - ' + reason:null);
+			str += '\nPrerequisite: ' + getPrerequisitesString( actionable );
 			
 			return str;
 		}

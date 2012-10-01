@@ -1,15 +1,22 @@
 package controllers
 {
+	import components.popups.ViewAttachmentPopup;
+	
+	import flash.display.DisplayObject;
 	import flash.utils.Dictionary;
 	
 	import models.Appointment;
+	import models.AppointmentPrerequisite;
 	import models.AppointmentsModel;
+	import models.ImageReference;
 	import models.UserModel;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.FlexGlobals;
 	import mx.graphics.GradientEntry;
 	import mx.graphics.IFill;
 	import mx.graphics.LinearGradient;
+	import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
 
 	[Bindable]
@@ -64,6 +71,25 @@ package controllers
 			}
 			
 			return results;
+		}
+		
+		public function showPrerequisites( appointment:Appointment ):void
+		{
+			var images:Vector.<ImageReference> = new Vector.<ImageReference>;
+			
+			for each(var pre:AppointmentPrerequisite in appointment.prerequisites)
+			{
+				var image:ImageReference = new ImageReference();
+				image.filePath = pre.path;
+				image.caption = pre.toString();
+				images.push( image );
+			}
+			
+			var popup:ViewAttachmentPopup = new ViewAttachmentPopup();
+			ViewAttachmentPopup(popup).fileReferences = images;
+			
+			PopUpManager.addPopUp( popup, DisplayObject(FlexGlobals.topLevelApplication), true );
+			PopUpManager.centerPopUp( popup );
 		}
 		
 		public function getFill( type:String ):IFill

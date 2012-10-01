@@ -175,7 +175,7 @@
 		<s:layout>
 			<s:BasicLayout />
 		</s:layout>
-		<s:Button label="Edit" click="editProfile(event)" horizontalCenter="0" enabled="{provider.id == ProviderConstants.USER_ID}" />
+		<s:Button label="Edit" click="editProfile(event)" horizontalCenter="0" visible="{provider.id == ProviderConstants.USER_ID}" />
 	</s:Group>
 	
 </s:NavigatorContent>
