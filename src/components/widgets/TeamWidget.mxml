@@ -20,6 +20,7 @@
 			import events.ApplicationEvent;
 			import events.EnhancedTitleWindowEvent;
 			
+			import models.Message;
 			import models.ProvidersModel;
 			
 			import mx.binding.utils.BindingUtils;
@@ -48,9 +49,12 @@
 			
 			private function onTeamClick(event:ListEvent):void
 			{
+				var message:Message = new Message();
+				message.recipients = [ DataGrid(event.currentTarget).selectedItem ];
+				
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
 				evt.data = ProviderConstants.MODULE_MESSAGES;
-				evt.users = [ DataGrid(event.currentTarget).selectedItem ];
+				evt.message = message;
 				dispatchEvent( evt );
 			}
 			

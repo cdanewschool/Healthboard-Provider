@@ -37,6 +37,7 @@
 			import models.Appointment;
 			import models.AppointmentPrerequisite;
 			import models.ImageReference;
+			import models.Message;
 			import models.ProviderModel;
 			import models.UserModel;
 			
@@ -338,6 +339,26 @@
 			{
 				if( event.detail == Alert.YES )
 				{
+					var patients:Array = [];
+					
+					for each(var appointment:Appointment in pendingAppointments)
+					{
+						if( patients.indexOf( appointment.patient ) == -1 )
+						{
+							patients.push( appointment.patient );
+						}
+					}
+					
+					var message:Message = new Message();
+					message.recipients = patients;
+					message.body = "All appointments for Wednesday, October 12, 2011 will be delayed by 15–20 minutes. I apologize for the inconvenience and thank you for your patience.";
+					message.urgency = Message.URGENCY_URGENT;
+					
+					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+					evt.data = ProviderConstants.MODULE_MESSAGES;
+					evt.message = message;
+					dispatchEvent( evt );
+					
 					removeAppointments( pendingAppointments );
 					
 					onAddAppointmentCancel(null);
@@ -535,9 +556,12 @@
 					}
 				}
 				
+				var message:Message = new Message();
+				message.recipients = patients;
+				
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
 				evt.data = ProviderConstants.MODULE_MESSAGES;
-				evt.users = patients;
+				evt.message = message;
 				dispatchEvent( evt );
 			}
 			

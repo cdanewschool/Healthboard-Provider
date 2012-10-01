@@ -29,6 +29,7 @@
 			import events.ProfileEvent;
 			import events.ProviderEvent;
 			
+			import models.Message;
 			import models.ProviderModel;
 			import models.ProvidersModel;
 			import models.UserModel;
@@ -56,10 +57,13 @@
 			
 			private function sendMessage( recipients:Array, alias:String = null ):void
 			{
+				var message:Message = new Message();
+				message.recipients = recipients;
+				message.recipientAlias = alias;
+				
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
 				evt.data = ProviderConstants.MODULE_MESSAGES;
-				evt.users = recipients;
-				evt.alias = alias;
+				evt.message = message;
 				dispatchEvent( evt );	
 			}
 			
@@ -227,9 +231,12 @@
 			
 			protected function onTeamClick(event:ListEvent):void 
 			{
+				var message:Message = new Message();
+				message.recipients = [ DataGrid(event.currentTarget).selectedItem ];
+				
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
 				evt.data = ProviderConstants.MODULE_MESSAGES;
-				evt.users = [ DataGrid(event.currentTarget).selectedItem ];
+				evt.message = message;
 				dispatchEvent( evt );
 			}
 			
