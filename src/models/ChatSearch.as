@@ -5,6 +5,9 @@ package models
 	import flash.events.EventDispatcher;
 	
 	import mx.collections.ArrayCollection;
+	import mx.collections.Sort;
+	
+	import spark.collections.SortField;
 
 	[Bindable] 
 	public class ChatSearch extends EventDispatcher
@@ -73,12 +76,17 @@ package models
 			else if( selectedChatGroup == 2 )
 				dataProvider = new ArrayCollection( providers.source );
 			
+			var sort:Sort = new Sort();
+			sort.fields = [ new SortField('lastName') ];
+				
+			dataProvider.filterFunction = filterFunction;
+			dataProvider.sort = sort;
+			
 			filter();
 		}
 		
 		private function filter():void 
 		{
-			dataProvider.filterFunction = filterFunction;
 			dataProvider.refresh();
 		}
 		
@@ -87,7 +95,7 @@ package models
 			var valid:Boolean = true;
 			
 			var search:String = searchText ? searchText.toLowerCase() : "";
-			if( valid && search != "" && search != SEARCH_PLACEHOLDER ) valid = item.firstName.toLowerCase().indexOf( search ) > -1 || item.lastName.toLowerCase().indexOf( search ) > -1;
+			if( valid && search != "" && search != SEARCH_PLACEHOLDER ) valid = item.fullName.toLowerCase().indexOf( search ) > -1;
 			
 			return valid;
 		}

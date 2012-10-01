@@ -212,16 +212,9 @@ private var autocomplete:AutoComplete;
 
 private function onShowAutoComplete( event:AutoCompleteEvent ):void
 {
-	if( autocomplete 
-		&& autocomplete.parent 
-		&& autocomplete.targetField == event.targetField 
-		&& autocomplete.dataProvider == event.dataProvider )
-		return;
-	
 	if( !autocomplete )
 	{
 		autocomplete = new AutoComplete();
-		autocomplete.width = event.desiredWidth ? event.desiredWidth : event.targetField.width;
 		autocomplete.addEventListener( Event.CHANGE, onAutocompleteSelect );
 		autocomplete.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
 	}
@@ -230,6 +223,7 @@ private function onShowAutoComplete( event:AutoCompleteEvent ):void
 	autocomplete.callbackFunction = event.callbackFunction;
 	autocomplete.labelFunction = event.labelFunction;
 	autocomplete.dataProvider = event.dataProvider;
+	autocomplete.width = event.desiredWidth ? event.desiredWidth : event.targetField.width;
 	
 	PopUpManager.addPopUp( autocomplete, this );
 }
@@ -308,6 +302,8 @@ private function onNavigate(event:ApplicationEvent):void
 			}
 		}
 	}
+	
+	onHideAutoComplete();
 }
 
 private function toggleAvailability(event:MouseEvent):void
