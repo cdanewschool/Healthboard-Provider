@@ -10,93 +10,26 @@
 	</s:layout>
 	<fx:Script>
 		<![CDATA[
-			import ASfiles.ProviderConstants;
-			
-			import components.popups.UserContextMenu;
-			
-			import controllers.ApplicationController;
-			import controllers.AppointmentsController;
-			import controllers.ChatController;
-			
 			import events.ApplicationEvent;
-			import events.ProfileEvent;
 			
 			import models.PatientModel;
 			
 			import mx.collections.ArrayCollection;
-			import mx.managers.PopUpManager;
 			import mx.rpc.events.ResultEvent;
 			
 			import spark.filters.DropShadowFilter;
 			
 			[Bindable] public var patient:PatientModel;
 			
-			private var userOptions:UserContextMenu;
-			
 			private function init():void 
 			{
-				addEventListener( MouseEvent.CLICK, onClick );
-			}
-			
-			private function onClick( event:MouseEvent ):void
-			{
-				if( userOptions 
-					&& userOptions.parent 
-					&& !userOptions.hitTestPoint( event.stageX, event.stageY ) )
-				{
-					closeContextMenu();
-				}
 			}
 			
 			protected function onPatientNameClick(event:MouseEvent):void 
 			{
-				if( userOptions ) closeContextMenu();
-				
-				userOptions = new UserContextMenu();
-				userOptions.user = patient;
-				userOptions.addEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
-				userOptions.addEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
-				userOptions.addEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );
-				userOptions.addEventListener( ProfileEvent.START_CHAT, onUserAction );
-				
-				userOptions.x = stage.mouseX;
-				userOptions.y = stage.mouseY;
-				
-				PopUpManager.addPopUp( userOptions, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
-			}
-			
-			private function closeContextMenu():void
-			{
-				userOptions.removeEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
-				userOptions.removeEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
-				userOptions.removeEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );
-				userOptions.removeEventListener( ProfileEvent.START_CHAT, onUserAction );
-				
-				PopUpManager.removePopUp( userOptions );
-			}
-			
-			private function onUserAction( event:ProfileEvent ):void
-			{
-				if( event.type == ProfileEvent.VIEW_PROFILE )
-				{
-					//	implement
-				}
-				else if( event.type == ProfileEvent.VIEW_APPOINTMENTS )
-				{
-					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-					evt.data = ProviderConstants.MODULE_APPOINTMENTS;
-					dispatchEvent( evt );
-				}
-				else if( event.type == ProfileEvent.SEND_MESSAGE )
-				{
-					
-				}
-				else if( event.type == ProfileEvent.START_CHAT )
-				{
-					ChatController.getInstance().chat( ApplicationController.getInstance().user, event.user );
-				}
-				
-				closeContextMenu();
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_CONTEXT_MENU, true );
+				evt.user = patient;
+				dispatchEvent( evt );
 			}
 			
 			[Bindable] private var widgetLibraryOpen:Boolean = false;
