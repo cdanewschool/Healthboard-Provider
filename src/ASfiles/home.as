@@ -179,7 +179,7 @@ private function providersResultHandler(event:ResultEvent):void {
 	
 	var results:ArrayCollection = event.result.providers.provider;
 	
-	var teams:Array = [ {label:"Show All",value:-1} ];
+	var teams:Array = [ {label:"All",value:-1} ];
 	
 	var providers:ArrayCollection = new ArrayCollection();
 	

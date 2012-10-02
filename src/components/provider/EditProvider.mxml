@@ -4,9 +4,9 @@
    	xmlns:s="library://ns.adobe.com/flex/spark" 
    	xmlns:mx="library://ns.adobe.com/flex/mx" 
    	skinClass="skins.general.myChromelessTitleWindow" 
-   	backgroundColor="0x706F6F" borderColor="0x898989" borderVisible="false" styleName="whiteBoldTitle" dropShadowVisible="false" chromeColor="0x706F6F" cornerRadius="10" 
-   	title="User Profile" 
-	width="884" 
+   	backgroundColor="0x706F6F" borderColor="0xFFFFFF" borderAlpha=".7" borderVisible="true" styleName="whiteBoldTitle" dropShadowVisible="false" chromeColor="0x706F6F" cornerRadius="4" 
+   	title=" User Profile" 
+	width="980" height="681" 
 	controlBarVisible="true" 
 	creationComplete="init()"
 	close="PopUpManager.removePopUp(this)" > 
@@ -57,7 +57,7 @@
 			private function init():void
 			{
 				controlBarVisible = false;
-				profilePic.source = provider.getProfilePictureURL();
+				profilePic.source = provider.getProfilePictureURL("med");
 			}
 		]]>
 	</fx:Script>
@@ -66,56 +66,55 @@
 		<s:HorizontalLayout paddingTop="5" paddingLeft="15" gap="0" />
 	</s:layout>
 	
-	<s:controlBarContent />
+	<!--<s:controlBarContent />-->
 	
 	<s:VGroup paddingTop="10">
-		<s:BorderContainer borderColor="0xBBBDBF" borderWeight="1" width="60" height="75"> 
+		<s:BorderContainer borderColor="0xBBBDBF" borderWeight="1" width="107" height="135"> 
 			<mx:Image id="profilePic" />
 		</s:BorderContainer>
-		<mx:LinkButton id="btnChangePic" label="Change profile picture" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" textDecoration="underline" fontSize="12" fontWeight="normal" skin="{null}" paddingLeft="-2" rollOver="btnChangePic.styleName='linkBtnUnderline';" rollOut="btnChangePic.styleName='linkBtn';" />
+		<mx:LinkButton id="btnChangePic" label="Change profile picture" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" fontSize="12" fontWeight="normal" skin="{null}" paddingLeft="-2" rollOver="btnChangePic.styleName='linkBtnUnderline';" rollOut="btnChangePic.styleName='linkBtn';" />
 	</s:VGroup>
 	
-	<mx:Form id="myForm" styleName="whiteText13">			
+	<mx:Form id="myForm" styleName="whiteText13" paddingLeft="-3">			
 		
-		<s:HGroup gap="47">
+		<s:HGroup gap="156">
 			
-			<s:VGroup>
-				<mx:FormHeading label="{parentApplication.fullname}" styleName="blueBoldSubtitle" paddingTop="-5"/>
-				<s:HGroup height="24">
-					<s:Label width="116" textAlign="right" text="DOB:" />
-					<s:Label text="{provider.birthday}" paddingLeft="13" />
+			<s:VGroup gap="13">
+				<mx:FormHeading label="{provider.fullName}" styleName="blueBoldSubtitle" paddingTop="-5"/>
+				<s:HGroup paddingTop="-4">
+					<s:Label width="99" textAlign="right" text="DOB:" />
+					<s:Label text="{provider.birthday}" />
 				</s:HGroup>
-				<s:HGroup height="24"> 
-					<s:Label width="116" textAlign="right" text="Sex:" />
-					<s:Label text="{provider.sex}" paddingLeft="13" />
+				<s:HGroup> 
+					<s:Label width="99" textAlign="right" text="Sex:" />
+					<s:Label text="{provider.sex}" />
 				</s:HGroup>
-				<s:HGroup height="24">
-					<s:Label width="116" textAlign="right" text="Team:" />
-					<s:Label text="{provider.team}" paddingLeft="13" />
+				<s:HGroup>
+					<s:Label width="99" textAlign="right" text="Team:" />
+					<s:Label text="{provider.team}" />
 				</s:HGroup>
-				<s:HGroup height="24">
-					<s:Label width="116" textAlign="right" text="Role:" />
-					<s:Label text="{provider.role}" paddingLeft="13" />
+				<s:HGroup>
+					<s:Label width="99" textAlign="right" text="Role:" />
+					<s:Label text="{provider.role}" />
 				</s:HGroup>
 			</s:VGroup>
 			
-			<s:VGroup>
+			<s:VGroup gap="3" paddingTop="-3">
+				<s:Label text="Security" paddingLeft="264" styleName="greenBoldText" paddingBottom="10" />
 				
-				<s:Label text="Security" paddingLeft="264" styleName="greenBoldText" />
-				
-				<mx:FormItem label="Password:" labelWidth="250" height="24">
+				<mx:FormItem label="Password:" labelWidth="250">
 					<s:TextInput maxChars="20" text="{provider.password}" styleName="black" displayAsPassword="true" focusOut="saveField(event,'password')" />
 				</mx:FormItem>
-				<mx:FormItem label="Password confirmation:" labelWidth="250" height="24">
+				<mx:FormItem label="Password confirmation:" labelWidth="250">
 					<s:TextInput maxChars="20" text="{provider.password}" styleName="black" displayAsPassword="true" />
 				</mx:FormItem>
-				<mx:FormItem label="Security Question:" labelWidth="250" height="24">
-					<s:DropDownList dataProvider="{securityQuestions}" selectedIndex="{parseInt(provider.securityQuestion)}" styleName="buttonText" focusOut="saveField(event,'password')"/>
+				<mx:FormItem label="Security Question:" labelWidth="250">
+					<s:DropDownList dataProvider="{securityQuestions}" selectedIndex="{parseInt(provider.securityQuestion)}" styleName="buttonText" width="194" focusOut="saveField(event,'password')"/>
 				</mx:FormItem>
-				<mx:FormItem label="Answer for Security Question:" labelWidth="250" height="24">
+				<mx:FormItem label="Answer for Security Question:" labelWidth="250">
 					<s:TextInput text="{provider.securityAnswer}" styleName="black" focusOut="saveField(event,'securityAnswer')"/>
 				</mx:FormItem>
-				<mx:FormItem label="E-mail Address:" labelWidth="250" height="24">
+				<mx:FormItem label="E-mail Address:" labelWidth="250">
 					<s:TextInput text="{provider.email}" styleName="black" focusOut="saveField(event,'email')"/>
 				</mx:FormItem>
 				

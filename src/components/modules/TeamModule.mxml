@@ -24,10 +24,12 @@
 			import models.ProviderModel;
 			import models.ProvidersModel;
 			
+			import mx.controls.Alert;
 			import mx.events.ListEvent;
 			
 			[Bindable] public var model:ProvidersModel;
 			[Bindable] public var teamRollOverRowIndex:int;
+			public var link:LinkButton;
 			
 			private const SEARCH_PLACEHOLDER:String = 'Search Patients';
 			
@@ -66,32 +68,53 @@
 					var header:Label = new Label();
 					header.setStyle('fontSize',12);
 					header.setStyle('color',"0xFFFFFF");
+					header.setStyle('paddingLeft',3);
 					header.text = group;
 					holder.addElement( header );
 					
-					var link:LinkButton = new LinkButton();
-					link.label = "Message to All " + group + "s";
-					link.styleName = "linkBtnBlue";
+					link = new LinkButton();
+					link.label = "Message to All " + group + "s »";
+					link.setStyle('paddingLeft',0);
 					link.setStyle('fontSize',12);
+					link.setStyle('color',"0xAEDEE4");
+					link.setStyle("textRollOverColor","0xAEDEE4");
+					link.setStyle("textSelectedColor","0xAEDEE4");
+					link.setStyle("skin", null);
+					//link.addEventListener(MouseEvent.ROLL_OVER,manageMouseOver);		//not working properly (it adds the underline to the last button only)
+					//link.addEventListener(MouseEvent.ROLL_OUT,manageMouseOut);
 					holder.addElement( link );
 					
 					var spacer:Spacer = new Spacer();
-					spacer.height = 10;
+					spacer.height = 18;
 					holder.addElement( spacer );
 					
 					for each(var teamMember:Object in teamGroup.members)
 					{
 						link = new LinkButton();
 						link.label = teamMember.firstName + ' ' + teamMember.lastName;
-						link.styleName = "linkBtnBlue";
+						link.setStyle('paddingLeft',0);
 						link.setStyle('fontSize',12);
+						link.setStyle('color',"0xAEDEE4");
+						link.setStyle("textRollOverColor","0xAEDEE4");
+						link.setStyle("textSelectedColor","0xAEDEE4");
+						link.setStyle("skin", null);
+						//link.addEventListener(MouseEvent.ROLL_OVER,manageMouseOver);		//not working properly (it adds the underline to the last button only)
+						//link.addEventListener(MouseEvent.ROLL_OUT,manageMouseOut);
 						holder.addElement( link );
 					}
 					
 					spacer = new Spacer();
-					spacer.height = 20;
+					spacer.height = 26;
 					holder.addElement( spacer );
 				}
+			}
+			
+			private function manageMouseOver(event:MouseEvent):void{
+				link.setStyle("styleName",'linkBtnUnderline');
+			}
+			
+			private function manageMouseOut(event:MouseEvent):void{
+				link.setStyle("styleName",'linkBtn');	
 			}
 			
 			private function showTeamMember( data:ProviderModel ):void
@@ -137,9 +160,9 @@
 	
 	<components:ModuleHeader id="header" title="Team Profile" icon="@Embed('images/patientHome.png')" showSearch="true" searchPlaceholder="Search Patients" searchFunction="{onHeaderSearch}" navigate="onHeaderClick(event)" />
 	
-	<s:HGroup width="100%" paddingTop="30">
+	<s:HGroup width="100%" paddingTop="14" gap="25" horizontalAlign="center">
 		
-		<mx:VBox width="100" height="100%" paddingLeft="20" paddingTop="5">
+		<mx:VBox width="100" height="100%" paddingTop="5">
 			
 			<mx:Repeater id="teamList" dataProvider="{model.providerTeams}">
 				<mx:LinkButton name="{teamList.currentItem.value}" label="{teamList.currentItem.label}" click="selectTeam(event);" textAlign="left" styleName="linkBtnOrange" fontSize="13" fontWeight="bold" height="25" />
@@ -149,7 +172,7 @@
 		
 		<s:Group creationComplete="{tabsTeamMembers.setTabClosePolicy(0, false);}">
 			
-			<mx:ViewStack id="viewStackTeamMembers" borderColor="0xBDBCBC" cornerRadius="2" backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" width="884" y="37">
+			<mx:ViewStack id="viewStackTeamMembers" borderColor="0xBDBCBC" cornerRadius="2" backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" width="825" y="22">
 				
 				<s:NavigatorContent label="Profiles">
 					
@@ -169,7 +192,7 @@
 						
 					</s:BorderContainer>
 					
-					<s:Line xFrom="0" xTo="884">
+					<s:Line xFrom="0" xTo="823">
 						<s:stroke>
 							<s:SolidColorStroke color="0xBDBCBC"/>
 						</s:stroke>
@@ -178,27 +201,27 @@
 					<mx:ViewStack id="viewsTeamMembers" width="100%" creationPolicy="all" selectedIndex="1">
 						
 						<!--	profile view	-->
-						<s:NavigatorContent>
+						<s:NavigatorContent backgroundColor="0x303031">
 							
-							<s:Scroller width="100%" height="600" horizontalScrollPolicy="off">
+							<s:Scroller width="100%" height="588" horizontalScrollPolicy="off">
 								
-								<s:VGroup paddingTop="40">
+								<s:VGroup paddingTop="12">
 									
-									<s:Label styleName="greenBoldText" text="{model.selectedProviderTeam>-1?'Team ' + (model.selectedProviderTeam+1):'All Teams'}" paddingLeft="10" />
+									<s:Label styleName="greenBoldText" text="{model.selectedProviderTeam>-1?'Team ' + (model.selectedProviderTeam+1):'All Teams'}" paddingLeft="14" />
 									
-									<mx:ViewStack selectedIndex="{model.selectedProviderTeam==-1?0:1}" paddingBottom="20" resizeToContent="true">
+									<mx:ViewStack selectedIndex="{model.selectedProviderTeam==-1?0:1}" height="64">
 										
 										<!--	all teams	-->
 										<s:NavigatorContent>
 											
-											<s:VGroup paddingLeft="10">	
-												<s:HGroup>
-													<s:Label text="Number of teams:" textAlign="right" width="100" styleName="grayTextBold11" />
-													<s:Label text="{model.providerTeams.length}" />
+											<s:VGroup paddingLeft="10" gap="4">	
+												<s:HGroup verticalAlign="middle">
+													<s:Label text="Number of Teams:" textAlign="right" width="100" styleName="grayTextBold11" />
+													<s:Label text="{model.providerTeams.length}" color="0xFFFFFF" />
 												</s:HGroup>
-												<s:HGroup>
+												<s:HGroup verticalAlign="middle">
 													<s:Label text="Team Members:" textAlign="right" width="100" styleName="grayTextBold11" />
-													<s:Label text="{model.providers.length}" />
+													<s:Label text="{model.providers.length}" color="0xFFFFFF" />
 												</s:HGroup>
 											</s:VGroup>
 											
@@ -210,38 +233,38 @@
 											<s:HGroup width="100%" paddingLeft="10">
 												
 												<!--	column 1	-->
-												<s:VGroup width="50%">	
-													<s:HGroup>
+												<s:VGroup width="313" gap="4">	
+													<s:HGroup verticalAlign="middle">
 														<s:Label text="Date Created:" textAlign="right" width="100" styleName="grayTextBold11" />
-														<s:Label text="August 1, 2011" />
+														<s:Label text="August 1, 2011" color="0xFFFFFF" />
 													</s:HGroup>
-													<s:HGroup>
+													<s:HGroup verticalAlign="middle">
 														<s:Label text="Created by:" textAlign="right" width="100" styleName="grayTextBold11" />
-														<s:Label text="Hugh Spencer (ADMIN)" />
+														<s:Label text="Hugh Spencer (ADMIN)" color="0xFFFFFF" />
 													</s:HGroup>
-													<s:HGroup>
+													<s:HGroup verticalAlign="middle">
 														<s:Label text="Purpose:" textAlign="right" width="100" styleName="grayTextBold11" />
-														<s:Label text="General care and emergency care" />
+														<s:Label text="General care and emergency care" color="0xFFFFFF" />
 													</s:HGroup>
 												</s:VGroup>
 												
 												<!--	column 2	-->
-												<s:VGroup width="50%">
-													<s:HGroup>
+												<s:VGroup gap="4">
+													<s:HGroup verticalAlign="middle">
 														<s:Label text="Last Updated:" textAlign="right" width="100" styleName="grayTextBold11" />
-														<s:Label text="August 1, 2011" />
+														<s:Label text="August 1, 2011" color="0xFFFFFF" />
 													</s:HGroup>
-													<s:HGroup>
+													<s:HGroup verticalAlign="middle">
 														<s:Label text="Updated by:" textAlign="right" width="100" styleName="grayTextBold11" />
-														<s:Label text="Bob Ferguson" />
+														<s:Label text="Bob Ferguson" color="0xFFFFFF" />
 													</s:HGroup>
-													<s:HGroup>
+													<s:HGroup verticalAlign="middle">
 														<s:Label text="Location:" textAlign="right" width="100" styleName="grayTextBold11" />
-														<s:Label text="NMMC" />
+														<s:Label text="NMMC" color="0xFFFFFF" />
 													</s:HGroup>
-													<s:HGroup>
+													<s:HGroup verticalAlign="middle">
 														<s:Label text="Team members:" textAlign="right" width="100" styleName="grayTextBold11" />
-														<s:Label text="{model.providers.length}"/>
+														<s:Label text="{model.providers.length}" color="0xFFFFFF" />
 													</s:HGroup>
 												</s:VGroup>
 											</s:HGroup>
@@ -250,30 +273,30 @@
 										
 									</mx:ViewStack>
 									
-									<s:Line xFrom="0" xTo="884">
+									<s:Line xFrom="0" xTo="823">
 										<s:stroke>
-											<s:SolidColorStroke color="0xBDBCBC" weight="2" />
+											<s:SolidColorStroke color="0x7C7C7C" weight="1" />
 										</s:stroke>
 									</s:Line>
 									
-									<s:HGroup width="100%" paddingLeft="10" paddingTop="10">
+									<s:HGroup width="100%" paddingLeft="9" paddingTop="10">
 										
-										<s:VGroup width="20%">
+										<s:VGroup width="130">
 											
-											<s:VGroup>
-												<mx:LinkButton label="View Team Schedule" styleName="linkBtnBlue" fontSize="12" />
-												<mx:LinkButton label="Messages to Team" styleName="linkBtnBlue" fontSize="12" />
-												<s:Spacer height="20"/>
-												<s:VGroup id="teamMessageLinks" width="20%" gap="2" />
+											<s:VGroup gap="-4">
+												<mx:LinkButton id="btnViewSchedule" label="View Team Schedule »" paddingLeft="0" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnViewSchedule.styleName='linkBtnUnderline';}" rollOut="btnViewSchedule.styleName='linkBtn';" />
+												<mx:LinkButton id="btnMessageTeam" label="Messages to Team »" paddingLeft="0" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnMessageTeam.styleName='linkBtnUnderline';}" rollOut="btnMessageTeam.styleName='linkBtn';" />
+												<s:Spacer height="22"/>
+												<s:VGroup id="teamMessageLinks" gap="-4" />
 											</s:VGroup>
 											
 										</s:VGroup>
 										
 										<s:TileGroup 
 											id="teamProfileList" 
-											horizontalGap="20" verticalGap="20" 
+											horizontalGap="19" verticalGap="19" 
 											requestedColumnCount="2" columnWidth="{ProviderProfile.WIDTH}" 
-											paddingTop="10" paddingBottom="20" />
+											paddingBottom="20" />
 										
 									</s:HGroup>
 									
@@ -287,7 +310,7 @@
 						<s:NavigatorContent>
 							<mx:DataGrid 
 								buttonMode="false" selectable="true" 
-								width="100%" height="600"
+								width="100%" height="588"
 								color="0xFFFFFF" fontFamily="myMyriadNoCFF" verticalAlign="middle"
 								dataProvider="{model.providers}"
 								rowHeight="25" headerHeight="25"
@@ -308,9 +331,9 @@
 															import mx.collections.ListCollectionView;
 														]]>
 													</fx:Script>
-													<s:Label text="{data.firstName + ' ' + data.lastName}" fontSize="12" paddingLeft="10" fontFamily="myMyriad" width="130" />
-													<mx:HBox width="16">
-														<s:Image id="iconImage" source="@Embed('images/messagesEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
+													<s:Label text="{data.firstName + ' ' + data.lastName}" fontSize="12" paddingLeft="10" fontFamily="myMyriad" width="115" />
+													<mx:HBox width="30">
+														<s:Image id="iconImage" source="@Embed('images/grayEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
 													</mx:HBox>
 												</mx:HBox>
 											</fx:Component>
@@ -327,7 +350,7 @@
 				</s:NavigatorContent>
 				
 			</mx:ViewStack>
-			<plus:TabBarPlus id="tabsTeamMembers" gap="6" height="38" left="0" cornerRadius="5" styleName="messagesTabs" closePolicy="always" dataProvider="{viewStackTeamMembers}" fontSize="14" />
+			<plus:TabBarPlus id="tabsTeamMembers" gap="6" cornerRadius="4" styleName="messagesTabs" closePolicy="always" dataProvider="{viewStackTeamMembers}" />
 		</s:Group>
 		
 	</s:HGroup>
