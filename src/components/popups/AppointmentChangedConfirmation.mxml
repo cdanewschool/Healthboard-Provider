@@ -12,20 +12,50 @@
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 	
+	<s:states>
+		<s:State name="default" />
+		<s:State name="conflict" />
+	</s:states>
+	
 	<fx:Script>
 		<![CDATA[
+			import models.Appointment;
 			import models.UserModel;
 			
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
 			
-			[Bindable] public var user:UserModel;
+			import utils.DateUtil;
+			
+			public var appointment:Appointment;
+			
+			public static const STATE_DEFAULT:String = "default";
+			public static const STATE_CONFLICT:String = "conflict";
+			
+			[Bindable] private var text:String;
+			[Bindable] private var header:String;
 			
 			private function close():void
 			{
 				dispatchEvent( new CloseEvent( Event.CLOSE ) );
 				
 				PopUpManager.removePopUp( this );
+			}
+			
+			override public function set currentState(value:String):void
+			{
+				super.currentState = value;
+				
+				if( currentState == "conflict" )
+				{
+					header = "Your Appointment Has Not Been Changed";
+					text = "This appointment conflicts with " + appointment.provider.fullName + "'s " + DateUtil.formatTimeFromDate( appointment.from, false, false ) + " appointment " + (appointment.patient ? "with " + appointment.patient.fullName : null) + ".";
+				}
+				else
+				{
+					header = "Your Appointment Has Been Changed";
+					text = "Your appointment has been changed.";
+				}
 			}
 			
 			private function init():void
@@ -36,14 +66,14 @@
 	</fx:Script>
 	
 	<s:layout>
-		<s:VerticalLayout paddingTop="15" gap="15" horizontalAlign="center" />
+		<s:BasicLayout id="layout" />
 	</s:layout>
 	
-	<s:Label text="Your Appointment Has Been Changed" styleName="darkGrayBold16" />
+	<s:Label text="{header}" styleName="darkGrayBold16" x="15" y="15" />
 	
-	<s:Label text="Your Appointment Has Been Changed." styleName="grayText11" />
+	<mx:Text id="content" text="{text}" styleName="grayText11" width="90%" height="{content.textHeight}" selectable="false" x="15" y="35" />
 	
-	<s:HGroup horizontalAlign="center" width="100%">
+	<s:HGroup horizontalAlign="center" width="100%" bottom="10">
 		<s:Button label="Close" click="close()" />
 	</s:HGroup>
 	
