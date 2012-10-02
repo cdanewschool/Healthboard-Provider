@@ -337,7 +337,7 @@
 									
 									</s:VGroup>
 									<s:VGroup gap="17">
-										<enhancedtitlewindow:EnhancedTitleWindow id="widgetMyPatients" width="633" title="My Patients (8)" collapsible="true" headerClickable="false" module="modPatients" showCloseButton="false" titleBarHeight="30" color="0xFFFFFF"><!--creationComplete="{if(!wasMedicationDataLoaded) medicationsXMLdataForWidget.send();}"-->
+										<enhancedtitlewindow:EnhancedTitleWindow id="widgetMyPatients" width="633" title="My Patients (8)" collapsible="true" headerClickable="false" module="modPatients" displayWarning="true" warningToolTip="There are patients who need attention" showCloseButton="false" titleBarHeight="30" color="0xFFFFFF"><!--creationComplete="{if(!wasMedicationDataLoaded) medicationsXMLdataForWidget.send();}"-->
 											<enhancedtitlewindow:layout>
 												<s:VerticalLayout paddingLeft="11" paddingTop="12" paddingBottom="8"/>
 											</enhancedtitlewindow:layout>

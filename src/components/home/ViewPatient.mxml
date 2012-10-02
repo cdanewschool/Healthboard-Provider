@@ -337,7 +337,7 @@
 							<mx:LinkButton id="btnNextAppt" label="Next Appt." icon="{parentApplication.blueArrowRight}" disabledIcon="{parentApplication.grayArrowRight}" horizontalGap="9" labelPlacement="left" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{if(btnNextAppt.enabled) btnNextAppt.styleName='linkBtnUnderline';}" rollOut="btnNextAppt.styleName='linkBtn';" click="{parentApplication.currentAppt++}" enabled="{parentApplication.currentAppt != parentApplication.appointments.length-1}" />
 						</s:HGroup>
 					</enhancedtitlewindow:EnhancedTitleWindow>
-					<enhancedtitlewindow:EnhancedTitleWindow id="widgetImmunizations" width="305" title="Immunizations (12)" collapsible="true" headerClickable="false" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" module="modImmunizations" visible="{widgetImmunizationsOpen}" includeInLayout="{widgetImmunizationsOpen}">	<!--title="{'Immunizations (' + immunizationsDueNumber + ')'}" (see comments on ArrayList below)-->
+					<enhancedtitlewindow:EnhancedTitleWindow id="widgetImmunizations" width="305" title="Immunizations (12)" collapsible="true" headerClickable="false" showCloseButton="{widgetLibraryOpen}" displayWarning="true" warningToolTip="Immunizations overdue" titleBarHeight="30" module="modImmunizations" visible="{widgetImmunizationsOpen}" includeInLayout="{widgetImmunizationsOpen}">	<!--title="{'Immunizations (' + immunizationsDueNumber + ')'}" (see comments on ArrayList below)-->
 						<enhancedtitlewindow:layout>
 							<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="20"/>
 						</enhancedtitlewindow:layout>
@@ -388,7 +388,7 @@
 					</enhancedtitlewindow:EnhancedTitleWindow>
 				</s:VGroup>
 				<s:VGroup gap="17">
-					<enhancedtitlewindow:EnhancedTitleWindow id="widgetHealthFocus" width="633" title="Health Focus (15)" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" color="0xFFFFFF">
+					<enhancedtitlewindow:EnhancedTitleWindow id="widgetHealthFocus" width="633" title="Health Focus (15)" collapsible="true" headerClickable="false" showCloseButton="false" displayWarning="true" warningToolTip="Patient needs attention" titleBarHeight="30" color="0xFFFFFF" showDropDown="true" dropDownDataProvider="{new ArrayCollection(['     Add New Internal Note','     View...'])}">
 						<mx:DataGrid dataProvider="{healthFocusData}" fontFamily="myMyriadNoCFF"
 									 width="100%" 
 									 color="0xFFFFFF" verticalAlign="middle"

@@ -88,37 +88,41 @@
 	<s:Spacer height="-5" />
 	<s:HGroup verticalAlign="middle" paddingLeft="10">
 		<s:Label text="Team:" color="0xFFFFFF" fontSize="11" />
-		<s:DropDownList id="providerTeamSelect" dataProvider="{model.providerTeams}" labelField="label" width="90" height="24" change="model.selectedProviderTeam = providerTeamSelect.selectedItem.value;" styleName="dropDownListDark" />
+		<s:DropDownList id="providerTeamSelect" dataProvider="{model.providerTeams}" labelField="label" width="70" height="24" change="model.selectedProviderTeam = providerTeamSelect.selectedItem.value;" styleName="dropDownListDark" />
 		<!--<s:DropDownList id="providerSort" dataProvider="{providerSortFields}" width="69" selectedIndex="0" change="sortProviders(event)" />-->
-		<s:HGroup gap="0" verticalAlign="middle" >
-			<s:TextInput id="providerSearch" text="{SEARCH_PLACEHOLDER}" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="125" height="24" click="{if(providerSearch.text == SEARCH_PLACEHOLDER) providerSearch.text=''}" change="{model.searchText = providerSearch.text}" />
+		<s:HGroup gap="-1" verticalAlign="middle" paddingLeft="4">
+			<s:TextInput id="providerSearch" text="{SEARCH_PLACEHOLDER}" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="146" height="24" click="{if(providerSearch.text == SEARCH_PLACEHOLDER) providerSearch.text=''}" change="{model.searchText = providerSearch.text}" />
 			<s:Button styleName="searchButtonIcon" width="24" height="24" />
 		</s:HGroup>
 	</s:HGroup>
-	<s:Line xFrom="0" xTo="305">
-		<s:stroke>
-			<s:SolidColorStroke color="0x676767" weight="2" />
-		</s:stroke>
-	</s:Line>
+	
+	<s:HGroup paddingLeft="10" paddingBottom="-4">
+		<s:Line xFrom="0" xTo="281">
+			<s:stroke>
+				<s:SolidColorStroke color="0x676767" weight="1" />
+			</s:stroke>
+		</s:Line>
+	</s:HGroup>
 	
 	<mx:DataGrid 
 		id="providerLists"
 		buttonMode="false" selectable="true" 
-		width="300" height="320" fontFamily="myMyriadNoCFF"
+		width="303" height="316" fontFamily="myMyriadNoCFF"
 		color="0xFFFFFF" verticalAlign="middle" 
 		dataProvider="{model.providers}"
-		headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeaderAlternative" headerHeight="30" paddingTop="6"
+		headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader" headerHeight="30" paddingTop="6"
 		borderVisible="false" horizontalGridLines="true" horizontalGridLineColor="0x444442" verticalGridLines="true" 
 		alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-		horizontalScrollPolicy="off" verticalScrollPolicy="on" rowHeight="22" horizontalSeparatorSkin="{null}" 
+		horizontalScrollPolicy="off" verticalScrollPolicy="auto" rowHeight="22" horizontalSeparatorSkin="{null}" 
 		itemRollOver="onTeamRollOver(event)" itemRollOut="teamRollOverRowIndex=-1" itemClick="onTeamClick(event)">
+
 		<mx:columns>
-			<mx:DataGridColumn dataField="team" width="36" headerText="Team" />
+			<mx:DataGridColumn dataField="team" width="42" headerText="Team" textAlign="center" />
 			<mx:DataGridColumn dataField="role"  width="53" headerText="Role" />
-			<mx:DataGridColumn dataField="available" width="47" headerText="Status">
+			<mx:DataGridColumn dataField="available" width="46" headerText="Status">
 				<mx:itemRenderer>
 					<fx:Component>
-						<mx:HBox width="27">
+						<mx:HBox width="27" horizontalAlign="center">
 							<s:Label text="{data.available}" color="{data.available == 'U' ? 0xB3B3B3 : 0xCCCC33}" textAlign="center" width="30" fontFamily="myMyriad" />
 						</mx:HBox>
 					</fx:Component>
@@ -133,9 +137,9 @@
 									import mx.collections.ListCollectionView;
 								]]>
 							</fx:Script>
-							<s:Label text="{data.firstName + ' ' + data.lastName}" color="0xAEDBE2" fontSize="12" paddingLeft="10" width="124" fontFamily="myMyriad" />
+							<s:Label text="{data.firstName + ' ' + data.lastName}" color="0xAEDBE2" fontSize="12" paddingLeft="10" width="117" fontFamily="myMyriad" />
 							<mx:HBox width="16" paddingTop="0">
-								<s:Image id="iconImage" source="@Embed('images/messagesEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
+								<s:Image id="iconImage" source="@Embed('images/grayEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
 							</mx:HBox>
 						</mx:HBox>
 					</fx:Component>

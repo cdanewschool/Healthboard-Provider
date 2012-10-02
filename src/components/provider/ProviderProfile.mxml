@@ -4,7 +4,8 @@
 	 xmlns:s="library://ns.adobe.com/flex/spark" 
 	 xmlns:mx="library://ns.adobe.com/flex/mx" 
 	 width="{WIDTH}" height="156" 
-	 backgroundAlpha="0" backgroundColor="0x00ADEE" cornerRadius="5" 
+	 backgroundColor="0x3C3C3B" cornerRadius="5" 
+	 borderColor="0xBDBCBC"
 	 skinClass="external.skins.TitleWindowSkin" styleName="teamProfileTitle" 
 	 controlBarVisible="true" 
 	 creationComplete="init()" 
@@ -38,12 +39,15 @@
 			
 			private function onRollOver(event:MouseEvent):void
 			{
-				setStyle("backgroundAlpha", .2);
+				//setStyle("backgroundColor", "0x00ADEE");
+				//setStyle("backgroundAlpha", .2);
+				setStyle("backgroundColor", "0x31535E");
 			}
 			
 			private function onRollOut(event:MouseEvent):void
 			{
-				setStyle("backgroundAlpha", 0);
+				setStyle("backgroundColor", "0x3C3C3B");
+				//setStyle("backgroundAlpha", 1);
 			}
 			
 			private function onClick(event:MouseEvent):void
@@ -67,7 +71,7 @@
 	
 	<s:controlBarContent />
 	
-	<s:HGroup width="100%" gap="5" paddingLeft="10" paddingTop="10">
+	<s:HGroup width="100%" gap="10" paddingLeft="7" paddingTop="7">
 		
 		<s:VGroup paddingTop="0">
 			<s:BorderContainer borderColor="0xE6E6E6" borderWeight="1" width="60" height="75"> 
@@ -75,24 +79,22 @@
 			</s:BorderContainer>
 		</s:VGroup>
 		
-		<s:VGroup paddingLeft="10">
-			<mx:LinkButton 
-				label="{(provider.role == 'MD' ? 'Dr. ' : '') + provider.firstName + ' ' + provider.lastName}" 
-				fontSize="14" fontWeight="bold" styleName="linkBtnBlue" click="onSelect(event)" />
+		<s:VGroup paddingTop="-6" fontWeight="normal" gap="3">
+			<mx:LinkButton id="btnProviderName" label="{(provider.role == 'MD' ? 'Dr. ' : '') + provider.firstName + ' ' + provider.lastName}" fontSize="14" fontWeight="bold" paddingLeft="0" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnProviderName.styleName='linkBtnUnderline';}" rollOut="btnProviderName.styleName='linkBtn';" click="onSelect(event)" />
 			<s:HGroup>
-				<s:Label text="Specialty:" textAlign="right" fontSize="12" />
+				<s:Label text="Specialty:" textAlign="right" fontSize="12" width="51" />
 				<s:Label text="{provider.specialty}" fontSize="12"/>
 			</s:HGroup>
 			<s:HGroup>
-				<s:Label text="Board:" textAlign="right" fontSize="12"/>
+				<s:Label text="Board:" textAlign="right" fontSize="12" width="51" />
 				<s:Label text="{provider.status}" fontSize="12"/>
 			</s:HGroup>
 			<s:HGroup>
-				<s:Label text="Title:" textAlign="right" fontSize="12" />
+				<s:Label text="Title:" textAlign="right" fontSize="12" width="51" />
 				<s:Label text="{provider.role}" fontSize="12"/>
 			</s:HGroup>
 			<s:HGroup>
-				<s:Label text="Team:" textAlign="right" fontSize="12" />
+				<s:Label text="Team:" textAlign="right" fontSize="12" width="51" />
 				<s:Label text="{provider.team}" fontSize="12"/>
 			</s:HGroup>
 		</s:VGroup>
