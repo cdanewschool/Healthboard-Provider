@@ -1,5 +1,7 @@
 package utils
 {
+	import ASclasses.Constants;
+	
 	import flash.globalization.DateTimeFormatter;
 	import flash.globalization.DateTimeStyle;
 	import flash.globalization.LocaleID;
@@ -23,6 +25,13 @@ package utils
 		public static function compareDates(date1:Date, date2:Date):Number
 		{
 			return date1.time - date2.time;
+		}
+		
+		public static function getDate(date:String):String 
+		{
+			if(date.charAt(1) == '/') date = '0' + date;									// 3/4/2012
+			if(date.charAt(4) == '/') date = date.substr(0,3) + '0' + date.substr(-6);		// 03/4/2012
+			return Constants.MONTHS[uint(date.substr(0,2))-1] + ' ' + uint(date.substr(3,2)) + ', ' + date.substr(-4);
 		}
 		
 		public static function formatTime( ms:int ):String

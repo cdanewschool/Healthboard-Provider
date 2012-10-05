@@ -28,8 +28,9 @@
 			import components.popups.ChatHistoryPopup;
 			import components.popups.ViewAttachmentPopup;
 			
-			import controllers.ApplicationController;
 			import controllers.ChatController;
+			import controllers.Controller;
+			import controllers.MainController;
 			
 			import events.ApplicationEvent;
 			import events.AuthenticationEvent;
@@ -69,7 +70,7 @@
 				
 				model.mode = ButtonBar(event.currentTarget).selectedItem.data;
 				
-				ChatController.getInstance().chat( ApplicationController.getInstance().user, targetUser );
+				ChatController.getInstance().chat( MainController(AppProperties.getInstance().controller).user, targetUser );
 			}
 			
 			private function viewHistory(event:MouseEvent):void
@@ -78,7 +79,7 @@
 				if( popup) PopUpManager.removePopUp( popup );
 				
 				popup = new ChatHistoryPopup();
-				ChatHistoryPopup(popup).user = ApplicationController.getInstance().user;
+				ChatHistoryPopup(popup).user = MainController(AppProperties.getInstance().controller).user;
 				ChatHistoryPopup(popup).chat = model;
 				
 				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );

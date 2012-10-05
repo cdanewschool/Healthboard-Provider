@@ -12,7 +12,8 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import controllers.ApplicationController;
+			import controllers.Controller;
+			import controllers.MainController;
 			
 			import models.Chat;
 			import models.ChatSearch;
@@ -56,7 +57,7 @@
 				if( valid && groupIndex > 0 ) valid = groupIndex == 1 ? item.targetUser.userType == UserModel.TYPE_PATIENT : item.targetUser.userType == UserModel.TYPE_PROVIDER;
 				if( valid && rangeIndex > 0 )
 				{
-					var today:Date = ApplicationController.getInstance().today;
+					var today:Date = MainController(AppProperties.getInstance().controller).today;
 					var diff:Number = DateUtil.compareDates( today, item.endTime );
 					
 					if( rangeIndex == 1 ) valid = diff <= DateUtil.WEEK;

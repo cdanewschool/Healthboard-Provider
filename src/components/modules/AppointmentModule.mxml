@@ -26,8 +26,9 @@
 			import components.popups.AppointmentReportPopup;
 			import components.popups.ViewAttachmentPopup;
 			
-			import controllers.ApplicationController;
 			import controllers.AppointmentsController;
+			import controllers.Controller;
+			import controllers.MainController;
 			
 			import events.ApplicationEvent;
 			import events.AppointmentEvent;
@@ -228,7 +229,7 @@
 			private function onAddAppointmentClick( event:MouseEvent ):void
 			{
 				var appointment:Appointment = new Appointment();
-				appointment.provider = ApplicationController.getInstance().getUser( 0, UserModel.TYPE_PROVIDER );
+				appointment.provider = MainController(AppProperties.getInstance().controller).getUser( 0, UserModel.TYPE_PROVIDER );
 				showAppointmentPopup( appointment, AddAppointmentPopup.MODE_ADD );
 			}
 			
@@ -941,7 +942,7 @@
 			{
 				if( direction == 0 )
 				{
-					var today:Date = ApplicationController.getInstance().today;
+					var today:Date = MainController(AppProperties.getInstance().controller).today;
 					selectedDate = new Date( today.fullYear, today.month, today.date );
 				}
 				else if( currentState == MODE_MONTH )
@@ -988,7 +989,7 @@
 					legend.addElement( container );
 				}
 				
-				var today:Date = ApplicationController.getInstance().today;
+				var today:Date = MainController(AppProperties.getInstance().controller).today;
 				selectedDate = new Date( today.fullYear, today.month, today.date );
 				
 				onAppointmentsChange();

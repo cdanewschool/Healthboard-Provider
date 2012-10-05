@@ -17,6 +17,7 @@
 		<![CDATA[
 			import events.ApplicationEvent;
 			import events.EnhancedTitleWindowEvent;
+			import events.ProfileEvent;
 			
 			import models.ProvidersModel;
 			import models.UserModel;
@@ -47,7 +48,7 @@
 			
 			protected function onTeamClick(event:ListEvent):void 
 			{
-				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_CONTEXT_MENU, true );
+				var evt:ProfileEvent = new ProfileEvent( ProfileEvent.SHOW_CONTEXT_MENU, true );
 				evt.user = DataGrid(event.currentTarget).selectedItem as UserModel;
 				dispatchEvent( evt );
 				

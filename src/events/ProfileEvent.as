@@ -12,6 +12,7 @@ package events
 		public static const VIEW_APPOINTMENTS:String = "ProfileEvent.VIEW_APPOINTMENTS";
 		public static const SEND_MESSAGE:String = "ProfileEvent.SEND_MESSAGE";
 		public static const START_CHAT:String = "ProfileEvent.START_CHAT";
+		public static const SHOW_CONTEXT_MENU:String = "showContextMenu";
 		
 		public var user:UserModel;
 		

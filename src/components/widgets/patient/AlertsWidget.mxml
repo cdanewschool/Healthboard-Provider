@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enhancedtitlewindow:EnhancedTitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import ASfiles.ProviderConstants;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CollectionEvent;
+			
+ 			private var _alerts:ArrayCollection;
+
+			private var _activeModule:String;
+			
+			private var dirty:Boolean;
+			
+			[Bindable]
+			public function get alerts():ArrayCollection
+			{
+				return _alerts;
+			}
+			
+			public function set alerts(value:ArrayCollection):void
+			{
+				_alerts = value;
+				
+				if( _alerts )
+				{
+					_alerts.filterFunction = filterByModule;
+					_alerts.refresh();
+					
+					invalidateProperties();
+					
+					dirty = true;
+				}
+			}
+
+			public function get activeModule():String
+			{
+				return _activeModule;
+			}
+
+			public function set activeModule(value:String):void
+			{
+				_activeModule = value;
+				
+				if( _alerts ) _alerts.refresh();
+				
+				dirty = true;
+				
+				invalidateProperties();
+			}
+
+			private function filterByModule( item:Object ):Boolean
+			{
+				if( !activeModule ) return true;
+				
+				var type:String = item.type;
+				
+				if( activeModule == ProviderConstants.MODULE_APPOINTMENTS )
+					return type == "Appointments";
+				else if( activeModule == ProviderConstants.MODULE_MEDICATIONS )
+					return type == "Medications";
+				else if( activeModule == ProviderConstants.MODULE_IMMUNIZATIONS )
+					return type == "Immunizations";
+				
+				return false;
+			}
+			
+			private function getModuleTitle(module:String):String
+			{
+				if( module == ProviderConstants.MODULE_APPOINTMENTS ) return "Appointments";
+				if( module == ProviderConstants.MODULE_DECISION_SUPPORT ) return "Decision Support";
+				if( module == ProviderConstants.MODULE_IMMUNIZATIONS ) return "Immunizations";
+				if( module == ProviderConstants.MODULE_MEDICATIONS ) return "Medications";
+				if( module == ProviderConstants.MODULE_MEDICAL_RECORDS ) return "Medical Records";
+				if( module == ProviderConstants.MODULE_MESSAGES ) return "Messages";
+				if( module == ProviderConstants.MODULE_NUTRITION ) return "Nutrition";
+				if( module == ProviderConstants.MODULE_TEAM ) return "Team Profile";
+				if( module == ProviderConstants.MODULE_VITAL_SIGNS ) return "Vital Signs";
+				
+				return null;
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if( dirty )
+				{
+					title = (activeModule ? getModuleTitle(activeModule) : "Health Focus") + ( alerts && alerts.length ? " (" + alerts.length + ")" : '' ); 
+					
+					dirty = false;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<mx:DataGrid 
+		dataProvider="{alerts}" fontFamily="myMyriadNoCFF"
+		width="100%" 
+		color="0xFFFFFF" verticalAlign="middle"
+	 	headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
+		borderVisible="false" 
+		alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
+		horizontalGridLines="true" horizontalGridLineColor="0x444442" horizontalScrollPolicy="off" 
+		rowCount="5" rowHeight="22">
+		<mx:columns>
+			<mx:DataGridColumn dataField="urgency" headerText="Urgency" width="68">
+				<mx:itemRenderer>
+					<fx:Component>
+						<mx:HBox width="68" horizontalAlign="center">
+							<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 'Urgent'}" includeInLayout="{data.urgency == 'Urgent'}" />
+							<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 'Somewhat urgent'}" includeInLayout="{data.urgency == 'Somewhat urgent'}" />
+						</mx:HBox>
+					</fx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="date" headerText="Time" width="86" />
+			<mx:DataGridColumn dataField="type" headerText="Type" width="102" />
+			<mx:DataGridColumn dataField="alert" headerText="Alert" width="143" />
+			<mx:DataGridColumn dataField="description" headerText="Description" paddingLeft="5" fontFamily="myMyriad">
+				<mx:itemRenderer>
+					<fx:Component>
+						<mx:HBox width="100%" paddingTop="0" horizontalScrollPolicy="off">
+							<mx:Label text="{data.description}" />
+							<s:Spacer width="100%" />
+							<s:HGroup paddingTop="7" paddingLeft="-7" paddingRight="7" alpha=".6">
+								<s:Image source="@Embed('images/btnHealthFocusMsg.png')" toolTip="Click to send message" buttonMode="true" /><!--click="nutDeleteHandler(event)"-->
+								<s:Image source="@Embed('images/btnHealthFocusComplete.png')" toolTip="Click to mark complete" buttonMode="true" /><!--click="nutDeleteHandler(event)"-->
+							</s:HGroup>
+						</mx:HBox>
+					</fx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	
+</enhancedtitlewindow:EnhancedTitleWindow>

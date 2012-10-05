@@ -21,6 +21,7 @@
 			import components.provider.ViewProvider;
 			
 			import events.ApplicationEvent;
+			import events.ProfileEvent;
 			import events.ProviderEvent;
 			
 			import models.Message;
@@ -199,7 +200,7 @@
 			
 			protected function onTeamClick(event:ListEvent):void 
 			{
-				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_CONTEXT_MENU, true );
+				var evt:ProfileEvent = new ProfileEvent( ProfileEvent.SHOW_CONTEXT_MENU, true );
 				evt.user = DataGrid(event.currentTarget).selectedItem as UserModel;
 				dispatchEvent( evt );
 				
@@ -208,7 +209,7 @@
 			
 			protected function onTeamSelect(event:ProviderEvent):void 
 			{
-				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_CONTEXT_MENU, true );
+				var evt:ProfileEvent = new ProfileEvent( ProfileEvent.SHOW_CONTEXT_MENU, true );
 				evt.user = event.provider;
 				dispatchEvent( evt );
 			}

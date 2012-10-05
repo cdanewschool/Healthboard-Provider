@@ -14,8 +14,9 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import controllers.ApplicationController;
 			import controllers.AppointmentsController;
+			import controllers.Controller;
+			import controllers.MainController;
 			
 			import events.AppointmentEvent;
 			import events.AutoCompleteEvent;
@@ -155,7 +156,7 @@
 			{
 				controlBarVisible = false;
 				
-				patients = new ArrayCollection( ApplicationController.getInstance().patients.source );
+				patients = new ArrayCollection( MainController(AppProperties.getInstance().controller).patients.source );
 				patients.filterFunction = filterPatients;
 				
 				patient.text = appointment.patient ? appointment.patient.fullName : PATIENT_PLACEHOLDER;

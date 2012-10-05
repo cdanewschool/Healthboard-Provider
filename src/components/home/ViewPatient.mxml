@@ -3,93 +3,267 @@
 					xmlns:s="library://ns.adobe.com/flex/spark" 
 					xmlns:mx="library://ns.adobe.com/flex/mx"
 					xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*"
+					xmlns:widgets="components.widgets.*"
 					xmlns:radarchart="fr.kapit.radarchart.*"
-					label="{patient.fullName}" creationComplete="{init(); healthFocusXMLdata.send()}">
+					creationComplete="{init();}" xmlns:patient="components.widgets.patient.*" xmlns:modules="modules.*">
+	
 	<s:layout>
 		<s:VerticalLayout paddingTop="15"/>
 	</s:layout>
+	
 	<fx:Script>
 		<![CDATA[
-			import events.ApplicationEvent;
+			import ASfiles.ProviderConstants;
+			
+			import controllers.Controller;
+			import controllers.MainController;
+			
+			import events.EnhancedTitleWindowEvent;
+			
+			import external.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
 			
 			import models.PatientModel;
 			
 			import mx.collections.ArrayCollection;
+			import mx.core.INavigatorContent;
+			import mx.core.UIComponent;
+			import mx.events.CloseEvent;
 			import mx.rpc.events.ResultEvent;
 			
-			import spark.filters.DropShadowFilter;
+			import spark.components.Group;
 			
-			[Bindable] public var patient:PatientModel;
+			import util.DateFormatters;
 			
-			private function init():void 
+			private const WIDGET_ALERTS:String = "alerts";
+			private const WIDGET_APPOINTMENTS:String = "appointments";
+			private const WIDGET_DECISION_SUPPORT:String = "decisionSupport";
+			private const WIDGET_EXERCISE:String = "exercise";
+			private const WIDGET_IMMUNIZATIONS:String = "immunizations";
+			private const WIDGET_MEDICAL_RECORDS:String = "medicalRecords";
+			private const WIDGET_MEDICATIONS:String = "medications";
+			private const WIDGET_NUTRITION:String = "nutrition";
+			private const WIDGET_PATIENT_PROFILE:String = "patientProfile";
+			private const WIDGET_RECENT_ACTIVITIES:String = "recentActivities";
+			private const WIDGET_VITAL_SIGNS:String = "vitalSigns";
+			
+			private var WIDGET_IDS:Array = 
+				[
+					WIDGET_ALERTS, WIDGET_APPOINTMENTS, WIDGET_DECISION_SUPPORT, WIDGET_EXERCISE, 
+					WIDGET_IMMUNIZATIONS, WIDGET_MEDICAL_RECORDS, WIDGET_MEDICATIONS, WIDGET_NUTRITION, 
+					WIDGET_PATIENT_PROFILE, WIDGET_RECENT_ACTIVITIES, WIDGET_VITAL_SIGNS
+				];
+			
+			[Bindable] private var controller:MainController = MainController( AppProperties.getInstance().controller );
+			
+			private function onResize(event:Event=null):void
 			{
+				if( !this.stage ) return;
+				
+				var coords:Point = new Point( x, y );
+				coords = localToGlobal( coords );
+				
+				widgetScroller.height = this.stage.stageHeight - coords.y - widgetScroller.y - 100;
 			}
 			
-			protected function onPatientNameClick(event:MouseEvent):void 
-			{
-				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_CONTEXT_MENU, true );
-				evt.user = patient;
-				dispatchEvent( evt );
-			}
+			private var stateDirty:Boolean;
 			
-			[Bindable] private var widgetLibraryOpen:Boolean = false;
-			[Bindable] private var widgetPatientProfileOpen:Boolean = true;
-			[Bindable] private var widgetRecentActivitiesOpen:Boolean = true;
-			[Bindable] private var widgetAppointmentsOpen:Boolean = true;
-			[Bindable] private var widgetMedicalRecordsOpen:Boolean = true;
-			[Bindable] private var widgetImmunizationsOpen:Boolean = true;
-			[Bindable] private var widgetVitalSignsOpen:Boolean = true;
-			[Bindable] private var widgetExerciseOpen:Boolean = true;
-			[Bindable] private var widgetMedicationsOpen:Boolean = true;
-			[Bindable] private var widgetNutritionOpen:Boolean = true;
-			[Bindable] private var widgetDecisionSupportOpen:Boolean = true;
-			[Bindable] private var widgetHealthFocusOpen:Boolean = true;
 			[Bindable] [Embed("images/btnWidgetTriggerOpen.png")] public var widgetTriggerOpen:Class;
 			[Bindable] [Embed("images/btnWidgetTriggerClose.png")] public var widgetTriggerClose:Class;
 			
-			[Bindable] public var collapsedPatientDetailsPixels:uint = 228;	//used for recalculating widget's height
-			[Bindable] public var collapsedVitals:uint = 0;					//used for recalculating widget's height
-			[Bindable] public var collapsedDecisionSupportPixels:uint = 0;	//used for recalculating widget's height
+ 			private var _activeModule:String;
 			
-			public function medicationsSetMinMaxWidget():void {
-				hAxisMedicationsWidget.minimum = parentApplication.minDateMedi;
-				hAxisMedicationsWidget.maximum = parentApplication.maxDateMediWidget;
-				parentApplication.canvasMedWidget.lineStyle(75,0x00ADEE,.2,true,LineScaleMode.NORMAL,CapsStyle.SQUARE,JointStyle.MITER,2);
-				parentApplication.canvasMedWidget.moveTo('06/16/2012 12:00:00 PM','Lisinopril (Prinivil/Zestril)');
-				parentApplication.canvasMedWidget.lineTo('06/16/2012 12:00:00 PM','Jiang Ya Pian'); 
+			private var _selectedAppointment:Object;
+			private var _patient:PatientModel;
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if( stateDirty )
+				{
+					for(var i:int=0;i<WIDGET_IDS.length;i++)
+					{
+						var widgetID:String = WIDGET_IDS[i];
+						var widget:EnhancedTitleWindow = getWidgetByID( widgetID );
+						var trigger:Group = this[ widgetID + 'Trigger' ] as Group;
+						
+						if( !widget || !trigger ) throw new Error('Widget or associated trigger does not exist');
+						
+						widget.showCloseButton = widgetID != WIDGET_ALERTS ? widgetLibrary.visible : false;
+						
+						var visible:Boolean = widget.visible;
+						
+						trigger.getChildAt(0).visible = UIComponent(trigger.getChildAt(0)).includeInLayout = visible;
+						trigger.getChildAt(1).visible = UIComponent(trigger.getChildAt(1)).includeInLayout = !visible;
+					}
+					
+					stateDirty = false;
+				}
+				
+				if( currentState == "module" )
+				{
+					var module:INavigatorContent;
+					
+					if( (module = moduleViews.getChildByName( activeModule ) as INavigatorContent ) != null )
+					{
+						moduleViews.selectedChild = module;
+						module.visible = true;
+					}
+					else
+					{
+						moduleViews.visible = false;
+					}
+				}
+				
+				label = lblBreadcrumbPatient.text = btnBreadcrumbPatient.label = patient.fullName;
+				
+				alertsWidget.activeModule = activeModule;
+				
+				EnhancedTitleWindow(nutritionWidget).subtitle = DateFormatters.dateFormatterDay.format( new Date() );
+				
+				patientProfileWidget.patient = patient;
+				patientProfileWidget.minHeight = activeModule?156:NaN;
+				patientProfileWidget.showDetails = activeModule == null;
+				
+				widgetContainer.minHeight = activeModule ? NaN : 591;
+				
+				triggerContainer.paddingTop = widgetLibrary.visible ? 0 : 106;
+				
+				if( activeModule ) widgetLibrary.visible = false;
+				
+				btnWidgetTrigger.setStyle( 'icon', widgetLibrary.visible ? widgetTriggerClose : widgetTriggerOpen ); 
 			}
 			
-			[Bindable] public var acActivities:ArrayCollection = new ArrayCollection([
-				{type: "Message", date: "3:45 pm", action: "Chronic pain"},
-				{type: "Vital Signs", date: "Yesterday", action: "Updated glucose..."},
-				{type: "Nutrition", date: "Yesterday", action: "Recorded a meal..."},
-				{type: "Medications", date: "Oct 28", action: "Requested renewal..."},
-				{type: "Exercise", date: "Oct 27", action: "Updated personal..."},
-			]);	
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth,unscaledHeight);
+			}
 			
-			[Bindable] public var healthFocusData:ArrayCollection = new ArrayCollection();
-			private function healthFocusResultHandler(event:ResultEvent):void {
-				/*if(event.result.autnresponse.responsedata.clusters.cluster is ObjectProxy ) {
-				= new ArrayCollection( [event.result.autnresponse.responsedata.clusters.cluster] );
+			override public function set currentState(value:String):void
+			{
+				super.currentState = value;
+				
+				if( currentState == "default" )
+				{
+					activeModule = null;
 				}
-				else {
-				clusterData = event.result.autnresponse.responsedata.clusters.cluster;	
-				}*/
-				healthFocusData = event.result.alerts.alert;
+			}
+			
+			private function healthFocusResultHandler(event:ResultEvent):void 
+			{
+				controller.model.patientAlerts = alertsWidget.alerts = event.result.alerts.alert;
+				
+				controller.model.patientAlertsLoaded = true;
+			}
+			
+			private function onWidgetHeaderClick(event:EnhancedTitleWindowEvent):void
+			{
+				currentState = "module";
+				
+				activeModule = EnhancedTitleWindow(event.currentTarget).module;
+			}
+			
+			private function onWidgetClose(event:CloseEvent):void
+			{
+				var module:EnhancedTitleWindow = EnhancedTitleWindow(event.currentTarget);
+				module.visible = module.includeInLayout = false;
+				
+				stateDirty = true;
+				
+				invalidateProperties();
+			}
+			
+			private function getWidgetByID( widgetID:String ):EnhancedTitleWindow
+			{
+				return this[ widgetID + 'Widget' ] as EnhancedTitleWindow;
+			}
+			
+			private function showWidget( widgetID:String ):void
+			{
+				var widget:EnhancedTitleWindow = getWidgetByID( widgetID );
+				
+				if( widget )
+				{
+					widget.visible = widget.includeInLayout = true;
+					
+					stateDirty = true;
+					
+					invalidateProperties();
+				}
+			}
+
+			private function toggleLibrary():void
+			{
+				widgetLibrary.visible = widgetLibrary.includeInLayout = !widgetLibrary.visible;
+				
+				widgetContent.verticalScrollPosition = widgetContent.height + 100;
+				
+				stateDirty = true;
+				
+				invalidateProperties();
+			}
+			
+			public function get activeModule():String{ return _activeModule; }
+			public function get patient():PatientModel{ return _patient;}
+			public function get selectedAppointment():Object{ return _selectedAppointment; }
+
+			public function set activeModule(value:String):void
+			{
+				_activeModule = value;
+				
+				invalidateProperties();
+				invalidateDisplayList();
+			}
+			
+			public function set patient(value:PatientModel):void
+			{
+				_patient = value;
+				
+				invalidateProperties();
+			}
+			
+			public function set selectedAppointment(value:Object):void
+			{
+				_selectedAppointment = value;
+				
+				invalidateProperties();
+			}
+			
+			private function init():void 
+			{
+				stage.addEventListener( Event.RESIZE, onResize );
+				
+				onResize();
+				
+				alertsWidget.dropDownDataProvider = new ArrayCollection(['     Add New Internal Note','     View...']);
+				
+				if( !controller.model.patientAlertsLoaded ) 
+				{
+					healthFocusXMLdata.send();
+				}
 			}
 		]]>
 	</fx:Script>
+	
+	<s:states>
+		<s:State name="default" />
+		<s:State name="module" />
+	</s:states>
+	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
-		<mx:HTTPService id="healthFocusXMLdata"
-						url="data/healthFocus.xml"
-						result="healthFocusResultHandler(event)" />
+		<mx:HTTPService 
+			id="healthFocusXMLdata"
+			url="data/healthFocus.xml"
+			result="healthFocusResultHandler(event)" />
 	</fx:Declarations>
 	
 	<s:BorderContainer height="40" width="100%">
+		
 		<s:layout>
 			<s:HorizontalLayout verticalAlign="middle" paddingLeft="16"/>
 		</s:layout>
+		
 		<s:backgroundFill>
 			<s:LinearGradient rotation="270">
 				<s:GradientEntry color="0xA3A3A3" alpha="1" ratio=".38" />
@@ -97,736 +271,146 @@
 			</s:LinearGradient>
 		</s:backgroundFill>
 		
-		<s:Image source="@Embed('images/patientHome.png')" buttonMode="true" />
+		<s:Image source="images/patientHome.png" buttonMode="true" click="{currentState = 'default'}" />
+		
 		<s:HGroup color="0xFFFFFF" verticalAlign="middle" paddingLeft="-7" gap="-4" fontSize="22">
-			<s:Label id="lblBreadcrumbPatient" text="{patient.fullName}" fontWeight="bold" paddingTop="2" paddingLeft="10" />
-			<mx:LinkButton id="btnBreadcrumbPatient" visible="false" includeInLayout="false"
-						   label="{patient.fullName}"
-						   textRollOverColor="0xFFFFFF" textSelectedColor="0xFFFFFF" skin="{null}"
-						   rollOver="btnBreadcrumbPatient.styleName='linkBtnUnderline';" rollOut="btnBreadcrumbPatient.styleName='linkBtn';" />
+			
+			<s:Label id="lblBreadcrumbPatient" fontWeight="bold" paddingTop="2" paddingLeft="10" />
+			
+			<mx:LinkButton 
+				id="btnBreadcrumbPatient" visible="false" includeInLayout="false"
+				textRollOverColor="0xFFFFFF" textSelectedColor="0xFFFFFF" skin="{null}"
+			 	rollOver="btnBreadcrumbPatient.styleName='linkBtnUnderline';" 
+				rollOut="btnBreadcrumbPatient.styleName='linkBtn';" />
+			
 		</s:HGroup>
+		
 	</s:BorderContainer>
 	
-	<s:Scroller id="widgetScroller" height="728" width="1024" horizontalScrollPolicy="off">
+	<s:Scroller id="widgetScroller" width="1024" horizontalScrollPolicy="off">
+		
 		<s:VGroup id="widgetContent">
-			<s:HGroup gap="22" paddingTop="11" paddingLeft="32" minHeight="591">
+			
+			<s:HGroup id="widgetContainer" gap="22" paddingTop="11" paddingLeft="32" minHeight="591">
+				
+				<!-- column 1	-->
 				<s:VGroup gap="17">
+					
 					<!-- see http://blog.9mmedia.com/?p=535 -->
-					<enhancedtitlewindow:EnhancedTitleWindow id="widgetPatientProfile" width="305" title="Patient Profile" collapsible="true" headerClickable="false" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" visible="{widgetPatientProfileOpen}" includeInLayout="{widgetPatientProfileOpen}">
-						<enhancedtitlewindow:layout>
-							<s:VerticalLayout paddingLeft="10" paddingTop="12" paddingRight="10" paddingBottom="10"/>
-						</enhancedtitlewindow:layout>
-						<mx:LinkButton label="{patient.fullName}" styleName="linkBtnBlue" fontSize="16" fontWeight="bold" click="onPatientNameClick(event)" />
-						<s:HGroup color="0xFFFFFF" fontSize="12" paddingTop="8">
-							<s:Image source="@Embed('images/profilePicSmall.png')" />
-							<s:Label text="{'Patient ID:\nSSN:\nDOB:\nSex:\nRank/OS:'}" textAlign="right" paddingLeft="4" lineHeight="16" paddingTop="2" />
-							<s:Label text="{'000704190\n213-55-4232\n01/01/1965 (46 Years)\nMale\nSCPO, Navy'}" lineHeight="16" paddingTop="2" />
-						</s:HGroup>
-						<s:VGroup paddingTop="8" paddingBottom="-4">
-							<s:Line xFrom="0" xTo="280">
-								<s:stroke>
-									<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-								</s:stroke>
-							</s:Line>
-						</s:VGroup>
-						<mx:DataGrid id="dgPatientProfileWidget" width="100%" height="{310 - collapsedPatientDetailsPixels}" selectable="false"
-									 color="0xFFFFFF" verticalAlign="middle" 
-									 useRollOver="false"
-									 headerHeight="0"
-									 verticalScrollPolicy="off"
-									 borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
-									 variableRowHeight="true">
-							<mx:ArrayList>
-								<fx:Object section="Address" />
-								<fx:Object section="Contact" />
-								<fx:Object section="Emergency Contact" />
-							</mx:ArrayList>
-							<mx:columns>
-								<mx:DataGridColumn dataField="vital">
-									<mx:itemRenderer>
-										<fx:Component>
-											<mx:VBox horizontalScrollPolicy="off" verticalScrollPolicy="off">
-												<mx:states>
-													<s:State name="collapsed" />
-													<s:State name="expanded" />
-												</mx:states>
-												
-												<!--
-												<mx:transitions>
-												<s:Transition fromState="collapsed">
-												<s:Resize target="{this}" duration="500" />
-												</s:Transition>
-												<s:Transition fromState="expanded">
-												<s:Resize target="{this}" duration="500" />
-												</s:Transition>
-												</mx:transition>
-												-->
-												
-												<mx:LinkButton icon.expanded="@Embed(source='images/smallArrowGray.png')" icon.collapsed="@Embed(source='images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.section}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedPatientDetailsPixels+= (data.section == 'Address') ? 92 : (data.section == 'Contact' ? 60 : 76);} else {this.currentState = 'expanded'; outerDocument.collapsedPatientDetailsPixels-= (data.section == 'Address') ? 92 : (data.section == 'Contact' ? 60 : 76);}}" />
-												
-												<s:Group includeIn="expanded"><!--includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}"-->
-													<s:Line xFrom="0" xTo="280">
-														<s:stroke>
-															<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-														</s:stroke>
-													</s:Line>
-												</s:Group>
-												
-												<s:HGroup includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}" width="282" gap="8" verticalAlign="middle" color="0xFFFFFF" fontSize="12">
-													<s:VGroup gap="3">
-														<s:HGroup includeInLayout="{data.section == 'Address'}" visible="{data.section == 'Address'}">
-															<s:Label text="{'Street 1:\nStreet 2:\nCity:\nState/Province:\nZIP/Postal Code:'}" textAlign="right" width="123" lineHeight="16" paddingTop="2" />
-															<s:Label text="{'123 4th Avenue\n\nNew York\nNY\n56789'}" lineHeight="16" paddingTop="2" />
-														</s:HGroup>
-														<s:HGroup includeInLayout="{data.section == 'Contact'}" visible="{data.section == 'Contact'}">
-															<s:Label text="{'Work:\nHome:\nMobile:'}" textAlign="right" width="123" lineHeight="16" paddingTop="2" />
-															<s:Label text="{'212 -123-4567\n212 -123-4567\n212 -123-4567'}" lineHeight="16" paddingTop="2" />
-														</s:HGroup>
-														<s:HGroup includeInLayout="{data.section == 'Emergency Contact'}" visible="{data.section == 'Emergency Contact'}">
-															<s:Label text="{'Name:\nRelation:\nEmergency Phone 1:\nEmergency Phone 2:'}" textAlign="right" width="123" lineHeight="16" paddingTop="2" />
-															<s:Label text="{'Chloe Goodman\nSpouse\n212-123-4567\n212-123-7890'}" lineHeight="16" paddingTop="2" />
-														</s:HGroup>
-													</s:VGroup>
-												</s:HGroup>
-												
-												<s:Group>
-													<s:Line xFrom="0" xTo="280">
-														<s:stroke>
-															<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-														</s:stroke>
-													</s:Line>
-												</s:Group>
-											</mx:VBox>
-											
-										</fx:Component>
-									</mx:itemRenderer>
-								</mx:DataGridColumn>
-							</mx:columns>
-						</mx:DataGrid>
-					</enhancedtitlewindow:EnhancedTitleWindow>
-					<enhancedtitlewindow:EnhancedTitleWindow id="widgetRecentActivities" width="305" title="Patient's Recent Activities" collapsible="true" headerClickable="false" module="modRecentActivities" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" visible="{widgetRecentActivitiesOpen}" includeInLayout="{widgetRecentActivitiesOpen}">
-						<enhancedtitlewindow:layout>
-							<s:VerticalLayout paddingLeft="12" paddingTop="10" paddingRight="10" paddingBottom="8"/>
-						</enhancedtitlewindow:layout>
-						<mx:DataGrid dataProvider="{acActivities}" buttonMode="true"
-									 width="100%"
-									 color="0xFFFFFF" verticalAlign="middle"
-									 selectable="false"
-									 headerHeight="0"
-									 borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
-									 horizontalScrollPolicy="off" verticalScrollPolicy="off" rowCount="5" rowHeight="18"><!--itemClick="openMessage(event);"-->
-							<mx:columns>
-								<mx:DataGridColumn dataField="correspondent">
-									<mx:itemRenderer>
-										<fx:Component>
-											<mx:HBox horizontalScrollPolicy="off" paddingTop="-3">
-												<fx:Script>
-													<![CDATA[
-														private function showEllipsis():String {
-															return (data.subject.length <= 13) ? '' : '...';
-														}
-													]]>
-												</fx:Script>
-												<s:Label text="{data.date}" fontSize="12" width="74" color="0x868686" paddingTop="6" /><!--text="{outerDocument.displayTime(data.date, 'short')}"-->
-												<s:Label text="{data.type}" color="0xFFFFFF" fontSize="12" width="88" paddingTop="6" />
-												<mx:LinkButton id="btnWidgetActivity" label="{data.action}" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnWidgetActivity.styleName='linkBtnUnderline';}" rollOut="btnWidgetActivity.styleName='linkBtn';" paddingLeft="-3" /><!--label="{data.subject.substr(0,13) + showEllipsis()}" -->
-											</mx:HBox>
-										</fx:Component>
-									</mx:itemRenderer>
-								</mx:DataGridColumn>
-							</mx:columns>
-						</mx:DataGrid>
-						<s:HGroup paddingTop="-6" gap="2">
-							<s:Label fontSize="12" color="0x868686" text="...plus 6 more activities." paddingTop="6" />
-							<mx:LinkButton id="btnWidgetAllActivities" label="View All »" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnWidgetAllActivities.styleName='linkBtnUnderline';}" rollOut="btnWidgetAllActivities.styleName='linkBtn';" paddingLeft="-3" /><!--click="currentState='modMessages';" -->
-						</s:HGroup>
-					</enhancedtitlewindow:EnhancedTitleWindow>
-					<enhancedtitlewindow:EnhancedTitleWindow id="widgetAppointments" width="305" title="Appointments (4)" collapsible="true" headerClickable="false" module="modCalendar" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" initialize="parentApplication.populateDatesForWidget();" visible="{widgetAppointmentsOpen}" includeInLayout="{widgetAppointmentsOpen}">
-						<enhancedtitlewindow:layout>
-							<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10"/>
-						</enhancedtitlewindow:layout>
-						<s:HGroup paddingLeft="14" paddingTop="2" paddingBottom="6">
-							<s:BorderContainer backgroundImage="@Embed('images/widgetCalendarBG.png')" width="90" height="87" borderVisible="false" color="0xFBB03B" fontWeight="bold" buttonMode="true" click="{this.currentState='modCalendar';}"><!--if(shouldAddInitialAppointments) onApplicationStart();-->
-								<s:layout>
-									<s:VerticalLayout horizontalAlign="center" paddingTop="7" gap="1" />
-								</s:layout>
-								<s:Label fontSize="16" text="{parentApplication.appointments[parentApplication.currentAppt].month}" filters="{[new DropShadowFilter(4,45,0,0.4)]}" />	<!--text="{String(arrMonths[today.getMonth()]).toUpperCase()}"-->
-								<s:Label fontSize="72" text="{parentApplication.appointments[parentApplication.currentAppt].date}" filters="{[new DropShadowFilter(4,45,0,0.4)]}" />	<!-- text="{today.getDate()}"-->
-							</s:BorderContainer>
-							<s:VGroup paddingLeft="9">
-								<mx:LinkButton id="btnApptTime" label="{parentApplication.appointments[parentApplication.currentAppt].daytime}" color="0xFBB03B" fontSize="16" fontWeight="bold" textRollOverColor="0xFBB03B" textSelectedColor="0xFBB03B" skin="{null}" rollOver="{btnApptTime.styleName='linkBtnUnderline';}" rollOut="btnApptTime.styleName='linkBtn';" paddingLeft="-3" click="{this.currentState='modCalendar';}" /><!--if(shouldAddInitialAppointments) onApplicationStart();-->	<!--text="{arrWeekdays[today.getDay()] + ' 11:00 AM'}"-->
-								<s:Label color="0x868686" fontSize="12" text="{parentApplication.appointments[parentApplication.currentAppt].details}" paddingBottom="-9" paddingTop="-3" />		<!--text="{'Physical Examination\nDr. Berg\n(999) 999-9999'}"-->
-								<mx:LinkButton id="btnViewMap" label="View Map »" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnViewMap.styleName='linkBtnUnderline';}" rollOut="btnViewMap.styleName='linkBtn';" paddingLeft="-2" />
-							</s:VGroup>
-						</s:HGroup>
-						<s:Line xFrom="0" xTo="280">
-							<s:stroke>
-								<s:SolidColorStroke color="0xB3B3B3" alpha="0.1" weight="1"/>
-							</s:stroke>
-						</s:Line>
-						<s:HGroup width="100%">
-							<mx:LinkButton id="btnPrevAppt" label="Previous Appt." icon="{parentApplication.blueArrowLeft}" disabledIcon="{parentApplication.grayArrowLeft}" horizontalGap="9" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{if(btnPrevAppt.enabled) btnPrevAppt.styleName='linkBtnUnderline';}" rollOut="btnPrevAppt.styleName='linkBtn';" click="{parentApplication.currentAppt--}" enabled="{parentApplication.currentAppt != 0}" />
-							<s:Spacer width="100%" />
-							<mx:LinkButton id="btnNextAppt" label="Next Appt." icon="{parentApplication.blueArrowRight}" disabledIcon="{parentApplication.grayArrowRight}" horizontalGap="9" labelPlacement="left" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{if(btnNextAppt.enabled) btnNextAppt.styleName='linkBtnUnderline';}" rollOut="btnNextAppt.styleName='linkBtn';" click="{parentApplication.currentAppt++}" enabled="{parentApplication.currentAppt != parentApplication.appointments.length-1}" />
-						</s:HGroup>
-					</enhancedtitlewindow:EnhancedTitleWindow>
-					<enhancedtitlewindow:EnhancedTitleWindow id="widgetImmunizations" width="305" title="Immunizations (12)" collapsible="true" headerClickable="false" showCloseButton="{widgetLibraryOpen}" displayWarning="true" warningToolTip="Immunizations overdue" titleBarHeight="30" module="modImmunizations" visible="{widgetImmunizationsOpen}" includeInLayout="{widgetImmunizationsOpen}">	<!--title="{'Immunizations (' + immunizationsDueNumber + ')'}" (see comments on ArrayList below)-->
-						<enhancedtitlewindow:layout>
-							<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="20"/>
-						</enhancedtitlewindow:layout>
-						<mx:DataGrid buttonMode="true"
-									 width="100%" itemClick="if(!parentApplication.wasImmunizationDataLoaded) parentApplication.immunizationsXMLdata.send(); this.currentState='modImmunizations';"
-									 color="0xFFFFFF" verticalAlign="middle"
-									 selectable="false"
-									 headerHeight="0"
-									 borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
-									 horizontalScrollPolicy="off" verticalScrollPolicy="off" rowCount="4" rowHeight="18">
-							<mx:ArrayList>	<!-- Using this static data source for time saving purposes. It also allows us to show this widget without having to load the Immunizations HTTPservice.  -->
-								<mx:source>	<!-- Ideally, instead of using this, we should use the same immunizationsDataFiltered source, sort it (without modifying the original), and display the first 4 due/overdue immunizations. By loading the HTTPservice, we would also have access to immunizationsDueNumber which we could add to the header. -->
-									<fx:Object name="Hepatitis B" date="05/18/2012" completed="false" />
-									<fx:Object name="Td / Tdap" date="05/18/2012" completed="false" />
-									<fx:Object name="Rabies" date="07/18/2012" completed="false" />
-									<fx:Object name="Rubella" date="07/18/2012" completed="false" />
-								</mx:source>
-							</mx:ArrayList>
-							<mx:columns>
-								<mx:DataGridColumn dataField="name">
-									<mx:itemRenderer>
-										<fx:Component>
-											<mx:HBox horizontalScrollPolicy="off" paddingTop="-3">
-												<mx:HBox width="11" paddingTop="6">
-													<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Overdue" visible="{new Date(data.date) &lt; new Date()}" includeInLayout="{new Date(data.date) &lt; new Date()}" />
-													<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Due" visible="{new Date(data.date) >= new Date()}" includeInLayout="{new Date(data.date) >= new Date()}" />
-												</mx:HBox>
-												<s:Label text="{data.name}" color="0xFFFFFF" fontSize="12" width="110" fontWeight="bold" paddingTop="6" />
-												<s:Label text="{new Date(data.date) &lt; new Date() ? 'due ' + (new Date().setHours(0,0,0,0) - new Date(data.date).getTime()) / (1000*60*60*24) + ' days ago' : 'due in ' + (new Date(data.date).getTime() - new Date().setHours(0,0,0,0)) / (1000*60*60*24) + ' days'}" fontSize="12" color="0x868686" paddingTop="6" fontStyle="italic" />
-											</mx:HBox>
-										</fx:Component>
-									</mx:itemRenderer>
-								</mx:DataGridColumn>
-							</mx:columns>
-						</mx:DataGrid>
-					</enhancedtitlewindow:EnhancedTitleWindow>
-					<enhancedtitlewindow:EnhancedTitleWindow id="widgetMedicalRecords" width="305" title="Medical Records" collapsible="true" headerClickable="false" module="modMedicalRecords" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" color="0xFFFFFF" visible="{widgetMedicalRecordsOpen}" includeInLayout="{widgetMedicalRecordsOpen}">
-						<enhancedtitlewindow:layout>
-							<s:VerticalLayout paddingLeft="13" paddingTop="3" paddingRight="10" paddingBottom="12" />
-						</enhancedtitlewindow:layout>
-						<mx:LinkButton id="btnMedRecWidget" label="Physical Examination · Sep 16, 2011" color="0xFBB03B" fontSize="16" fontWeight="bold" textRollOverColor="0xFBB03B" textSelectedColor="0xFBB03B" skin="{null}" rollOver="{btnMedRecWidget.styleName='linkBtnUnderline';}" rollOut="btnMedRecWidget.styleName='linkBtn';" paddingLeft="-3" click="{if(!parentApplication.wasMedicalRecordsDataLoaded) parentApplication.medicalRecordsXMLdata.send(); this.currentState='modMedicalRecords';}" />
-						<s:Label fontSize="12" text="Dr. Gregory Berg" paddingTop="-7" paddingBottom="12" />
-						<s:Label fontSize="12" text="Start the Physical Rehabilitation regimen we spoke about. Our Gentle Chair Yoga class would be beneficial if you find the time." width="280" lineHeight="16" />
-						<s:HGroup>
-							<s:Label text="Recommendation:" paddingTop="4" />
-							<mx:LinkButton id="btnNextStepsRecommendation2" label="Gentle Chair Yoga Class" paddingTop="-5" paddingLeft="-7" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnNextStepsRecommendation2.styleName='linkBtnUnderline';}" rollOut="btnNextStepsRecommendation2.styleName='linkBtn';" click="{parentApplication.handleRecommendation('Gentle Chair Yoga Class')}" />
-						</s:HGroup>
-					</enhancedtitlewindow:EnhancedTitleWindow>
+					<patient:PatientProfile 
+						id="patientProfileWidget" />
+					<!--visible="{widgetPatientProfileOpen || currentState == 'module'}" includeInLayout="{widgetPatientProfileOpen || currentState == 'module'}" -->
+					
+					<patient:RecentActivities
+						id="recentActivitiesWidget" 
+						width="305" title="Patient's Recent Activities" 
+						collapsible="true" headerClickable="false" 
+						titleBarHeight="30" 
+						headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
+						includeIn="default" creationComplete="recentActivitiesWidget.module = ProviderConstants.MODULE_RECENT_ACTIVITIES" />
+						
+					<patient:PatientAppointmentsWidget 
+						id="appointmentsWidget" 
+						width="305" title="Appointments (4)" 
+						collapsible="true" headerClickable="false" 
+						titleBarHeight="30" 
+						headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)"
+						includeIn="default" creationComplete="appointmentsWidget.module = ProviderConstants.MODULE_APPOINTMENTS" />
+					
+					<patient:ImmunizationsWidget
+						id="immunizationsWidget" width="305" title="Immunizations (12)" 
+						collapsible="true" headerClickable="false" displayWarning="true" 
+						warningToolTip="Immunizations overdue" titleBarHeight="30" 
+						headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)"
+						includeIn="default" creationComplete="immunizationsWidget.module = ProviderConstants.MODULE_IMMUNIZATIONS"/>	<!--title="{'Immunizations (' + immunizationsDueNumber + ')'}" (see comments on ArrayList below)-->
+					
+					<patient:MedicalRecordsWidget
+						id="medicalRecordsWidget" width="305" 
+						title="Medical Records" 
+						collapsible="true" headerClickable="false" close="onWidgetClose(event)"
+						module="medicalRecordsModule" titleBarHeight="30" color="0xFFFFFF" 
+						headerClicked="onWidgetHeaderClick(event)"
+						includeIn="default" creationComplete="medicalRecordsWidget.module = ProviderConstants.MODULE_MEDICAL_RECORDS"/>
+					
 				</s:VGroup>
+				
+				<!-- column 2	-->
 				<s:VGroup gap="17">
-					<enhancedtitlewindow:EnhancedTitleWindow id="widgetHealthFocus" width="633" title="Health Focus (15)" collapsible="true" headerClickable="false" showCloseButton="false" displayWarning="true" warningToolTip="Patient needs attention" titleBarHeight="30" color="0xFFFFFF" showDropDown="true" dropDownDataProvider="{new ArrayCollection(['     Add New Internal Note','     View...'])}">
-						<mx:DataGrid dataProvider="{healthFocusData}" fontFamily="myMyriadNoCFF"
-									 width="100%" 
-									 color="0xFFFFFF" verticalAlign="middle"
-									 headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
-									 borderVisible="false" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-									 horizontalScrollPolicy="off" rowCount="5" rowHeight="22"><!--itemClick="{parentApplication.dgPatients_itemClickHandler(event)}" dataProvider="{acMessagesToDisplay}" creationComplete="showInboxMessages()" itemClick="openMessage(event);"-->
-							<mx:columns>
-								<mx:DataGridColumn dataField="urgency" headerText="Urgency" width="68">
-									<mx:itemRenderer>
-										<fx:Component>
-											<mx:HBox width="68" horizontalAlign="center">
-												<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 'Urgent'}" includeInLayout="{data.urgency == 'Urgent'}" />
-												<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 'Somewhat urgent'}" includeInLayout="{data.urgency == 'Somewhat urgent'}" />
-											</mx:HBox>
-										</fx:Component>
-									</mx:itemRenderer>
-								</mx:DataGridColumn>
-								<mx:DataGridColumn dataField="date" headerText="Time" width="86" />
-								<mx:DataGridColumn dataField="type" headerText="Type" width="102" />
-								<mx:DataGridColumn dataField="alert" headerText="Alert" width="143" />
-								<mx:DataGridColumn dataField="description" headerText="Description" paddingLeft="5" fontFamily="myMyriad">
-									<mx:itemRenderer>
-										<fx:Component>
-											<mx:HBox width="100%" paddingTop="0" horizontalScrollPolicy="off">
-												<!--<fx:Script>
-												<![CDATA[
-														import components.nutrition.saveMealWindow;
-														import mx.managers.PopUpManager;
-														protected function nutDeleteHandler(event:MouseEvent):void {
-															var item:Object = outerDocument.nutritionJournal.selectedItem;
-															//outerDocument.acTrash.addItem(item);
-															var index:int = outerDocument.arrNutritionFoodJournal.getItemIndex(item);
-															outerDocument.arrNutritionFoodJournal.removeItemAt(index);
-														}
-														
-														protected function saveMealPrompt(event:MouseEvent):void {
-															var mySaveMealWindow:saveMealWindow = saveMealWindow(PopUpManager.createPopUp(this, saveMealWindow) as spark.components.TitleWindow);
-															
-															var item:Object = outerDocument.nutritionJournal.selectedItem;
-															var index:int = outerDocument.arrNutritionFoodJournal.getItemIndex(item);
-															
-															mySaveMealWindow.mealType = outerDocument.arrNutritionFoodJournal.getItemAt(index).meal;
-															mySaveMealWindow.mealIngredients = outerDocument.arrNutritionFoodJournal.getItemAt(index).ingredients;
-															
-															PopUpManager.centerPopUp(mySaveMealWindow);
-														}
-													]]>
-												</fx:Script>-->
-												<mx:Label text="{data.description}" />
-												<s:Spacer width="100%" />
-												<s:HGroup paddingTop="7" paddingLeft="-7" paddingRight="7" alpha=".6">
-													<s:Image source="@Embed('images/btnHealthFocusMsg.png')" toolTip="Click to send message" buttonMode="true" /><!--click="nutDeleteHandler(event)"-->
-													<s:Image source="@Embed('images/btnHealthFocusComplete.png')" toolTip="Click to mark complete" buttonMode="true" /><!--click="nutDeleteHandler(event)"-->
-												</s:HGroup>
-											</mx:HBox>
-										</fx:Component>
-									</mx:itemRenderer>
-								</mx:DataGridColumn>
-							</mx:columns>
-						</mx:DataGrid>
-					</enhancedtitlewindow:EnhancedTitleWindow>
-					<enhancedtitlewindow:EnhancedTitleWindow id="widgetMedications" width="633" title="Medications" collapsible="true" headerClickable="false" module="modMedications" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" creationComplete="{if(!parentApplication.wasMedicationDataLoaded) parentApplication.medicationsXMLdataForWidget.send();}" visible="{widgetMedicationsOpen}" includeInLayout="{widgetMedicationsOpen}">
-						<enhancedtitlewindow:layout>
-							<s:VerticalLayout paddingLeft="10" paddingTop="8" paddingBottom="2"/>
-						</enhancedtitlewindow:layout>
-						<mx:PlotChart id="plotMedicationsWidget" dataProvider="{parentApplication.medicationsData}" width="100%" 
-									  backgroundElements="{parentApplication.bgeMedicationsWidget}" click="{if(!parentApplication.wasMedicationDataLoaded) parentApplication.medicationsXMLdata.send(); this.currentState = 'modMedications'}" buttonMode="true"
-									  creationComplete="medicationsSetMinMaxWidget();" height="181"><!-- height="403" (replaced by medications.as: plotMedications.height= medicationsCategories.length * 34 + 29;) paddingLeft="-155" paddingLeft="7"-->	<!--showDataTips="true" dataTipFunction="dataTipsMedications" itemClick="showMedicationDetails(event)" creationComplete="applyCustomDataTipsMedi();" -->
-							<mx:horizontalAxisRenderers>
-								<mx:AxisRenderer id="hAxisRendMedicationsWidget" axis="{hAxisMedicationsWidget}" tickPlacement="none" minorTickLength="3" minorTickPlacement="outside">
-									<mx:axisStroke><mx:SolidColorStroke color="#B3B3B3" weight="1" alpha=".1" /></mx:axisStroke>
-									<mx:minorTickStroke><s:SolidColorStroke color="#B3B3B3" weight="1" alpha=".1" /></mx:minorTickStroke>
-								</mx:AxisRenderer>
-							</mx:horizontalAxisRenderers>
-							
-							<!--<mx:verticalAxisRenderers>
-							<mx:AxisRenderer id="vAxisRendMedicationsWidget" axis="{vAxisMedicationsWidget}" tickPlacement="outside" tickLength="155" minorTickPlacement="inside" minorTickLength="637" labelGap="-155">
-							<mx:tickStroke><mx:SolidColorStroke color="#FFFFFF" weight="1" alpha=".3" /></mx:tickStroke>
-							<mx:minorTickStroke><s:SolidColorStroke color="#FFFFFF" weight="1" alpha=".3" /></mx:minorTickStroke>
-							<mx:axisStroke><mx:SolidColorStroke color="#FFFFFF" weight="1" alpha=".3" /></mx:axisStroke>-->
-							<!--http://help.adobe.com/en_US/flex/using/WS02f7d8d4857b1677355f601a126b41ed60e-8000.html-->
-							<!--<mx:labelRenderer>
-							<fx:Component>
-							<mx:Label color="{this.myColor}" fontWeight="{this.myWeight}" fontStyle="{this.myStyle}">
-							<fx:Script><![CDATA[
-							[Bindable] private var myTip:String;
-							[Bindable] private var myColor:uint;
-							[Bindable] private var myWeight:String;
-							[Bindable] private var myStyle:String;
-							
-							override public function set data(value:Object):void{
-							if(value == null) return;
-							text = value.text;
-							
-							if(value.text == "Prescription Drugs" || value.text == "Over-The-Counter Drugs" || value.text == "Supplements" || value.text == "Herbal Medicines") {
-							myColor = 0xBED63A;
-							text += ":";
-							}
-							else {
-							myColor = 0xFFFFFF;
-							}
-							}
-							]]></fx:Script>
-							</mx:Label>	
-							
-							</fx:Component>
-							</mx:labelRenderer>
-							
-							</mx:AxisRenderer>
-							</mx:verticalAxisRenderers>-->
-							
-							<mx:verticalAxisRenderers>
-								<mx:AxisRenderer id="vAxisRendMedicationsWidget" axis="{vAxisMedicationsWidget}" tickPlacement="outside" minorTickPlacement="none" tickLength="155" labelGap="-155"> 
-									<mx:tickStroke><mx:SolidColorStroke color="#B3B3B3" weight="1" alpha=".1" /></mx:tickStroke>
-									<mx:axisStroke><mx:SolidColorStroke color="#B3B3B3" weight="1" alpha=".1" /></mx:axisStroke>
-								</mx:AxisRenderer>
-							</mx:verticalAxisRenderers>
-							
-							<mx:horizontalAxis>
-								<mx:DateTimeAxis id="hAxisMedicationsWidget" labelFunction="parentApplication.lblHAxisPlotChartDayOnly" displayLocalTime="true" minorTickInterval="12" minorTickUnits="hours" />
-							</mx:horizontalAxis>
-							
-							<mx:verticalAxis>
-								<!--LINEAR AXIS-->
-								<!--<mx:LinearAxis id="vAxisMedicalRecords" interval="1" maximum="{immunizationsCategories.length}" labelFunction="lblVAxisImmunizations" />-->
-								
-								<!--CATEGORY AXIS-->
-								<mx:CategoryAxis id="vAxisMedicationsWidget" dataProvider="{parentApplication.medicationsCategories}" />
-							</mx:verticalAxis> <!-- categoryField="name" --> <!--dataFunction="catFunc"--> <!--labelFunction="lblVAxisImmunizations"-->
-							
-							<mx:series>
-								<mx:PlotSeries xField="date" yField="name" displayName="Medication" fillFunction="parentApplication.medicationsFillFunction" itemRenderer="ASclasses.MyMedicationsCustomRenderer" radius="5" stroke="{parentApplication.whiteStroke}" />
-								<mx:PlotSeries xField="dateAN" yField="name" displayName="Medication" fillFunction="parentApplication.medicationsFillFunction" itemRenderer="mx.charts.renderers.CircleItemRenderer" radius="5" stroke="{parentApplication.whiteStroke}" />
-								<mx:PlotSeries xField="dateX" yField="name" visible="false" />	<!-- this invisible point exists only so we can create the blue stripe -->
-							</mx:series>
-						</mx:PlotChart>
-					</enhancedtitlewindow:EnhancedTitleWindow>
-					<s:HGroup gap="22">
+					
+					<patient:AlertsWidget 
+						id="alertsWidget" 
+						width="633" maxHeight="157" 
+						collapsible="true" headerClickable="false" showCloseButton="false" displayWarning="true" 
+						warningToolTip="Patient needs attention" 
+						titleBarHeight="30" 
+						color="0xFFFFFF" 
+						showDropDown="true" />
+					
+					<patient:MedicationsWidget
+						id="medicationsWidget" width="633" title="Medications" 
+						collapsible="true" headerClickable="false" 
+						module="modMedications" titleBarHeight="30" 
+						headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)"
+						includeIn="default" creationComplete="medicalRecordsWidget.module = ProviderConstants.MODULE_MEDICAL_RECORDS"/>
+					
+					<s:HGroup gap="22" includeIn="default">
+						
 						<s:VGroup gap="17">
-							<enhancedtitlewindow:EnhancedTitleWindow id="widgetDecisionSupport" width="305" title="Decision Support" collapsible="true" headerClickable="false" module="modDecisionSupport" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" visible="{widgetDecisionSupportOpen}" includeInLayout="{widgetDecisionSupportOpen}">
-								<enhancedtitlewindow:layout>
-									<s:VerticalLayout paddingLeft="10" paddingTop="8" paddingRight="10" />
-								</enhancedtitlewindow:layout>
-								<s:Label text="Risk factors as of Oct 11, 2012" color="0xCCCCCC" fontSize="12" fontStyle="italic" />
-								<s:VGroup paddingBottom="-4">
-									<s:Line xFrom="0" xTo="280">
-										<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-										</s:stroke>
-									</s:Line>
-								</s:VGroup>
-								<mx:DataGrid id="dgDecisionSupportWidget" width="100%" height="{366 - collapsedDecisionSupportPixels}" selectable="false"
-											 color="0xFFFFFF" verticalAlign="middle" 
-											 useRollOver="false"
-											 headerHeight="0"
-											 verticalScrollPolicy="off"
-											 borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
-											 variableRowHeight="true">
-									<mx:ArrayList>
-										<fx:Object section="Cardiovascular Risk" />
-										<fx:Object section="Deployment Risks" />
-									</mx:ArrayList>
-									<mx:columns>
-										<mx:DataGridColumn dataField="vital">
-											<mx:itemRenderer>
-												<fx:Component>
-													<mx:VBox horizontalScrollPolicy="off" verticalScrollPolicy="off">
-														<mx:states>
-															<s:State name="expanded" />
-															<s:State name="collapsed" />
-														</mx:states>
-														
-														<!--
-														<mx:transitions>
-														<s:Transition fromState="collapsed">
-														<s:Resize target="{this}" duration="500" />
-														</s:Transition>
-														<s:Transition fromState="expanded">
-														<s:Resize target="{this}" duration="500" />
-														</s:Transition>
-														</mx:transition>
-														-->
-														
-														<mx:LinkButton icon.expanded="@Embed(source='images/smallArrowGray.png')" icon.collapsed="@Embed(source='images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.section}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedDecisionSupportPixels+= (data.section == 'Cardiovascular Risk') ? 169 : 137;} else {this.currentState = 'expanded'; outerDocument.collapsedDecisionSupportPixels-= (data.section == 'Cardiovascular Risk') ? 169 : 137;}}" />
-														
-														<s:Group includeIn="expanded"><!--includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}"-->
-															<s:Line xFrom="0" xTo="280">
-																<s:stroke>
-																	<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-																</s:stroke>
-															</s:Line>
-														</s:Group>
-														
-														<s:VGroup includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}" width="282" paddingLeft="30" verticalAlign="middle" fontSize="12" paddingTop="6" paddingBottom="6">
-															<s:HGroup includeInLayout="{data.section == 'Cardiovascular Risk'}" visible="{data.section == 'Cardiovascular Risk'}" gap="75">
-																<s:VGroup>
-																	<s:Label text="{'Blood Pressure\nCholesterol\nBlood Sugar\nWeight\nSmoking'}" lineHeight="33" color="0xFFFFFF" />
-																</s:VGroup>
-																<s:VGroup>
-																	<s:Label text="{'High Risk\nHigh Risk\nHigh Risk\nHigh Risk\nHigh Risk'}" fontStyle="italic" lineHeight="33" color="0xE84E1B" />
-																</s:VGroup>
-															</s:HGroup>
-															<s:HGroup includeInLayout="{data.section == 'Deployment Risks'}" visible="{data.section == 'Deployment Risks'}" gap="75">
-																<s:VGroup>
-																	<s:Label text="{'Malaria\nSchistosiomasis\nDengue\nFiliarasis'}" lineHeight="33" color="0xFFFFFF" />
-																</s:VGroup>
-																<s:VGroup>
-																	<s:Label text="{'Low Risk\nLow Risk\nLow Risk\nLow Risk'}" fontStyle="italic" lineHeight="33" color="0xF8E831" />
-																</s:VGroup>
-															</s:HGroup>
-														</s:VGroup>
-														
-														<s:Group>
-															<s:Line xFrom="0" xTo="280">
-																<s:stroke>
-																	<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-																</s:stroke>
-															</s:Line>
-														</s:Group>
-													</mx:VBox>
-													
-												</fx:Component>
-											</mx:itemRenderer>
-										</mx:DataGridColumn>
-									</mx:columns>
-								</mx:DataGrid>
-							</enhancedtitlewindow:EnhancedTitleWindow>
-							<enhancedtitlewindow:EnhancedTitleWindow id="widgetNutrition" width="305" title="Nutrition" subtitle="{parentApplication.dateFormatterDay.format(new Date())}" collapsible="true" headerClickable="false" module="modNutrition" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" visible="{widgetNutritionOpen}" includeInLayout="{widgetNutritionOpen}">
-								<enhancedtitlewindow:layout>
-									<s:HorizontalLayout paddingLeft="10" gap="0"/>
-								</enhancedtitlewindow:layout>
-								<s:VGroup width="100%" click="{this.currentState='modNutrition'}">
-									<s:HGroup width="100%" paddingTop="31" paddingBottom="16">
-										<s:Image source="{parentApplication.plateFullWidget}" /><!--source="{!hasMealBeenSubmitted ? plateEmptyWidget : mealType == 'full' ? plateFullWidget : platePartialWidget}"-->
-									</s:HGroup>
-									<s:Line xFrom="0" xTo="224">
-										<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-										</s:stroke>
-									</s:Line>
-									<s:HGroup paddingTop="9" paddingLeft="4" gap="16" verticalAlign="middle">
-										<s:Image source="@Embed('images/nutritionJournalFood.png')" />
-										<s:Label fontSize="14" color="0xFFFFFF" text="1700" textAlign="right" width="63" />
-										<s:Label fontSize="12" color="0x868686" text="Calories Consumed" />
-									</s:HGroup>
-									<s:HGroup paddingBottom="5" paddingLeft="4" gap="16" verticalAlign="middle">
-										<s:Image source="@Embed('images/nutritionJournalExercise.png')" />
-										<s:Label fontSize="14" color="0xFFFFFF" text="- 0" textAlign="right" width="63" />
-										<s:Label fontSize="12" color="0x868686" text="Calories Burned" />
-									</s:HGroup>
-									<s:Line xFrom="0" xTo="224">
-										<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-										</s:stroke>
-									</s:Line>
-									<s:HGroup paddingTop="7" gap="15">
-										<s:Label text="1700" styleName="orangeStandout" width="99" textAlign="right" />
-										<s:Label text="{'of 2,000 Total\nDaily Calories'}" color="0x868686" fontSize="12" paddingTop="2" />
-									</s:HGroup>
-								</s:VGroup>
-								<s:Line yFrom="0" yTo="292">
-									<s:stroke>
-										<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-									</s:stroke>
-								</s:Line>
-								<s:VGroup click="{this.currentState='modNutrition'}">
-									<s:VGroup width="67" horizontalAlign="center" paddingTop="11" paddingBottom="4">
-										<s:Label text="Sodium" fontSize="12" color="0x868686" />
-										<s:Image source="{parentApplication.sodiumFull}" />
-									</s:VGroup>
-									<s:Line xFrom="0" xTo="67">
-										<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-										</s:stroke>
-									</s:Line>
-									<s:VGroup width="67" horizontalAlign="center" paddingTop="3" paddingBottom="-3">
-										<s:Label text="Sugars" fontSize="12" color="0x868686" />
-										<s:Image source="{parentApplication.sugarsFull}" />
-									</s:VGroup>
-									<s:Line xFrom="0" xTo="67">
-										<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-										</s:stroke>
-									</s:Line>
-									<s:VGroup width="67" horizontalAlign="center" paddingTop="3" paddingBottom="4">
-										<s:Label text="Fats &amp; Oils" fontSize="12" color="0x868686" />
-										<s:Image source="{parentApplication.fatsOilsPartial}" />
-									</s:VGroup>
-									<s:Line xFrom="0" xTo="67">
-										<s:stroke>
-											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-										</s:stroke>
-									</s:Line>
-									<s:VGroup width="67" horizontalAlign="center" paddingTop="5">
-										<s:Label text="Alcohol" fontSize="12" color="0x868686" />
-										<s:Image source="{parentApplication.alcoholFull}" />
-									</s:VGroup>
-								</s:VGroup>
-							</enhancedtitlewindow:EnhancedTitleWindow>
-							<enhancedtitlewindow:EnhancedTitleWindow id="widgetVitalSigns" width="305" title="Vital Signs" collapsible="true" headerClickable="false" module="modVitalSigns" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" initialize="{parentApplication.arrVitalSignsForWidget.source.splice(-2);}" visible="{widgetVitalSignsOpen}" includeInLayout="{widgetVitalSignsOpen}">
-								<enhancedtitlewindow:layout>
-									<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10"/>
-								</enhancedtitlewindow:layout>
-								<mx:DataGrid id="dgVitalSignsWidget" width="100%" height="{441 - collapsedVitals*58}" dataProvider="{parentApplication.arrVitalSignsForWidget}" selectable="false"
-											 color="0xFFFFFF" verticalAlign="middle" 
-											 useRollOver="false"
-											 headerHeight="0"
-											 verticalScrollPolicy="off"
-											 borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
-											 variableRowHeight="true" initialize="parentApplication.updateVitalIndices()">
-									<mx:columns>
-										<mx:DataGridColumn dataField="vital">
-											<mx:itemRenderer>
-												<fx:Component>
-													<mx:VBox horizontalScrollPolicy="off" verticalScrollPolicy="off">
-														<fx:Script>
-															<![CDATA[
-																import ASclasses.MyCircleItemRenderer;
-																import ASclasses.MyCircleItemRendererOver;
-																import ASclasses.MyCustomDataTip;
-																
-																import mx.charts.HitData;
-																import mx.charts.events.ChartItemEvent;
-																import mx.controls.Alert;
-																import mx.events.FlexEvent;
-																override public function set data(value:Object):void {
-																	super.data = value;
-																	if (value.hasOwnProperty("chart")) {
-																		chart.dataProvider = value.chart[0].data;
-																	}
-																}
-																
-																private function chartRolloverEventHandler(event:ChartItemEvent):void {
-																	//lblTemperature.width = String(data.chart[0].data[event.hitData.chartItem.index].value).length > 2 ? 60 : 40;
-																	lblWeight.text = lblBloodPressure1.text = lblHeartRate.text = lblRespiratory.text = lblTemperature.text = data.chart[0].data[event.hitData.chartItem.index].value;
-																	lblBloodPressure2.text = data.chart[0].data[event.hitData.chartItem.index].value2;
-																	lblHeightFeet.text = String(Math.floor(data.chart[0].data[event.hitData.chartItem.index].value / 12));
-																	lblHeightInches.text = String(data.chart[0].data[event.hitData.chartItem.index].value % 12);
-																	//lblDate.text = outerDocument.getDate(data.chart[0].data[event.hitData.chartItem.index].date);
-																	myLineSeries.setStyle("itemRenderer",new ClassFactory(ASclasses.MyCircleItemRendererOverWidget));
-																	myLineSeries2.setStyle("itemRenderer",new ClassFactory(ASclasses.MyCircleItemRendererOverWidget));
-																}
-																private function chartRolloutEventHandler(event:ChartItemEvent):void {
-																	//lblTemperature.width = 40;
-																	lblWeight.text = lblBloodPressure1.text = lblHeartRate.text = lblRespiratory.text = lblTemperature.text = data.chart[0].data[data.chart[0].data.length - 1].value;
-																	lblBloodPressure2.text = data.chart[0].data[data.chart[0].data.length - 1].value2;
-																	lblHeightFeet.text = String(Math.floor(data.chart[0].data[data.chart[0].data.length - 1].value / 12));
-																	lblHeightInches.text = String(data.chart[0].data[data.chart[0].data.length - 1].value % 12);
-																	//lblDate.text = outerDocument.getDate(data.chart[0].data[data.chart[0].data.length - 1].date);
-																	myLineSeries.setStyle("itemRenderer",new ClassFactory(ASclasses.MyCircleItemRenderer));
-																	myLineSeries2.setStyle("itemRenderer",new ClassFactory(ASclasses.MyCircleItemRenderer));
-																}
-															]]>
-														</fx:Script>
-														
-														<fx:Declarations>
-															<fx:Array id="bge">
-															</fx:Array>
-														</fx:Declarations>
-														
-														<mx:states>
-															<s:State name="expanded" />
-															<s:State name="collapsed" />
-														</mx:states>
-														
-														<!--
-														<mx:transitions>
-														<s:Transition fromState="collapsed">
-														<s:Resize target="{this}" duration="500" />
-														</s:Transition>
-														<s:Transition fromState="expanded">
-														<s:Resize target="{this}" duration="500" />
-														</s:Transition>
-														</mx:transition>
-														-->
-														
-														<s:HGroup width="140" gap="-2">
-															<mx:LinkButton icon.expanded="@Embed(source='images/smallArrowGray.png')" icon.collapsed="@Embed(source='images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.vital}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedVitals++;} else {this.currentState = 'expanded'; outerDocument.collapsedVitals--;}}" />
-															<mx:Label text="{'(Last: ' + parentApplication.getDate(data.chart[0].data[data.chart[0].data.length - 1].date) + ')'}" fontSize="12" color="0x868686" paddingTop="1" />
-														</s:HGroup>
-														
-														<s:Group includeIn="expanded"><!--includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}"-->
-															<s:Line xFrom="0" xTo="280">
-																<s:stroke>
-																	<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-																</s:stroke>
-															</s:Line>
-														</s:Group>
-														
-														<s:HGroup includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}" width="282" gap="8" verticalAlign="middle">
-															<mx:LineChart id="chart" width="162" height="45" backgroundElements="{bge}" seriesFilters="[]" selectionMode="single" itemRollOver="chartRolloverEventHandler(event)" itemRollOut="chartRolloutEventHandler(event)" itemClick="{outerDocument.currentState = 'modVitalSigns'}"><!--itemRollOverColor="0xFBB03B" itemSelectionColor="0xFBB03B" showDataTips="true" itemRollOut="{myLineSeries.selectedIndex = 2}" -->
-																<mx:series>
-																	<mx:LineSeries yField="expectation" xField="date" interactive="false">
-																		<mx:lineStroke>
-																			<s:SolidColorStroke color="0x86888A" weight="2" alpha=".4" />
-																		</mx:lineStroke>
-																	</mx:LineSeries>
-																	<mx:LineSeries id="myLineSeries" yField="value" xField="date" itemRenderer="ASclasses.MyCircleItemRenderer" radius="4" adjustedRadius="4" fill="{parentApplication.colorVitalSignsWidgetBlack}" selectedIndex="0"><!--form="curve" -->
-																		<mx:lineStroke>
-																			<s:SolidColorStroke color="0xFFFFFF" weight="2" />
-																		</mx:lineStroke>
-																		<mx:stroke>
-																			<mx:SolidColorStroke color="0xFFFFFF" weight="1"/>
-																		</mx:stroke>
-																	</mx:LineSeries>
-																	<mx:LineSeries yField="expectation2" xField="date" interactive="false" includeInLayout="{data.chartType == 'double'}" visible="{data.chartType == 'double'}">
-																		<mx:lineStroke>
-																			<s:SolidColorStroke color="0x86888A" weight="2" alpha=".4" />
-																		</mx:lineStroke>
-																	</mx:LineSeries>
-																	<mx:LineSeries id="myLineSeries2" yField="value2" xField="date" includeInLayout="{data.chartType == 'double'}" visible="{data.chartType == 'double'}" itemRenderer="ASclasses.MyCircleItemRenderer" radius="4" adjustedRadius="4" fill="{parentApplication.colorVitalSignsWidgetBlack}"><!--form="curve" -->
-																		<mx:lineStroke>
-																			<s:SolidColorStroke color="0xFFFFFF" weight="2" />
-																		</mx:lineStroke>
-																		<!--<mx:fill>
-																		<mx:SolidColor color="0xD78C73"/>
-																		</mx:fill>-->
-																		<mx:stroke>
-																			<mx:SolidColorStroke color="0xFFFFFF" />
-																		</mx:stroke>
-																	</mx:LineSeries>
-																</mx:series>
-																<mx:horizontalAxis>
-																	<mx:DateTimeAxis id="vitalXaxis" minimum="{parentApplication.chartMin}" maximum="{parentApplication.chartMax}" />
-																</mx:horizontalAxis>
-																<mx:horizontalAxisRenderers>
-																	<mx:AxisRenderer axis="{vitalXaxis}" showLabels="false" tickPlacement="none" showLine="false" visible="false"  />
-																</mx:horizontalAxisRenderers>
-																<mx:verticalAxis>
-																	<mx:LinearAxis id="vitalYaxis" minimum="{data.chartMin}" maximum="{data.chartMax}"  /><!--minimum="60" maximum="140"-->
-																</mx:verticalAxis>
-																<mx:verticalAxisRenderers>
-																	<mx:AxisRenderer axis="{vitalYaxis}" showLabels="false" tickPlacement="none" showLine="false" visible="false" />
-																</mx:verticalAxisRenderers>
-															</mx:LineChart>
-															
-															<s:VGroup gap="3" color="0x868686">
-																<s:VGroup includeInLayout="{data.vital == 'Weight'}" visible="{data.vital == 'Weight'}" gap="-3">
-																	<s:HGroup verticalAlign="baseline" gap="4">
-																		<s:Label id="lblWeight" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
-																		<s:Label fontSize="12" text="pounds" />
-																	</s:HGroup>
-																</s:VGroup>
-																
-																<s:HGroup includeInLayout="{data.vital == 'Blood pressure'}" visible="{data.vital == 'Blood pressure'}" verticalAlign="baseline" gap="0">
-																	<s:Label id="lblBloodPressure1" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
-																	<s:Label fontSize="24" text="/" color="0xFFFFFF" fontWeight="bold" />
-																	<s:Label id="lblBloodPressure2" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value2}" />
-																	<s:Label fontSize="12" text="mmHg" paddingLeft="3" />
-																</s:HGroup>
-																
-																<s:HGroup includeInLayout="{data.vital == 'Heart rate'}" visible="{data.vital == 'Heart rate'}" verticalAlign="baseline" gap="4">
-																	<s:Label id="lblHeartRate" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
-																	<s:Label fontSize="12" text="beats / minute" />
-																</s:HGroup>
-																
-																<s:HGroup includeInLayout="{data.vital == 'Respiratory'}" visible="{data.vital == 'Respiratory'}" verticalAlign="baseline" gap="4">
-																	<s:Label id="lblRespiratory" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
-																	<s:Label fontSize="12" text="breaths / minute" />
-																</s:HGroup>
-																
-																<s:HGroup includeInLayout="{data.vital == 'Temperature'}" visible="{data.vital == 'Temperature'}" verticalAlign="baseline" gap="1">
-																	<s:Label id="lblTemperature" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
-																	<s:Label fontSize="24" text="°" />
-																	<s:Label fontSize="12" text="Fahrenheit" />
-																</s:HGroup>
-																
-																<s:HGroup includeInLayout="{data.vital == 'Height'}" visible="{data.vital == 'Height'}" verticalAlign="baseline" gap="4">
-																	<s:Label id="lblHeightFeet" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{Math.floor(data.chart[0].data[data.chart[0].data.length - 1].value / 12)}" />
-																	<s:Label fontSize="12" text="feet" />
-																	<s:Label id="lblHeightInches" fontSize="24" fontWeight="bold" color="0xFBB03B" text="{data.chart[0].data[data.chart[0].data.length - 1].value % 12}" />
-																	<s:Label fontSize="12" text="inches" />
-																</s:HGroup>
-																
-																<!--<s:Label id="lblDate" includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}" text="{outerDocument.getDate(data.chart[0].data[data.chart[0].data.length - 1].date)}" fontSize="13" fontStyle="italic" color="0xCCCCCC" />-->
-															</s:VGroup>
-														</s:HGroup>
-														
-														<s:Group>
-															<s:Line xFrom="0" xTo="280">
-																<s:stroke>
-																	<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-																</s:stroke>
-															</s:Line>
-														</s:Group>
-													</mx:VBox>
-													
-												</fx:Component>
-											</mx:itemRenderer>
-										</mx:DataGridColumn>
-									</mx:columns>
-								</mx:DataGrid>
-							</enhancedtitlewindow:EnhancedTitleWindow>
+							
+							<patient:DecisionSupportWidget
+								id="decisionSupportWidget" 
+								width="305" title="Decision Support" 
+								collapsible="true" headerClickable="false" 
+								module="decisionSupportModule" titleBarHeight="30" 
+								headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
+								creationComplete="decisionSupportWidget.module = ProviderConstants.MODULE_DECISION_SUPPORT"/>
+							
+							<patient:NutritionWidget
+								id="nutritionWidget" 
+								width="305" 
+								title="Nutrition"
+								collapsible="true" headerClickable="false" 
+								module="nutritionModule" titleBarHeight="30" 
+								headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
+								creationComplete="nutritionWidget.module = ProviderConstants.MODULE_NUTRITION"/>
+							
+							<patient:VitalSignsWidget
+								id="vitalSignsWidget" width="305" maxHeight="441"
+								title="Vital Signs" 
+								collapsible="true" headerClickable="false"
+								module="vitalSignsModule" titleBarHeight="30" 
+								headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
+								creationComplete="vitalSignsWidget.module = ProviderConstants.MODULE_VITAL_SIGNS"/>
+							
 						</s:VGroup>
-						<enhancedtitlewindow:EnhancedTitleWindow id="widgetExercise" width="305" title="Exercise" collapsible="true" headerClickable="false" module="modExercise" showCloseButton="{widgetLibraryOpen}" titleBarHeight="30" initialize="{parentApplication.filterProvidersForWidget();}" visible="{widgetExerciseOpen}" includeInLayout="{widgetExerciseOpen}">
+						
+						<!--
+						<patient:ExerciseWidget
+							id="widgetExercise" 
+							width="305" maxHeight="500" 
+							title="Exercise" 
+							collapsible="true" headerClickable="false" showCloseButton="{widgetLibraryOpen}" 
+							module="modExercise" 
+							titleBarHeight="30"  
+							headerClicked="onWidgetHeaderClick(event)"
+							visible="{widgetExerciseOpen}" includeInLayout="{widgetExerciseOpen}" />--><!--initialize="{parentApplication.filterProvidersForWidget();}"-->
+						
+						<enhancedtitlewindow:EnhancedTitleWindow 
+							id="exerciseWidget" width="305" title="Exercise" collapsible="true" headerClickable="false" module="modExercise" titleBarHeight="30" initialize="{parentApplication.filterProvidersForWidget();}">
+							
 							<enhancedtitlewindow:layout>
 								<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="6"/>
 							</enhancedtitlewindow:layout>
-							<mx:DataGrid id="dgExerciseWidget" width="100%" height="{500 - parentApplication.collapsedExercisesPixels}" dataProvider="{parentApplication.arrExerciseForWidget}" selectable="false"
-										 color="0xFFFFFF" verticalAlign="middle" 
-										 useRollOver="false"
-										 headerHeight="0"
-										 verticalScrollPolicy="off"
-										 borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
-										 variableRowHeight="true">
+							
+							<mx:DataGrid 
+								id="dgExerciseWidget" width="100%" height="{500 - parentApplication.collapsedExercisesPixels}" dataProvider="{parentApplication.arrExerciseForWidget}" selectable="false"
+								color="0xFFFFFF" verticalAlign="middle" 
+							 	useRollOver="false"
+								headerHeight="0"
+								verticalScrollPolicy="off"
+								borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
+								variableRowHeight="true">
+								
 								<mx:columns>
 									<mx:DataGridColumn dataField="exercise">
 										<mx:itemRenderer>
@@ -1012,18 +596,36 @@
 					</s:HGroup>
 				</s:VGroup>
 			</s:HGroup>
-			<s:VGroup width="100%" horizontalAlign="right" paddingTop="{widgetLibraryOpen ? 0 : 106}">
-				<mx:LinkButton id="btnWidgetTrigger" label="Widgets" icon="{widgetLibraryOpen ? widgetTriggerClose : widgetTriggerOpen}" labelPlacement="left" paddingRight="34" fontSize="12" color="0xFFFFFF" textRollOverColor="0xFFFFFF" textSelectedColor="0xFFFFFF" skin="{null}" rollOver="{btnWidgetTrigger.styleName='linkBtnUnderline';}" rollOut="btnWidgetTrigger.styleName='linkBtn';" click="{widgetLibraryOpen = !widgetLibraryOpen; widgetContent.verticalScrollPosition = widgetContent.height + 100;}" />
-				<s:BorderContainer width="1024" height="100" visible="{widgetLibraryOpen}" includeInLayout="{widgetLibraryOpen}" borderAlpha=".2" borderColor="0xF2F2F2">
+			
+			<mx:ViewStack id="moduleViews" includeIn="module" paddingLeft="32" width="1024">
+				
+				<s:NavigatorContent name="appointmentsModule">
+					<s:Label text="test" />
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent id="modMedicalRecords">
+					<modules:MedicalRecordsModule width="976" paddingTop="10" showHeader="false" />
+				</s:NavigatorContent>
+				
+			</mx:ViewStack>
+			
+			<s:VGroup id="triggerContainer" includeIn="default" width="100%" horizontalAlign="right">
+				
+				<mx:LinkButton id="btnWidgetTrigger" label="Widgets" labelPlacement="left" paddingRight="34" fontSize="12" color="0xFFFFFF" textRollOverColor="0xFFFFFF" textSelectedColor="0xFFFFFF" skin="{null}" rollOver="{btnWidgetTrigger.styleName='linkBtnUnderline';}" rollOut="btnWidgetTrigger.styleName='linkBtn';" click="toggleLibrary()" />
+				
+				<s:BorderContainer id="widgetLibrary" width="1024" height="100" visible="false" includeInLayout="false" borderAlpha=".2" borderColor="0xF2F2F2">
+					
 					<s:layout>
 						<s:HorizontalLayout paddingTop="5" paddingLeft="47" gap="34" />
 					</s:layout>
+					
 					<s:backgroundFill>
 						<s:LinearGradient rotation="270">
 							<s:GradientEntry color="0x000000" alpha="1" ratio="0" />
 							<s:GradientEntry color="0x515151" alpha="1" ratio="1" /> <!--ratio="0.8834"-->
 						</s:LinearGradient>
 					</s:backgroundFill>
+					
 					<!--<s:HGroup>
 						<s:VGroup visible="{widgetMessagesOpen}" includeInLayout="{widgetMessagesOpen}" horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderMessages.png')" />
@@ -1034,102 +636,105 @@
 							<s:Label text="Messages" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>-->
-					<s:HGroup>
-						<s:VGroup visible="{widgetPatientProfileOpen}" includeInLayout="{widgetPatientProfileOpen}" horizontalAlign="center" gap="4">
+					
+					<s:HGroup id="patientProfileTrigger">
+						<s:VGroup horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderPatientProfile.png')" />
 							<s:Label text="{'Patient\'s\nProfile'}" fontSize="11" color="0xFFFFFF" textAlign="center" />
 						</s:VGroup>
-						<s:VGroup visible="{!widgetPatientProfileOpen}" includeInLayout="{!widgetPatientProfileOpen}" horizontalAlign="center" gap="4" click="{widgetPatientProfileOpen = true}" buttonMode="true">
+						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_PATIENT_PROFILE )" buttonMode="true">
 							<mx:Button upSkin="@Embed('images/widgetLibProviderPatientProfile.png')" overSkin="@Embed('images/widgetLibProviderPatientProfileOver.png')" downSkin="@Embed('images/widgetLibProviderPatientProfileDown.png')" />
 							<s:Label text="{'Patient\'s\nProfile'}" fontSize="11" color="0x666666" fontStyle="italic" textAlign="center" />
 						</s:VGroup>
 					</s:HGroup>
-					<s:HGroup>
-						<s:VGroup visible="{widgetRecentActivitiesOpen}" includeInLayout="{widgetRecentActivitiesOpen}" horizontalAlign="center" gap="4">
+					
+					<s:HGroup id="recentActivitiesTrigger">
+						<s:VGroup horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderRecentActivities.png')" />
 							<s:Label text="{'Recent\nActivities'}" fontSize="11" color="0xFFFFFF" textAlign="center" />
 						</s:VGroup>
-						<s:VGroup visible="{!widgetRecentActivitiesOpen}" includeInLayout="{!widgetRecentActivitiesOpen}" horizontalAlign="center" gap="4" click="{widgetRecentActivitiesOpen = true}" buttonMode="true">
+						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_RECENT_ACTIVITIES )" buttonMode="true">
 							<mx:Button upSkin="@Embed('images/widgetLibProviderRecentActivities.png')" overSkin="@Embed('images/widgetLibProviderRecentActivitiesOver.png')" downSkin="@Embed('images/widgetLibProviderRecentActivitiesDown.png')" />
 							<s:Label text="{'Recent\nActivities'}" fontSize="11" color="0x666666" fontStyle="italic" textAlign="center" />
 						</s:VGroup>
 					</s:HGroup>
-					<s:HGroup paddingLeft="-6" paddingRight="-6">
-						<s:VGroup visible="{widgetAppointmentsOpen}" includeInLayout="{widgetAppointmentsOpen}" horizontalAlign="center" gap="4">
+					
+					<s:HGroup paddingLeft="-6" paddingRight="-6" id="appointmentsTrigger">
+						<s:VGroup horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderAppointments.png')" />
 							<s:Label text="Appointments" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
-						<s:VGroup visible="{!widgetAppointmentsOpen}" includeInLayout="{!widgetAppointmentsOpen}" horizontalAlign="center" gap="4" click="{widgetAppointmentsOpen = true}" buttonMode="true">
+						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_APPOINTMENTS )" buttonMode="true">
 							<mx:Button upSkin="@Embed('images/widgetLibProviderAppointments.png')" overSkin="@Embed('images/widgetLibProviderAppointmentsOver.png')" downSkin="@Embed('images/widgetLibProviderAppointmentsDown.png')" />
 							<s:Label text="Appointments" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
-					<s:HGroup paddingLeft="-7" paddingRight="-7">
-						<s:VGroup visible="{widgetImmunizationsOpen}" includeInLayout="{widgetImmunizationsOpen}" horizontalAlign="center" gap="4">
+					<s:HGroup paddingLeft="-7" paddingRight="-7" id="immunizationsTrigger">
+						<s:VGroup horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderImmunizations.png')" />
 							<s:Label text="Immunizations" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
-						<s:VGroup visible="{!widgetImmunizationsOpen}" includeInLayout="{!widgetImmunizationsOpen}" horizontalAlign="center" gap="4" click="{widgetImmunizationsOpen = true}" buttonMode="true">
+						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_IMMUNIZATIONS )" buttonMode="true">
 							<mx:Button upSkin="@Embed('images/widgetLibProviderImmunizations.png')" overSkin="@Embed('images/widgetLibProviderImmunizationsOver.png')" downSkin="@Embed('images/widgetLibProviderImmunizationsDown.png')" />
 							<s:Label text="Immunizations" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
-					<s:HGroup>
-						<s:VGroup visible="{widgetMedicalRecordsOpen}" includeInLayout="{widgetMedicalRecordsOpen}" horizontalAlign="center" gap="4">
+					<s:HGroup id="medicalRecordsTrigger">
+						<s:VGroup horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderMedicalRecords.png')" />
 							<s:Label text="{'Medical\nRecords'}" fontSize="11" color="0xFFFFFF" textAlign="center" />
 						</s:VGroup>
-						<s:VGroup visible="{!widgetMedicalRecordsOpen}" includeInLayout="{!widgetMedicalRecordsOpen}" horizontalAlign="center" gap="4" click="{widgetMedicalRecordsOpen = true}" buttonMode="true">
+						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_MEDICAL_RECORDS )" buttonMode="true">
 							<mx:Button upSkin="@Embed('images/widgetLibProviderMedicalRecords.png')" overSkin="@Embed('images/widgetLibProviderMedicalRecordsOver.png')" downSkin="@Embed('images/widgetLibProviderMedicalRecordsDown.png')" />
 							<s:Label text="{'Medical\nRecords'}" fontSize="11" color="0x666666" fontStyle="italic" textAlign="center" />
 						</s:VGroup>
 					</s:HGroup>
-					<s:HGroup paddingLeft="-3" paddingRight="-3">
-						<s:VGroup visible="{widgetHealthFocusOpen}" includeInLayout="{widgetHealthFocusOpen}" horizontalAlign="center" gap="4">
+					<s:HGroup paddingLeft="-3" paddingRight="-3" id="alertsTrigger">
+						<s:VGroup horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderHealthFocus.png')" />
 							<s:Label text="Health Focus" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
-						<s:VGroup visible="{!widgetHealthFocusOpen}" includeInLayout="{!widgetHealthFocusOpen}" horizontalAlign="center" gap="4" click="{widgetHealthFocusOpen = true}" buttonMode="true">
+						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_ALERTS )" buttonMode="true">
 							<mx:Button upSkin="@Embed('images/widgetLibProviderHealthFocus.png')" overSkin="@Embed('images/widgetLibProviderHealthFocusOver.png')" downSkin="@Embed('images/widgetLibProviderHealthFocusDown.png')" />
 							<s:Label text="Health Focus" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
-					<s:HGroup paddingRight="-1">
-						<s:VGroup visible="{widgetMedicationsOpen}" includeInLayout="{widgetMedicationsOpen}" horizontalAlign="center" gap="4">
+					<s:HGroup paddingRight="-1" id="medicationsTrigger">
+						<s:VGroup horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderMedications.png')" />
 							<s:Label text="Medications" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
-						<s:VGroup visible="{!widgetMedicationsOpen}" includeInLayout="{!widgetMedicationsOpen}" horizontalAlign="center" gap="4" click="{widgetMedicationsOpen = true}" buttonMode="true">
+						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_MEDICATIONS )" buttonMode="true">
 							<mx:Button upSkin="@Embed('images/widgetLibProviderMedications.png')" overSkin="@Embed('images/widgetLibProviderMedicationsOver.png')" downSkin="@Embed('images/widgetLibProviderMedicationsDown.png')" />
 							<s:Label text="Medications" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
-					<s:HGroup>
-						<s:VGroup visible="{widgetNutritionOpen}" includeInLayout="{widgetNutritionOpen}" horizontalAlign="center" gap="4">
+					<s:HGroup id="nutritionTrigger">
+						<s:VGroup horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderNutrition.png')" />
 							<s:Label text="Nutrition" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
-						<s:VGroup visible="{!widgetNutritionOpen}" includeInLayout="{!widgetNutritionOpen}" horizontalAlign="center" gap="4" click="{widgetNutritionOpen = true}" buttonMode="true">
+						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_NUTRITION )" buttonMode="true">
 							<mx:Button upSkin="@Embed('images/widgetLibProviderNutrition.png')" overSkin="@Embed('images/widgetLibProviderNutritionOver.png')" downSkin="@Embed('images/widgetLibProviderNutritionDown.png')" />
 							<s:Label text="Nutrition" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
-					<s:HGroup>
-						<s:VGroup visible="{widgetExerciseOpen}" includeInLayout="{widgetExerciseOpen}" horizontalAlign="center" gap="4">
+					<s:HGroup id="exerciseTrigger">
+						<s:VGroup horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderExercise.png')" />
 							<s:Label text="Exercise" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
-						<s:VGroup visible="{!widgetExerciseOpen}" includeInLayout="{!widgetExerciseOpen}" horizontalAlign="center" gap="4" click="{widgetExerciseOpen = true}" buttonMode="true">
+						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_EXERCISE )" buttonMode="true">
 							<mx:Button upSkin="@Embed('images/widgetLibProviderExercise.png')" overSkin="@Embed('images/widgetLibProviderExerciseOver.png')" downSkin="@Embed('images/widgetLibProviderExerciseDown.png')" />
 							<s:Label text="Exercise" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
-					<s:HGroup>
-						<s:VGroup visible="{widgetVitalSignsOpen}" includeInLayout="{widgetVitalSignsOpen}" horizontalAlign="center" gap="4">
+					<s:HGroup id="vitalSignsTrigger">
+						<s:VGroup horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderVitalSigns.png')" />
 							<s:Label text="Vital Signs" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
-						<s:VGroup visible="{!widgetVitalSignsOpen}" includeInLayout="{!widgetVitalSignsOpen}" horizontalAlign="center" gap="4" click="{widgetVitalSignsOpen = true}" buttonMode="true">
+						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_VITAL_SIGNS )" buttonMode="true">
 							<mx:Button upSkin="@Embed('images/widgetLibProviderVitalSigns.png')" overSkin="@Embed('images/widgetLibProviderVitalSignsOver.png')" downSkin="@Embed('images/widgetLibProviderVitalSignsDown.png')" />
 							<s:Label text="Vital Signs" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
@@ -1144,12 +749,12 @@
 							<s:Label text="{'Educational\nResources'}" textAlign="center" lineHeight="11" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>-->
-					<s:HGroup>
-						<s:VGroup visible="{widgetDecisionSupportOpen}" includeInLayout="{widgetDecisionSupportOpen}" horizontalAlign="center" gap="4">
+					<s:HGroup id="decisionSupportTrigger">
+						<s:VGroup horizontalAlign="center" gap="4">
 							<s:Image source="@Embed('images/widgetLibProviderDecisionSupport.png')" />
 							<s:Label text="{'Decision\nSupport'}" fontSize="11" color="0xFFFFFF" textAlign="center" />
 						</s:VGroup>
-						<s:VGroup visible="{!widgetDecisionSupportOpen}" includeInLayout="{!widgetDecisionSupportOpen}" horizontalAlign="center" gap="4" click="{widgetDecisionSupportOpen = true}" buttonMode="true">
+						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_DECISION_SUPPORT )" buttonMode="true">
 							<mx:Button upSkin="@Embed('images/widgetLibProviderDecisionSupport.png')" overSkin="@Embed('images/widgetLibProviderDecisionSupportOver.png')" downSkin="@Embed('images/widgetLibProviderDecisionSupportDown.png')" />
 							<s:Label text="{'Decision\nSupport'}" fontSize="11" color="0x666666" fontStyle="italic" textAlign="center" />
 						</s:VGroup>

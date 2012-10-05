@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enhancedtitlewindow:EnhancedTitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script source="../../../../../visualDashboardShared/sharedASfiles/nutrition.as" />
+	
+	<enhancedtitlewindow:layout>
+		<s:HorizontalLayout paddingLeft="10" gap="0"/>
+	</enhancedtitlewindow:layout>
+	
+	<s:VGroup width="100%">
+		<s:HGroup width="100%" paddingTop="31" paddingBottom="16">
+			<s:Image source="{plateFullWidget}" /><!--source="{!hasMealBeenSubmitted ? plateEmptyWidget : mealType == 'full' ? plateFullWidget : platePartialWidget}"-->
+		</s:HGroup>
+		<s:Line xFrom="0" xTo="224">
+			<s:stroke>
+				<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
+			</s:stroke>
+		</s:Line>
+		<s:HGroup paddingTop="9" paddingLeft="4" gap="16" verticalAlign="middle">
+			<s:Image source="@Embed('images/nutritionJournalFood.png')" />
+			<s:Label fontSize="14" color="0xFFFFFF" text="1700" textAlign="right" width="63" />
+			<s:Label fontSize="12" color="0x868686" text="Calories Consumed" />
+		</s:HGroup>
+		<s:HGroup paddingBottom="5" paddingLeft="4" gap="16" verticalAlign="middle">
+			<s:Image source="@Embed('images/nutritionJournalExercise.png')" />
+			<s:Label fontSize="14" color="0xFFFFFF" text="- 0" textAlign="right" width="63" />
+			<s:Label fontSize="12" color="0x868686" text="Calories Burned" />
+		</s:HGroup>
+		<s:Line xFrom="0" xTo="224">
+			<s:stroke>
+				<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
+			</s:stroke>
+		</s:Line>
+		<s:HGroup paddingTop="7" gap="15">
+			<s:Label text="1700" styleName="orangeStandout" width="99" textAlign="right" />
+			<s:Label text="{'of 2,000 Total\nDaily Calories'}" color="0x868686" fontSize="12" paddingTop="2" />
+		</s:HGroup>
+	</s:VGroup>
+	<s:Line yFrom="0" yTo="292">
+		<s:stroke>
+			<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
+		</s:stroke>
+	</s:Line>
+	<s:VGroup click="{this.currentState='modNutrition'}">
+		<s:VGroup width="67" horizontalAlign="center" paddingTop="11" paddingBottom="4">
+			<s:Label text="Sodium" fontSize="12" color="0x868686" />
+			<s:Image source="{sodiumFull}" />
+		</s:VGroup>
+		<s:Line xFrom="0" xTo="67">
+			<s:stroke>
+				<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
+			</s:stroke>
+		</s:Line>
+		<s:VGroup width="67" horizontalAlign="center" paddingTop="3" paddingBottom="-3">
+			<s:Label text="Sugars" fontSize="12" color="0x868686" />
+			<s:Image source="{sugarsFull}" />
+		</s:VGroup>
+		<s:Line xFrom="0" xTo="67">
+			<s:stroke>
+				<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
+			</s:stroke>
+		</s:Line>
+		<s:VGroup width="67" horizontalAlign="center" paddingTop="3" paddingBottom="4">
+			<s:Label text="Fats &amp; Oils" fontSize="12" color="0x868686" />
+			<s:Image source="{fatsOilsPartial}" />
+		</s:VGroup>
+		<s:Line xFrom="0" xTo="67">
+			<s:stroke>
+				<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
+			</s:stroke>
+		</s:Line>
+		<s:VGroup width="67" horizontalAlign="center" paddingTop="5">
+			<s:Label text="Alcohol" fontSize="12" color="0x868686" />
+			<s:Image source="{alcoholFull}" />
+		</s:VGroup>
+	</s:VGroup>
+	
+</enhancedtitlewindow:EnhancedTitleWindow>

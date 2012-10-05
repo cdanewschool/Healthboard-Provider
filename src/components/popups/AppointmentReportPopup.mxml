@@ -11,8 +11,9 @@
 		<![CDATA[
 			import ASclasses.Constants;
 			
-			import controllers.ApplicationController;
 			import controllers.AppointmentsController;
+			import controllers.Controller;
+			import controllers.MainController;
 			
 			import models.Appointment;
 			import models.ProviderModel;
@@ -33,7 +34,7 @@
 			
 			private function initDate():void
 			{
-				var today:Date = ApplicationController.getInstance().today;
+				var today:Date = MainController(AppProperties.getInstance().controller).today;
 				date.text = Constants.MONTHS[ today.month ] + " " + today.date + ", " + today.fullYear;
 			}
 			

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enhancedtitlewindow:EnhancedTitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
+	title="Patient Profile" 
+	collapsible="true" headerClickable="false" 
+	titleBarHeight="30" >
+	
+	<fx:Script>
+		<![CDATA[
+			import events.ProfileEvent;
+			
+			import models.UserModel;
+		
+			[Bindable] public var patient:UserModel;
+			[Bindable] public var showDetails:Boolean = true;
+			
+			[Bindable] public var collapsedPatientDetailsPixels:uint = 228;	//used for recalculating widget's height
+			
+			protected function onPatientNameClick(event:MouseEvent):void 
+			{
+				var evt:ProfileEvent = new ProfileEvent( ProfileEvent.SHOW_CONTEXT_MENU, true );
+				evt.user = patient;
+				dispatchEvent( evt );
+			}
+		]]>
+	</fx:Script>
+	
+	<enhancedtitlewindow:layout>
+		<s:VerticalLayout paddingLeft="10" paddingTop="12" paddingRight="10" paddingBottom="10" />
+	</enhancedtitlewindow:layout>
+	
+	<mx:LinkButton 
+		label="{patient.fullName}" styleName="linkBtnBlue" fontSize="16" fontWeight="bold" click="onPatientNameClick(event)"
+		visible="{showDetails}" includeInLayout="{showDetails}" />
+	
+	<s:HGroup color="0xFFFFFF" fontSize="12" paddingTop="8">
+		<s:Image source="@Embed('images/profilePicSmall.png')" />
+		<s:Label text="{'Patient ID:\nSSN:\nDOB:\nSex:\nRank/OS:'}" textAlign="right" paddingLeft="4" lineHeight="16" paddingTop="2" />
+		<s:Label text="{'000704190\n213-55-4232\n01/01/1965 (46 Years)\nMale\nSCPO, Navy'}" lineHeight="16" paddingTop="2" />
+	</s:HGroup>
+	
+	<s:VGroup visible="{showDetails}" includeInLayout="{showDetails}" >
+		
+		<s:VGroup paddingTop="8" paddingBottom="-4">
+			<s:Line xFrom="0" xTo="280">
+				<s:stroke>
+					<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
+				</s:stroke>
+			</s:Line>
+		</s:VGroup>
+		
+		<mx:DataGrid 
+			id="dgPatientProfileWidget" width="100%" height="{310 - collapsedPatientDetailsPixels}" selectable="false"
+			color="0xFFFFFF" verticalAlign="middle" 
+			useRollOver="false"
+			headerHeight="0"
+			verticalScrollPolicy="off"
+			borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
+			variableRowHeight="true">
+			<mx:ArrayList>
+				<fx:Object section="Address" />
+				<fx:Object section="Contact" />
+				<fx:Object section="Emergency Contact" />
+			</mx:ArrayList>
+			<mx:columns>
+				<mx:DataGridColumn dataField="vital">
+					<mx:itemRenderer>
+						<fx:Component>
+							<mx:VBox horizontalScrollPolicy="off" verticalScrollPolicy="off">
+								<mx:states>
+									<s:State name="collapsed" />
+									<s:State name="expanded" />
+								</mx:states>
+								
+								<mx:LinkButton 
+									id="btnVital" 
+									icon.expanded="@Embed(source='images/smallArrowGray.png')" icon.collapsed="@Embed(source='images/smallArrowCollapsedGray.png')" 
+									horizontalGap="10" label="{data.section}" fontSize="12" fontWeight="bold" toggle="true" 
+									color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" 
+									click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedPatientDetailsPixels+= (data.section == 'Address') ? 92 : (data.section == 'Contact' ? 60 : 76);} else {this.currentState = 'expanded'; outerDocument.collapsedPatientDetailsPixels-= (data.section == 'Address') ? 92 : (data.section == 'Contact' ? 60 : 76);}}" />
+								
+								<s:Group includeIn="expanded"><!--includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}"-->
+									<s:Line xFrom="0" xTo="280">
+										<s:stroke>
+											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
+										</s:stroke>
+									</s:Line>
+								</s:Group>
+								
+								<s:HGroup includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}" width="282" gap="8" verticalAlign="middle" color="0xFFFFFF" fontSize="12">
+									<s:VGroup gap="3">
+										<s:HGroup includeInLayout="{data.section == 'Address'}" visible="{data.section == 'Address'}">
+											<s:Label text="{'Street 1:\nStreet 2:\nCity:\nState/Province:\nZIP/Postal Code:'}" textAlign="right" width="123" lineHeight="16" paddingTop="2" />
+											<s:Label text="{'123 4th Avenue\n\nNew York\nNY\n56789'}" lineHeight="16" paddingTop="2" />
+										</s:HGroup>
+										<s:HGroup includeInLayout="{data.section == 'Contact'}" visible="{data.section == 'Contact'}">
+											<s:Label text="{'Work:\nHome:\nMobile:'}" textAlign="right" width="123" lineHeight="16" paddingTop="2" />
+											<s:Label text="{'212 -123-4567\n212 -123-4567\n212 -123-4567'}" lineHeight="16" paddingTop="2" />
+										</s:HGroup>
+										<s:HGroup includeInLayout="{data.section == 'Emergency Contact'}" visible="{data.section == 'Emergency Contact'}">
+											<s:Label text="{'Name:\nRelation:\nEmergency Phone 1:\nEmergency Phone 2:'}" textAlign="right" width="123" lineHeight="16" paddingTop="2" />
+											<s:Label text="{'Chloe Goodman\nSpouse\n212-123-4567\n212-123-7890'}" lineHeight="16" paddingTop="2" />
+										</s:HGroup>
+									</s:VGroup>
+								</s:HGroup>
+								
+								<s:Group>
+									<s:Line xFrom="0" xTo="280">
+										<s:stroke>
+											<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
+										</s:stroke>
+									</s:Line>
+								</s:Group>
+							</mx:VBox>
+						</fx:Component>
+					</mx:itemRenderer>
+				</mx:DataGridColumn>
+			</mx:columns>
+		</mx:DataGrid>
+		
+	</s:VGroup>
+	
+</enhancedtitlewindow:EnhancedTitleWindow>

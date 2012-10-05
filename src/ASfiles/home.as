@@ -1,3 +1,5 @@
+import ASclasses.Constants;
+
 import ASfiles.ProviderConstants;
 
 import components.AutoComplete;
@@ -5,66 +7,105 @@ import components.home.ViewPatient;
 import components.modules.TeamModule;
 import components.popups.UserContextMenu;
 
-import controllers.ApplicationController;
 import controllers.AppointmentsController;
 import controllers.ChatController;
+import controllers.MainController;
 
+import events.ApplicationDataEvent;
 import events.ApplicationEvent;
 import events.AutoCompleteEvent;
-import events.EnhancedTitleWindowEvent;
 import events.ProfileEvent;
 
-import external.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
+import external.TabBarPlus.plus.TabBarPlus;
+import external.TabBarPlus.plus.TabPlus;
 
 import flash.display.DisplayObject;
-import flash.display.InteractiveObject;
 import flash.events.Event;
-import flash.events.FocusEvent;
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
-import flash.geom.Point;
 import flash.utils.Timer;
 
+import models.ApplicationModel;
 import models.Chat;
-import models.ChatSearch;
 import models.Message;
 import models.PatientModel;
 import models.ProviderModel;
 import models.ProvidersModel;
 import models.UserModel;
 
+import mx.binding.utils.BindingUtils;
+import mx.charts.chartClasses.CartesianDataCanvas;
 import mx.collections.ArrayCollection;
-import mx.containers.ApplicationControlBar;
+import mx.collections.IList;
 import mx.controls.LinkButton;
+import mx.core.FlexGlobals;
 import mx.core.INavigatorContent;
 import mx.events.CalendarLayoutChangeEvent;
 import mx.events.ListEvent;
+import mx.graphics.SolidColorStroke;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 
 import spark.events.DropDownEvent;
 import spark.events.IndexChangeEvent;
 
+import styles.ChartStyles;
+
 import utils.DateUtil;
 
-private var controller:ApplicationController = ApplicationController.getInstance();
+[Bindable] public var controller:MainController;
+[Bindable] public var medicalRecordsController:MainController;
+
+[Bindable] public var chartStyles:ChartStyles;
 
 private function init():void
 {
-	patientsXMLdata.send();
-	providersXMLdata.send();
+	AppProperties.getInstance().controller = controller = new MainController();
+	
+	populateDatesForWidget();	//	this popuplates the 'appointments' array
+	
+	var model:ApplicationModel = new ApplicationModel();
+	model.chartStyles = chartStyles = new ChartStyles();
+	model.patientVitalSigns = arrVitalSigns;
+	model.patientExercises = exerciseData;
+	model.patientExercisesWidget = arrExerciseForWidget;
+	model.patientAppointments = new ArrayCollection( appointments );
+	model.patientAppointmentIndex = currentAppt;
+	controller.model = model;
 	
 	if( ProviderConstants.DEBUG ) this.currentState = "providerHome";
 
 	userContextMenuTimer = new Timer( 2000, 1 );
 	userContextMenuTimer.addEventListener(TimerEvent.TIMER_COMPLETE,onUserMenuDelay);
 	
+	updateExercisePAIndices();
+	
+	BindingUtils.bindProperty( model.chartStyles, 'horizontalFill', this, 'myHorizontalFill');
+	BindingUtils.bindProperty( model.chartStyles, 'horizontalAlternateFill', this, 'myHorizontalAlternateFill');
+	
 	this.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
 	this.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
-	
+	this.addEventListener( ApplicationDataEvent.LOAD, onLoadDataRequest );
 	this.addEventListener( ApplicationEvent.NAVIGATE, onNavigate );
-	this.addEventListener( ApplicationEvent.SHOW_CONTEXT_MENU, onShowContextMenu );
+	this.addEventListener( ProfileEvent.SHOW_CONTEXT_MENU, onShowContextMenu );
+	this.addEventListener( TabPlus.CLOSE_TAB_EVENT, onTabClose );
+	
+	patientsXMLdata.send();
+	providersXMLdata.send();
 }
+
+private function onResize():void
+{
+	if( !this.stage ) return;
+	
+	FlexGlobals.topLevelApplication.height = this.stage.stageHeight;
+}
+
+public function get bgeMedications():Array { return chartStyles.bgeMedications; }
+public function get bgeMedicationsWidget():Array { return chartStyles.bgeMedicationsWidget; }
+public function get canvasMed():CartesianDataCanvas { return chartStyles.canvasMed; }
+public function get canvasMedWidget():CartesianDataCanvas { return chartStyles.canvasMedWidget; }
+public function get medicationsVerticalGridLine():SolidColorStroke { return chartStyles.medicationsVerticalGridLine; }
 
 [Bindable] public var fullname:String;
 [Bindable] private var registeredUserID:String = "thisValueWillBeReplaced";
@@ -147,9 +188,11 @@ protected function dgPatients_itemClickHandler(event:ListEvent):void {
 			break;
 		}
 	}				
-	if(!isPatientAlreadyOpen) {
+	if(!isPatientAlreadyOpen) 
+	{		
 		var viewPatient:ViewPatient = new ViewPatient();
 		viewPatient.patient = myData;		//acMessages[event.rowIndex];
+		viewPatient.selectedAppointment = appointments[currentAppt];
 		viewStackMain.addChild(viewPatient);
 		tabsMain.selectedIndex = viewStackMain.length - 1;
 		arrOpenPatients.push(myData);	
@@ -206,7 +249,7 @@ private function providersResultHandler(event:ResultEvent):void {
 		provider.id = providers.length;
 		providers.addItem( provider );
 		
-		if( provider.id == ProviderConstants.USER_ID ) ApplicationController.getInstance().user = provider;
+		if( provider.id == ProviderConstants.USER_ID ) controller.user = provider;
 		
 		var team:Object = {label:"Team " + provider.team, value: provider.team};
 		if( teams[provider.team] == null ) teams[provider.team] = team;
@@ -260,7 +303,7 @@ private function initChatHistory():void
 	
 	var user:UserModel = controller.getUser( ProviderConstants.USER_ID, UserModel.TYPE_PROVIDER );
 	
-	var today:Date = ApplicationController.getInstance().today;
+	var today:Date = controller.today;
 	var time:Number = today.getTime();
 	
 	var defs:Array = 
@@ -283,6 +326,20 @@ private function initChatHistory():void
 	}
 	
 	appointmentsXMLdata.send();
+}
+
+private function onLoadDataRequest(event:ApplicationDataEvent):void
+{
+	if( event.data === Constants.MEDICATIONS 
+		&& !controller.medicationsController.model.dataLoaded )
+	{
+		medicationsXMLdataForWidget.send();
+	}
+	else if( event.data === Constants.MEDICAL_RECORDS
+		&& !controller.medicalRecordsController.model.dataLoaded )
+	{
+		medicalRecordsXMLdata.send();
+	}
 }
 
 private function onNavigate(event:ApplicationEvent):void
@@ -322,17 +379,6 @@ private function onNavigate(event:ApplicationEvent):void
 		}
 	}
 	
-	if( module )
-	{
-		if( module is TeamModule )
-		{
-			if( event.user )
-			{
-				TeamModule(module).showTeamMember( event.user );
-			}
-		}
-	}
-	
 	onHideAutoComplete();
 }
 
@@ -340,7 +386,7 @@ private function toggleAvailability(event:MouseEvent):void
 {
 	var button:LinkButton = LinkButton(event.currentTarget);
 	
-	var user:UserModel = ApplicationController.getInstance().user;
+	var user:UserModel = controller.user;
 	
 	user.available = user.available == UserModel.STATE_AVAILABLE ? UserModel.STATE_UNAVAILABLE : UserModel.STATE_AVAILABLE;
 	
@@ -357,7 +403,7 @@ public function falsifyWidget(widget:String):void
 private var userContextMenu:UserContextMenu;
 private var userContextMenuTimer:Timer;
 
-private function onShowContextMenu(event:ApplicationEvent):void 
+private function onShowContextMenu(event:ProfileEvent):void 
 {
 	if( userContextMenu ) hideContextMenu();
 	
@@ -395,8 +441,9 @@ private function onUserAction( event:ProfileEvent ):void
 	{
 		evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
 		evt.data = ProviderConstants.MODULE_TEAM;
-		evt.user = event.user;
 		this.dispatchEvent( evt );
+		
+		TeamModule(viewStackProviderModules.getChildByName( ProviderConstants.MODULE_TEAM )).showTeamMember( event.user );
 	}
 	else if( event.type == ProfileEvent.VIEW_APPOINTMENTS )
 	{
@@ -421,7 +468,7 @@ private function onUserAction( event:ProfileEvent ):void
 	}
 	else if( event.type == ProfileEvent.START_CHAT )
 	{
-		ChatController.getInstance().chat( ApplicationController.getInstance().user, event.user );
+		ChatController.getInstance().chat( controller.user, event.user );
 	}
 	
 	hideContextMenu();
@@ -442,5 +489,50 @@ private function onUserMenuDelay( event:TimerEvent ):void
 			userContextMenuTimer.reset();
 			userContextMenuTimer.start();
 		}
+	}
+}
+
+protected function onTabClose( event:ListEvent ):void
+{
+	if( TabBarPlus( event.target.owner).dataProvider is IList )
+	{
+		var dataProvider:IList = TabBarPlus( event.target.owner).dataProvider as IList;
+		var index:int = event.rowIndex;
+		
+		if( dataProvider == viewStackMessages ) 
+		{
+			//	this array will hold the index values of each "NEW" message in arrOpenTabs. Its purpose is to know which "NEW" message we're closing (if it is in fact a new message)
+			var arrNewMessagesInOpenTabs:Array = new Array(); 
+			
+			for(var i:uint = 0; i < arrOpenTabs.length; i++) 
+			{
+				if( arrOpenTabs[i] == "NEW") arrNewMessagesInOpenTabs.push(i);
+			}
+			
+			if( arrOpenTabs[index-1] == "NEW" ) 
+				arrNewMessages.splice( arrNewMessagesInOpenTabs.indexOf(index-1), 1 );
+			
+			arrOpenTabs.splice(index-1,1);
+			viewStackMessages.selectedIndex--;
+		}
+		else if( this.currentState == ProviderConstants.MODULE_MEDICATIONS ) 
+		{
+			arrOpenTabsME.splice(index-1,1);
+		}
+		/*
+		else if( this.currentState == "modImmunizations" ) 
+		{
+			arrOpenTabsIM.splice(index-1,1);
+		}
+		*/
+		else if( this.currentState == ProviderConstants.STATE_PROVIDER_HOME ) 
+		{		//aka PROVIDER PORTAL!
+			if( dataProvider == viewStackMain) 
+				arrOpenPatients.splice(index-1,1);
+		}
+	}
+	else 
+	{
+		trace("Bad data provider");
 	}
 }

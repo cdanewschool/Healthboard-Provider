@@ -54,8 +54,9 @@
 		<![CDATA[
 			import ASclasses.Constants;
 			
-			import controllers.ApplicationController;
 			import controllers.AppointmentsController;
+			import controllers.Controller;
+			import controllers.MainController;
 			
 			import flashx.textLayout.elements.Configuration;
 			import flashx.textLayout.elements.LinkElement;
@@ -89,7 +90,7 @@
 			[Bindable] public var appointments:ArrayCollection;
 			[Bindable] private var providers:ArrayCollection;
 			
-			private var today:Date = ApplicationController.getInstance().today;
+			private var today:Date = MainController(AppProperties.getInstance().controller).today;
 			
 			private var nextAppointment:Appointment;
 			
@@ -170,7 +171,7 @@
 				if( action == 'showPatient' )
 				{
 					var id:int = parseInt( link[1] );
-					var patient:UserModel = ApplicationController.getInstance().getUser( id, UserModel.TYPE_PATIENT );
+					var patient:UserModel = MainController(AppProperties.getInstance().controller).getUser( id, UserModel.TYPE_PATIENT );
 					
 					//	TODO: show patient
 				}

@@ -2,7 +2,8 @@ package models
 {
 	import ASclasses.Constants;
 	
-	import controllers.ApplicationController;
+	import controllers.Controller;
+	import controllers.MainController;
 	
 	import flash.utils.describeType;
 	
@@ -77,7 +78,7 @@ package models
 		{
 			location = "The New York Clinic\n99 Main St.\nNew York, NY 11111";	//	temp
 			
-			var today:Date = ApplicationController.getInstance().today;
+			var today:Date = MainController(AppProperties.getInstance().controller).today;
 			
 			from = new Date( today.fullYear, today.month, today.date, 10 );
 			to = new Date( today.fullYear, today.month, today.date, 11 );
@@ -164,8 +165,8 @@ package models
 			val.to = new Date();
 			val.to.setTime( Date.parse( data.to ) );
 			
-			val.patient = ApplicationController.getInstance().getUser( data.patient_id, UserModel.TYPE_PATIENT );
-			val.provider = ApplicationController.getInstance().getUser( data.provider_id, UserModel.TYPE_PROVIDER );
+			val.patient = MainController(AppProperties.getInstance().controller).getUser( data.patient_id, UserModel.TYPE_PATIENT );
+			val.provider = MainController(AppProperties.getInstance().controller).getUser( data.provider_id, UserModel.TYPE_PROVIDER );
 			
 			val.isPending = String(data.is_pending) == 'true';
 			

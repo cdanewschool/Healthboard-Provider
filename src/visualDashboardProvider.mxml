@@ -9,12 +9,14 @@
 			   xmlns:general="components.general.*"
 			   xmlns:ASclasses="ASclasses.*"
 			   fontFamily="myMyriad"
-			   minWidth="1024" minHeight="768"
-			   creationComplete="init()" xmlns:modules="components.modules.*" xmlns:widgets="components.widgets.*">
+			   minWidth="1024" minHeight="768" resize="onResize()"
+			   creationComplete="init();onResize()" xmlns:modules="components.modules.*" xmlns:widgets="components.widgets.*">
 
 	<fx:Script>
 		<![CDATA[
 			import controllers.AppointmentsController;
+			
+			import models.modules.MedicalRecordsModel;
 		]]>
 	</fx:Script>
 
@@ -25,11 +27,11 @@
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/messages.as" />
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/appointments.as" />
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/immunizations.as" />
-	<fx:Script source="../../visualDashboardShared/sharedASfiles/medicalRecords.as" />
-	<fx:Script source="../../visualDashboardShared/sharedASfiles/medications.as" />
-	<fx:Script source="../../visualDashboardShared/sharedASfiles/vitalSigns.as" />
+	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/medicalRecords.as" />-->
+	<fx:Script source="../../visualDashboardShared/sharedASfiles/medications.as" />	<!--	this should be able to removed once the myTreeMedRec placeholder is replaced	-->
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/exercise.as" />
-	<fx:Script source="../../visualDashboardShared/sharedASfiles/nutrition.as" />
+	<fx:Script source="../../visualDashboardShared/sharedASfiles/vitalSigns.as" />
+	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/nutrition.as" />-->
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
@@ -37,44 +39,8 @@
 		<mx:Validator id="passwordValidator" source="{password}" property="text" requiredFieldError="The user ID or password is incorrect." />
 		<mx:EmailValidator id="forgotPasswordEmailValidator" source="{passEmailAddress}" property="text" />
 		
-		<fx:Array id="bgeMedications">
-			<mx:GridLines gridDirection="both" >
-				<mx:horizontalStroke>
-					<mx:SolidColorStroke alpha="0" color="0xFFFFFF" />
-				</mx:horizontalStroke>
-				<mx:verticalStroke>
-					<s:SolidColorStroke id="medicationsVerticalGridLine" alpha="0" color="0xFFFFFF" />
-				</mx:verticalStroke>
-				<mx:horizontalAlternateFill>
-					<mx:SolidColor color="{myHorizontalAlternateFill}" />
-				</mx:horizontalAlternateFill>
-				<mx:horizontalFill>
-					<s:SolidColor color="{myHorizontalFill}" />
-				</mx:horizontalFill>
-			</mx:GridLines>
-			<mx:CartesianDataCanvas id="canvasMed" />
-		</fx:Array>
-		
-		<fx:Array id="bgeMedicationsWidget">
-			<mx:GridLines gridDirection="both" >
-				<mx:horizontalStroke>
-					<mx:SolidColorStroke alpha="0.1" color="0xB3B3B3" />
-				</mx:horizontalStroke>
-				<mx:verticalStroke>
-					<s:SolidColorStroke id="medicationsVerticalGridLine2" weight="2" alpha="0.4" color="0x86888A" />
-				</mx:verticalStroke>
-			</mx:GridLines>
-			<mx:CartesianDataCanvas id="canvasMedWidget" />
-		</fx:Array>
-		
 		<s:Sine id="sineEasing"
 				easeInFraction="0.1"/>
-		
-		<mx:DateFormatter id="dateFormatterDay" formatString="EEE, MMM D"/><!--MMM D, YY-->
-		<mx:DateFormatter id="dateFormatter" formatString="MMM YY"/>
-		<mx:DateFormatter id="dateFormatterYear" formatString="YYYY"/>
-		<mx:DateFormatter id="dateFormatterToday" />
-		<mx:DateFormatter id="dateFormatterDayOnly" formatString="EEE"/><!-- for Meds widget -->
 		
 		<mx:HTTPService id="patientsXMLdata"
 						url="data/patients.xml"
@@ -86,11 +52,11 @@
 		
 		<mx:HTTPService id="medicalRecordsXMLdata"
 						url="../../visualDashboardShared/data/medicalRecords.xml"
-						result="medicalRecordsResultHandler(event)" />
+						result="AppProperties.getInstance().controller.medicalRecordsController.dataResultHandler(event)" />
 		
 		<mx:HTTPService id="medicationsXMLdataForWidget"
 						url="data/medications.xml"
-						result="medicationsResultHandlerForWidget(event)" />
+						result="AppProperties.getInstance().controller.medicationsController.dataResultHandler(event)" />
 		
 		<mx:HTTPService id="providersXMLdata"
 						url="data/providers.xml"
@@ -102,13 +68,8 @@
 
 		<s:SolidColor id="colorMedicalRecordsOutpatient" color="0x71B2D1" /><!--also used for Medication's "Prescription Drugs"-->
 		<s:SolidColor id="colorMedicalRecordsInpatient" color="0xDC9D00" /><!--also used for Medication's "Supplements"-->
-		<s:SolidColor id="colorMedicationsOverTheCounterDrugs" color="0xE5B0B5" />
-		<s:SolidColor id="colorMedicationsHerbalMedicines" color="0x9CB40D" />
-		<s:SolidColor id="colorMedicationsPast" color="0x646464" />
+		<s:SolidColor id="colorMedicationsPast" color="0x646464" />		
 		
-		<s:SolidColor id="colorVitalSignsWidgetBlack" color="0x000000" />
-		
-		<s:SolidColorStroke id="whiteStroke" color="0xFFFFFF" />
 	</fx:Declarations>
 	
 	<fx:Style source="css/styles.css" />
@@ -252,7 +213,7 @@
 				
 				<s:HGroup paddingRight="14">
 					
-					<mx:LinkButton label="{ApplicationController.getInstance().user.available == UserModel.STATE_AVAILABLE ? 'Available' : 'Unavailable'}" click="toggleAvailability(event)" toolTip="{ApplicationController.getInstance().user.available == UserModel.STATE_AVAILABLE ? 'Change status to unavailable' : 'Change status to available'}" styleName="linkBtnYellow" />
+					<mx:LinkButton label="{MainController(AppProperties.getInstance().controller).user.available == UserModel.STATE_AVAILABLE ? 'Available' : 'Unavailable'}" click="toggleAvailability(event)" toolTip="{MainController(AppProperties.getInstance().controller).user.available == UserModel.STATE_AVAILABLE ? 'Change status to unavailable' : 'Change status to available'}" styleName="linkBtnYellow" />
 					<mx:LinkButton id="btnProfile" label="{fullname}" color="0xAEDBE2" textRollOverColor="0xAEDBE2" textSelectedColor="0xAEDBE2" skin="{null}" click="{currentState='profile'}" rollOver="btnProfile.styleName='linkBtnUnderline';" rollOut="btnProfile.styleName='linkBtn';" />
 					
 					<mx:LinkButton id="btnLogout" label="Logout" color="0xE6E6E6" textRollOverColor="0xE6E6E6" textSelectedColor="0xE6E6E6" skin="{null}" paddingLeft="1" click="{currentState='default'}" rollOver="btnLogout.styleName='linkBtnUnderline';" rollOut="btnLogout.styleName='linkBtn';" />
@@ -271,7 +232,7 @@
 		
 		<s:VGroup paddingTop="-45">
 			<s:Group creationComplete="bar_initializeHandlerMain()">
-				<mx:ViewStack id="viewStackMain" borderColor="0xBDBCBC" cornerRadius="2" width="1024" height="728" x="0" y="22" creationPolicy="all" resizeToContent="true"><!--backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" change="updateBreadcrumb('messages')" -->
+				<mx:ViewStack id="viewStackMain" borderColor="0xBDBCBC" cornerRadius="2" width="1024" height="100%" x="0" y="22" creationPolicy="all" resizeToContent="true"><!--backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" change="updateBreadcrumb('messages')" -->
 					<s:NavigatorContent id="providerBox" icon="@Embed('images/healthboard.png')">
 						<s:layout>
 							<s:VerticalLayout gap="0" paddingTop="15" />
@@ -821,17 +782,16 @@
 		</s:VGroup>
 
 		<!--PLACEHOLDERS!!! DELETE!!!-->
-		<mx:Tree id="myTreeMedRec" dataProvider="{medicalRecordsCategoriesTree}" labelField="category" visible="false" includeInLayout="false"
+		<mx:Tree id="myTreeMedRec" dataProvider="{MedicalRecordsModel(controller.medicalRecordsController.model).medicalRecordsCategoriesTree}" labelField="category" visible="false" includeInLayout="false"
 				 width="130"
 				 verticalScrollPolicy="off" horizontalScrollPolicy="off"
 				 selectable="false"
-				 
 				 contentBackgroundAlpha="0" color="0xBED63A" fontWeight="bold" alternatingItemColors="[0x4A4A49,0x303030]"
 				 rowHeight="28"
 				 defaultLeafIcon="{null}" folderClosedIcon="{null}" folderOpenIcon="{null}"
 				  /><!--itemRenderer="ASclasses.MyTreeItemRendererMedRec" itemOpen="filterMedRecFromTree()" itemClose="filterMedRecFromTree()"-->
 		<mx:PlotChart id="plotMedicalRecords" width="100%" visible="false" includeInLayout="false"
-					  dataProvider="{medicalRecordsData}" showDataTips="true" 
+					  dataProvider="{MedicalRecordsModel(controller.medicalRecordsController.model).medicalRecordsData}" showDataTips="true" 
 					  paddingLeft="-4"><!--backgroundElements="{bgeMedicalRecords}"creationComplete="applyCustomDataTips(); medicalRecordsSetMinMax();" itemClick="showServiceDetails(event)" dataTipFunction="dataTipsMedicalRecords" height="300"-->
 			<mx:horizontalAxisRenderers>
 				<mx:AxisRenderer id="hAxisRendMedicalRecords" axis="{hAxisMedicalRecords}" tickPlacement="none">
@@ -856,7 +816,7 @@
 				<!--<mx:LinearAxis id="vAxisMedicalRecords" interval="1" maximum="{immunizationsCategories.length}" labelFunction="lblVAxisImmunizations" />-->
 				
 				<!--CATEGORY AXIS-->
-				<mx:CategoryAxis id="vAxisMedicalRecords" dataProvider="{medicalRecordsCategories}" /><!---->
+				<mx:CategoryAxis id="vAxisMedicalRecords" dataProvider="{MedicalRecordsModel(controller.medicalRecordsController.model).medicalRecordsCategories}" /><!---->
 			</mx:verticalAxis> <!-- categoryField="name" --> <!--dataFunction="catFunc"--> <!--labelFunction="lblVAxisImmunizations"-->
 			
 			<mx:series>

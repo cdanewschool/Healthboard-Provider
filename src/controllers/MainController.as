@@ -1,30 +1,29 @@
 package controllers
 {
+	import models.ApplicationModel;
 	import models.UserModel;
 	
 	import mx.collections.ArrayCollection;
 
-	public class ApplicationController
+	public class MainController extends Controller
 	{
-		private static var __instance:ApplicationController;
-		
 		public var providers:ArrayCollection;
 		public var patients:ArrayCollection;
 		
 		public var today:Date;
 		
+		//	TODO: move to model
 		[Bindable] public var user:UserModel;	//	logged-in user, i.e. Dr. Berg
 		
-		public function ApplicationController( enforcer:SingletonEnforcer )
+		public function MainController()
 		{
-			today = new Date( 2012, 09, 12 );			//	simulate october 12th
-		}
-		
-		public static function getInstance():ApplicationController
-		{
-			if( !__instance ) __instance = new ApplicationController( new SingletonEnforcer() );
+			super();
 			
-			return __instance;
+			today = new Date( 2012, 09, 12 );			//	simulate october 12th
+			
+			model = new ApplicationModel();
+			
+			medicalRecordsController = new ProviderMedicalRecordsController();
 		}
 		
 		public function getUser( id:int, type:String = null ):UserModel
@@ -37,7 +36,4 @@ package controllers
 			return null;
 		}
 	}
-}
-internal class SingletonEnforcer
-{
 }

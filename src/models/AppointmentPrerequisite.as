@@ -2,7 +2,8 @@ package models
 {
 	import ASclasses.Constants;
 	
-	import controllers.ApplicationController;
+	import controllers.Controller;
+	import controllers.MainController;
 	
 	import utils.DateUtil;
 
@@ -50,7 +51,7 @@ package models
 			val.date = new Date();
 			val.date.setTime( Date.parse( data.date ) );
 			
-			val.orderedBy = ApplicationController.getInstance().getUser( data.ordered_by_id, UserModel.TYPE_PROVIDER );
+			val.orderedBy = MainController(AppProperties.getInstance().controller).getUser( data.ordered_by_id, UserModel.TYPE_PROVIDER );
 			
 			val.interpretedBy = data.interpreted_by;
 			
