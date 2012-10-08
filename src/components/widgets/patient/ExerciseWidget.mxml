@@ -4,7 +4,8 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
-	creationComplete="init();" xmlns:radarchart="fr.kapit.radarchart.*">
+	xmlns:radarchart="fr.kapit.radarchart.*"
+	creationComplete="init();">
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
@@ -13,14 +14,25 @@
 	<fx:Script>
 		<![CDATA[
 			import controllers.Controller;
+			import controllers.ExerciseController;
+			
+			import models.modules.ExerciseModel;
 			
 			import mx.collections.ArrayCollection;
 			
+			import styles.ChartStyles;
+			
 			[Bindable] public var collapsedExercisesPixels:uint = 0;
+			
+			[Bindable] public var controller:ExerciseController = AppProperties.getInstance().controller.exerciseController;
+			
+			[Bindable] public var chartStyles:ChartStyles;
 			
 			private function init():void
 			{
-				dgExerciseWidget.dataProvider = ApplicationController.getInstance().model.exercisesWidget;
+				chartStyles = AppProperties.getInstance().controller.model.chartStyles;
+				
+				dgExerciseWidget.dataProvider = ExerciseModel(controller.model).arrExerciseForWidget;
 			}
 		]]>
 	</fx:Script>
@@ -52,6 +64,8 @@
 									import ASclasses.MyCustomDataTip;
 									
 									import controllers.Controller;
+									
+									import models.modules.ExerciseModel;
 									
 									import mx.charts.HitData;
 									import mx.charts.events.ChartItemEvent;
@@ -94,7 +108,7 @@
 								
 								<radarchart:RadarChart
 									seriesField="series" 
-									dataProvider="{ApplicationController.getInstance().model.exercises.getItemAt(ApplicationController.getInstance().model.exercises.length - 1)}" 
+									dataProvider="{ExerciseModel(outerDocument.controller.model).exerciseData.getItemAt(ExerciseModel(outerDocument.controller.model).exerciseData.length - 1)}" 
 									width="200" 
 									height="200" divisions="3" gridAlpha="0.2" axisWidth="1" gridWidth="1" axisNameTextFormat="{new TextFormat('myMyriad',11,'0x868686')}" graduationTextFormat="{new TextFormat('myMyriad',11,'0x868686')}"
 									showGraduations="false"
@@ -183,7 +197,7 @@
 																	<s:SolidColorStroke color="0xFAFDFF" weight="2" alpha="0.4" />
 																</mx:lineStroke>
 															</mx:LineSeries>
-															<mx:LineSeries id="myLineSeries" yField="value" xField="date" itemRenderer="ASclasses.MyCircleItemRendererExercise" radius="4" adjustedRadius="4" fill="{ApplicationController.getInstance().model.chartStyles.colorVitalSignsWidgetBlack}" selectedIndex="0"><!--form="curve" -->
+															<mx:LineSeries id="myLineSeries" yField="value" xField="date" itemRenderer="ASclasses.MyCircleItemRendererExercise" radius="4" adjustedRadius="4" fill="{AppProperties.getInstance().controller.model.chartStyles.colorVitalSignsWidgetBlack}" selectedIndex="0"><!--form="curve" -->
 																<mx:lineStroke>
 																	<s:SolidColorStroke color="0xFFFFFF" weight="2" />
 																</mx:lineStroke>

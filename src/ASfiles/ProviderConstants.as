@@ -9,8 +9,10 @@ package ASfiles
 		
 		public static const STATE_PROVIDER_HOME:String = "providerHome";
 		
+		//	TODO: remove shared module ids
 		public static const MODULE_APPOINTMENTS:String = "modAppointments";
 		public static const MODULE_DECISION_SUPPORT:String = "modDecisionSupport";
+		public static const MODULE_EXERCISE:String = "modDecisionSupport";
 		public static const MODULE_IMMUNIZATIONS:String = "modImmunizations";
 		public static const MODULE_MEDICATIONS:String = "modMedications";
 		public static const MODULE_MEDICAL_RECORDS:String = "modMedicalRecords";

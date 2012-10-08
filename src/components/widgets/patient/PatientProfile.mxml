@@ -15,9 +15,24 @@
 			import models.UserModel;
 		
 			[Bindable] public var patient:UserModel;
-			[Bindable] public var showDetails:Boolean = true;
+			
+ 			private var _showDetails:Boolean = true;
 			
 			[Bindable] public var collapsedPatientDetailsPixels:uint = 228;	//used for recalculating widget's height
+			
+			private var fieldLabels:String = 'Patient ID:\nSSN:\nDOB:\nSex:';
+			private var fieldLabelsAll:String = fieldLabels + '\nRank/OS:';
+			
+			private var fieldValues:String = '000704190\n213-55-4232\n01/01/1965 (46 Years)\nMale';
+			private var fieldValuesAll:String = fieldValues + '\nSCPO, Navy';
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				labels.text = showDetails ? fieldLabelsAll : fieldLabels;
+				values.text = showDetails ? fieldValuesAll : fieldValues;
+			}
 			
 			protected function onPatientNameClick(event:MouseEvent):void 
 			{
@@ -25,11 +40,32 @@
 				evt.user = patient;
 				dispatchEvent( evt );
 			}
+			
+			private function onViewProfileClick(event:MouseEvent):void
+			{
+				var evt:ProfileEvent = new ProfileEvent( ProfileEvent.VIEW_PROFILE, true );
+				evt.user = patient;
+				dispatchEvent( evt );
+			}
+
+			[Bindable]
+			public function get showDetails():Boolean
+			{
+				return _showDetails;
+			}
+
+			public function set showDetails(value:Boolean):void
+			{
+				_showDetails = value;
+				
+				invalidateProperties();
+			}
+
 		]]>
 	</fx:Script>
 	
 	<enhancedtitlewindow:layout>
-		<s:VerticalLayout paddingLeft="10" paddingTop="12" paddingRight="10" paddingBottom="10" />
+		<s:VerticalLayout paddingLeft="10" paddingTop="{showDetails?12:-4}" paddingRight="10" paddingBottom="10" />
 	</enhancedtitlewindow:layout>
 	
 	<mx:LinkButton 
@@ -38,13 +74,19 @@
 	
 	<s:HGroup color="0xFFFFFF" fontSize="12" paddingTop="8">
 		<s:Image source="@Embed('images/profilePicSmall.png')" />
-		<s:Label text="{'Patient ID:\nSSN:\nDOB:\nSex:\nRank/OS:'}" textAlign="right" paddingLeft="4" lineHeight="16" paddingTop="2" />
-		<s:Label text="{'000704190\n213-55-4232\n01/01/1965 (46 Years)\nMale\nSCPO, Navy'}" lineHeight="16" paddingTop="2" />
+		<s:VGroup gap="0">
+			<s:Label text="{patient.fullName}" styleName="white14Bold" paddingTop="2" visible="{!showDetails}" includeInLayout="{!showDetails}"  />
+			<s:HGroup>
+				<s:Label id="labels" textAlign="right" paddingLeft="4" lineHeight="16" paddingTop="2" />
+				<s:Label id="values" text="{'000704190\n213-55-4232\n01/01/1965 (46 Years)\nMale\nSCPO, Navy'}" lineHeight="16" paddingTop="2" />
+			</s:HGroup>
+		</s:VGroup>
 	</s:HGroup>
 	
-	<s:VGroup visible="{showDetails}" includeInLayout="{showDetails}" >
+	<s:VGroup visible="{showDetails}" includeInLayout="{showDetails}">
 		
 		<s:VGroup paddingTop="8" paddingBottom="-4">
+			
 			<s:Line xFrom="0" xTo="280">
 				<s:stroke>
 					<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
@@ -60,11 +102,13 @@
 			verticalScrollPolicy="off"
 			borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
 			variableRowHeight="true">
+			
 			<mx:ArrayList>
 				<fx:Object section="Address" />
 				<fx:Object section="Contact" />
 				<fx:Object section="Emergency Contact" />
 			</mx:ArrayList>
+			
 			<mx:columns>
 				<mx:DataGridColumn dataField="vital">
 					<mx:itemRenderer>
@@ -122,5 +166,9 @@
 		</mx:DataGrid>
 		
 	</s:VGroup>
+	
+	<s:HGroup width="100%" visible="{!showDetails}" includeInLayout="{!showDetails}" horizontalAlign="right">
+		<mx:LinkButton label="View Full Patient Profile »" click="onViewProfileClick(event)" styleName="linkBtnBlue" />
+	</s:HGroup>
 	
 </enhancedtitlewindow:EnhancedTitleWindow>

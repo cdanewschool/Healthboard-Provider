@@ -26,10 +26,10 @@
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/home.as" />
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/messages.as" />
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/appointments.as" />
-	<fx:Script source="../../visualDashboardShared/sharedASfiles/immunizations.as" />
+	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/immunizations.as" />-->
 	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/medicalRecords.as" />-->
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/medications.as" />	<!--	this should be able to removed once the myTreeMedRec placeholder is replaced	-->
-	<fx:Script source="../../visualDashboardShared/sharedASfiles/exercise.as" />
+	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/exercise.as" />-->
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/vitalSigns.as" />
 	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/nutrition.as" />-->
 	
@@ -48,7 +48,7 @@
 		
 		<mx:HTTPService id="immunizationsXMLdata"
 						url="data/immunizations.xml"
-						result="immunizationsResultHandler(event)" />
+						result="AppProperties.getInstance().controller.immunizationsController.dataResultHandler(event)" />
 		
 		<mx:HTTPService id="medicalRecordsXMLdata"
 						url="../../visualDashboardShared/data/medicalRecords.xml"

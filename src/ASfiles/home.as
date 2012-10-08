@@ -58,6 +58,8 @@ import utils.DateUtil;
 
 [Bindable] public var chartStyles:ChartStyles;
 
+public var fullName:String;	//	needed?
+
 private function init():void
 {
 	AppProperties.getInstance().controller = controller = new MainController();
@@ -67,8 +69,6 @@ private function init():void
 	var model:ApplicationModel = new ApplicationModel();
 	model.chartStyles = chartStyles = new ChartStyles();
 	model.patientVitalSigns = arrVitalSigns;
-	model.patientExercises = exerciseData;
-	model.patientExercisesWidget = arrExerciseForWidget;
 	model.patientAppointments = new ArrayCollection( appointments );
 	model.patientAppointmentIndex = currentAppt;
 	controller.model = model;
@@ -78,8 +78,7 @@ private function init():void
 	userContextMenuTimer = new Timer( 2000, 1 );
 	userContextMenuTimer.addEventListener(TimerEvent.TIMER_COMPLETE,onUserMenuDelay);
 	
-	updateExercisePAIndices();
-	
+	BindingUtils.bindProperty( controller.exerciseController.model, 'fullName', this, 'fullName');	//	temp
 	BindingUtils.bindProperty( model.chartStyles, 'horizontalFill', this, 'myHorizontalFill');
 	BindingUtils.bindProperty( model.chartStyles, 'horizontalAlternateFill', this, 'myHorizontalAlternateFill');
 	
@@ -89,9 +88,29 @@ private function init():void
 	this.addEventListener( ApplicationEvent.NAVIGATE, onNavigate );
 	this.addEventListener( ProfileEvent.SHOW_CONTEXT_MENU, onShowContextMenu );
 	this.addEventListener( TabPlus.CLOSE_TAB_EVENT, onTabClose );
+	this.addEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
 	
 	patientsXMLdata.send();
 	providersXMLdata.send();
+}
+
+private function onLoadDataRequest(event:ApplicationDataEvent):void
+{
+	if( event.data === Constants.IMMUNIZATIONS
+		&& !controller.immunizationsController.model.dataLoaded )
+	{
+		immunizationsXMLdata.send();
+	}
+	else if( event.data === Constants.MEDICATIONS 
+		&& !controller.medicationsController.model.dataLoaded )
+	{
+		medicationsXMLdataForWidget.send();
+	}
+	else if( event.data === Constants.MEDICAL_RECORDS
+		&& !controller.medicalRecordsController.model.dataLoaded )
+	{
+		medicalRecordsXMLdata.send();
+	}
 }
 
 private function onResize():void
@@ -178,38 +197,43 @@ private function patientsResultHandler(event:ResultEvent):void {
 }
 
 public var arrOpenPatients:Array = new Array();
-protected function dgPatients_itemClickHandler(event:ListEvent):void {
+protected function dgPatients_itemClickHandler(event:ListEvent):void 
+{
 	var myData:PatientModel = PatientModel( event.itemRenderer.data );
+	
+	showPatient( myData );
+}
+
+private function showPatient( patient:PatientModel ):void
+{
 	var isPatientAlreadyOpen:Boolean = false;
-	for(var i:uint = 0; i < arrOpenPatients.length; i++) {
-		if(arrOpenPatients[i] == myData) {
+	var viewPatient:ViewPatient;
+	
+	for(var i:uint = 0; i < arrOpenPatients.length; i++) 
+	{
+		if(arrOpenPatients[i] == patient) 
+		{
 			isPatientAlreadyOpen = true;
-			viewStackMain.selectedIndex = i + 1;		//+1 because in arrOpenTabs we don't include the "inbox" tab
 			break;
 		}
-	}				
-	if(!isPatientAlreadyOpen) 
-	{		
-		var viewPatient:ViewPatient = new ViewPatient();
-		viewPatient.patient = myData;		//acMessages[event.rowIndex];
+	}
+	
+	if( !isPatientAlreadyOpen ) 
+	{
+		viewPatient = new ViewPatient();
+		viewPatient.name = "patient" + patient.id;
+		viewPatient.patient = patient;		//acMessages[event.rowIndex];
 		viewPatient.selectedAppointment = appointments[currentAppt];
 		viewStackMain.addChild(viewPatient);
 		tabsMain.selectedIndex = viewStackMain.length - 1;
-		arrOpenPatients.push(myData);	
-		//myData.status = "read";
-		/*for(var i:uint = 0; i < myData.messages.length; i++) {
-			myData.messages[i].status = "read";
-		}
-		btnInbox.label = "Inbox"+getUnreadMessagesCount();
-		if(getUnreadMessagesCount() == '') {
-			lblMessagesNumber.text = "no";
-			lblMessagesNumber.setStyle("color","0xFFFFFF");
-			lblMessagesNumber.setStyle("fontWeight","normal");
-			lblMessagesNumber.setStyle("paddingLeft",-3);
-			lblMessagesNumber.setStyle("paddingRight",-3);
-		}
-		else lblMessagesNumber.text = getUnreadMessagesCount().substr(2,1);*/
-		//dgMessages.invalidateList();
+		arrOpenPatients.push(patient);	
+	}
+	else
+	{
+		viewPatient = viewStackMain.getChildByName(  "patient" + patient.id ) as ViewPatient;
+		viewPatient.currentState = ViewPatient.STATE_DEFAULT;
+		
+		viewStackMain.selectedIndex = viewStackMain.getChildIndex( viewPatient );
 	}
 }
 
@@ -328,20 +352,6 @@ private function initChatHistory():void
 	appointmentsXMLdata.send();
 }
 
-private function onLoadDataRequest(event:ApplicationDataEvent):void
-{
-	if( event.data === Constants.MEDICATIONS 
-		&& !controller.medicationsController.model.dataLoaded )
-	{
-		medicationsXMLdataForWidget.send();
-	}
-	else if( event.data === Constants.MEDICAL_RECORDS
-		&& !controller.medicalRecordsController.model.dataLoaded )
-	{
-		medicalRecordsXMLdata.send();
-	}
-}
-
 private function onNavigate(event:ApplicationEvent):void
 {
 	var module:INavigatorContent;
@@ -425,6 +435,8 @@ private function onShowContextMenu(event:ProfileEvent):void
 
 private function hideContextMenu():void
 {
+	if( !userContextMenu ) return;
+	
 	userContextMenu.removeEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
 	userContextMenu.removeEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
 	userContextMenu.removeEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );
@@ -439,11 +451,18 @@ private function onUserAction( event:ProfileEvent ):void
 	
 	if( event.type == ProfileEvent.VIEW_PROFILE )
 	{
-		evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-		evt.data = ProviderConstants.MODULE_TEAM;
-		this.dispatchEvent( evt );
-		
-		TeamModule(viewStackProviderModules.getChildByName( ProviderConstants.MODULE_TEAM )).showTeamMember( event.user );
+		if( event.user is ProviderModel )
+		{
+			evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+			evt.data = ProviderConstants.MODULE_TEAM;
+			this.dispatchEvent( evt );
+			
+			TeamModule(viewStackProviderModules.getChildByName( ProviderConstants.MODULE_TEAM )).showTeamMember( event.user );
+		}
+		else
+		{
+			showPatient( event.user as PatientModel );
+		}
 	}
 	else if( event.type == ProfileEvent.VIEW_APPOINTMENTS )
 	{

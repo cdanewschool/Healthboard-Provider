@@ -23,7 +23,10 @@ package controllers
 			
 			model = new ApplicationModel();
 			
+			exerciseController = new ProviderExerciseController();
+			immunizationsController = new ProviderImmunizationsController();
 			medicalRecordsController = new ProviderMedicalRecordsController();
+			medicationsController = new ProviderMedicationsController();
 		}
 		
 		public function getUser( id:int, type:String = null ):UserModel

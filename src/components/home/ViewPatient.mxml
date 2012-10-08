@@ -23,6 +23,7 @@
 			import external.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
 			
 			import models.PatientModel;
+			import models.modules.ExerciseModel;
 			
 			import mx.collections.ArrayCollection;
 			import mx.core.INavigatorContent;
@@ -33,6 +34,9 @@
 			import spark.components.Group;
 			
 			import util.DateFormatters;
+			
+			public static const STATE_DEFAULT:String = "default";
+			public static const STATE_MODULE:String = "module";
 			
 			private const WIDGET_ALERTS:String = "alerts";
 			private const WIDGET_APPOINTMENTS:String = "appointments";
@@ -122,7 +126,8 @@
 				EnhancedTitleWindow(nutritionWidget).subtitle = DateFormatters.dateFormatterDay.format( new Date() );
 				
 				patientProfileWidget.patient = patient;
-				patientProfileWidget.minHeight = activeModule?156:NaN;
+				patientProfileWidget.maxHeight = activeModule?156:NaN;
+				patientProfileWidget.width = activeModule?314:304;
 				patientProfileWidget.showDetails = activeModule == null;
 				
 				widgetContainer.minHeight = activeModule ? NaN : 591;
@@ -143,7 +148,7 @@
 			{
 				super.currentState = value;
 				
-				if( currentState == "default" )
+				if( currentState == STATE_DEFAULT )
 				{
 					activeModule = null;
 				}
@@ -158,7 +163,7 @@
 			
 			private function onWidgetHeaderClick(event:EnhancedTitleWindowEvent):void
 			{
-				currentState = "module";
+				currentState = STATE_MODULE;
 				
 				activeModule = EnhancedTitleWindow(event.currentTarget).module;
 			}
@@ -291,7 +296,7 @@
 		
 		<s:VGroup id="widgetContent">
 			
-			<s:HGroup id="widgetContainer" gap="22" paddingTop="11" paddingLeft="32" minHeight="591">
+			<s:HGroup id="widgetContainer" gap="22" paddingTop="11" minHeight="591">
 				
 				<!-- column 1	-->
 				<s:VGroup gap="17">
@@ -384,227 +389,27 @@
 							
 						</s:VGroup>
 						
-						<!--
 						<patient:ExerciseWidget
-							id="widgetExercise" 
-							width="305" maxHeight="500" 
+							id="exerciseWidget" 
+							width="305" maxHeight="510" 
 							title="Exercise" 
-							collapsible="true" headerClickable="false" showCloseButton="{widgetLibraryOpen}" 
-							module="modExercise" 
+							collapsible="true" headerClickable="false"
 							titleBarHeight="30"  
-							headerClicked="onWidgetHeaderClick(event)"
-							visible="{widgetExerciseOpen}" includeInLayout="{widgetExerciseOpen}" />--><!--initialize="{parentApplication.filterProvidersForWidget();}"-->
+							headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
+							creationComplete="nutritionWidget.module = ProviderConstants.MODULE_EXERCISE" />
 						
-						<enhancedtitlewindow:EnhancedTitleWindow 
-							id="exerciseWidget" width="305" title="Exercise" collapsible="true" headerClickable="false" module="modExercise" titleBarHeight="30" initialize="{parentApplication.filterProvidersForWidget();}">
-							
-							<enhancedtitlewindow:layout>
-								<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="6"/>
-							</enhancedtitlewindow:layout>
-							
-							<mx:DataGrid 
-								id="dgExerciseWidget" width="100%" height="{500 - parentApplication.collapsedExercisesPixels}" dataProvider="{parentApplication.arrExerciseForWidget}" selectable="false"
-								color="0xFFFFFF" verticalAlign="middle" 
-							 	useRollOver="false"
-								headerHeight="0"
-								verticalScrollPolicy="off"
-								borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
-								variableRowHeight="true">
-								
-								<mx:columns>
-									<mx:DataGridColumn dataField="exercise">
-										<mx:itemRenderer>
-											<fx:Component>
-												<mx:VBox horizontalScrollPolicy="off" verticalScrollPolicy="off">
-													<fx:Script>
-														<![CDATA[
-															import ASclasses.MyCircleItemRenderer;
-															import ASclasses.MyCircleItemRendererOver;
-															import ASclasses.MyCustomDataTip;
-															
-															import mx.charts.HitData;
-															import mx.charts.events.ChartItemEvent;
-															import mx.controls.Alert;
-															import mx.events.FlexEvent;
-															override public function set data(value:Object):void {
-																super.data = value;
-																innerDataGrid.dataProvider = value.chart;
-															}
-														]]>
-													</fx:Script>
-													
-													<fx:Declarations>
-														<fx:Array id="bge">
-														</fx:Array>
-													</fx:Declarations>
-													
-													<mx:states>
-														<s:State name="expanded" />
-														<s:State name="collapsed" />
-													</mx:states>
-													
-													<s:HGroup width="140" gap="-2">
-														<mx:LinkButton icon.expanded="@Embed(source='images/smallArrowGray.png')" icon.collapsed="@Embed(source='images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.exerciseType}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; parentApplication.collapsedExercisesPixels+= (data.exerciseType == 'Most Recent PRT') ? 210 : (data.exerciseType == 'Physician-assigned' ? 130 : 71);} else {this.currentState = 'expanded'; parentApplication.collapsedExercisesPixels-= (data.exerciseType == 'Most Recent PRT') ? 210 : (data.exerciseType == 'Physician-assigned' ? 130 : 71);}}" />
-														<mx:Label text="{'(Last: ' + parentApplication.getDate(data.lastDate) + ')'}" fontSize="12" color="0x868686" paddingTop="1" />
-													</s:HGroup>
-													
-													<s:Group includeIn="expanded"><!--includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}"-->
-														<s:Line xFrom="0" xTo="280">
-															<s:stroke>
-																<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-															</s:stroke>
-														</s:Line>
-													</s:Group>
-													
-													<s:HGroup includeInLayout="{this.currentState == 'expanded' &amp;&amp; data.exerciseType == 'Most Recent PRT'}" visible="{this.currentState == 'expanded' &amp;&amp; data.exerciseType == 'Most Recent PRT'}" width="100%" horizontalAlign="center" paddingBottom="-4">
-														<radarchart:RadarChart seriesField="series" 
-																			   dataProvider="{parentApplication.exerciseData.getItemAt(parentApplication.exerciseData.length - 1)}" 
-																			   width="200" 
-																			   height="200" divisions="3" gridAlpha="0.2" axisWidth="1" gridWidth="1" axisNameTextFormat="{new TextFormat('myMyriad',11,'0x868686')}" graduationTextFormat="{new TextFormat('myMyriad',11,'0x868686')}"
-																			   showGraduations="false"
-																			   showAxesArrow="false">
-															<radarchart:series>
-																<radarchart:RadarChartSeries id="asdf1" name="PRTresults" label="PRTresults" color="0xFBB03B" />
-															</radarchart:series> 
-															<radarchart:axes>
-																<radarchart:RadarChartAxis id="radarAxis1" name="PRTscore" label="Avg. PRT Score" />
-																<radarchart:RadarChartAxis id="radarAxis2" name="mileRun" label="1.5 Mile Run"/>
-																<radarchart:RadarChartAxis id="radarAxis3" name="curlUps" label="Curl Ups"/>
-																<radarchart:RadarChartAxis id="radarAxis4" name="pushUps" label="Push Ups"/>
-																<radarchart:RadarChartAxis id="radarAxis5" name="weight" label="Weight"/>
-															</radarchart:axes>
-														</radarchart:RadarChart>
-													</s:HGroup>
-													
-													<mx:DataGrid id="innerDataGrid" includeInLayout="{this.currentState == 'expanded' &amp;&amp; data.exerciseType != 'Most Recent PRT'}" visible="{this.currentState == 'expanded' &amp;&amp; data.exerciseType != 'Most Recent PRT'}" dropIndicatorSkin="skins.general.myDropIndicatorSkin"
-																 width="100%" height="{data.exerciseType == 'Physician-assigned' ? 117 : 58}" color="0xFFFFFF" verticalAlign="middle" selectable="false"
-																 useRollOver="false" 
-																 headerHeight="0"
-																 borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
-																 variableRowHeight="true" initialize="parentApplication.updateExercisePAIndices()"><!--rowCount="7"-->
-														<mx:columns>
-															<mx:DataGridColumn dataField="measure">
-																<mx:itemRenderer>
-																	<fx:Component>
-																		<mx:HBox verticalAlign="middle" paddingLeft="10" horizontalScrollPolicy="off" verticalScrollPolicy="off">
-																			<fx:Script>
-																				<![CDATA[
-																					import ASclasses.MyCircleItemRenderer;
-																					import ASclasses.MyCircleItemRendererOver;
-																					import ASclasses.MyCustomDataTip;
-																					
-																					import mx.charts.HitData;
-																					import mx.charts.events.ChartItemEvent;
-																					import mx.controls.Alert;
-																					import mx.events.FlexEvent;
-																					import mx.managers.PopUpManager;
-																					
-																					override public function set data(value:Object):void {
-																						super.data = value;
-																						if (value.hasOwnProperty("chart")) {
-																							chart.dataProvider = value.chart[0].data;
-																						}
-																					}	
-																					
-																					private function chartRolloverEventHandler(event:ChartItemEvent):void {
-																						lblMinutes.text = data.chart[0].data[event.hitData.chartItem.index].value;
-																						lblMiles.text = data.chart[0].data[event.hitData.chartItem.index].miles;
-																						myLineSeries.setStyle("itemRenderer",new ClassFactory(ASclasses.MyCircleItemRendererOverWidget)); 
-																					}
-																					private function chartRolloutEventHandler(event:ChartItemEvent):void {
-																						lblMinutes.text = data.chart[0].data[data.chart[0].data.length - 1].value;
-																						lblMiles.text = data.chart[0].data[data.chart[0].data.length - 1].miles;
-																						myLineSeries.setStyle("itemRenderer",new ClassFactory(ASclasses.MyCircleItemRendererExercise)); 
-																					}
-																				]]>
-																			</fx:Script>
-																			
-																			<fx:Declarations>
-																				<fx:Array id="bge">
-																				</fx:Array>
-																			</fx:Declarations>
-																			
-																			<s:VGroup width="23" horizontalAlign="center">
-																				<s:Image visible="{data.measure == 'Run / Walk'}" includeInLayout="{data.measure == 'Run / Walk'}" source="@Embed('images/exRunWidget.png')" />
-																				<s:Image visible="{data.measure == 'Bike'}" includeInLayout="{data.measure == 'Bike'}" source="@Embed('images/exBikeWidget.png')" />
-																			</s:VGroup>
-																			
-																			<mx:LineChart id="chart" width="150" height="52" backgroundElements="{bge}" seriesFilters="[]" selectionMode="single" itemRollOver="chartRolloverEventHandler(event)" itemRollOut="chartRolloutEventHandler(event)"><!--itemRollOverColor="0xFBB03B" itemSelectionColor="0xFBB03B" showDataTips="true" itemRollOut="{myLineSeries.selectedIndex = 2}" -->
-																				<mx:series>
-																					<mx:LineSeries yField="expectation" xField="date" interactive="false">
-																						<mx:lineStroke>
-																							<s:SolidColorStroke color="0xFAFDFF" weight="2" alpha="0.4" />
-																						</mx:lineStroke>
-																					</mx:LineSeries>
-																					<mx:LineSeries id="myLineSeries" yField="value" xField="date" itemRenderer="ASclasses.MyCircleItemRendererExercise" radius="4" adjustedRadius="4" fill="{parentApplication.colorVitalSignsWidgetBlack}" selectedIndex="0"><!--form="curve" -->
-																						<mx:lineStroke>
-																							<s:SolidColorStroke color="0xFFFFFF" weight="2" />
-																						</mx:lineStroke>
-																						<mx:stroke>
-																							<mx:SolidColorStroke color="0xFFFFFF" weight="1"/>
-																						</mx:stroke>
-																					</mx:LineSeries>
-																				</mx:series>
-																				<mx:horizontalAxis>
-																					<mx:DateTimeAxis id="exerciseXaxis" minimum="{parentApplication.chartMinExPA}" maximum="{parentApplication.chartMaxExPA}" />
-																				</mx:horizontalAxis>
-																				<mx:horizontalAxisRenderers>
-																					<mx:AxisRenderer axis="{exerciseXaxis}" showLabels="false" tickPlacement="none" showLine="false" visible="false"  />
-																				</mx:horizontalAxisRenderers>
-																				<mx:verticalAxis>
-																					<mx:LinearAxis id="exerciseYaxis" minimum="{data.chartMin}" maximum="{data.chartMax}" /><!--minimum="60" maximum="140"-->
-																				</mx:verticalAxis>
-																				<mx:verticalAxisRenderers>
-																					<mx:AxisRenderer axis="{exerciseYaxis}" showLabels="false" tickPlacement="none" showLine="false" visible="false" />
-																				</mx:verticalAxisRenderers>
-																			</mx:LineChart>
-																			
-																			<s:VGroup fontSize="12" paddingLeft="10" gap="3">
-																				<s:HGroup gap="3">
-																					<s:Label id="lblMinutes" color="0xFBB03B" fontWeight="bold" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
-																					<s:Label text="minutes" color="0xFFFFFF" />
-																				</s:HGroup>
-																				<s:HGroup visible="{data.measure == 'Run / Walk'}" includeInLayout="{data.measure == 'Run / Walk'}" gap="3">
-																					<s:Label id="lblMiles" color="0xFBB03B" fontWeight="bold" text="{data.chart[0].data[data.chart[0].data.length - 1].miles}" />
-																					<s:Label text="miles" color="0xFFFFFF" />
-																				</s:HGroup>
-																			</s:VGroup>
-																		</mx:HBox>
-																		
-																	</fx:Component>
-																</mx:itemRenderer>
-															</mx:DataGridColumn>
-														</mx:columns>
-													</mx:DataGrid>
-													
-													<s:Group>
-														<s:Line xFrom="0" xTo="280">
-															<s:stroke>
-																<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-															</s:stroke>
-														</s:Line>
-													</s:Group>
-												</mx:VBox>
-												
-											</fx:Component>
-										</mx:itemRenderer>
-									</mx:DataGridColumn>
-								</mx:columns>
-								
-							</mx:DataGrid>
-						</enhancedtitlewindow:EnhancedTitleWindow>
 					</s:HGroup>
 				</s:VGroup>
 			</s:HGroup>
 			
-			<mx:ViewStack id="moduleViews" includeIn="module" paddingLeft="32" width="1024">
-				
-				<s:NavigatorContent name="appointmentsModule">
-					<s:Label text="test" />
-				</s:NavigatorContent>
+			<mx:ViewStack id="moduleViews" includeIn="module" width="975">
 				
 				<s:NavigatorContent id="modMedicalRecords">
-					<modules:MedicalRecordsModule width="976" paddingTop="10" showHeader="false" />
+					<modules:MedicalRecordsModule width="975" paddingTop="10" showHeader="false" />
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent id="modImmunizations">
+					<modules:ImmunizationsModule width="975" paddingTop="10" showHeader="false" />
 				</s:NavigatorContent>
 				
 			</mx:ViewStack>
