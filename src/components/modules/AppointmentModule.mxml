@@ -29,6 +29,7 @@
 			import controllers.AppointmentsController;
 			import controllers.Controller;
 			import controllers.MainController;
+			import controllers.TeamAppointmentsController;
 			
 			import events.ApplicationEvent;
 			import events.AppointmentEvent;
@@ -73,7 +74,7 @@
 			
 			import utils.DateUtil;
 			
-			[Bindable] private var controller:AppointmentsController;
+			[Bindable] private var controller:TeamAppointmentsController;
 			
 			[Bindable] private var appointments:ArrayCollection;
 			[Bindable] private var providers:ArrayCollection;
@@ -284,7 +285,7 @@
 			
 			private function addAppointment( event:AppointmentEvent ):void
 			{
-				AppointmentsController.getInstance().model.addAppointment( addAppointmentPopup.appointment );
+				TeamAppointmentsController.getInstance().model.addAppointment( addAppointmentPopup.appointment );
 				
 				onAddAppointmentCancel(null);
 			}
@@ -831,7 +832,7 @@
 			
 			private function onPrerequisitesClick(event:MouseEvent):void
 			{
-				AppointmentsController.getInstance().showPrerequisites( selectedAppointment );
+				TeamAppointmentsController.getInstance().showPrerequisites( selectedAppointment );
 			}
 			
 			private var dragOffset:Point;
@@ -902,7 +903,7 @@
 
 				to.time = from.time + ( appointment.to.time - appointment.from.time );
 				
-				var appointments:ArrayCollection = AppointmentsController.getInstance().getAppointments( provider.id, UserModel.TYPE_PROVIDER, new Date( appointment.from.fullYear, appointment.from.month, appointment.from.date ) );
+				var appointments:ArrayCollection = TeamAppointmentsController.getInstance().getAppointments( provider.id, UserModel.TYPE_PROVIDER, new Date( appointment.from.fullYear, appointment.from.month, appointment.from.date ) );
 				var conflictingAppointment:Appointment;
 				
 				for each(var a:Appointment in appointments)
@@ -965,7 +966,7 @@
 			{
 				currentState = MODE_DAY;
 				
-				controller = AppointmentsController.getInstance();
+				controller = TeamAppointmentsController.getInstance();
 				
 				controller.model.appointments.addEventListener( CollectionEvent.COLLECTION_CHANGE, onAppointmentsChange ); 
 				

@@ -1,6 +1,7 @@
 package components.itemrenderers
 {
 	import controllers.AppointmentsController;
+	import controllers.TeamAppointmentsController;
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
@@ -52,7 +53,7 @@ package components.itemrenderers
 				
 				labels = new Vector.<IUITextField>;
 				
-				var providers:ArrayCollection = AppointmentsController.getInstance().model.selectedProviders;
+				var providers:ArrayCollection = TeamAppointmentsController.getInstance().model.selectedProviders;
 				
 				for(var i:int=0;i<providers.length;i++)
 				{
@@ -106,7 +107,7 @@ package components.itemrenderers
 			var date:Date = new Date();
 			date.setTime( Date.parse( value.value ) );
 			
-			AppointmentsController.getInstance().model.selectedProviders.addEventListener(CollectionEvent.COLLECTION_CHANGE, onProvidersChange );
+			TeamAppointmentsController.getInstance().model.selectedProviders.addEventListener(CollectionEvent.COLLECTION_CHANGE, onProvidersChange );
 			onProvidersChange();
 		}
 		

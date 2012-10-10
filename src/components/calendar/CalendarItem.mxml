@@ -11,6 +11,7 @@
 			import components.appointments.ProviderOverviewItem;
 			
 			import controllers.AppointmentsController;
+			import controllers.TeamAppointmentsController;
 			
 			import models.ProviderModel;
 			
@@ -36,7 +37,7 @@
 				
 				dayLabel.text = day.date.toString();
 				
-				var providers:ArrayCollection = AppointmentsController.getInstance().model.selectedProviders;
+				var providers:ArrayCollection = TeamAppointmentsController.getInstance().model.selectedProviders;
 				
 				for each(var provider:ProviderModel in providers)
 				{

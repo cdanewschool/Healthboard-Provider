@@ -32,7 +32,7 @@
 				
 				var percentages:Array = [];
 				
-				var appointments:ArrayCollection = AppointmentsController.getInstance().getAppointments( provider.id, UserModel.TYPE_PROVIDER, day );
+				var appointments:ArrayCollection = TeamAppointmentsController.getInstance().getAppointments( provider.id, UserModel.TYPE_PROVIDER, day );
 				
 				for each(var a:Appointment in appointments)
 				{
@@ -56,7 +56,7 @@
 						square.height = breakdown.height;
 						square.x = x;
 						square.borderStroke = borderStroke;
-						square.backgroundFill = AppointmentsController.getInstance().getFill( p.type );;
+						square.backgroundFill = TeamAppointmentsController.getInstance().getFill( p.type );;
 						breakdown.addElement( square );
 						
 						x += square.width;

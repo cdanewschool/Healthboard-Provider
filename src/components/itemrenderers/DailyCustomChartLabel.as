@@ -2,7 +2,7 @@ package components.itemrenderers
 {
 	import controllers.AppointmentsController;
 	
-	import events.AppointmentEvent;
+	import events.TeamAppointmentEvent;
 	import events.MessageEvent;
 	
 	import flash.display.DisplayObject;
@@ -138,7 +138,7 @@ package components.itemrenderers
 			}
 			else if( event.newIndex == 1 )
 			{
-				dispatchEvent( new AppointmentEvent( AppointmentEvent.CANCEL_ALL, true ) );
+				dispatchEvent( new TeamAppointmentEvent( TeamAppointmentEvent.CANCEL_ALL, true ) );
 			}
 			
 			anchor.displayPopUp = false;
@@ -148,7 +148,7 @@ package components.itemrenderers
 		{
 			event.stopPropagation();
 			
-			var evt:AppointmentEvent = new AppointmentEvent( AppointmentEvent.VIEW_PROVIDER, true );
+			var evt:TeamAppointmentEvent = new TeamAppointmentEvent( TeamAppointmentEvent.VIEW_PROVIDER, true );
 			evt.data = AxisLabel(data).value;
 			dispatchEvent( evt );
 		}

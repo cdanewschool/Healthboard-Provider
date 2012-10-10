@@ -18,7 +18,7 @@
 			import controllers.Controller;
 			import controllers.MainController;
 			
-			import events.AppointmentEvent;
+			import events.TeamAppointmentEvent;
 			import events.AutoCompleteEvent;
 			
 			import models.Appointment;
@@ -56,17 +56,17 @@
 			{
 				if( mode == MODE_EDIT )
 				{
-					dispatchEvent( new AppointmentEvent( AppointmentEvent.SAVE ) );
+					dispatchEvent( new TeamAppointmentEvent( TeamAppointmentEvent.SAVE ) );
 				}
 				else if( mode == MODE_ADD )
 				{
-					dispatchEvent( new AppointmentEvent( AppointmentEvent.ADD ) );
+					dispatchEvent( new TeamAppointmentEvent( TeamAppointmentEvent.ADD ) );
 				}
 			}
 			
 			private function cancelAppointment():void
 			{
-				dispatchEvent( new AppointmentEvent( AppointmentEvent.CANCEL ) );
+				dispatchEvent( new TeamAppointmentEvent( TeamAppointmentEvent.CANCEL ) );
 			}
 			
 			private function cancel():void

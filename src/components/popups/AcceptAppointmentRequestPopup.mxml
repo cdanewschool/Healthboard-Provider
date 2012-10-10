@@ -13,7 +13,7 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import events.AppointmentEvent;
+			import events.TeamAppointmentEvent;
 			
 			import models.Appointment;
 			
@@ -26,7 +26,7 @@
 			
 			private function accept():void
 			{
-				var evt:AppointmentEvent = new AppointmentEvent( AppointmentEvent.ACCEPT );
+				var evt:TeamAppointmentEvent = new TeamAppointmentEvent( TeamAppointmentEvent.ACCEPT );
 				evt.appointment = appointment;
 				dispatchEvent( evt );
 			}

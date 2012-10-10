@@ -57,6 +57,7 @@
 			import controllers.AppointmentsController;
 			import controllers.Controller;
 			import controllers.MainController;
+			import controllers.TeamAppointmentsController;
 			
 			import flashx.textLayout.elements.Configuration;
 			import flashx.textLayout.elements.LinkElement;
@@ -85,7 +86,7 @@
 			
 			import utils.DateUtil;
 			
-			private var controller:AppointmentsController;
+			private var controller:TeamAppointmentsController;
 			
 			[Bindable] public var appointments:ArrayCollection;
 			[Bindable] private var providers:ArrayCollection;
@@ -178,7 +179,7 @@
 				else if( action == "showPrerequisite"
 						&& nextAppointment )
 				{
-					AppointmentsController.getInstance().showPrerequisites( nextAppointment );
+					TeamAppointmentsController.getInstance().showPrerequisites( nextAppointment );
 				}
 				
 				event.preventDefault();
@@ -186,7 +187,7 @@
 			
 			private function init():void
 			{
-				controller = AppointmentsController.getInstance();
+				controller = TeamAppointmentsController.getInstance();
 				controller.model.appointments.addEventListener( CollectionEvent.COLLECTION_CHANGE, onAppointmentsChange ); 
 				onAppointmentsChange();
 				
