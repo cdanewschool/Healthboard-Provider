@@ -10,11 +10,12 @@
 			   xmlns:ASclasses="ASclasses.*"
 			   fontFamily="myMyriad"
 			   minWidth="1024" minHeight="768" resize="onResize()"
-			   creationComplete="init();onResize()" xmlns:modules="components.modules.*" xmlns:widgets="components.widgets.*">
+			   creationComplete="init();onResize()" xmlns:modules="components.modules.*" xmlns:widgets="components.widgets.*" xmlns:views="components.views.*">
 
 	<fx:Script>
 		<![CDATA[
 			import controllers.AppointmentsController;
+			import controllers.TeamAppointmentsController;
 			
 			import models.modules.MedicalRecordsModel;
 		]]>
@@ -23,9 +24,9 @@
 	<fx:Script source="ASfiles/home.as" />
 	<fx:Script source="ASfiles/messages.as" />
 	<fx:Script source="ASfiles/patients.as" />
-	<fx:Script source="../../visualDashboardShared/sharedASfiles/home.as" />
+	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/home.as" />-->
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/messages.as" />
-	<fx:Script source="../../visualDashboardShared/sharedASfiles/appointments.as" />
+	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/appointments.as" />-->
 	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/immunizations.as" />-->
 	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/medicalRecords.as" />-->
 	<fx:Script source="../../visualDashboardShared/sharedASfiles/medications.as" />	<!--	this should be able to removed once the myTreeMedRec placeholder is replaced	-->
@@ -34,14 +35,8 @@
 	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/nutrition.as" />-->
 	
 	<fx:Declarations>
-		<!-- Place non-visual elements (e.g., services, value objects) here -->
-		<mx:Validator id="usernameValidator" source="{userID}" property="text" requiredFieldError="The user ID or password is incorrect." />
-		<mx:Validator id="passwordValidator" source="{password}" property="text" requiredFieldError="The user ID or password is incorrect." />
-		<mx:EmailValidator id="forgotPasswordEmailValidator" source="{passEmailAddress}" property="text" />
 		
-		<s:Sine id="sineEasing"
-				easeInFraction="0.1"/>
-		
+		<!--
 		<mx:HTTPService id="patientsXMLdata"
 						url="data/patients.xml"
 						result="patientsResultHandler(event)" />
@@ -64,8 +59,9 @@
 		
 		<mx:HTTPService id="appointmentsXMLdata"
 						url="data/appointments.xml"
-						result="AppointmentsController.getInstance().resultHandler(event)" />
-
+						result="TeamAppointmentsController.getInstance().resultHandler(event)" />
+	-->
+		
 		<s:SolidColor id="colorMedicalRecordsOutpatient" color="0x71B2D1" /><!--also used for Medication's "Prescription Drugs"-->
 		<s:SolidColor id="colorMedicalRecordsInpatient" color="0xDC9D00" /><!--also used for Medication's "Supplements"-->
 		<s:SolidColor id="colorMedicationsPast" color="0x646464" />		
@@ -97,99 +93,9 @@
 	</s:layout>
 	
 	<s:transitions>
-		<s:Transition fromState="default" toState="forgotPassword">
-			<s:Parallel>
-				<s:Resize target="{bcLogin}" duration="300" easer="{sineEasing}" />
-				<s:Fade target="{hgLoginButton}" duration="450" alphaFrom="0" alphaTo="1" />
-			</s:Parallel>
-		</s:Transition>
-		<s:Transition fromState="forgotPassword" toState="default">
-			<s:Parallel>
-				<s:Resize target="{bcLogin}" duration="300" easer="{sineEasing}" />
-				<s:Fade target="{hgLoginButton}" duration="300" alphaFrom="0" alphaTo="1" />
-			</s:Parallel>
-		</s:Transition>
-		<s:Transition fromState="forgotPassword" toState="passwordSent">
-			<s:Parallel>
-				<s:Resize target="{bcLogin}" duration="300" easer="{sineEasing}" />
-				<s:Fade target="{hgLoginButton}" duration="450" alphaFrom="0" alphaTo="1" />
-			</s:Parallel>
-		</s:Transition>
-		<s:Transition fromState="passwordSent" toState="default">
-			<s:Parallel>
-				<s:Resize target="{bcLogin}" duration="300" easer="{sineEasing}" />
-				<s:Fade target="{hgLoginButton}" duration="300" alphaFrom="0" alphaTo="1" />
-			</s:Parallel>
-		</s:Transition>
 	</s:transitions>
 	
-	<s:VGroup width="1024" includeIn="default,forgotPassword,passwordSent">
-		<s:BorderContainer width="1024" height="38" borderAlpha="0">
-			<s:layout>
-				<s:HorizontalLayout />
-			</s:layout>
-			<s:backgroundFill>
-				<s:LinearGradient rotation="270">
-					<s:GradientEntry color="0xB3B3B3" alpha="0" ratio="0" />
-					<s:GradientEntry color="0x999999" alpha="1" ratio="1" /> <!--ratio="0.8834"-->
-				</s:LinearGradient>
-			</s:backgroundFill>
-			
-			<s:VGroup paddingLeft="27" paddingTop="6">
-				<fxg:healthBoardLogoGray />
-			</s:VGroup>
-		</s:BorderContainer>
-		
-		<!-- LOGIN BOX -->
-		<s:VGroup width="100%" horizontalAlign="center" paddingTop="156">
-			<s:BorderContainer id="bcLogin" width="528" height="328" height.forgotPassword="256" height.passwordSent="200" backgroundColor="0xFFFFFF" backgroundAlpha="0.2" borderColor="0xFFFFFF" borderAlpha="0.6" cornerRadius="3">
-				<s:layout>
-					<s:VerticalLayout />
-				</s:layout>
-				
-				<s:Label text="Login" text.forgotPassword="Forgot Password" text.passwordSent="Temporary Password Sent" styleName="loginBoxGreenBoldTitle" paddingTop="26" paddingLeft="44" />
-				
-				<s:HGroup paddingLeft="44" paddingTop="26" styleName="loginBoxWhiteText">
-					<s:Label text.forgotPassword="{'Please enter the email address you used to register.\nYou will receive a temporary password via email.'}" text.passwordSent="{'A temporary password has been sent to your email address.\nPlease check your email.'}" />
-				</s:HGroup>	
-				<s:HGroup id="hgLoginFail" includeInLayout="false" visible="false" paddingLeft="41" paddingTop="-6">
-					<s:BorderContainer borderVisible="false" backgroundColor="0xD0D0D0" width="351" height="18">
-						<s:layout>
-							<s:VerticalLayout paddingTop="2" paddingLeft="3" />
-						</s:layout>
-						<s:Label text="The user ID or password you entered is incorrect." color="0xCC0000" fontWeight="bold" fontSize="16" />
-					</s:BorderContainer>
-				</s:HGroup>
-				
-				<mx:Form id="myForm" paddingLeft="44" width="100%" defaultButton="{btnLogin}">
-					<s:VGroup id="vgFormContent" includeIn="default">
-						<s:Label text="User ID" styleName="loginBoxWhiteBoldText" paddingTop="-2" paddingBottom="-4" />
-						<mx:FormItem paddingLeft="-14">
-							<s:TextInput id="userID" styleName="formTextField" width="228" height="26" />
-						</mx:FormItem>
-						
-						<s:Label text="Password" styleName="loginBoxWhiteBoldText" paddingTop="9" paddingBottom="-4" />
-						<mx:FormItem paddingLeft="-14">
-							<s:TextInput id="password" styleName="formTextField" width="228" height="26" displayAsPassword="true" />
-						</mx:FormItem>
-						
-						<mx:LinkButton id="btnForgotPassword" label="Forgot User ID or Password?" color="0xFF931E" textRollOverColor="0xFF931E" textSelectedColor="0xFF931E" fontSize="16" fontStyle="italic" skin="{null}" paddingLeft="-3" paddingTop="10" rollOver="btnForgotPassword.styleName='linkBtnUnderline';" rollOut="btnForgotPassword.styleName='linkBtn';" click="{currentState = 'forgotPassword'; clearValidationErrorsLogin();}" />	<!--textDecoration="underline" -->
-					</s:VGroup>
-					<s:VGroup includeIn="forgotPassword">
-						<s:Label text="E-mail Address" styleName="loginBoxWhiteBoldText" paddingTop="-2" paddingBottom="-4" />
-						<mx:FormItem paddingLeft="-14">
-							<s:TextInput id="passEmailAddress" styleName="formTextField" width="228" height="26" />
-						</mx:FormItem>
-					</s:VGroup>
-					<s:HGroup id="hgLoginButton" horizontalAlign="center" width="100%" paddingTop="26" paddingLeft="-28">
-						<s:Button id="btnCancel" label="Cancel" fontSize="14" includeIn="forgotPassword" width="103" height="24" click="{currentState = 'default';}" />
-						<s:Button id="btnLogin" label="Login" label.forgotPassword="Submit" label.passwordSent="Close" width="103" height="24" styleName="orangeButton" click="btnLogin_clickHandler(event)" click.forgotPassword="forgotPasswordHandler();" click.passwordSent="{currentState = 'default';}" />
-					</s:HGroup>
-					
-				</mx:Form>
-			</s:BorderContainer>
-		</s:VGroup>
-	</s:VGroup>
+	<views:LoginView width="1024" includeIn="default" />
 	
 	<s:VGroup includeIn="providerHome" width="1024" horizontalAlign="center">		
 		<!-- HEADER -->
@@ -294,7 +200,7 @@
 										
 										<widgets:ChatWidget id="widgetChat" width="305" title="Chat" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" />
 										
-										<widgets:TeamWidget id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" model="{providersModel}" module="modTeam" />
+										<widgets:TeamWidget id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" model="{ProviderApplicationModel(controller.model).providersModel}" module="modTeam" />
 									
 									</s:VGroup>
 									<s:VGroup gap="17">
@@ -366,7 +272,7 @@
 												</s:HGroup>
 												<s:CheckBox label="Only show patients I'm seeing today" />
 											</s:HGroup>
-											<mx:DataGrid dataProvider="{patientsData}" fontFamily="myMyriadNoCFF"
+											<mx:DataGrid dataProvider="{ProviderApplicationModel(controller.model).patients}" fontFamily="myMyriadNoCFF"
 														 itemClick="dgPatients_itemClickHandler(event)"
 														 width="100%" 
 														 color="0xFFFFFF" verticalAlign="middle"
@@ -518,7 +424,7 @@
 														</s:Line>
 													</s:HGroup>
 													<mx:LinkButton id="btnCustomizeTable" label="Customize Table" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnCustomizeTable.styleName='linkBtnUnderline';" rollOut="btnCustomizeTable.styleName='linkBtn';" paddingLeft="10" />
-													<mx:DataGrid id="patientsList" dataProvider="{patientsData}" fontFamily="myMyriadNoCFF" paddingLeft="-2"
+													<mx:DataGrid id="patientsList" dataProvider="{ProviderApplicationModel(controller.model).patients}" fontFamily="myMyriadNoCFF" paddingLeft="-2"
 																 itemClick="dgPatients_itemClickHandler(event)"
 																 width="989" height="462"
 																 selectionColor="0x31535E" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF"
@@ -769,7 +675,7 @@
 							</s:NavigatorContent>
 							
 							<!--	team profile	-->
-							<modules:TeamModule id="modTeam" model="{providersModel}" />
+							<modules:TeamModule id="modTeam" model="{ProviderApplicationModel(controller.model).providersModel}" />
 							
 							<!--	appointments	-->
 							<modules:AppointmentModule id="modAppointments" />

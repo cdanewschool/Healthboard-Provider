@@ -27,8 +27,10 @@ import flash.utils.Timer;
 
 import models.ApplicationModel;
 import models.Chat;
+import models.ChatSearch;
 import models.Message;
 import models.PatientModel;
+import models.ProviderApplicationModel;
 import models.ProviderModel;
 import models.ProvidersModel;
 import models.UserModel;
@@ -54,6 +56,7 @@ import styles.ChartStyles;
 import utils.DateUtil;
 
 [Bindable] public var controller:MainController;
+[Bindable] public var model:ProviderApplicationModel;
 [Bindable] public var medicalRecordsController:MainController;
 
 [Bindable] public var chartStyles:ChartStyles;
@@ -62,23 +65,22 @@ private function init():void
 {
 	AppProperties.getInstance().controller = controller = new MainController();
 	
-	var model:ApplicationModel = new ApplicationModel();
+	model = controller.model as ProviderApplicationModel;
+	
 	model.chartStyles = chartStyles = new ChartStyles();
-	model.patientVitalSigns = arrVitalSigns;
-	model.patientAppointmentIndex = currentAppt;
-	controller.model = model;
+	model.patientVitalSigns = arrVitalSigns;	//	temp
 	
 	if( ProviderConstants.DEBUG ) this.currentState = ProviderConstants.STATE_PROVIDER_HOME;
 
-	BindingUtils.bindProperty( controller.exerciseController.model, 'fullName', this, 'fullName');	//	temp
+	BindingUtils.bindProperty( controller.exerciseController.model, 'fullName', model, 'fullname');	//	temp
 	BindingUtils.bindProperty( model.chartStyles, 'horizontalFill', this, 'myHorizontalFill');
 	BindingUtils.bindProperty( model.chartStyles, 'horizontalAlternateFill', this, 'myHorizontalAlternateFill');
 	
 	//	eventually this should go in maincontroller
 	this.addEventListener( TabPlus.CLOSE_TAB_EVENT, onTabClose );
 	
-	patientsXMLdata.send();
-	providersXMLdata.send();
+	ProviderApplicationModel(model).patientsDataService.send();
+	ProviderApplicationModel(model).providersDataService.send();
 }
 
 private function onResize():void
@@ -93,28 +95,6 @@ public function get bgeMedicationsWidget():Array { return chartStyles.bgeMedicat
 public function get canvasMed():CartesianDataCanvas { return chartStyles.canvasMed; }
 public function get canvasMedWidget():CartesianDataCanvas { return chartStyles.canvasMedWidget; }
 public function get medicationsVerticalGridLine():SolidColorStroke { return chartStyles.medicationsVerticalGridLine; }
-
-[Bindable] private var registeredUserID:String = "thisValueWillBeReplaced";
-[Bindable] private var registeredPassword:String = "thisValueWillBeReplaced";
-protected function btnLogin_clickHandler(event:MouseEvent):void {
-	if(userID.text == 'popo' || (userID.text == 'piim' && password.text == 'password') || (userID.text == 'gregory' && password.text == 'berg')) {
-		this.currentState='providerHome';
-		
-		if(userID.text == 'popo' || (userID.text == 'piim' && password.text == 'password')) fullname = "Dr. Gregory Berg";
-		else if(userID.text == 'gregory' && password.text == 'berg') fullname = "Dr. Gregory Berg";
-		//else, fullname will contain the name the user indicated at registration.
-		
-		clearValidationErrorsLogin();
-		bcLogin.height = 328;
-	}
-	else {
-		usernameValidator.validate('');		//here we are forcing the userID and password text fields to show red borders, by validating them as if they had empty values.
-		passwordValidator.validate('');
-		hgLoginFail.visible = hgLoginFail.includeInLayout = true;
-		bcLogin.height = 346;
-		//this.currentState='default';
-	}
-}
 
 protected function bar_initializeHandlerMain():void {
 	// Set first tab as non-closable
@@ -137,42 +117,17 @@ protected function dateChooser_changeHandler(event:CalendarLayoutChangeEvent):vo
 	dropDownCalendar.closeDropDown(true);					
 }
 
-[Bindable] public var patientsData:ArrayCollection = new ArrayCollection();			//data provider for the Plot Chart
-private function patientsResultHandler(event:ResultEvent):void {
-	/*if(event.result.autnresponse.responsedata.clusters.cluster is ObjectProxy ) {
-	= new ArrayCollection( [event.result.autnresponse.responsedata.clusters.cluster] );
-	}
-	else {
-	clusterData = event.result.autnresponse.responsedata.clusters.cluster;	
-	}*/
-	
-	var results:ArrayCollection = event.result.patients.patient;
-	
-	var patients:ArrayCollection = new ArrayCollection();
-	
-	for each(var result:Object in results)
-	{
-		var patient:PatientModel = PatientModel.fromObj(result);
-		patients.addItem( patient );
-	}
-	
-	patientsData = patients;
-	
-	controller.patients = ChatController.getInstance().model.patients = patientsData;
-
-	initChatHistory();
-}
-
 protected function dgPatients_itemClickHandler(event:ListEvent):void 
 {
 	var myData:PatientModel = PatientModel( event.itemRenderer.data );
 	
-	showPatient( myData );
+	MainController(controller).showPatient( myData );
 }
 
-private function patientsSearchFilter():void {
-	patientsData.filterFunction = filterPatientsSearch;
-	patientsData.refresh();
+private function patientsSearchFilter():void 
+{
+	ProviderApplicationModel(model).patients.filterFunction = filterPatientsSearch;
+	ProviderApplicationModel(model).patients.refresh();
 }
 
 private function filterPatientsSearch(item:Object):Boolean {
@@ -188,68 +143,6 @@ private function filterPatientsSearch(item:Object):Boolean {
 	var notifFilter:Boolean = showPatientsAll.selected ? true : item.urgency != "Not urgent";
 	
 	return searchFilter && birthDayFilter && birthMonthFilter && birthYearFilter && genderFilter && notifFilter;
-}
-
-[Bindable] public var providersModel:ProvidersModel = new ProvidersModel();
-
-private function providersResultHandler(event:ResultEvent):void {
-	
-	var results:ArrayCollection = event.result.providers.provider;
-	
-	var teams:Array = [ {label:"All",value:-1} ];
-	
-	var providers:ArrayCollection = new ArrayCollection();
-	
-	for each(var result:Object in results)
-	{
-		var provider:ProviderModel = ProviderModel.fromObj(result);
-		provider.id = providers.length;
-		providers.addItem( provider );
-		
-		if( provider.id == ProviderConstants.USER_ID ) controller.user = provider;
-		
-		var team:Object = {label:"Team " + provider.team, value: provider.team};
-		if( teams[provider.team] == null ) teams[provider.team] = team;
-	}
-	
-	providersModel.providers = providers;
-	providersModel.providerTeams = new ArrayCollection( teams );
-	
-	controller.providers = ChatController.getInstance().model.providers = providers;
-	
-	initChatHistory();
-}
-
-
-private function initChatHistory():void
-{
-	if( !ChatController.getInstance().model.providers || !ChatController.getInstance().model.patients ) return;
-	
-	var user:UserModel = controller.getUser( ProviderConstants.USER_ID, UserModel.TYPE_PROVIDER );
-	
-	var today:Date = controller.today;
-	var time:Number = today.getTime();
-	
-	var defs:Array = 
-		[ 
-			{time: time - (DateUtil.DAY * 1 + DateUtil.DAY * .7 * Math.random()), id: 123, type: UserModel.TYPE_PATIENT},
-			{time: time - (DateUtil.DAY * 3 + DateUtil.DAY * .7 * Math.random()), id: 123, type: UserModel.TYPE_PATIENT},
-			{time: time - (DateUtil.MONTH * .9 + DateUtil.DAY * .7 * Math.random()), id: 123, type: UserModel.TYPE_PATIENT},
-			{time: time - (DateUtil.MONTH * 4 + DateUtil.DAY * 3 + DateUtil.DAY * .7 * Math.random()), id: 1, type: UserModel.TYPE_PROVIDER}
-		];
-	
-	for each(var def:Object in defs)
-	{
-		var start:Date = new Date();
-		start.setTime( def.time );
-		
-		var end:Date = new Date();
-		end.setTime( start.time + (DateUtil.HOUR * Math.random()) );
-		
-		user.addChat( new Chat( user, controller.getUser( def.id, def.type ), start, end ) );
-	}
-	
-	appointmentsXMLdata.send();
 }
 
 private function toggleAvailability(event:MouseEvent):void
@@ -304,7 +197,7 @@ protected function onTabClose( event:ListEvent ):void
 		else if( this.currentState == ProviderConstants.STATE_PROVIDER_HOME ) 
 		{		//aka PROVIDER PORTAL!
 			if( dataProvider == viewStackMain) 
-				arrOpenPatients.splice(index-1,1);
+				controller.arrOpenPatients.splice(index-1,1);
 		}
 	}
 	else 

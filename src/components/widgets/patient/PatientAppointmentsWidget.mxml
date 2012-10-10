@@ -46,7 +46,7 @@
 			{
 				var index:int = AppointmentsModel(controller.model).currentAppointmentIndex += direction;
 				
-				selectedAppointment = AppointmentsModel(controller.model).appointments.getItemAt( index );
+				selectedAppointment = AppointmentsModel(controller.model).appointments[ index ];
 				
 				invalidateProperties();
 			}
@@ -60,11 +60,11 @@
 			
 			private function init():void
 			{
-				btnPrevAppt.setStyle( 'icon', parentApplication.blueArrowLeft );
-				btnPrevAppt.setStyle( 'disabledIcon', parentApplication.grayArrowLeft );
+				btnPrevAppt.setStyle( 'icon', AppointmentsModel(controller.model).blueArrowLeft );
+				btnPrevAppt.setStyle( 'disabledIcon', AppointmentsModel(controller.model).grayArrowLeft );
 				
-				btnNextAppt.setStyle( 'icon', parentApplication.blueArrowRight );
-				btnNextAppt.setStyle( 'disabledIcon', parentApplication.grayArrowRight );
+				btnNextAppt.setStyle( 'icon', AppointmentsModel(controller.model).blueArrowRight );
+				btnNextAppt.setStyle( 'disabledIcon', AppointmentsModel(controller.model).grayArrowRight );
 				
 				navigate();
 			}

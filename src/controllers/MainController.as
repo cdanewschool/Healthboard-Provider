@@ -19,6 +19,8 @@ package controllers
 	import flash.utils.Timer;
 	
 	import models.ApplicationModel;
+	import models.Chat;
+	import models.ChatSearch;
 	import models.Message;
 	import models.PatientModel;
 	import models.ProviderApplicationModel;
@@ -32,15 +34,16 @@ package controllers
 	import mx.core.INavigatorContent;
 	import mx.events.ListEvent;
 	import mx.managers.PopUpManager;
+	import mx.rpc.events.ResultEvent;
 	
 	import spark.events.IndexChangeEvent;
+	
+	import utils.DateUtil;
 
 	public class MainController extends Controller
 	{
-		public var providers:ArrayCollection;
-		public var patients:ArrayCollection;
-		
 		public var chatController:ChatController;
+		public var teamAppointmentsController:TeamAppointmentsController;
 		
 		public var today:Date;
 		
@@ -71,6 +74,13 @@ package controllers
 			immunizationsController = new ProviderImmunizationsController();
 			medicalRecordsController = new ProviderMedicalRecordsController();
 			medicationsController = new ProviderMedicationsController();
+			teamAppointmentsController = new TeamAppointmentsController();
+			
+			ProviderApplicationModel(model).patientsDataService.url = "data/patients.xml";
+			ProviderApplicationModel(model).patientsDataService.addEventListener( ResultEvent.RESULT, patientsResultHandler );
+			
+			ProviderApplicationModel(model).providersDataService.url = "data/providers.xml";
+			ProviderApplicationModel(model).providersDataService.addEventListener( ResultEvent.RESULT, providersResultHandler );
 			
 			application.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
 			application.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
@@ -80,7 +90,7 @@ package controllers
 		public function getUser( id:int, type:String = null ):UserModel
 		{
 			var user:UserModel;
-			var users:ArrayCollection = (type==UserModel.TYPE_PROVIDER?providers:patients);
+			var users:ArrayCollection = (type==UserModel.TYPE_PROVIDER?ProviderApplicationModel(model).providersModel.providers:ProviderApplicationModel(model).patients);
 			
 			for each(user in users) if( user.id == id ) return user;
 			
@@ -177,9 +187,9 @@ package controllers
 			}
 			else if( event.type == ProfileEvent.VIEW_APPOINTMENTS )
 			{
-				if( TeamAppointmentsController.getInstance().model.selectedProviders.getItemIndex( event.user ) == -1 )
+				if( TeamAppointmentsModel( teamAppointmentsController.model ).selectedProviders.getItemIndex( event.user ) == -1 )
 				{
-					TeamAppointmentsController.getInstance().model.selectedProviders.addItem( event.user );
+					TeamAppointmentsModel( teamAppointmentsController.model ).selectedProviders.addItem( event.user );
 				}
 				
 				evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
@@ -222,7 +232,7 @@ package controllers
 			}
 		}
 		
-		private function showPatient( patient:PatientModel ):void
+		public function showPatient( patient:PatientModel ):void
 		{
 			var isPatientAlreadyOpen:Boolean = false;
 			var viewPatient:ViewPatient;
@@ -340,6 +350,81 @@ package controllers
 			}
 			
 			onHideAutoComplete();
+		}
+		
+		private function patientsResultHandler(event:ResultEvent):void 
+		{
+			var results:ArrayCollection = event.result.patients.patient;
+			
+			var patients:ArrayCollection = new ArrayCollection();
+			
+			for each(var result:Object in results)
+			{
+				var patient:PatientModel = PatientModel.fromObj(result);
+				patients.addItem( patient );
+			}
+			
+			ProviderApplicationModel(model).patients = ChatSearch( chatController.model ).patients = patients;
+			
+			initChatHistory();
+		}
+		
+		private function providersResultHandler(event:ResultEvent):void {
+			
+			var results:ArrayCollection = event.result.providers.provider;
+			
+			var teams:Array = [ {label:"All",value:-1} ];
+			
+			var providers:ArrayCollection = new ArrayCollection();
+			
+			for each(var result:Object in results)
+			{
+				var provider:ProviderModel = ProviderModel.fromObj(result);
+				provider.id = providers.length;
+				providers.addItem( provider );
+				
+				if( provider.id == ProviderConstants.USER_ID ) user = provider;
+				
+				var team:Object = {label:"Team " + provider.team, value: provider.team};
+				if( teams[provider.team] == null ) teams[provider.team] = team;
+			}
+			
+			ProviderApplicationModel(model).providersModel.providers = ChatSearch( chatController.model ).providers = providers;
+			ProviderApplicationModel(model).providersModel.providerTeams = new ArrayCollection( teams );
+			
+			initChatHistory();
+		}
+		
+		private function initChatHistory():void
+		{
+			if( !ChatSearch( chatController.model ).providers 
+				|| !ChatSearch( chatController.model ).patients ) return;
+			
+			var user:UserModel = ChatSearch(chatController.model).getUser( ProviderConstants.USER_ID, UserModel.TYPE_PROVIDER );
+			
+			var today:Date = model.today;
+			var time:Number = today.getTime();
+			
+			var defs:Array = 
+				[ 
+					{time: time - (DateUtil.DAY * 1 + DateUtil.DAY * .7 * Math.random()), id: 123, type: UserModel.TYPE_PATIENT},
+					{time: time - (DateUtil.DAY * 3 + DateUtil.DAY * .7 * Math.random()), id: 123, type: UserModel.TYPE_PATIENT},
+					{time: time - (DateUtil.MONTH * .9 + DateUtil.DAY * .7 * Math.random()), id: 123, type: UserModel.TYPE_PATIENT},
+					{time: time - (DateUtil.MONTH * 4 + DateUtil.DAY * 3 + DateUtil.DAY * .7 * Math.random()), id: 1, type: UserModel.TYPE_PROVIDER}
+				];
+			
+			for each(var def:Object in defs)
+			{
+				var start:Date = new Date();
+				start.setTime( def.time );
+				
+				var end:Date = new Date();
+				end.setTime( start.time + (DateUtil.HOUR * Math.random()) );
+				
+				user.addChat( new Chat( user, ChatSearch(chatController.model).getUser( def.id, def.type ), start, end ) );
+			}
+			
+			teamAppointmentsController.model.dataService.send();
 		}
 	}
 }
