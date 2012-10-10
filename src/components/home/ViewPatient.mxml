@@ -404,6 +404,10 @@
 			
 			<mx:ViewStack id="moduleViews" includeIn="module" width="975">
 				
+				<s:NavigatorContent id="modAppointments">
+					<modules:AppointmentsModule width="975" paddingTop="10" showHeader="false" />
+				</s:NavigatorContent>
+				
 				<s:NavigatorContent id="modMedicalRecords">
 					<modules:MedicalRecordsModule width="975" paddingTop="10" showHeader="false" />
 				</s:NavigatorContent>
