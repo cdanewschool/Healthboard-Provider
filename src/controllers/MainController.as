@@ -273,7 +273,8 @@ package controllers
 			
 			var child:DisplayObject;
 			
-			if( (child = visualDashboardProvider(application).viewStackProviderModules.getChildByName( event.data ) ) != null )
+			if( visualDashboardProvider(application).viewStackProviderModules
+				&& (child = visualDashboardProvider(application).viewStackProviderModules.getChildByName( event.data ) ) != null )
 			{
 				visualDashboardProvider(application).viewStackProviderModules.selectedChild = child as INavigatorContent;
 			}
