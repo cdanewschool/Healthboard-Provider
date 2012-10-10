@@ -70,7 +70,7 @@ private function init():void
 	model.chartStyles = chartStyles = new ChartStyles();
 	model.patientVitalSigns = arrVitalSigns;	//	temp
 	
-	if( ProviderConstants.DEBUG ) this.currentState = ProviderConstants.STATE_PROVIDER_HOME;
+	if( ProviderConstants.DEBUG ) this.currentState = Constants.STATE_LOGGED_IN;
 
 	BindingUtils.bindProperty( controller.exerciseController.model, 'fullName', model, 'fullname');	//	temp
 	BindingUtils.bindProperty( model.chartStyles, 'horizontalFill', this, 'myHorizontalFill');
@@ -194,7 +194,7 @@ protected function onTabClose( event:ListEvent ):void
 			arrOpenTabsIM.splice(index-1,1);
 		}
 		*/
-		else if( this.currentState == ProviderConstants.STATE_PROVIDER_HOME ) 
+		else if( this.currentState == Constants.STATE_LOGGED_IN ) 
 		{		//aka PROVIDER PORTAL!
 			if( dataProvider == viewStackMain) 
 				controller.arrOpenPatients.splice(index-1,1);
