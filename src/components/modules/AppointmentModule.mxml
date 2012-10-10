@@ -32,15 +32,16 @@
 			import controllers.TeamAppointmentsController;
 			
 			import events.ApplicationEvent;
-			import events.TeamAppointmentEvent;
 			import events.AutoCompleteEvent;
 			import events.MessageEvent;
+			import events.TeamAppointmentEvent;
 			
 			import models.Appointment;
 			import models.AppointmentPrerequisite;
 			import models.ImageReference;
 			import models.Message;
 			import models.ProviderModel;
+			import models.TeamAppointmentsModel;
 			import models.UserModel;
 			
 			import mx.charts.AxisLabel;
@@ -74,7 +75,8 @@
 			
 			import utils.DateUtil;
 			
-			[Bindable] private var controller:TeamAppointmentsController;
+			[Bindable] private var controller:TeamAppointmentsController = MainController( AppProperties.getInstance().controller ).teamAppointmentsController;
+			[Bindable] private var model:TeamAppointmentsModel = TeamAppointmentsModel( controller.model );
 			
 			[Bindable] private var appointments:ArrayCollection;
 			[Bindable] private var providers:ArrayCollection;
@@ -196,7 +198,7 @@
 				//	set dataprovider on provider schedule list component (right-hand side-bar)
 				if( currentState == MODE_MONTH )
 				{
-					providerScheduleList.providers = controller.model.selectedProviders;
+					providerScheduleList.providers = model.selectedProviders;
 				}
 				else if( currentState == MODE_DAY )
 				{
@@ -256,7 +258,7 @@
 			private function onPrintAppointmentClick( event:MouseEvent ):void
 			{
 				printAppointmentsPopup = new AppointmentReportPopup();
-				printAppointmentsPopup.providers = controller.model.selectedProviders;
+				printAppointmentsPopup.providers = model.selectedProviders;
 				printAppointmentsPopup.from = viewRangeStartDate;
 				printAppointmentsPopup.to = viewRangeEndDate;
 				
@@ -285,7 +287,7 @@
 			
 			private function addAppointment( event:TeamAppointmentEvent ):void
 			{
-				TeamAppointmentsController.getInstance().model.addAppointment( addAppointmentPopup.appointment );
+				model.addAppointment( addAppointmentPopup.appointment );
 				
 				onAddAppointmentCancel(null);
 			}
@@ -419,6 +421,7 @@
 			{
 				if( controller == null ) return;
 				if( !dirty ) return;
+				if( !selectedDate ) return;
 				
 				var hAxis:IAxis;
 				var column:ColumnSeries;
@@ -440,7 +443,7 @@
 					viewRangeEndDate.setTime( viewRangeStartDate.time + (DateUtil.DAY - DateUtil.SECOND) );
 					
 					hAxis = new CategoryAxis();
-					CategoryAxis(hAxis).dataProvider = controller.model.selectedProviders;
+					CategoryAxis(hAxis).dataProvider = model.selectedProviders;
 					CategoryAxis(hAxis).dataFunction = horizontalAxisCategoryFunction;
 					CategoryAxis(hAxis).ticksBetweenLabels = true;
 					renderer.axis = hAxis;
@@ -487,9 +490,9 @@
 						daysInRange.addItem( day );
 					}
 					
-					for(i=0;i<controller.model.selectedProviders.length;i++)
+					for(i=0;i<model.selectedProviders.length;i++)
 					{
-						var provider:ProviderModel = ProviderModel( controller.model.selectedProviders.getItemAt(i) );
+						var provider:ProviderModel = ProviderModel( model.selectedProviders.getItemAt(i) );
 						column = new ColumnSeries();
 						column.id = provider.id.toString();
 						column.labelFunction = getProviderName;
@@ -540,11 +543,11 @@
 			{
 				var provider:ProviderModel;
 				
-				for(var i:int=0;i<controller.model.selectedProviders.length;i++)
+				for(var i:int=0;i<model.selectedProviders.length;i++)
 				{
-					if( ProviderModel(controller.model.selectedProviders[i]).lastName == ChartLabel(event.target).data.value )
+					if( ProviderModel(model.selectedProviders[i]).lastName == ChartLabel(event.target).data.value )
 					{
-						provider = ProviderModel(controller.model.selectedProviders[i]);
+						provider = ProviderModel(model.selectedProviders[i]);
 						
 						break;
 					}
@@ -576,11 +579,11 @@
 			{
 				var provider:ProviderModel;
 				
-				for(var i:int=0;i<controller.model.selectedProviders.length;i++)
+				for(var i:int=0;i<model.selectedProviders.length;i++)
 				{
-					if( ProviderModel(controller.model.selectedProviders[i]).lastName == ChartLabel(event.target).data.value )
+					if( ProviderModel(model.selectedProviders[i]).lastName == ChartLabel(event.target).data.value )
 					{
-						provider = ProviderModel(controller.model.selectedProviders[i]);
+						provider = ProviderModel(model.selectedProviders[i]);
 						
 						break;
 					}
@@ -600,7 +603,7 @@
 				selectedAppointment = null;
 				selectedProvider = null;
 				
-				for each(var provider:ProviderModel in controller.model.selectedProviders)
+				for each(var provider:ProviderModel in model.selectedProviders)
 				{
 					if( provider.lastName == event.data )
 					{
@@ -705,7 +708,7 @@
 			
 			private function onAppointmentsChange( event:CollectionEvent = null ):void
 			{
-				appointments = controller.model.appointments;
+				appointments = model.appointments;
 				
 				chart.dataProvider = appointments;
 				
@@ -719,12 +722,12 @@
 				}
 				
 				providers = new ArrayCollection( p );
-				controller.model.selectedProviders = new ArrayCollection( p );
+				model.selectedProviders = new ArrayCollection( p );
 				
 				var sort:Sort = new Sort();
 				sort.fields = [ new SortField('lastName') ];
-				controller.model.selectedProviders.sort = sort;
-				controller.model.selectedProviders.refresh();
+				model.selectedProviders.sort = sort;
+				model.selectedProviders.refresh();
 				
 				dirty = true;
 			}
@@ -748,7 +751,7 @@
 				for each(var provider:ProviderModel in providers) 
 					if( provider.selected ) _selectedProviders.push( provider);
 				
-				controller.model.selectedProviders = new ArrayCollection( _selectedProviders );
+				model.selectedProviders = new ArrayCollection( _selectedProviders );
 				
 				dirty = true;
 			}
@@ -832,7 +835,7 @@
 			
 			private function onPrerequisitesClick(event:MouseEvent):void
 			{
-				TeamAppointmentsController.getInstance().showPrerequisites( selectedAppointment );
+				controller.showPrerequisites( selectedAppointment );
 			}
 			
 			private var dragOffset:Point;
@@ -879,12 +882,12 @@
 				}
 				else if( currentState == MODE_WEEK )
 				{
-					var numSubColumns:int = controller.model.selectedProviders.length;
+					var numSubColumns:int = model.selectedProviders.length;
 					var subColumnWidth:Number = columnWidth/numSubColumns;
 					
 					var providerIndex:int = Math.max( 0, Math.floor( (numColumns * numSubColumns) * xPercentage) ) % (columnIndex * numSubColumns);
 					providerIndex = Math.floor( Math.max( 0, (coords.x - columnWidth * columnIndex) ) / subColumnWidth );
-					provider = ProviderModel( controller.model.selectedProviders.getItemAt( providerIndex ) );
+					provider = ProviderModel( model.selectedProviders.getItemAt( providerIndex ) );
 					
 					var date:Date = daysInRange.getItemAt( columnIndex ) as Date;
 					from = new Date( date.fullYear, date.month, date.date );
@@ -903,7 +906,7 @@
 
 				to.time = from.time + ( appointment.to.time - appointment.from.time );
 				
-				var appointments:ArrayCollection = TeamAppointmentsController.getInstance().getAppointments( provider.id, UserModel.TYPE_PROVIDER, new Date( appointment.from.fullYear, appointment.from.month, appointment.from.date ) );
+				var appointments:ArrayCollection = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER, new Date( appointment.from.fullYear, appointment.from.month, appointment.from.date ) );
 				var conflictingAppointment:Appointment;
 				
 				for each(var a:Appointment in appointments)
@@ -966,9 +969,7 @@
 			{
 				currentState = MODE_DAY;
 				
-				controller = TeamAppointmentsController.getInstance();
-				
-				controller.model.appointments.addEventListener( CollectionEvent.COLLECTION_CHANGE, onAppointmentsChange ); 
+				model.appointments.addEventListener( CollectionEvent.COLLECTION_CHANGE, onAppointmentsChange ); 
 				
 				for each(var type:Object in Appointment.APPOINTMENT_TYPES)
 				{
@@ -1172,7 +1173,7 @@
 															itemRollOverColor="0x00adee" itemSelectionColor="0x00adee" creationComplete="updateView()" >
 															
 															<mx:horizontalAxis>
-																<mx:CategoryAxis id="xAxis" dataProvider="{controller.model.selectedProviders}" dataFunction="horizontalAxisCategoryFunction" ticksBetweenLabels="true" />
+																<mx:CategoryAxis id="xAxis" dataProvider="{model.selectedProviders}" dataFunction="horizontalAxisCategoryFunction" ticksBetweenLabels="true" />
 															</mx:horizontalAxis>
 															
 															<mx:verticalAxis>

@@ -12,6 +12,7 @@
 	<fx:Script>
 		<![CDATA[
 			import controllers.AppointmentsController;
+			import controllers.MainController;
 			import controllers.TeamAppointmentsController;
 			
 			import models.Appointment;
@@ -39,6 +40,8 @@
 			
 			private var _titleStyleName:String = "blue9SemiBold";
 			private var _titleAlign:String = "left";
+			
+			private var controller:TeamAppointmentsController = MainController( AppProperties.getInstance().controller ).teamAppointmentsController;
 			
 			public function get showOverview():Boolean
 			{
@@ -150,7 +153,7 @@
 						var list:VGroup = new VGroup();
 						group.addElement( list );
 						
-						var appointments:ArrayCollection = TeamAppointmentsController.getInstance().getAppointments( provider.id, UserModel.TYPE_PROVIDER, date );
+						var appointments:ArrayCollection = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER, date );
 						
 						for(var i:int=0;i<appointments.length;i++)
 						{
@@ -162,7 +165,7 @@
 							var square:BorderContainer = new BorderContainer();
 							square.width = 8;
 							square.height = 7;
-							square.backgroundFill = TeamAppointmentsController.getInstance().getFill( appointment.type );;
+							square.backgroundFill = controller.getFill( appointment.type );;
 							row.addElement( square );
 							
 							var date:Label = new Label();

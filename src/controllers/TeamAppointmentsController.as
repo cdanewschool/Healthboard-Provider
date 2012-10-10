@@ -7,8 +7,8 @@ package controllers
 	
 	import models.Appointment;
 	import models.AppointmentPrerequisite;
-	import models.TeamAppointmentsModel;
 	import models.ImageReference;
+	import models.TeamAppointmentsModel;
 	import models.UserModel;
 	
 	import mx.collections.ArrayCollection;
@@ -20,33 +20,27 @@ package controllers
 	import mx.rpc.events.ResultEvent;
 
 	[Bindable]
-	public class TeamAppointmentsController
+	public class TeamAppointmentsController extends BaseModuleController
 	{
-		private static var __instance:TeamAppointmentsController;
-		
-		public var model:TeamAppointmentsModel;
-		
 		private var fillCache:Dictionary;
 		
-		public function TeamAppointmentsController( enforcer:SingletonEnforcer )
+		public function TeamAppointmentsController()
 		{
-			model = new TeamAppointmentsModel;
+			super();
 			
-			fillCache = new Dictionary();
-		}
+			model = new TeamAppointmentsModel();
 		
-		public static function getInstance():TeamAppointmentsController
-		{
-			if( !__instance ) __instance = new TeamAppointmentsController( new SingletonEnforcer() );
-			
-			return __instance;
+			model.dataService.url = "data/appointments.xml";
+			model.dataService.addEventListener( ResultEvent.RESULT, dataResultHandler );
+				
+			fillCache = new Dictionary();
 		}
 		
 		public function getAppointments( id:int = -1, type:String = null, date:Date = null ):ArrayCollection
 		{
 			var results:ArrayCollection = new ArrayCollection();
 			
-			for each(var appointment:Appointment in model.appointments)
+			for each(var appointment:Appointment in TeamAppointmentsModel(model).appointments)
 			{
 				var valid:Boolean = true;
 				
@@ -114,8 +108,8 @@ package controllers
 			return fill;
 		}
 		
-		public function resultHandler(event:ResultEvent):void {
-			
+		override public function dataResultHandler(event:ResultEvent):void 
+		{
 			var results:ArrayCollection = event.result.appointments.appointment;
 			
 			var appointments:ArrayCollection = new ArrayCollection();
@@ -126,10 +120,9 @@ package controllers
 				appointments.addItem( appointment );
 			}
 			
-			model.appointments = appointments;
+			TeamAppointmentsModel(model).appointments = appointments;
+			
+			super.dataResultHandler(event);
 		}
 	}
-}
-internal class SingletonEnforcer
-{
 }

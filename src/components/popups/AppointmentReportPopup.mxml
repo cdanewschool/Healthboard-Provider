@@ -64,7 +64,7 @@
 						label.text = id + '. ' + provider.fullName.toUpperCase();
 						group.addElement( label );
 						
-						var appointments:ArrayCollection = TeamAppointmentsController.getInstance().getAppointments( provider.id, UserModel.TYPE_PROVIDER, from );
+						var appointments:ArrayCollection = MainController( AppProperties.getInstance().controller ).teamAppointmentsController.getAppointments( provider.id, UserModel.TYPE_PROVIDER, from );
 						
 						if( appointments.length )
 						{

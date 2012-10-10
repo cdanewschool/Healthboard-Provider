@@ -12,6 +12,7 @@
 	<fx:Script>
 		<![CDATA[
 			import controllers.AppointmentsController;
+			import controllers.MainController;
 			import controllers.TeamAppointmentsController;
 			
 			import models.Appointment;
@@ -33,7 +34,7 @@
 				
 				var percentages:Array = [];
 				
-				var appointments:ArrayCollection = TeamAppointmentsController.getInstance().getAppointments( provider.id, UserModel.TYPE_PROVIDER, day );
+				var appointments:ArrayCollection = MainController( AppProperties.getInstance().controller ).teamAppointmentsController.getAppointments( provider.id, UserModel.TYPE_PROVIDER, day );
 				
 				for each(var a:Appointment in appointments)
 				{
@@ -57,7 +58,7 @@
 						square.height = breakdown.height;
 						square.x = x;
 						square.borderStroke = borderStroke;
-						square.backgroundFill = TeamAppointmentsController.getInstance().getFill( p.type );;
+						square.backgroundFill = MainController( AppProperties.getInstance().controller ).teamAppointmentsController.getFill( p.type );;
 						breakdown.addElement( square );
 						
 						x += square.width;

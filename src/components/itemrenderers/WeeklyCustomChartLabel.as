@@ -1,6 +1,7 @@
 package components.itemrenderers
 {
 	import controllers.AppointmentsController;
+	import controllers.MainController;
 	import controllers.TeamAppointmentsController;
 	
 	import flash.display.DisplayObject;
@@ -10,6 +11,7 @@ package components.itemrenderers
 	
 	import models.Appointment;
 	import models.ProviderModel;
+	import models.TeamAppointmentsModel;
 	
 	import mx.charts.chartClasses.ChartLabel;
 	import mx.collections.ArrayCollection;
@@ -28,6 +30,8 @@ package components.itemrenderers
 		private var dirty:Boolean;
 		
 		private var labels:Vector.<IUITextField>;
+		
+		private var controller:TeamAppointmentsController = MainController( AppProperties.getInstance().controller ).teamAppointmentsController;
 		
 		public function WeeklyCustomChartLabel()
 		{
@@ -53,7 +57,7 @@ package components.itemrenderers
 				
 				labels = new Vector.<IUITextField>;
 				
-				var providers:ArrayCollection = TeamAppointmentsController.getInstance().model.selectedProviders;
+				var providers:ArrayCollection = TeamAppointmentsModel( controller.model ).selectedProviders;
 				
 				for(var i:int=0;i<providers.length;i++)
 				{
@@ -107,7 +111,8 @@ package components.itemrenderers
 			var date:Date = new Date();
 			date.setTime( Date.parse( value.value ) );
 			
-			TeamAppointmentsController.getInstance().model.selectedProviders.addEventListener(CollectionEvent.COLLECTION_CHANGE, onProvidersChange );
+			TeamAppointmentsModel( controller.model ).selectedProviders.addEventListener(CollectionEvent.COLLECTION_CHANGE, onProvidersChange );
+			
 			onProvidersChange();
 		}
 		

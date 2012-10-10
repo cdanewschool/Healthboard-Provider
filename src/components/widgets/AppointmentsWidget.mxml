@@ -59,6 +59,8 @@
 			import controllers.MainController;
 			import controllers.TeamAppointmentsController;
 			
+			import events.ApplicationDataEvent;
+			
 			import flashx.textLayout.elements.Configuration;
 			import flashx.textLayout.elements.LinkElement;
 			import flashx.textLayout.elements.TextFlow;
@@ -68,6 +70,7 @@
 			
 			import models.Appointment;
 			import models.ProviderModel;
+			import models.TeamAppointmentsModel;
 			import models.UserModel;
 			
 			import mx.charts.ChartItem;
@@ -179,17 +182,33 @@
 				else if( action == "showPrerequisite"
 						&& nextAppointment )
 				{
-					TeamAppointmentsController.getInstance().showPrerequisites( nextAppointment );
+					controller.showPrerequisites( nextAppointment );
 				}
 				
 				event.preventDefault();
 			}
 			
+			private function onDataLoaded( event:ApplicationDataEvent = null ):void
+			{
+				controller.model.removeEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
+				
+				TeamAppointmentsModel(controller.model).appointments.addEventListener( CollectionEvent.COLLECTION_CHANGE, onAppointmentsChange ); 
+				
+				onAppointmentsChange();
+			}
+			
 			private function init():void
 			{
-				controller = TeamAppointmentsController.getInstance();
-				controller.model.appointments.addEventListener( CollectionEvent.COLLECTION_CHANGE, onAppointmentsChange ); 
-				onAppointmentsChange();
+				controller = MainController( AppProperties.getInstance().controller ).teamAppointmentsController;
+				
+				if( controller.model.dataLoaded )
+				{
+					onDataLoaded();
+				}
+				else
+				{
+					controller.model.addEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
+				}
 				
 				for each(var type:Object in Appointment.APPOINTMENT_TYPES)
 				{

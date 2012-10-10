@@ -2,13 +2,15 @@ package models
 {
 	import flash.utils.Dictionary;
 	
+	import models.modules.ModuleModel;
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	
 	import spark.collections.SortField;
 
 	[Bindable]
-	public class TeamAppointmentsModel
+	public class TeamAppointmentsModel extends ModuleModel
 	{
 		private var _appointments:ArrayCollection;
 		
@@ -16,6 +18,7 @@ package models
 		
 		public function TeamAppointmentsModel()
 		{
+			super();
 		}
 		
 		public function addAppointment( appointment:Appointment ):void
