@@ -12,12 +12,14 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import controllers.AppointmentsController;
 			import controllers.Controller;
 			import controllers.MainController;
 			
 			import events.ApplicationEvent;
 			
 			import models.Appointment;
+			import models.modules.AppointmentsModel;
 			
 			import mx.collections.ArrayCollection;
 			
@@ -25,7 +27,7 @@
 			
 			[Bindable] private var selectedAppointment:Object;
 			
-			[Bindable] private var controller:MainController = MainController( AppProperties.getInstance().controller );
+			[Bindable] private var controller:AppointmentsController = AppProperties.getInstance().controller.appointmentsController;
 			
 			override protected function commitProperties():void
 			{
@@ -42,9 +44,9 @@
 			
 			private function navigate( direction:int = 0 ):void
 			{
-				var index:int = ( controller.model.patientAppointmentIndex += direction );
+				var index:int = AppointmentsModel(controller.model).currentAppointmentIndex += direction;
 				
-				selectedAppointment = controller.model.patientAppointments.getItemAt( index );
+				selectedAppointment = AppointmentsModel(controller.model).appointments.getItemAt( index );
 				
 				invalidateProperties();
 			}
@@ -104,9 +106,9 @@
 	</s:Line>
 	
 	<s:HGroup width="100%">
-		<mx:LinkButton id="btnPrevAppt" label="Previous Appt." horizontalGap="9" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{if(btnPrevAppt.enabled) btnPrevAppt.styleName='linkBtnUnderline';}" rollOut="btnPrevAppt.styleName='linkBtn';" click="navigate(-1)" enabled="{controller.model.patientAppointmentIndex != 0}" />
+		<mx:LinkButton id="btnPrevAppt" label="Previous Appt." horizontalGap="9" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{if(btnPrevAppt.enabled) btnPrevAppt.styleName='linkBtnUnderline';}" rollOut="btnPrevAppt.styleName='linkBtn';" click="navigate(-1)" enabled="{AppointmentsModel(controller.model).currentAppointmentIndex != 0}" />
 		<s:Spacer width="100%" />
-		<mx:LinkButton id="btnNextAppt" label="Next Appt." horizontalGap="9" labelPlacement="left" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{if(btnNextAppt.enabled) btnNextAppt.styleName='linkBtnUnderline';}" rollOut="btnNextAppt.styleName='linkBtn';" click="navigate(1)" enabled="{controller.model.patientAppointmentIndex != controller.model.patientAppointments.length-1}" />
+		<mx:LinkButton id="btnNextAppt" label="Next Appt." horizontalGap="9" labelPlacement="left" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{if(btnNextAppt.enabled) btnNextAppt.styleName='linkBtnUnderline';}" rollOut="btnNextAppt.styleName='linkBtn';" click="navigate(1)" enabled="{AppointmentsModel(controller.model).currentAppointmentIndex != AppointmentsModel(controller.model).appointments.length-1}" />
 	</s:HGroup>
 	
 </enhancedtitlewindow:EnhancedTitleWindow>

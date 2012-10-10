@@ -1,6 +1,7 @@
 package components.popups
 {
 	import controllers.ChatController;
+	import controllers.MainController;
 	
 	import events.ProfileEvent;
 	
@@ -221,7 +222,7 @@ package components.popups
 
 		private function onSelectChatMode(event:IndexChangeEvent):void
 		{
-			ChatController.getInstance().model.mode = ButtonBar(event.currentTarget).selectedItem.data;
+			ChatSearch( MainController( AppProperties.getInstance().controller ).chatController.model ).mode = ButtonBar(event.currentTarget).selectedItem.data;
 			
 			dispatchAction( ProfileEvent.START_CHAT );
 		}
