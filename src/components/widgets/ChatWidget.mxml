@@ -33,7 +33,6 @@
 			import controllers.MainController;
 			
 			import events.ApplicationEvent;
-			import events.AuthenticationEvent;
 			import events.AutoCompleteEvent;
 			import events.ChatEvent;
 			
