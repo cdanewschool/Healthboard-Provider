@@ -32,7 +32,7 @@
 			import controllers.TeamAppointmentsController;
 			
 			import events.ApplicationEvent;
-			import events.AppointmentEvent;
+			import events.TeamAppointmentEvent;
 			import events.AutoCompleteEvent;
 			import events.MessageEvent;
 			
@@ -272,9 +272,9 @@
 				addAppointmentPopup.mode = mode;
 				addAppointmentPopup.appointment = appointment;
 				
-				addAppointmentPopup.addEventListener( AppointmentEvent.ADD, addAppointment );
-				addAppointmentPopup.addEventListener( AppointmentEvent.SAVE, saveAppointment );
-				addAppointmentPopup.addEventListener( AppointmentEvent.CANCEL, cancelAppointment );
+				addAppointmentPopup.addEventListener( TeamAppointmentEvent.ADD, addAppointment );
+				addAppointmentPopup.addEventListener( TeamAppointmentEvent.SAVE, saveAppointment );
+				addAppointmentPopup.addEventListener( TeamAppointmentEvent.CANCEL, cancelAppointment );
 				addAppointmentPopup.addEventListener( Event.CANCEL, onAddAppointmentCancel );
 				addAppointmentPopup.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
 				addAppointmentPopup.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
@@ -283,14 +283,14 @@
 				PopUpManager.centerPopUp( addAppointmentPopup );
 			}
 			
-			private function addAppointment( event:AppointmentEvent ):void
+			private function addAppointment( event:TeamAppointmentEvent ):void
 			{
 				TeamAppointmentsController.getInstance().model.addAppointment( addAppointmentPopup.appointment );
 				
 				onAddAppointmentCancel(null);
 			}
 			
-			private function saveAppointment( event:AppointmentEvent ):void
+			private function saveAppointment( event:TeamAppointmentEvent ):void
 			{
 				selectedAppointment.copy( addAppointmentPopup.appointment );
 				selectedAppointment = null;
@@ -316,9 +316,9 @@
 			{
 				if( !addAppointmentPopup ) return;
 				
-				addAppointmentPopup.removeEventListener( AppointmentEvent.ADD, addAppointment );
-				addAppointmentPopup.removeEventListener( AppointmentEvent.SAVE, saveAppointment );
-				addAppointmentPopup.removeEventListener( AppointmentEvent.CANCEL, cancelAppointment );
+				addAppointmentPopup.removeEventListener( TeamAppointmentEvent.ADD, addAppointment );
+				addAppointmentPopup.removeEventListener( TeamAppointmentEvent.SAVE, saveAppointment );
+				addAppointmentPopup.removeEventListener( TeamAppointmentEvent.CANCEL, cancelAppointment );
 				addAppointmentPopup.removeEventListener( Event.CANCEL, onAddAppointmentCancel );
 				addAppointmentPopup.removeEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
 				addAppointmentPopup.removeEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
@@ -326,7 +326,7 @@
 				removePopUp( addAppointmentPopup );
 			}
 			
-			private function cancelAppointment( event:AppointmentEvent = null ):void
+			private function cancelAppointment( event:TeamAppointmentEvent = null ):void
 			{
 				pendingAppointments = [ selectedAppointment ];
 				
@@ -462,8 +462,8 @@
 					chart.series = [column];
 					
 					renderer.labelRenderer = new ClassFactory(DailyCustomChartLabel);
-					renderer.addEventListener( AppointmentEvent.CANCEL_ALL, onCancelAllForProvider );
-					renderer.addEventListener( AppointmentEvent.VIEW_PROVIDER, onViewProvider );
+					renderer.addEventListener( TeamAppointmentEvent.CANCEL_ALL, onCancelAllForProvider );
+					renderer.addEventListener( TeamAppointmentEvent.VIEW_PROVIDER, onViewProvider );
 					renderer.addEventListener( MessageEvent.MESSAGE_ALL, onMessageAllForProvider );
 					
 					dateLabel.text = Constants.DAYS[ viewRangeStartDate.day ] + ', ' + Constants.MONTHS[ viewRangeStartDate.month ] + ' ' + viewRangeStartDate.date;
@@ -572,7 +572,7 @@
 				dispatchEvent( evt );
 			}
 			
-			private function onCancelAllForProvider( event:AppointmentEvent ):void
+			private function onCancelAllForProvider( event:TeamAppointmentEvent ):void
 			{
 				var provider:ProviderModel;
 				
@@ -595,7 +595,7 @@
 				confirmCancelAppointments();
 			}
 			
-			private function onViewProvider( event:AppointmentEvent ):void
+			private function onViewProvider( event:TeamAppointmentEvent ):void
 			{
 				selectedAppointment = null;
 				selectedProvider = null;
@@ -765,9 +765,9 @@
 					{
 						var item:RequestItem = new RequestItem();
 						item.appointment = a;
-						item.addEventListener( AppointmentEvent.VIEW, onViewRequest );
-						item.addEventListener( AppointmentEvent.DECLINE, onDeclineRequest );
-						item.addEventListener( AppointmentEvent.ACCEPT, onAcceptRequest );
+						item.addEventListener( TeamAppointmentEvent.VIEW, onViewRequest );
+						item.addEventListener( TeamAppointmentEvent.DECLINE, onDeclineRequest );
+						item.addEventListener( TeamAppointmentEvent.ACCEPT, onAcceptRequest );
 						requests.addElement( item );
 					}
 				}
@@ -775,29 +775,29 @@
 				header.actionCount = requests.numElements;
 			}
 			
-			private function onViewRequest(event:AppointmentEvent):void
+			private function onViewRequest(event:TeamAppointmentEvent):void
 			{
 				selectedAppointment = event.appointment;
 			}
 			
-			private function onDeclineRequest(event:AppointmentEvent):void
+			private function onDeclineRequest(event:TeamAppointmentEvent):void
 			{
 				removeAppointment( event.appointment );
 				refreshRequestList();
 			}
 			
-			private function onAcceptRequest(event:AppointmentEvent):void
+			private function onAcceptRequest(event:TeamAppointmentEvent):void
 			{
 				acceptRequestPopup = new AcceptAppointmentRequestPopup();
 				acceptRequestPopup.appointment = event.appointment;
-				acceptRequestPopup.addEventListener( AppointmentEvent.ACCEPT, onAcceptConfirm );
+				acceptRequestPopup.addEventListener( TeamAppointmentEvent.ACCEPT, onAcceptConfirm );
 				acceptRequestPopup.addEventListener( Event.CANCEL, onAcceptCancel );
 				
 				PopUpManager.addPopUp( acceptRequestPopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
 				PopUpManager.centerPopUp( acceptRequestPopup );
 			}
 			
-			private function onAcceptConfirm(event:AppointmentEvent):void
+			private function onAcceptConfirm(event:TeamAppointmentEvent):void
 			{
 				onAcceptCancel();	
 				
@@ -806,7 +806,7 @@
 			
 			private function onAcceptCancel(event:Event=null):void
 			{
-				acceptRequestPopup.removeEventListener( AppointmentEvent.ACCEPT, onAcceptConfirm );
+				acceptRequestPopup.removeEventListener( TeamAppointmentEvent.ACCEPT, onAcceptConfirm );
 				acceptRequestPopup.removeEventListener( Event.CANCEL, onAcceptCancel );
 				
 				removePopUp( acceptRequestPopup );

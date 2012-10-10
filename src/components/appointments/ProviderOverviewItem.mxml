@@ -12,6 +12,7 @@
 	<fx:Script>
 		<![CDATA[
 			import controllers.AppointmentsController;
+			import controllers.TeamAppointmentsController;
 			
 			import models.Appointment;
 			import models.ProviderModel;

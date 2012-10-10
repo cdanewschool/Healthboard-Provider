@@ -7,7 +7,7 @@ package controllers
 	
 	import models.Appointment;
 	import models.AppointmentPrerequisite;
-	import models.AppointmentsModel;
+	import models.TeamAppointmentsModel;
 	import models.ImageReference;
 	import models.UserModel;
 	
@@ -24,13 +24,13 @@ package controllers
 	{
 		private static var __instance:TeamAppointmentsController;
 		
-		public var model:AppointmentsModel;
+		public var model:TeamAppointmentsModel;
 		
 		private var fillCache:Dictionary;
 		
 		public function TeamAppointmentsController( enforcer:SingletonEnforcer )
 		{
-			model = new AppointmentsModel;
+			model = new TeamAppointmentsModel;
 			
 			fillCache = new Dictionary();
 		}

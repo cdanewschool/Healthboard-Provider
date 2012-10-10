@@ -8,13 +8,13 @@ package models
 	import spark.collections.SortField;
 
 	[Bindable]
-	public class AppointmentsModel
+	public class TeamAppointmentsModel
 	{
 		private var _appointments:ArrayCollection;
 		
 		public var selectedProviders:ArrayCollection;
 		
-		public function AppointmentsModel()
+		public function TeamAppointmentsModel()
 		{
 		}
 		

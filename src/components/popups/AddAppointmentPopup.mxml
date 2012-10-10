@@ -22,7 +22,7 @@
 			import events.AutoCompleteEvent;
 			
 			import models.Appointment;
-			import models.AppointmentsModel;
+			import models.TeamAppointmentsModel;
 			import models.UserModel;
 			
 			import mx.collections.ArrayCollection;

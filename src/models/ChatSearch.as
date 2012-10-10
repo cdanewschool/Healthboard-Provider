@@ -4,13 +4,15 @@ package models
 	
 	import flash.events.EventDispatcher;
 	
+	import models.modules.ModuleModel;
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	
 	import spark.collections.SortField;
 
 	[Bindable] 
-	public class ChatSearch extends EventDispatcher
+	public class ChatSearch extends ModuleModel
 	{
 		public static const STATE_DEFAULT:String = "default";
 		public static const STATE_CONNECTED:String = "connected";
