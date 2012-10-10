@@ -56,6 +56,8 @@
 			private var chatPopup:IFlexDisplayObject;
 			private var popup:IFlexDisplayObject;
 			
+			private var controller:ChatController = MainController(AppProperties.getInstance().controller).chatController;
+			
 			private function onGroupSelect(event:IndexChangeEvent):void
 			{
 				model.selectedChatGroup = DropDownList(event.currentTarget).selectedIndex;
@@ -69,7 +71,7 @@
 				
 				model.mode = ButtonBar(event.currentTarget).selectedItem.data;
 				
-				ChatController.getInstance().chat( MainController(AppProperties.getInstance().controller).user, targetUser );
+				controller.chat( MainController(AppProperties.getInstance().controller).user, targetUser );
 			}
 			
 			private function viewHistory(event:MouseEvent):void
@@ -161,13 +163,13 @@
 			
 			private function init():void
 			{
-				model = ChatController.getInstance().model;
+				model = ChatSearch( controller.model );
 				
 				search.text = ChatSearch.SEARCH_PLACEHOLDER;
 				filterGroup.selectedIndex = 0;
 				
-				ChatController.getInstance().model.addEventListener( ChatEvent.STATE_CHANGE, onChatStateChange );
-				ChatController.getInstance().model.addEventListener( ChatEvent.CANCEL, onChatCancel );
+				model.addEventListener( ChatEvent.STATE_CHANGE, onChatStateChange );
+				model.addEventListener( ChatEvent.CANCEL, onChatCancel );
 			}
 			
 		]]>

@@ -58,59 +58,27 @@ import utils.DateUtil;
 
 [Bindable] public var chartStyles:ChartStyles;
 
-public var fullName:String;	//	needed?
-
 private function init():void
 {
 	AppProperties.getInstance().controller = controller = new MainController();
 	
-	populateDatesForWidget();	//	this popuplates the 'appointments' array
-	
 	var model:ApplicationModel = new ApplicationModel();
 	model.chartStyles = chartStyles = new ChartStyles();
 	model.patientVitalSigns = arrVitalSigns;
-	model.patientAppointments = new ArrayCollection( appointments );
 	model.patientAppointmentIndex = currentAppt;
 	controller.model = model;
 	
-	if( ProviderConstants.DEBUG ) this.currentState = "providerHome";
+	if( ProviderConstants.DEBUG ) this.currentState = ProviderConstants.STATE_PROVIDER_HOME;
 
-	userContextMenuTimer = new Timer( 2000, 1 );
-	userContextMenuTimer.addEventListener(TimerEvent.TIMER_COMPLETE,onUserMenuDelay);
-	
 	BindingUtils.bindProperty( controller.exerciseController.model, 'fullName', this, 'fullName');	//	temp
 	BindingUtils.bindProperty( model.chartStyles, 'horizontalFill', this, 'myHorizontalFill');
 	BindingUtils.bindProperty( model.chartStyles, 'horizontalAlternateFill', this, 'myHorizontalAlternateFill');
 	
-	this.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
-	this.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
-	this.addEventListener( ApplicationDataEvent.LOAD, onLoadDataRequest );
-	this.addEventListener( ApplicationEvent.NAVIGATE, onNavigate );
-	this.addEventListener( ProfileEvent.SHOW_CONTEXT_MENU, onShowContextMenu );
+	//	eventually this should go in maincontroller
 	this.addEventListener( TabPlus.CLOSE_TAB_EVENT, onTabClose );
-	this.addEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
 	
 	patientsXMLdata.send();
 	providersXMLdata.send();
-}
-
-private function onLoadDataRequest(event:ApplicationDataEvent):void
-{
-	if( event.data === Constants.IMMUNIZATIONS
-		&& !controller.immunizationsController.model.dataLoaded )
-	{
-		immunizationsXMLdata.send();
-	}
-	else if( event.data === Constants.MEDICATIONS 
-		&& !controller.medicationsController.model.dataLoaded )
-	{
-		medicationsXMLdataForWidget.send();
-	}
-	else if( event.data === Constants.MEDICAL_RECORDS
-		&& !controller.medicalRecordsController.model.dataLoaded )
-	{
-		medicalRecordsXMLdata.send();
-	}
 }
 
 private function onResize():void
@@ -126,7 +94,6 @@ public function get canvasMed():CartesianDataCanvas { return chartStyles.canvasM
 public function get canvasMedWidget():CartesianDataCanvas { return chartStyles.canvasMedWidget; }
 public function get medicationsVerticalGridLine():SolidColorStroke { return chartStyles.medicationsVerticalGridLine; }
 
-[Bindable] public var fullname:String;
 [Bindable] private var registeredUserID:String = "thisValueWillBeReplaced";
 [Bindable] private var registeredPassword:String = "thisValueWillBeReplaced";
 protected function btnLogin_clickHandler(event:MouseEvent):void {
@@ -196,45 +163,11 @@ private function patientsResultHandler(event:ResultEvent):void {
 	initChatHistory();
 }
 
-public var arrOpenPatients:Array = new Array();
 protected function dgPatients_itemClickHandler(event:ListEvent):void 
 {
 	var myData:PatientModel = PatientModel( event.itemRenderer.data );
 	
 	showPatient( myData );
-}
-
-private function showPatient( patient:PatientModel ):void
-{
-	var isPatientAlreadyOpen:Boolean = false;
-	var viewPatient:ViewPatient;
-	
-	for(var i:uint = 0; i < arrOpenPatients.length; i++) 
-	{
-		if(arrOpenPatients[i] == patient) 
-		{
-			isPatientAlreadyOpen = true;
-			break;
-		}
-	}
-	
-	if( !isPatientAlreadyOpen ) 
-	{
-		viewPatient = new ViewPatient();
-		viewPatient.name = "patient" + patient.id;
-		viewPatient.patient = patient;		//acMessages[event.rowIndex];
-		viewPatient.selectedAppointment = appointments[currentAppt];
-		viewStackMain.addChild(viewPatient);
-		tabsMain.selectedIndex = viewStackMain.length - 1;
-		arrOpenPatients.push(patient);	
-	}
-	else
-	{
-		viewPatient = viewStackMain.getChildByName(  "patient" + patient.id ) as ViewPatient;
-		viewPatient.currentState = ViewPatient.STATE_DEFAULT;
-		
-		viewStackMain.selectedIndex = viewStackMain.getChildIndex( viewPatient );
-	}
 }
 
 private function patientsSearchFilter():void {
@@ -287,39 +220,6 @@ private function providersResultHandler(event:ResultEvent):void {
 	initChatHistory();
 }
 
-private var autocompleteCallback:Function;
-private var autocomplete:AutoComplete;
-
-private function onShowAutoComplete( event:AutoCompleteEvent ):void
-{
-	if( !autocomplete )
-	{
-		autocomplete = new AutoComplete();
-		autocomplete.addEventListener( Event.CHANGE, onAutocompleteSelect );
-		autocomplete.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
-	}
-	
-	autocomplete.targetField = event.targetField;
-	autocomplete.callbackFunction = event.callbackFunction;
-	autocomplete.labelFunction = event.labelFunction;
-	autocomplete.dataProvider = event.dataProvider;
-	autocomplete.width = event.desiredWidth ? event.desiredWidth : event.targetField.width;
-	
-	PopUpManager.addPopUp( autocomplete, this );
-}
-
-private function onHideAutoComplete( event:AutoCompleteEvent = null ):void
-{
-	if( autocomplete )
-	{
-		PopUpManager.removePopUp( autocomplete );
-	}
-}
-
-private function onAutocompleteSelect( event:IndexChangeEvent ):void
-{
-	autocomplete.callbackFunction( event );
-}
 
 private function initChatHistory():void
 {
@@ -352,46 +252,6 @@ private function initChatHistory():void
 	appointmentsXMLdata.send();
 }
 
-private function onNavigate(event:ApplicationEvent):void
-{
-	var module:INavigatorContent;
-	
-	if( event.data is int )
-	{
-		viewStackProviderModules.selectedIndex = event.data;
-		
-		module = viewStackProviderModules.selectedChild;
-	}
-	else if( event.data is String )
-	{
-		if( this.currentState == 'providerHome' ) 
-		{
-			var moduleName:String = event.data.toString();
-			
-			if( this.viewStackProviderModules.getChildByName( moduleName ) ) 
-			{
-				module = this.viewStackProviderModules.getChildByName( moduleName ) as INavigatorContent;
-				
-				this.viewStackProviderModules.selectedChild = module;
-				
-				if( event.data == ProviderConstants.MODULE_MESSAGES )
-				{
-					createNewMessage( 1 );
-					
-					viewStackMessages.selectedIndex = viewStackMessages.length - 2;
-				}
-				
-				if( this.viewStackMain.selectedIndex != 0 )
-				{
-					this.viewStackMain.selectedIndex = 0;
-				}
-			}
-		}
-	}
-	
-	onHideAutoComplete();
-}
-
 private function toggleAvailability(event:MouseEvent):void
 {
 	var button:LinkButton = LinkButton(event.currentTarget);
@@ -407,109 +267,6 @@ public function falsifyWidget(widget:String):void
 {
 }
 
-/**
- * User context menu
-*/
-private var userContextMenu:UserContextMenu;
-private var userContextMenuTimer:Timer;
-
-private function onShowContextMenu(event:ProfileEvent):void 
-{
-	if( userContextMenu ) hideContextMenu();
-	
-	userContextMenu = new UserContextMenu();
-	userContextMenu.user = event.user;
-	userContextMenu.addEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
-	userContextMenu.addEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
-	userContextMenu.addEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );
-	userContextMenu.addEventListener( ProfileEvent.START_CHAT, onUserAction );
-	
-	userContextMenu.x = this.stage.mouseX;
-	userContextMenu.y = this.stage.mouseY;
-	
-	PopUpManager.addPopUp( userContextMenu, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
-	
-	userContextMenuTimer.reset();
-	userContextMenuTimer.start();
-}
-
-private function hideContextMenu():void
-{
-	if( !userContextMenu ) return;
-	
-	userContextMenu.removeEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
-	userContextMenu.removeEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
-	userContextMenu.removeEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );
-	userContextMenu.removeEventListener( ProfileEvent.START_CHAT, onUserAction );
-	
-	PopUpManager.removePopUp( userContextMenu );
-}
-
-private function onUserAction( event:ProfileEvent ):void
-{
-	var evt:ApplicationEvent;
-	
-	if( event.type == ProfileEvent.VIEW_PROFILE )
-	{
-		if( event.user is ProviderModel )
-		{
-			evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-			evt.data = ProviderConstants.MODULE_TEAM;
-			this.dispatchEvent( evt );
-			
-			TeamModule(viewStackProviderModules.getChildByName( ProviderConstants.MODULE_TEAM )).showTeamMember( event.user );
-		}
-		else
-		{
-			showPatient( event.user as PatientModel );
-		}
-	}
-	else if( event.type == ProfileEvent.VIEW_APPOINTMENTS )
-	{
-		if( AppointmentsController.getInstance().model.selectedProviders.getItemIndex( event.user ) == -1 )
-		{
-			AppointmentsController.getInstance().model.selectedProviders.addItem( event.user );
-		}
-		
-		evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-		evt.data = ProviderConstants.MODULE_APPOINTMENTS;
-		this.dispatchEvent( evt );
-	}
-	else if( event.type == ProfileEvent.SEND_MESSAGE )
-	{
-		var message:Message = new Message();
-		message.recipients = [ event.user ];
-		
-		evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-		evt.data = ProviderConstants.MODULE_MESSAGES;
-		evt.message = message;
-		this.dispatchEvent( evt );
-	}
-	else if( event.type == ProfileEvent.START_CHAT )
-	{
-		ChatController.getInstance().chat( controller.user, event.user );
-	}
-	
-	hideContextMenu();
-}
-
-private function onUserMenuDelay( event:TimerEvent ):void
-{
-	if( userContextMenu 
-		&& userContextMenu.parent )
-	{
-		if( !userContextMenu.hitTestPoint(this.stage.mouseX,this.stage.mouseY)
-			&& !userContextMenu.chatModes.hitTestPoint(this.stage.mouseX,this.stage.mouseY) )
-		{
-			hideContextMenu();
-		}
-		else
-		{
-			userContextMenuTimer.reset();
-			userContextMenuTimer.start();
-		}
-	}
-}
 
 protected function onTabClose( event:ListEvent ):void
 {

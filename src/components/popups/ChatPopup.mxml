@@ -18,6 +18,7 @@
 	<fx:Script>
 		<![CDATA[
 			import controllers.ChatController;
+			import controllers.MainController;
 			
 			import models.Chat;
 			import models.ChatMessage;
@@ -63,6 +64,8 @@
 			
 			private var camera:Camera;
 			private var videoSoure:DynamicStreamingVideoSource;
+			
+			private var controller:ChatController = MainController(AppProperties.getInstance().controller).chatController;
 			
 			private function onSendClick( event:MouseEvent ):void
 			{
@@ -186,14 +189,14 @@
 			
 			private function onUpdateChatMode(event:IndexChangeEvent):void
 			{
-				ChatController.getInstance().model.mode = ButtonBar(event.currentTarget).selectedItem.data;
+				ChatSearch( controller.model ).mode = ButtonBar(event.currentTarget).selectedItem.data;
 				
 				initChatMode();
 			}
 			
 			private function initChatMode():void
 			{
-				currentState = ChatController.getInstance().model.mode + 'Chat';
+				currentState = ChatSearch( controller.model ).mode + 'Chat';
 			}
 			
 			private function resize(event:ResizeEvent=null):void
@@ -274,7 +277,7 @@
 				
 				volumeSlider.setStyle('accentColor',0xeeeeee);
 				
-				updateMode.selectedIndex = ChatSearch.getModeIndex( ChatController.getInstance().model.mode );
+				updateMode.selectedIndex = ChatSearch.getModeIndex( ChatSearch( controller.model ).mode );
 				
 				initChatMode();
 				simulateResponse();

@@ -25,38 +25,29 @@ package controllers
 	
 	import utils.DateUtil;
 
-	public class ChatController
+	public class ChatController extends BaseModuleController
 	{
-		private static var __instance:ChatController;
-		
 		private var popup:IFlexDisplayObject;
-		
-		public var model:ChatSearch;
 		
 		private var connectionTimer:Timer;
 		
-		public function ChatController( enforcer:SingletonEnforcer )
+		public function ChatController()
 		{
-			model = new ChatSearch();
+			super();
+			
+			model = new ChatSearch();	//	TODO: rename ChatModel
 			model.addEventListener( ChatEvent.STATE_CHANGE, onStateChange );
 			
 			connectionTimer = new Timer(1000,1);
 			connectionTimer.addEventListener(TimerEvent.TIMER_COMPLETE,onConnectionTimerComplete);
 		}
 		
-		public static function getInstance():ChatController
-		{
-			if( !__instance ) __instance = new ChatController( new SingletonEnforcer() );
-			
-			return __instance;
-		}
-		
 		public function chat( user:UserModel, targetUser:UserModel ):void
 		{
 			if( popup) PopUpManager.removePopUp( popup );
 			
-			model.user = user;
-			model.targetUser = targetUser;
+			ChatSearch(model).user = user;
+			ChatSearch(model).targetUser = targetUser;
 			
 			popup = new VerifyCredentialsPopup();
 			VerifyCredentialsPopup(popup).user = user;
@@ -69,17 +60,17 @@ package controllers
 		
 		private function onConnectionTimerComplete(event:TimerEvent):void
 		{
-			if( !model.targetUser ) return;
+			if( !ChatSearch(model).targetUser ) return;
 			
-			if( model.targetUser.available == UserModel.STATE_AVAILABLE )
+			if( ChatSearch(model).targetUser.available == UserModel.STATE_AVAILABLE )
 			{
-				model.state = ChatSearch.STATE_CONNECTED;
+				ChatSearch(model).state = ChatSearch.STATE_CONNECTED;
 				
-				var chat:Chat = new Chat( model.user, model.targetUser, new Date() );
+				var chat:Chat = new Chat( ChatSearch(model).user, ChatSearch(model).targetUser, new Date() );
 				
 				popup = new ChatPopup();
 				ChatPopup(popup).chat = chat;
-				ChatPopup(popup).user = model.user;
+				ChatPopup(popup).user = ChatSearch(model).user;
 				popup.addEventListener( ApplicationEvent.VIEW_FILE, onViewAttachment );
 				popup.addEventListener( CloseEvent.CLOSE, onPopupClose );
 				
@@ -91,7 +82,7 @@ package controllers
 				if( popup) PopUpManager.removePopUp( popup );
 				
 				popup = new ChatRequestDeniedPopup();
-				ChatRequestDeniedPopup(popup).user = model.targetUser;
+				ChatRequestDeniedPopup(popup).user = ChatSearch(model).targetUser;
 				popup.addEventListener( CloseEvent.CLOSE, onPopupClose );
 				
 				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
@@ -101,7 +92,7 @@ package controllers
 		
 		private function onStateChange(event:Event):void
 		{
-			if( model.state == ChatSearch.STATE_CONNECTING )
+			if( ChatSearch(model).state == ChatSearch.STATE_CONNECTING )
 			{
 				connectionTimer.reset();
 				connectionTimer.delay = DateUtil.SECOND * Math.round( Math.random() * 5 );
@@ -135,17 +126,14 @@ package controllers
 		
 		private function reset():void
 		{
-			model.state = ChatSearch.STATE_DEFAULT;
-			model.user = null;
-			model.targetUser = null;
+			ChatSearch(model).state = ChatSearch.STATE_DEFAULT;
+			ChatSearch(model).user = null;
+			ChatSearch(model).targetUser = null;
 		}
 		
 		private function onAuthenticationSuccess(event:AuthenticationEvent):void
 		{
-			model.state = ChatSearch.STATE_CONNECTING;
+			ChatSearch(model).state = ChatSearch.STATE_CONNECTING;
 		}
 	}
-}
-internal class SingletonEnforcer
-{
 }
