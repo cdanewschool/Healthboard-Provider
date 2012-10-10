@@ -99,7 +99,7 @@ package models
 			{
 				var items:Array = [];
 				for each(var prerequisite:AppointmentPrerequisite in prerequisites) 
-					items.push( (actionable?"<a href='showPrerequisite,"+prerequisite.id+"'><span color='0xAEDBE2'>":null) + prerequisite.title +  (actionable?"</span></a>":null) );
+					items.push( (actionable?"<a href='showPrerequisite,"+prerequisite.id+"'><span color='0xAEDBE2'>":'') + prerequisite.title +  (actionable?"</span></a>":'') );
 				return items.join('; ');
 			}
 			

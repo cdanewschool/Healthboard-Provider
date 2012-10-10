@@ -15,11 +15,15 @@
 			import models.ProviderModel;
 			
 			import mx.collections.ArrayCollection;
+			import mx.graphics.Stroke;
 			
 			private function updateState():void
 			{
 				if( dayLabel ) dayLabel.styleName = selected ? 'calendarSelectedDay' : 'lightGray11';
-				if( providerList && border ) providerList.alpha = border.alpha = selected ? 1 : .45;
+				if( providerList && border ) {
+					providerList.alpha = border.alpha = selected ? 1 : .5;
+					border.borderStroke = selected ? new Stroke(0xFFFFFF,1,1) : new Stroke(0x9E9E9E,1,.65);
+				}
 			}
 			
 			override public function set selected(value:Boolean):void
@@ -53,7 +57,7 @@
 		]]>
 	</fx:Script>
 	
-	<s:BorderContainer id="border" borderColor="0xffffff" backgroundAlpha="0" width="100%" height="100%" left="-2">
+	<s:BorderContainer id="border" borderColor="0x9E9E9E" backgroundAlpha="0" width="95" height="95">
 		
 		<s:layout>
 			<s:BasicLayout  />

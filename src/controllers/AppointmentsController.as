@@ -3,6 +3,7 @@ package controllers
 	import components.popups.ViewAttachmentPopup;
 	
 	import flash.display.DisplayObject;
+	import flash.display.GradientType;
 	import flash.utils.Dictionary;
 	
 	import models.Appointment;
@@ -92,9 +93,10 @@ package controllers
 			PopUpManager.centerPopUp( popup );
 		}
 		
-		public function getFill( type:String ):IFill
+		public function getFill( type:String, rotation:int = 0 ):IFill
 		{
-			if( fillCache[type] ) return fillCache[type];
+			var key:String = type + '_' + rotation.toString();
+			if( fillCache[key] ) return fillCache[key];
 
 			var colors:Array = [];
 			
@@ -109,7 +111,8 @@ package controllers
 			
 			var fill:LinearGradient = new LinearGradient();
 			fill.entries = [ new GradientEntry( colors[0] ), new GradientEntry( colors[1], .5215 ), new GradientEntry( colors[2], 1 ) ];
-			fillCache[type] = fill;
+			fill.rotation = rotation;
+			fillCache[key] = fill;
 			
 			return fill;
 		}

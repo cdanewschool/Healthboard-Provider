@@ -24,17 +24,37 @@
 	<fx:Script>
 		<![CDATA[
 			import events.ApplicationEvent;
-			import events.ProviderEvent;
+			import events.ProfileEvent;
 			
+			import models.PatientModel;
 			import models.ProviderModel;
+			import models.UserModel;
 			
 			public static const WIDTH:int = 314;
 			
-			[Bindable] public var provider:ProviderModel;
+ 			[Bindable] public var user:UserModel;
 			
+			override protected function commitProperties():void {
+				super.commitProperties();
+				
+				if( user )
+				{
+					labelOne.text = user.userType == UserModel.TYPE_PROVIDER? "Specialty:" : "Patient ID:";
+					labelTwo.text = user.userType == UserModel.TYPE_PROVIDER? "Board:" : "SSN:";
+					labelThree.text = user.userType == UserModel.TYPE_PROVIDER? "Title:" : "DOB:";
+					labelFour.text = user.userType == UserModel.TYPE_PROVIDER? "Team:" : "Sex:";
+					
+					valueOne.text = user.userType == UserModel.TYPE_PROVIDER ? ProviderModel(user).specialty : user.id.toString();
+					valueTwo.text = user.userType == UserModel.TYPE_PROVIDER ? ProviderModel(user).status : PatientModel(user).ssn;
+					valueThree.text = user.userType == UserModel.TYPE_PROVIDER ? ProviderModel(user).role : PatientModel(user).dob;
+					valueFour.text = user.userType == UserModel.TYPE_PROVIDER ? user.team : user.sex;
+					valueFive.text = user.userType == UserModel.TYPE_PROVIDER ? '' : PatientModel(user).rank;
+				}
+			}
+
 			private function onSelect(event:MouseEvent):void
 			{
-				dispatchEvent( new ProviderEvent(ProviderEvent.SELECT, false, false, ProviderModel(provider) ) );
+				dispatchEvent( new ProfileEvent(ProfileEvent.SELECT, false, false, user ) );
 			}
 			
 			private function onRollOver(event:MouseEvent):void
@@ -52,17 +72,17 @@
 			
 			private function onClick(event:MouseEvent):void
 			{
-				dispatchEvent( new ProviderEvent(ProviderEvent.SELECT, false, false, ProviderModel(provider) ) );
+				dispatchEvent( new ProfileEvent(ProfileEvent.SELECT, false, false, user ) );
 			}
 			
 			private function onTargetUserImageLoadError(event:IOErrorEvent):void
 			{
-				Image(event.currentTarget).source = provider.getDefaultProfilePictureURL( 'small' );
+				Image(event.currentTarget).source = user.getDefaultProfilePictureURL( 'med' );
 			}
 			
 			private function init():void
 			{
-				profilePic.source = provider.getProfilePictureURL();
+				profilePic.source = user.getProfilePictureURL();
 				
 				controlBarVisible=false;
 			}
@@ -80,22 +100,26 @@
 		</s:VGroup>
 		
 		<s:VGroup paddingTop="-6" fontWeight="normal" gap="3">
-			<mx:LinkButton id="btnProviderName" label="{(provider.role == 'MD' ? 'Dr. ' : '') + provider.firstName + ' ' + provider.lastName}" fontSize="14" fontWeight="bold" paddingLeft="0" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnProviderName.styleName='linkBtnUnderline';}" rollOut="btnProviderName.styleName='linkBtn';" click="onSelect(event)" />
+			<mx:LinkButton id="btnUserName" label="{user.fullName}" fontSize="14" fontWeight="bold" paddingLeft="0" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnUserName.styleName='linkBtnUnderline';}" rollOut="btnUserName.styleName='linkBtn';" click="onSelect(event)" />
 			<s:HGroup>
-				<s:Label text="Specialty:" textAlign="right" fontSize="12" width="51" />
-				<s:Label text="{provider.specialty}" fontSize="12"/>
+				<s:Label id="labelOne" textAlign="right" fontSize="12" width="55" />
+				<s:Label id="valueOne" fontSize="12"/>
 			</s:HGroup>
 			<s:HGroup>
-				<s:Label text="Board:" textAlign="right" fontSize="12" width="51" />
-				<s:Label text="{provider.status}" fontSize="12"/>
+				<s:Label id="labelTwo" textAlign="right" fontSize="12" width="55" />
+				<s:Label id="valueTwo" fontSize="12"/>
 			</s:HGroup>
 			<s:HGroup>
-				<s:Label text="Title:" textAlign="right" fontSize="12" width="51" />
-				<s:Label text="{provider.role}" fontSize="12"/>
+				<s:Label id="labelThree" textAlign="right" fontSize="12" width="55" />
+				<s:Label id="valueThree" fontSize="12"/>
 			</s:HGroup>
 			<s:HGroup>
-				<s:Label text="Team:" textAlign="right" fontSize="12" width="51" />
-				<s:Label text="{provider.team}" fontSize="12"/>
+				<s:Label id="labelFour" textAlign="right" fontSize="12" width="55" />
+				<s:Label id="valueFour" fontSize="12"/>
+			</s:HGroup>
+			<s:HGroup visible="{user &amp;&amp; user.userType==UserModel.TYPE_PATIENT}">
+				<s:Label id="labelFive" text="Rank:" textAlign="right" fontSize="12" width="55" />
+				<s:Label id="valueFive" fontSize="12"/>
 			</s:HGroup>
 		</s:VGroup>
 	</s:HGroup>

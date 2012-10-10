@@ -153,6 +153,11 @@
 						result="healthFocusResultHandler(event)" />
 	</fx:Declarations>
 	
+	<s:states>
+		<s:State name="default" />
+		<s:State name="modVitalSigns" />
+	</s:states>
+	
 	<s:BorderContainer height="40" width="100%">
 		<s:layout>
 			<s:HorizontalLayout verticalAlign="middle" paddingLeft="16"/>
@@ -174,7 +179,7 @@
 		</s:HGroup>
 	</s:BorderContainer>
 	
-	<s:Scroller id="widgetScroller" height="728" width="1024" horizontalScrollPolicy="off">
+	<s:Scroller id="widgetScroller" height="728" width="1024" horizontalScrollPolicy="off" includeIn="default">
 		<s:VGroup id="widgetContent">
 			<s:HGroup gap="22" paddingTop="11" paddingLeft="32" minHeight="591">
 				<s:VGroup gap="17">
@@ -1225,4 +1230,9 @@
 			</s:VGroup>
 		</s:VGroup>
 	</s:Scroller>
+	
+	<s:VGroup includeIn="modVitalSigns" width="976" paddingTop="10">
+		<s:Label text="cascasc" />
+		
+	</s:VGroup>
 </s:NavigatorContent>

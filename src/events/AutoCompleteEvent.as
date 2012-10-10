@@ -19,6 +19,8 @@ package events
 		public var callbackFunction:Function;
 		public var labelFunction:Function;
 		
+		public var backgroundColor:uint;
+		
 		public function AutoCompleteEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
@@ -32,6 +34,7 @@ package events
 			event.desiredWidth = desiredWidth;
 			event.callbackFunction = callbackFunction;
 			event.labelFunction = labelFunction;
+			event.backgroundColor = backgroundColor;
 			
 			return event;
 		}

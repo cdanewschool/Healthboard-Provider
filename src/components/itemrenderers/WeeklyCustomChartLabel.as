@@ -74,7 +74,9 @@ package components.itemrenderers
 				{
 					_label = labels[i];
 					
-					_label.x = (width - (labels.length*20))/2 + (i*20);
+					//_label.x = (width - (labels.length*20))/2 + (i*20);
+					const LABEL_WIDTH:uint = 16;
+					_label.x = (width / labels.length - LABEL_WIDTH) / 2 + i*(width / labels.length);
 					_label.y = height - 2;
 				}
 				
@@ -87,6 +89,7 @@ package components.itemrenderers
 			super.updateDisplayList(w, h);
 			
 			var _label:IUITextField = IUITextField( getChildAt(0) );
+			_label.x = w/2-_label.textWidth/2;
 			
 			var y:int = _label.height + 5;
 			
@@ -120,7 +123,7 @@ package components.itemrenderers
 			super.measure();
 			
 			measuredHeight = 83;
-			measuredWidth = 75;
+			measuredWidth = 76.5;
 		}
 		
 		private function onProvidersChange(event:CollectionEvent=null):void

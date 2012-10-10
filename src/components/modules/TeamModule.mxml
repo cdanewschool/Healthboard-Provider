@@ -27,7 +27,6 @@
 			
 			import events.ApplicationEvent;
 			import events.ProfileEvent;
-			import events.ProviderEvent;
 			
 			import models.Message;
 			import models.ProviderModel;
@@ -118,9 +117,9 @@
 					{
 						var profile:ProviderProfile = new ProviderProfile();
 						profile.title = item.role + " Profile";
-						profile.provider = item;
+						profile.user = item;
 						profile.setStyle('dropShadowVisible',false);
-						profile.addEventListener( ProviderEvent.SELECT, onTeamSelect );
+						profile.addEventListener( ProfileEvent.SELECT, onTeamSelect );
 						teamProfileList.addElement( profile );
 					}
 				}
@@ -195,7 +194,7 @@
 				
 				for(var i:int=0;i<teamProfileList.numElements;i++)
 				{
-					users.push( ProviderProfile(teamProfileList.getElementAt(i)).provider );
+					users.push( ProviderProfile(teamProfileList.getElementAt(i)).user );
 				}
 				
 				var alias:String = "All Teams";
@@ -261,12 +260,12 @@
 				dispatchEvent( evt );
 			}
 			
-			protected function onTeamSelect(event:ProviderEvent):void 
+			protected function onTeamSelect(event:ProfileEvent):void 
 			{
 				if( userOptions ) closeContextMenu();
 				
 				userOptions = new UserContextMenu();
-				userOptions.user = event.provider;
+				userOptions.user = event.user;
 				userOptions.addEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
 				userOptions.addEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
 				userOptions.addEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );

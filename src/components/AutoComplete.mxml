@@ -2,8 +2,8 @@
 <s:List xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		xmlns:s="library://ns.adobe.com/flex/spark" 
 		xmlns:mx="library://ns.adobe.com/flex/mx" 
-		width="100%" maxHeight="100" color="0xFFFFFF" fontSize="12" contentBackgroundColor="0x3C3C3B" 
-		alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" selectionColor="0x31535E" 
+		width="100%" maxHeight="100" color="{textColor}" fontSize="12" contentBackgroundColor="{backgroundColor}" 
+		alternatingItemColors="{[backgroundColor,backgroundColor]}" rollOverColor="{rolloverColor}" selectionColor="{rolloverColor}" 
 		addedToStage="onShow()" removedFromStage="onHide()">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
@@ -17,9 +17,26 @@
 			
 			import spark.components.TextInput;
 			
+			[Bindable]
+			public function get backgroundColor():uint
+			{
+				return _backgroundColor;
+			}
+
+			public function set backgroundColor(value:uint):void
+			{
+				_backgroundColor = value;
+				textColor = (_backgroundColor == 0xFFFFFF) ? 0x000000 : 0xFFFFFF;
+				rolloverColor = (_backgroundColor == 0xFFFFFF) ? 0xCCCCCCC : 0x31535E;
+			}
+
 			public var callbackFunction:Function;
 			
 			public var targetField:TextInput;
+			
+ 			private var _backgroundColor:uint = 0x3C3C3B;
+			[Bindable] public var rolloverColor:uint = 0x31535E;
+			[Bindable] public var textColor:uint = 0xFFFFFF;
 			
 			private function onFocusOut( event:FocusEvent ):void
 			{

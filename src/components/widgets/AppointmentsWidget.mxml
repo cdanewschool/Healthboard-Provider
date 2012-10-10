@@ -10,7 +10,7 @@
 	
 	<fx:Declarations>
 		<mx:SolidColorStroke id="xAxisStroke" color="0xB3B3B3" alpha=".1" />
-		<mx:SolidColorStroke id="yAxisStroke" color="0x86888A" alpha="1" />
+		<!--<mx:SolidColorStroke id="yAxisStroke" color="0x86888A" alpha="1" />-->
 		<mx:SolidColorStroke id="whiteStroke" color="0xffffff" alpha="1" weight="0" />
 		
 		<fx:Array id="gridBackground">
@@ -154,7 +154,7 @@
 			private function getFill(element:ChartItem, index:Number):IFill 
 			{
 				var appointment:Appointment = Appointment( appointments.getItemAt( index ) );
-				return controller.getFill( appointment.isPending ? Appointment.TYPE_PENDING : appointment.type );
+				return controller.getFill( appointment.isPending ? Appointment.TYPE_PENDING : appointment.type, 90 );
 			}
 			
 			private function verticalAxisCategoryFunction(axis:AxisBase, item:ProviderModel):Object 
@@ -219,35 +219,33 @@
 		<s:VerticalLayout paddingLeft="10" paddingTop="0" paddingRight="10" paddingBottom="10" gap="0" />
 	</enhancedtitlewindow:layout>
 	
-	<s:HGroup width="100%" gap="5">
+	<s:HGroup width="100%" gap="15" paddingTop="7">
 		
-		<s:VGroup paddingTop="10">
+		<s:VGroup>
 			<s:BorderContainer borderColor="0xBBBDBF" borderWeight="1" width="40" height="51">
-				<mx:Image id="profilePic" source="images/patients/small/glover.jpg" />
+				<mx:Image id="profilePic" source="images/patients/tiny/glover.jpg" />
 			</s:BorderContainer>
 		</s:VGroup>
 		
-		<s:VGroup paddingLeft="10" paddingTop="10" width="100%">
+		<s:VGroup paddingTop="3">
 			
-			<s:HGroup width="100%">
-				<s:RichEditableText id="nextAppointmentInfo" styleName="white12" width="100%" editable="false" />
+			<s:HGroup>
+				<s:RichEditableText id="nextAppointmentInfo" styleName="white12" editable="false" lineHeight="18" />
 			</s:HGroup>
 			
 		</s:VGroup>
 		
 	</s:HGroup>
 	
-	<s:Spacer height="5"/> 
+	<s:HGroup paddingTop="7" paddingBottom="5">
+		<s:Line xFrom="0" xTo="610">
+			<s:stroke>
+				<s:SolidColorStroke color="0x676767" weight="1" />
+			</s:stroke>
+		</s:Line>
+	</s:HGroup>
 	
-	<s:Line xFrom="20" xTo="{width-20}">
-		<s:stroke>
-			<s:SolidColorStroke color="0x676767" weight="1" />
-		</s:stroke>
-	</s:Line>
-	
-	<s:Spacer height="5"/> 
-	
-	<mx:BarChart id="chart" dataProvider="{appointments}" showDataTips="false" backgroundElements="{gridBackground}" width="100%" height="100" barWidthRatio=".4">
+	<mx:BarChart id="chart" dataProvider="{appointments}" showDataTips="false" backgroundElements="{gridBackground}" width="622" height="87" barWidthRatio=".4">
 		
 		<mx:horizontalAxis>
 			<mx:LinearAxis id="xAxis" minimum="{DateUtil.HOUR*6}" maximum="{DateUtil.HOUR*17}" labelFunction="getTimeLabel" interval="{DateUtil.HOUR}" />
@@ -261,7 +259,7 @@
 			<mx:BarSeries
 				id="appointmentTime"
 				dataFunction="valueFunction" minField="x"
-				fillFunction="getFill" stroke="{whiteStroke}" />
+				fillFunction="getFill" />
 		</mx:series>
 		
 		<mx:horizontalAxisRenderers>
@@ -269,19 +267,17 @@
 		</mx:horizontalAxisRenderers>
 		
 		<mx:verticalAxisRenderers>
-			<mx:AxisRenderer axis="{yAxis}" axisStroke="{yAxisStroke}" styleName="blue12" showLine="true" tickPlacement="none" minorTickPlacement="none" placement="left"  />
+			<mx:AxisRenderer axis="{yAxis}" styleName="blue12" showLine="false" tickPlacement="none" minorTickPlacement="none" placement="left"  />
 		</mx:verticalAxisRenderers>
 		
 	</mx:BarChart>
 	
-	<s:Line xFrom="20" xTo="{width-20}">
+	<s:Line xFrom="0" xTo="610">
 		<s:stroke>
 			<s:SolidColorStroke color="0x676767" weight="1" />
 		</s:stroke>
 	</s:Line>
 	
-	<s:Spacer height="5"/> 
-	
-	<s:HGroup id="legend" gap="50" />
+	<s:HGroup id="legend" gap="61" paddingTop="9" />
 	
 </enhancedtitlewindow:EnhancedTitleWindow>

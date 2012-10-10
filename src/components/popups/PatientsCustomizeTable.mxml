@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	width="341" height="499"
+	controlBarVisible="true" 
+	skinClass="skins.general.myHeaderlessTitleWindow">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			private function save():void {
+				parentApplication.colUrgency = checkUrgency.selected;
+				parentApplication.colPhoto = checkPhoto.selected;
+				parentApplication.colId = checkID.selected;
+				parentApplication.colTeam = checkTeam.selected;
+				parentApplication.colLastName = checkLastName.selected;
+				parentApplication.colFirstName = checkFirstName.selected;
+				parentApplication.colBranch = checkBranch.selected;
+				parentApplication.colRank = checkRank.selected;
+				parentApplication.colOccupation = checkOccupation.selected;
+				parentApplication.colSex = checkSex.selected;
+				parentApplication.colLastVisit = checkLastVisit.selected;
+				parentApplication.colAge = checkAge.selected;
+				parentApplication.colDob = checkDOB.selected;
+				parentApplication.colBloodType = checkBloodType.selected;
+				parentApplication.colRace = checkRace.selected;
+				parentApplication.colHealthConditions = checkHealthConditions.selected;
+				
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="12" paddingTop="12" paddingRight="12" />
+	</s:layout>
+	
+	<s:Label text="Customize Table" styleName="darkGrayBold16" />
+	
+	<s:Label text="Please select the data you want displayed in the table view." styleName="darkGray12" />
+	
+	<s:VGroup paddingLeft="20" paddingTop="3">
+		<s:CheckBox id="checkUrgency" label="Urgency" selected="{parentApplication.colUrgency}" />
+		<s:CheckBox id="checkPhoto" label="Photo" selected="{parentApplication.colPhoto}" />
+		<s:CheckBox id="checkID" label="ID Number" selected="{parentApplication.colID}" />
+		<s:CheckBox id="checkTeam" label="Team" selected="{parentApplication.colTeam}" />
+		<s:CheckBox id="checkLastName" label="Last Name" selected="{parentApplication.colLastName}" />
+		<s:CheckBox id="checkFirstName" label="First Name" selected="{parentApplication.colFirstName}" />
+		<s:CheckBox id="checkBranch" label="Servuce Branch" selected="{parentApplication.colBranch}" />
+		<s:CheckBox id="checkRank" label="Rank" selected="{parentApplication.colRank}" />
+		<s:CheckBox id="checkOccupation" label="Occupation" selected="{parentApplication.colOccupation}" />
+		<s:CheckBox id="checkSex" label="Sex" selected="{parentApplication.colSex}" />
+		<s:CheckBox id="checkLastVisit" label="Last Visit" selected="{parentApplication.colLastVisit}" />
+		<s:CheckBox id="checkAge" label="Age" selected="{parentApplication.colAge}" />
+		<s:CheckBox id="checkDOB" label="DOB" selected="{parentApplication.colDob}" />
+		<s:CheckBox id="checkBloodType" label="Blood Type" selected="{parentApplication.colBloodType}" />
+		<s:CheckBox id="checkRace" label="Race" selected="{parentApplication.colRace}" />
+		<s:CheckBox id="checkHealthConditions" label="Health Conditions" selected="{parentApplication.colHealthConditions}" />
+	</s:VGroup>
+	
+	<s:VGroup paddingTop="5" paddingBottom="6">
+		<s:Line xFrom="0" xTo="317">
+			<s:stroke>
+				<s:SolidColorStroke color="0x4D4D4D" weight="1" alpha=".25" />
+			</s:stroke>
+		</s:Line>
+	</s:VGroup>
+	
+	<s:HGroup horizontalAlign="right" width="100%">
+		<s:HGroup gap="7">
+			<s:Button label="Save" width="52" height="24" click="save();" skinClass="skins.general.IconButtonSkin" />
+			<s:Button label="Cancel" width="52" height="24" click="PopUpManager.removePopUp(this);" skinClass="skins.general.IconButtonSkin" />
+		</s:HGroup>
+	</s:HGroup>
+	
+</s:TitleWindow>
