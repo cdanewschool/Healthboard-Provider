@@ -1,5 +1,7 @@
 package controllers
 {
+	import ASclasses.Constants;
+	
 	import ASfiles.ProviderConstants;
 	
 	import components.AutoComplete;
@@ -265,6 +267,18 @@ package controllers
 			}
 		}
 		
+		override protected function onSetState( event:ApplicationEvent ):void
+		{
+			super.onSetState( event );
+			
+			var child:DisplayObject;
+			
+			if( (child = visualDashboardProvider(application).viewStackProviderModules.getChildByName( event.data ) ) != null )
+			{
+				visualDashboardProvider(application).viewStackProviderModules.selectedChild = child as INavigatorContent;
+			}
+		}
+		
 		override protected function onTabClose( event:ListEvent ):void
 		{
 			super.onTabClose(event);
@@ -324,7 +338,7 @@ package controllers
 			}
 			else if( event.data is String )
 			{
-				if( application.currentState == ProviderConstants.STATE_PROVIDER_HOME ) 
+				if( application.currentState == Constants.STATE_LOGGED_IN ) 
 				{
 					var moduleName:String = event.data.toString();
 					

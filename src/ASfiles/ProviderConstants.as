@@ -2,12 +2,12 @@ package ASfiles
 {
 	public class ProviderConstants
 	{
-		public static const DEBUG:Boolean = true;
+		public static const DEBUG:Boolean = false;
+		
+		public static const STATE_PROFILE:String = "profile";
 		
 		/*	corresponds to index of desired user in providers.xml	*/
 		public static const USER_ID:int = 0;
-		
-		public static const STATE_PROVIDER_HOME:String = "providerHome";
 		
 		//	TODO: remove shared module ids
 		public static const MODULE_APPOINTMENTS:String = "modAppointments";

@@ -74,7 +74,7 @@
 		<s:State name="default" />
 		<s:State name="forgotPassword" />
 		<s:State name="passwordSent" />
-		<s:State name="providerHome" />
+		<s:State name="loggedIn" />
 		<!--<s:State name="widgetView" enterState="filterMedsFromWidget();" />
 		<s:State name="modCalendar" />
 		<s:State name="modImmunizations" />
@@ -95,9 +95,11 @@
 	<s:transitions>
 	</s:transitions>
 	
-	<views:LoginView width="1024" includeIn="default" />
+	<views:LoginView 
+		width="1024" includeIn="default" 
+		authenticationSuccess="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.STATE_LOGGED_IN) )" adminUsername="popo" />
 	
-	<s:VGroup includeIn="providerHome" width="1024" horizontalAlign="center">		
+	<s:VGroup includeIn="loggedIn" width="1024" horizontalAlign="center">		
 		<!-- HEADER -->
 		<s:Group width="100%">
 			<s:BorderContainer width="1024" height="38" borderAlpha="0">
@@ -120,9 +122,9 @@
 				<s:HGroup paddingRight="14">
 					
 					<mx:LinkButton label="{MainController(AppProperties.getInstance().controller).user.available == UserModel.STATE_AVAILABLE ? 'Available' : 'Unavailable'}" click="toggleAvailability(event)" toolTip="{MainController(AppProperties.getInstance().controller).user.available == UserModel.STATE_AVAILABLE ? 'Change status to unavailable' : 'Change status to available'}" styleName="linkBtnYellow" />
-					<mx:LinkButton id="btnProfile" label="{fullname}" color="0xAEDBE2" textRollOverColor="0xAEDBE2" textSelectedColor="0xAEDBE2" skin="{null}" click="{currentState='profile'}" rollOver="btnProfile.styleName='linkBtnUnderline';" rollOut="btnProfile.styleName='linkBtn';" />
+					<mx:LinkButton id="btnProfile" label="{fullname}" color="0xAEDBE2" textRollOverColor="0xAEDBE2" textSelectedColor="0xAEDBE2" skin="{null}" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, ProviderConstants.STATE_PROFILE) )" rollOver="btnProfile.styleName='linkBtnUnderline';" rollOut="btnProfile.styleName='linkBtn';" />
 					
-					<mx:LinkButton id="btnLogout" label="Logout" color="0xE6E6E6" textRollOverColor="0xE6E6E6" textSelectedColor="0xE6E6E6" skin="{null}" paddingLeft="1" click="{currentState='default'}" rollOver="btnLogout.styleName='linkBtnUnderline';" rollOut="btnLogout.styleName='linkBtn';" />
+					<mx:LinkButton id="btnLogout" label="Logout" color="0xE6E6E6" textRollOverColor="0xE6E6E6" textSelectedColor="0xE6E6E6" skin="{null}" paddingLeft="1" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.STATE_DEFAULT) )" rollOver="btnLogout.styleName='linkBtnUnderline';" rollOut="btnLogout.styleName='linkBtn';" />
 					
 					<s:HGroup paddingTop="-6" paddingLeft="-9">
 						<s:DropDownList id="dropDownView" dropShadowVisible="false" skinClass="skins.general.MyOptionsDropDownListSkin" color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" contentBackgroundColor="0xFFFFFF" width="35" fontSize="12"><!--change="dropDownView_changeHandler(event)"--> 
@@ -194,7 +196,7 @@
 											</mx:DataGrid>
 											<s:HGroup paddingLeft="20" paddingTop="-6" gap="2">
 												<s:Label fontSize="12" color="0x868686" paddingTop="6" /><!--text="{'...plus ' + (acMessagesToDisplay.length - 4) + ' more ' + (acMessagesToDisplay.length == 5 ? 'message.' : 'messages.')}" visible="{acMessagesToDisplay.length > 4}" includeInLayout="{acMessagesToDisplay.length > 4}" -->
-												<mx:LinkButton id="btnWidgetAllMessages" label="View All »" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnWidgetAllMessages.styleName='linkBtnUnderline';}" rollOut="btnWidgetAllMessages.styleName='linkBtn';" click="currentState='modMessages';" paddingLeft="-3" />
+												<mx:LinkButton id="btnWidgetAllMessages" label="View All »" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnWidgetAllMessages.styleName='linkBtnUnderline';}" rollOut="btnWidgetAllMessages.styleName='linkBtn';" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_MESSAGES) );" paddingLeft="-3" />
 											</s:HGroup>
 										</enhancedtitlewindow:EnhancedTitleWindow>
 										
