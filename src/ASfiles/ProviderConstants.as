@@ -2,8 +2,6 @@ package ASfiles
 {
 	public class ProviderConstants
 	{
-		public static const DEBUG:Boolean = false;
-		
 		public static const STATE_PROFILE:String = "profile";
 		
 		/*	corresponds to index of desired user in providers.xml	*/

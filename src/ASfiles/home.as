@@ -70,11 +70,7 @@ private function init():void
 	model.chartStyles = chartStyles = new ChartStyles();
 	model.patientVitalSigns = arrVitalSigns;	//	temp
 	
-	if( ProviderConstants.DEBUG ) this.currentState = Constants.STATE_LOGGED_IN;
-
 	BindingUtils.bindProperty( controller.exerciseController.model, 'fullName', model, 'fullname');	//	temp
-	BindingUtils.bindProperty( model.chartStyles, 'horizontalFill', this, 'myHorizontalFill');
-	BindingUtils.bindProperty( model.chartStyles, 'horizontalAlternateFill', this, 'myHorizontalAlternateFill');
 	
 	//	eventually this should go in maincontroller
 	this.addEventListener( TabPlus.CLOSE_TAB_EVENT, onTabClose );
@@ -90,11 +86,13 @@ private function onResize():void
 	FlexGlobals.topLevelApplication.height = this.stage.stageHeight;
 }
 
+/*
 public function get bgeMedications():Array { return chartStyles.bgeMedications; }
 public function get bgeMedicationsWidget():Array { return chartStyles.bgeMedicationsWidget; }
 public function get canvasMed():CartesianDataCanvas { return chartStyles.canvasMed; }
 public function get canvasMedWidget():CartesianDataCanvas { return chartStyles.canvasMedWidget; }
 public function get medicationsVerticalGridLine():SolidColorStroke { return chartStyles.medicationsVerticalGridLine; }
+*/
 
 protected function bar_initializeHandlerMain():void {
 	// Set first tab as non-closable
@@ -186,7 +184,7 @@ protected function onTabClose( event:ListEvent ):void
 		}
 		else if( this.currentState == ProviderConstants.MODULE_MEDICATIONS ) 
 		{
-			arrOpenTabsME.splice(index-1,1);
+			controller.medicationsController.model.openTabs.splice(index-1,1);
 		}
 		/*
 		else if( this.currentState == "modImmunizations" ) 
