@@ -95,10 +95,17 @@ protected function stopPropagation(event:Event):void {
 }
 
 protected function dateChooser_changeHandler(event:CalendarLayoutChangeEvent):void {
-	txtPatientBirthDay.text = String(patientBirthDateChooser.selectedDate.date);
-	txtPatientBirthMonth.text = String(patientBirthDateChooser.displayedMonth + 1);
+	txtPatientBirthDay.text = patientBirthDateChooser.selectedDate.date < 10 ? '0' + patientBirthDateChooser.selectedDate.date : String(patientBirthDateChooser.selectedDate.date);
+	txtPatientBirthMonth.text = patientBirthDateChooser.displayedMonth < 9 ? '0' + (patientBirthDateChooser.displayedMonth + 1) : String(patientBirthDateChooser.displayedMonth + 1);
 	txtPatientBirthYear.text = String(patientBirthDateChooser.displayedYear);
 	dropDownCalendar.closeDropDown(true);					
+}
+
+protected function advDateChooser_changeHandler(event:CalendarLayoutChangeEvent):void {
+	txtAdvBirthDay.text = advBirthDateChooser.selectedDate.date < 10 ? '0' + advBirthDateChooser.selectedDate.date : String(advBirthDateChooser.selectedDate.date);
+	txtAdvBirthMonth.text = advBirthDateChooser.displayedMonth < 9 ? '0' + (advBirthDateChooser.displayedMonth + 1) : String(advBirthDateChooser.displayedMonth + 1);
+	txtAdvBirthYear.text = String(advBirthDateChooser.displayedYear);
+	dropDownAdvCalendar.closeDropDown(true);					
 }
 
 [Bindable] public var patientsData:ArrayCollection = new ArrayCollection();
@@ -169,6 +176,7 @@ private function patientsSearchFilter():void {
 private function patientsModuleSearchFilter():void {
 	patientsData.filterFunction = filterPatientsSearchModule;
 	patientsData.refresh();
+	searchResults.visible = true;
 	update();
 }
 
@@ -189,11 +197,11 @@ private function filterPatientsSearch(item:Object):Boolean {
 
 private function filterPatientsSearchModule(item:Object):Boolean {
 	var pattern:RegExp = new RegExp("[^]*"+patientModuleSearch.text+"[^]*", "i");
-	var searchFilter:Boolean = (patientModuleSearch.text == 'Search' || patientModuleSearch.text == '') ? true : (pattern.test(item.lastName) || pattern.test(item.firstName));
+	var searchFilter:Boolean = (patientModuleSearch.text == 'First Name, Last Name, or ID Number' || patientModuleSearch.text == '') ? true : (pattern.test(item.lastName) || pattern.test(item.firstName));
 	
 	var selectedUrgencies:Array = [];
 	for each(var urgency:Object in arrUrgencies.source) {
-		if(urgency.selected) selectedUrgencies.unshift(urgency);
+		if(urgency.selected) selectedUrgencies.push(urgency);
 	}
 	var urgencyFilter:Boolean = false;
 	for each(var selectedUrgency:Object in selectedUrgencies) {
@@ -202,16 +210,51 @@ private function filterPatientsSearchModule(item:Object):Boolean {
 			break;
 		}
 	}
-		
-	/*var birthDayFilter:Boolean = (txtPatientBirthDay.text == 'dd' || txtPatientBirthDay.text == '') ? true : item.dob.substr(3,2) == txtPatientBirthDay.text;
-	var birthMonthFilter:Boolean = (txtPatientBirthMonth.text == 'mm' || txtPatientBirthMonth.text == '') ? true : item.dob.substr(0,2) == txtPatientBirthMonth.text;
-	var birthYearFilter:Boolean = (txtPatientBirthYear.text == 'year' || txtPatientBirthYear.text == '') ? true : item.dob.substr(6,4) == txtPatientBirthYear.text;
 	
-	var genderFilter:Boolean = dropPatientsSex.selectedIndex == 0 ? true : item.sex == dropPatientsSex.selectedItem.label;
+	var selectedTeams:Array = [];
+	for each(var team:Object in arrTeams.source) {
+		if(team.selected) selectedTeams.push(team);
+	}
+	var teamsFilter:Boolean = false;
+	for each(var selectedTeam:Object in selectedTeams) {
+		if(String(selectedTeam.label).substr(5) == item.team) {
+			teamsFilter = true;
+			break;
+		}
+	}
 	
-	var notifFilter:Boolean = showPatientsAll.selected ? true : item.urgency != "Not urgent";*/
+	var patternAdvName:RegExp = new RegExp("[^]*"+txtAdvFirstLast.text+"[^]*", "i");
+	var searchAdvName:Boolean = (txtAdvFirstLast.text == 'e.g., Arthur Adams' || txtAdvFirstLast.text == '') ? true : (patternAdvName.test(item.lastName) || patternAdvName.test(item.firstName));
 	
-	return searchFilter && urgencyFilter;	// && birthDayFilter && birthMonthFilter && birthYearFilter && genderFilter && notifFilter;
+	var birthDayFilter:Boolean = (txtAdvBirthDay.text == 'dd' || txtAdvBirthDay.text == '') ? true : item.dob.substr(3,2) == txtAdvBirthDay.text;
+	var birthMonthFilter:Boolean = (txtAdvBirthMonth.text == 'mm' || txtAdvBirthMonth.text == '') ? true : item.dob.substr(0,2) == txtAdvBirthMonth.text;
+	var birthYearFilter:Boolean = (txtAdvBirthYear.text == 'year' || txtAdvBirthYear.text == '') ? true : item.dob.substr(6,4) == txtAdvBirthYear.text;
+	
+	var selectedSexes:Array = [];
+	for each(var sex:Object in arrSexes.source) {
+		if(sex.selected) selectedSexes.push(sex);
+	}
+	var sexFilter:Boolean = false;
+	for each(var selectedSex:Object in selectedSexes) {
+		if(selectedSex.label == item.sex) {
+			sexFilter = true;
+			break;
+		}
+	}
+	
+	var minAgeFilter:Boolean = (txtAdvAgeFrom.text == '##' || txtAdvAgeFrom.text == '') ? true : calculateAge(item.dob) >= uint(txtAdvAgeFrom.text);
+	var maxAgeFilter:Boolean = (txtAdvAgeTo.text == '##' || txtAdvAgeTo.text == '') ? true : calculateAge(item.dob) <= uint(txtAdvAgeTo.text);
+	
+	var patternID:RegExp = new RegExp("[^]*"+txtAdvID.text+"[^]*", "i");
+	var idFilter:Boolean = (txtAdvID.text == '#########' || txtAdvID.text == '') ? true : patternID.test(item.id);
+	
+	var patternSSN:RegExp = new RegExp("[^]*"+txtAdvSSN.text+"[^]*", "i");
+	var ssnFilter:Boolean = (txtAdvSSN.text == '###-##-####' || txtAdvSSN.text == '') ? true : patternSSN.test(item.ssn);
+	
+	var patternSponsorSSN:RegExp = new RegExp("[^]*"+txtAdvSponsorSSN.text+"[^]*", "i");
+	var sponsorSSNFilter:Boolean = (txtAdvSponsorSSN.text == '###-##-####' || txtAdvSponsorSSN.text == '') ? true : patternSponsorSSN.test(item.sponsorSSN);
+	
+	return searchFilter && urgencyFilter && teamsFilter && searchAdvName && birthDayFilter && birthMonthFilter && birthYearFilter && sexFilter && minAgeFilter && maxAgeFilter && idFilter && ssnFilter && sponsorSSNFilter;
 }
 
 [Bindable] public var providersModel:ProvidersModel = new ProvidersModel();

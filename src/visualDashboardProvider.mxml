@@ -346,7 +346,7 @@
 												<s:Spacer width="50%" />
 												<s:RadioButton groupName="showPatients" id="showPatientsNotif" label="Only show patients with notifications" click="patientsSearchFilter()" />
 											</s:HGroup>
-											<mx:LinkButton id="btnPatientsAdvancedSearch" label="Advanced Search »" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnPatientsAdvancedSearch.styleName='linkBtnUnderline';}" rollOut="btnPatientsAdvancedSearch.styleName='linkBtn';" paddingLeft="-3" />
+											<mx:LinkButton id="btnPatientsAdvancedSearch" label="Advanced Search »" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnPatientsAdvancedSearch.styleName='linkBtnUnderline';}" rollOut="btnPatientsAdvancedSearch.styleName='linkBtn';" click="{viewStackProviderModules.selectedChild = modPatients; showAdvancedSearch = true;}" paddingLeft="-3" />
 											<s:HGroup width="610" paddingTop="2" paddingBottom="4">
 												<s:VGroup gap="5">
 													<s:HGroup verticalAlign="middle" gap="3">
@@ -488,7 +488,7 @@
 													<s:Label text="Keyword" fontSize="12" fontWeight="bold" color="0xFFFFFF" paddingLeft="10" />
 													<s:HGroup width="100%" paddingLeft="10" paddingRight="10">
 														<s:HGroup gap="-1" paddingTop="-2" paddingBottom="5">
-															<s:TextInput id="patientModuleSearch" text="First Name, Last Name, or ID Number" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" height="24" paddingLeft="7" paddingTop="5" width="228" click="{if(patientModuleSearch.text == 'First Name, Last Name, or ID Number') patientModuleSearch.text=''}" change="{patientsModuleSearchFilter(); searchResults.visible = (patientModuleSearch.text != 'First Name, Last Name, or ID Number' &amp;&amp; patientModuleSearch.text != '')}" />
+															<s:TextInput id="patientModuleSearch" text="First Name, Last Name, or ID Number" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" height="24" paddingLeft="7" paddingTop="5" width="228" click="{if(patientModuleSearch.text == 'First Name, Last Name, or ID Number') patientModuleSearch.text=''}" change="{patientsModuleSearchFilter();}" />
 															<s:Button styleName="searchButtonIcon" width="24" height="24" />
 														</s:HGroup>
 														<s:Spacer width="100%" />
@@ -499,27 +499,22 @@
 																width="130" height="24" placeholderText="All urgency" placeholderTextPartial="%n% selections"
 																dataProvider="{arrUrgencies}" requireSelection="false"
 																itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" selectionChange="patientsModuleSearchFilter()" />
-																
-															<s:DropDownList id="dropDownPatientModules" height="24" width="130" styleName="buttonText" selectedIndex="0">
-																<mx:ArrayCollection>
-																	<fx:String>All modules</fx:String>
-																	<fx:String>...</fx:String>
-																	<fx:String>...</fx:String>
-																	<fx:String>...</fx:String>
-																</mx:ArrayCollection>
-															</s:DropDownList> 
+															
+															<components:MultiSelectDropDownList
+																id="selectPatientModules"
+																width="130" height="24" placeholderText="All modules" placeholderTextPartial="%n% modules"
+																dataProvider="{arrModules}" requireSelection="false"
+																itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" />
+															
 														</s:HGroup>
 														<s:Spacer width="100%" />
 														<s:HGroup verticalAlign="middle">
 															<s:Label text="Show patients from" color="0xFFFFFF" />
-															<s:DropDownList id="dropDownPatientTeams" height="24" width="130" styleName="buttonText" selectedIndex="0">
-																<mx:ArrayCollection>
-																	<fx:String>All teams</fx:String>
-																	<fx:String>...</fx:String>
-																	<fx:String>...</fx:String>
-																	<fx:String>...</fx:String>
-																</mx:ArrayCollection>
-															</s:DropDownList> 
+															<components:MultiSelectDropDownList
+																id="selectPatientTeams"
+																width="130" height="24" placeholderText="All teams" placeholderTextPartial="%n% teams"
+																dataProvider="{arrTeams}" requireSelection="false"
+																itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" selectionChange="patientsModuleSearchFilter()" /> 
 														</s:HGroup>
 													</s:HGroup>
 													<s:HGroup paddingTop="-10">
@@ -536,50 +531,34 @@
 													</s:HGroup>
 												</s:VGroup>
 												<s:VGroup id="advancedSearch" visible="{showAdvancedSearch}" includeInLayout="{showAdvancedSearch}" paddingTop="8" paddingLeft="10" color="0xFFFFFF" width="100%">
-													<s:DropDownList id="dropDownAdvancedSearchParameters" height="24" width="171" styleName="buttonText" prompt="Show 8 Search Parameters">
-														<mx:ArrayCollection>
-															<fx:String>Show All</fx:String>
-															<fx:String>First and/or Last Name</fx:String>
-															<fx:String>DOB</fx:String>
-															<fx:String>Sex</fx:String>
-															<fx:String>Marital Status</fx:String>
-															<fx:String>Age Range</fx:String>
-															<fx:String>Blood Type</fx:String>
-															<fx:String>Family Prefix</fx:String>
-															<fx:String>ID Number</fx:String>
-															<fx:String>Patient's SSN</fx:String>
-															<fx:String>Sponsor's SSN</fx:String>
-															<fx:String>Race</fx:String>
-															<fx:String>Address</fx:String>
-															<fx:String>Service Branch</fx:String>
-															<fx:String>Status</fx:String>
-															<fx:String>Rank</fx:String>
-															<fx:String>Occupation</fx:String>
-															<fx:String>Years of Service</fx:String>
-															<fx:String>Stationed / Deployment</fx:String>
-															<fx:String>Last Visit Range</fx:String>
-															<fx:String>Case Number</fx:String>
-															<fx:String>Special Health Conditions</fx:String>
-														</mx:ArrayCollection>
-													</s:DropDownList>
+													<components:MultiSelectDropDownList
+														id="selectAdvancedSearchParameters" 
+														width="171" height="24" placeholderText="Show 8 Search Parameters" placeholderTextPartial="Show %n% Search Parameters"
+														dataProvider="{arrSearchParameters}" requireSelection="false"
+														itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" />
+														<!--<components:layout>
+															<s:TileLayout requestedRowCount="21" />
+														</components:layout>
+													</components:MultiSelectDropDownList>-->
+													
 													<s:HGroup width="100%" paddingTop="7" paddingBottom="7">
 														<s:VGroup gap="5" paddingRight="21">
-															<s:TextInput id="txtAdvFirstLast" width="171" height="24" text="e.g., Arthur Adams" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvFirstLast.text == 'e.g., Arthur Adams') txtAdvFirstLast.text=''}" />
+															<s:TextInput id="txtAdvFirstLast" width="171" height="24" text="e.g., Arthur Adams" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvFirstLast.text == 'e.g., Arthur Adams') txtAdvFirstLast.text=''}" change="patientsModuleSearchFilter();" />
 															<s:Label text="First and/or last name" fontStyle="italic" />
 														</s:VGroup>
 														<s:VGroup gap="5" paddingRight="65">
 															<s:HGroup verticalAlign="middle" gap="3">
-																<s:TextInput id="txtAdvBirthDay" width="26" height="24" text="dd" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" click="{if(txtPatientBirthDay.text == 'dd') txtPatientBirthDay.text=''}" change="patientsSearchFilter()" />
+																<s:TextInput id="txtAdvBirthDay" width="26" height="24" text="dd" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" click="{if(txtAdvBirthDay.text == 'dd') txtAdvBirthDay.text=''}" change="patientsModuleSearchFilter();" />
 																<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
-																<s:TextInput id="txtAdvBirthMonth" width="26" height="24" text="mm" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" click="{if(txtPatientBirthMonth.text == 'mm') txtPatientBirthMonth.text=''}" change="patientsSearchFilter()" />
+																<s:TextInput id="txtAdvBirthMonth" width="26" height="24" text="mm" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" click="{if(txtAdvBirthMonth.text == 'mm') txtAdvBirthMonth.text=''}" change="patientsModuleSearchFilter();" />
 																<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
-																<s:TextInput id="txtAdvBirthYear" width="31" height="24" text="year" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="4" click="{if(txtPatientBirthYear.text == 'year') txtPatientBirthYear.text=''}" change="patientsSearchFilter()" />
+																<s:TextInput id="txtAdvBirthYear" width="31" height="24" text="year" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="4" click="{if(txtAdvBirthYear.text == 'year') txtAdvBirthYear.text=''}" change="patientsModuleSearchFilter();" />
 																<s:DropDownList id="dropDownAdvCalendar" dropShadowVisible="false" skinClass="skins.general.MyCalendarDropDownListSkin" itemRenderer="spark.skins.spark.DefaultComplexItemRenderer" width="25" requireSelection="false" click="{event.stopImmediatePropagation()}" open="dropDownCalendar_openHandler(event)">
 																	<s:dataProvider>
 																		<s:ArrayList>
 																			<mx:DateChooser id="advBirthDateChooser" showToday="true" yearNavigationEnabled="true"
 																							contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" headerStyleName="dateChooserVitalGrayHeader"
-																							fontSize="11" change="{dateChooser_changeHandler(event); patientsSearchFilter();}" />
+																							fontSize="11" change="{advDateChooser_changeHandler(event); patientsModuleSearchFilter();}" />
 																		</s:ArrayList>
 																	</s:dataProvider>
 																</s:DropDownList>
@@ -587,15 +566,11 @@
 															<s:Label text="Date of Birth" fontStyle="italic" />
 														</s:VGroup>
 														<s:VGroup gap="5" paddingRight="105">
-															<s:DropDownList id="dropAdvSex" styleName="dropDownListDark" height="24" width="74" selectedIndex="0" change="patientsSearchFilter()">
-																<s:dataProvider>
-																	<s:ArrayList>
-																		<fx:Object label="All" />
-																		<fx:Object label="Male" />
-																		<fx:Object label="Female" />
-																	</s:ArrayList>							
-																</s:dataProvider>
-															</s:DropDownList>
+															<components:MultiSelectDropDownList
+																id="selectSexes"
+																width="74" height="24" placeholderText="All" placeholderTextPartial="%n% selections"
+																dataProvider="{arrSexes}" requireSelection="false"
+																itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" selectionChange="patientsModuleSearchFilter();" />
 															<s:Label text="Sex" fontStyle="italic" />
 														</s:VGroup>
 														<s:VGroup paddingRight="140">
@@ -608,33 +583,25 @@
 															<s:Label text="Age or Age Range" fontStyle="italic" />
 														</s:VGroup>
 														<s:VGroup gap="5">
-															<s:DropDownList id="dropAdvFamilyPrefix" styleName="dropDownListDark" height="24" width="127" selectedIndex="0" change="patientsSearchFilter()">
-																<s:dataProvider>
-																	<s:ArrayList>
-																		<fx:Object label="All" />
-																		<fx:Object label="01" />
-																		<fx:Object label="02" />
-																		<fx:Object label="03" />
-																		<fx:Object label="04" />
-																		<fx:Object label="05" />
-																		<fx:Object label="06" />
-																	</s:ArrayList>							
-																</s:dataProvider>
-															</s:DropDownList>
+															<components:MultiSelectDropDownList
+																id="selectFamilyPrefix"
+																width="127" height="24" placeholderText="All" placeholderTextPartial="%n% selections"
+																dataProvider="{arrFamilyPrefixes}" requireSelection="false"
+																itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" />
 															<s:Label text="Family Prefix" fontStyle="italic" />
 														</s:VGroup>
 													</s:HGroup>
 													<s:HGroup>
 														<s:VGroup gap="5" paddingRight="38">
-															<s:TextInput id="txtAdvID" width="82" height="24" text="#########" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvID.text == '#########') txtAdvID.text=''}" />
+															<s:TextInput id="txtAdvID" width="82" height="24" text="#########" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvID.text == '#########') txtAdvID.text=''}" change="patientsModuleSearchFilter()" />
 															<s:Label text="ID Number" fontStyle="italic" />
 														</s:VGroup>
 														<s:VGroup gap="5" paddingRight="52">
-															<s:TextInput id="txtAdvSSN" width="82" height="24" text="###-##-####" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvSSN.text == '###-##-####') txtAdvSSN.text=''}" />
+															<s:TextInput id="txtAdvSSN" width="82" height="24" text="###-##-####" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvSSN.text == '###-##-####') txtAdvSSN.text=''}" change="patientsModuleSearchFilter()" />
 															<s:Label text="Patient's SSN" fontStyle="italic" />
 														</s:VGroup>
 														<s:VGroup gap="5">
-															<s:TextInput id="txtAdvSponsorSSN" width="82" height="24" text="###-##-####" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvSponsorSSN.text == '###-##-####') txtAdvSponsorSSN.text=''}" />
+															<s:TextInput id="txtAdvSponsorSSN" width="82" height="24" text="###-##-####" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvSponsorSSN.text == '###-##-####') txtAdvSponsorSSN.text=''}" change="patientsModuleSearchFilter()" />
 															<s:Label text="Sponsor's SSN" fontStyle="italic" />
 														</s:VGroup>
 													</s:HGroup>

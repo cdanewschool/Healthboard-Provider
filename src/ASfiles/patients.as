@@ -22,6 +22,7 @@ import mx.managers.PopUpManager;
 
 [Bindable] private var showAdvancedSearch:Boolean = false;
 
+//used by the Patients datagrid
 private function lblPatientsAge(item:Object, column:DataGridColumn):String {
 	var now:Date = new Date();
 	var dob:Date = new Date(item.dob);
@@ -30,6 +31,17 @@ private function lblPatientsAge(item:Object, column:DataGridColumn):String {
 	if (dob.month > now.month || (dob.month == now.month && dob.date > now.date)) years--;
 	
 	return String(years);
+}
+
+//same as previous function, used by the Patient Search filter
+private function calculateAge(birthdate:String):uint {
+	var now:Date = new Date();
+	var dob:Date = new Date(birthdate);
+	
+	var years:uint = now.getFullYear() - dob.getFullYear();
+	if (dob.month > now.month || (dob.month == now.month && dob.date > now.date)) years--;
+	
+	return years;
 }
 
 [Bindable] public var colUrgency:Boolean = true;
@@ -84,7 +96,20 @@ private function update():void {
 }
 
 private function clearPatientSearch():void {
-	patientModuleSearch.text = '';
+	patientModuleSearch.text = 'First Name, Last Name, or ID Number';
+	for each(var obj1:Object in arrUrgencies.source) obj1.selected = true;
+	for each(var obj2:Object in arrModules.source) obj2.selected = true;
+	for each(var obj3:Object in arrTeams.source) obj3.selected = true;
+	txtAdvFirstLast.text = 'e.g., Arthur Adams';
+	txtAdvBirthDay.text = 'dd';
+	txtAdvBirthMonth.text = 'mm';
+	txtAdvBirthYear.text = 'year';
+	for each(var obj4:Object in arrSexes.source) obj4.selected = true;
+	txtAdvAgeFrom.text = txtAdvAgeTo.text = '##';
+	for each(var obj5:Object in arrFamilyPrefixes.source) obj5.selected = true;
+	txtAdvID.text = '#########';
+	txtAdvSSN.text = txtAdvSponsorSSN.text = '###-##-####';	
+	
 	patientsModuleSearchFilter();
 	searchResults.visible = false;
 }
@@ -112,4 +137,9 @@ private function highlightSelectedSort(field:String = "none"):void {
 	else if(field == "lastVisit") btnSortLastVisit.styleName = "messageFolderSelected";
 }
 
-[Bindable] private var arrUrgencies:ArrayCollection = new ArrayCollection([{label: 'Not urgent', selected: true},{label: 'Somewhat urgent', selected: true},{label: 'Urgent', selected: true}]);
+[Bindable] private var arrUrgencies:ArrayCollection = new ArrayCollection([{label: 'Urgent', selected: true},{label: 'Somewhat urgent', selected: true},{label: 'Not urgent', selected: true}]);
+[Bindable] private var arrModules:ArrayCollection = new ArrayCollection([{label: 'Exercise', selected: true},{label: 'Immunizations', selected: true},{label: 'Medications', selected: true},{label: 'Nutrition', selected: true},{label: 'Vital Signs', selected: true}]);
+[Bindable] private var arrTeams:ArrayCollection = new ArrayCollection([{label: 'Team 1', selected: true},{label: 'Team 2', selected: true},{label: 'Team 3', selected: true},{label: 'Team 4', selected: true},{label: 'Team 5', selected: true},{label: 'Team 6', selected: true}]);
+[Bindable] private var arrSearchParameters:ArrayCollection = new ArrayCollection([{label: 'First and/or Last Name', selected: true},{label: 'DOB', selected: true},{label: 'Sex', selected: true},{label: 'Marital Status', selected: false},{label: 'Age Range', selected: true},{label: 'Blood Type', selected: false},{label: 'Family Prefix', selected: true},{label: 'ID Number', selected: true},{label: 'Patient\'s SSN', selected: true},{label: 'Sponsor\'s SSN', selected: true},{label: 'Race', selected: false},{label: 'Address', selected: false},{label: 'Service Branch', selected: false},{label: 'Status', selected: false},{label: 'Rank', selected: false},{label: 'Occupation', selected: false},{label: 'Years of Service', selected: false},{label: 'Stationed / Deployment', selected: false},{label: 'Last Visit Range', selected: false},{label: 'Case Number', selected: false},{label: 'Special Health Conditions', selected: false}]);
+[Bindable] private var arrSexes:ArrayCollection = new ArrayCollection([{label: 'Male', selected: true},{label: 'Female', selected: true}]);
+[Bindable] private var arrFamilyPrefixes:ArrayCollection = new ArrayCollection([{label: '01', selected: true},{label: '02', selected: true},{label: '03', selected: true},{label: '04', selected: true},{label: '05', selected: true},{label: '06', selected: true},{label: '07', selected: true},{label: '08', selected: true},{label: '09', selected: true},{label: '10', selected: true},{label: '11', selected: true},{label: '12', selected: true},{label: '13', selected: true},{label: '14', selected: true},{label: '15', selected: true},{label: '16', selected: true},{label: '17', selected: true},{label: '18', selected: true},{label: '19', selected: true},{label: '20', selected: true},{label: '22', selected: true},{label: '22', selected: true},{label: '23', selected: true},{label: '24', selected: true},{label: '25', selected: true},{label: '26', selected: true},{label: '27', selected: true},{label: '28', selected: true},{label: '29', selected: true},{label: '30', selected: true},{label: '33', selected: true},{label: '32', selected: true},{label: '33', selected: true},{label: '34', selected: true},{label: '35', selected: true},{label: '36', selected: true},{label: '37', selected: true},{label: '38', selected: true},{label: '39', selected: true}]);

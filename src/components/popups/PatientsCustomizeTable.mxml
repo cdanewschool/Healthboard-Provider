@@ -48,7 +48,7 @@
 		<s:CheckBox id="checkTeam" label="Team" selected="{parentApplication.colTeam}" />
 		<s:CheckBox id="checkLastName" label="Last Name" selected="{parentApplication.colLastName}" />
 		<s:CheckBox id="checkFirstName" label="First Name" selected="{parentApplication.colFirstName}" />
-		<s:CheckBox id="checkBranch" label="Servuce Branch" selected="{parentApplication.colBranch}" />
+		<s:CheckBox id="checkBranch" label="Service Branch" selected="{parentApplication.colBranch}" />
 		<s:CheckBox id="checkRank" label="Rank" selected="{parentApplication.colRank}" />
 		<s:CheckBox id="checkOccupation" label="Occupation" selected="{parentApplication.colOccupation}" />
 		<s:CheckBox id="checkSex" label="Sex" selected="{parentApplication.colSex}" />
