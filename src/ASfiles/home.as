@@ -68,7 +68,6 @@ private function init():void
 	model = controller.model as ProviderApplicationModel;
 	
 	model.chartStyles = chartStyles = new ChartStyles();
-	model.patientVitalSigns = arrVitalSigns;	//	temp
 	
 	BindingUtils.bindProperty( controller.exerciseController.model, 'fullName', model, 'fullname');	//	temp
 	

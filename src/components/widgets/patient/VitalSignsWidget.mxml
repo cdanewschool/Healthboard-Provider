@@ -14,19 +14,19 @@
 		<![CDATA[
 			import controllers.Controller;
 			import controllers.MainController;
+			import controllers.VitalSignsController;
+			
+			import models.modules.VitalSignsModel;
 			
 			import mx.collections.ArrayCollection;
 			
-			[Bindable] public var collapsedVitals:uint = 0;					//used for recalculating widget's height
+			[Bindable] public var collapsedPixels:uint = 0;					//used for recalculating widget's height
 			
-			[Bindable] private var dataProvider:ArrayCollection;
+			[Bindable] private var controller:VitalSignsController = AppProperties.getInstance().controller.vitalSignsController as VitalSignsController;
+			[Bindable] public var model:VitalSignsModel = controller.model as VitalSignsModel;
 			
 			private function init():void
 			{
-				dataProvider = new ArrayCollection( MainController( AppProperties.getInstance().controller ).model.patientVitalSigns.source );
-				dataProvider.source.splice(-2);
-				
-				//initialize="{parentApplication.arrVitalSignsForWidget.source.splice(-2);}" 
 			}
 		]]>
 	</fx:Script>
@@ -36,7 +36,7 @@
 	</enhancedtitlewindow:layout>
 	
 	<mx:DataGrid 
-		id="dgVitalSignsWidget" width="100%" height="{maxHeight - collapsedVitals*58}" dataProvider="{dataProvider}" selectable="false"
+		id="dgVitalSignsWidget" width="100%" height="{maxHeight - collapsedPixels*58}" dataProvider="{model.vitalSignsForWidget}" selectable="false"
 		color="0xFFFFFF" verticalAlign="middle" 
 		useRollOver="false"
 		headerHeight="0"
@@ -114,7 +114,7 @@
 							-->
 							
 							<s:HGroup width="140" gap="-2">
-								<mx:LinkButton icon.expanded="@Embed(source='images/smallArrowGray.png')" icon.collapsed="@Embed(source='images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.vital}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedVitals++;} else {this.currentState = 'expanded'; outerDocument.collapsedVitals--;}}" />
+								<mx:LinkButton icon.expanded="@Embed(source='images/smallArrowGray.png')" icon.collapsed="@Embed(source='images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.vital}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedPixels++;} else {this.currentState = 'expanded'; outerDocument.collapsedPixels--;}}" />
 								<mx:Label text="{'(Last: ' + DateUtil.getDate(data.chart[0].data[data.chart[0].data.length - 1].date) + ')'}" fontSize="12" color="0x868686" paddingTop="1" />
 							</s:HGroup>
 							
