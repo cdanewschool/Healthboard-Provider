@@ -51,8 +51,8 @@
 						<mx:VBox horizontalScrollPolicy="off" verticalScrollPolicy="off">
 							<fx:Script>
 								<![CDATA[
-									import ASclasses.MyCircleItemRenderer;
-									import ASclasses.MyCircleItemRendererOver;
+									import components.itemrenderers.chart.MyCircleItemRenderer;
+									import components.itemrenderers.chart.MyCircleItemRendererOver;
 									import ASclasses.MyCustomDataTip;
 									
 									import mx.charts.HitData;
@@ -76,8 +76,8 @@
 										lblHeightFeet.text = String(Math.floor(data.chart[0].data[event.hitData.chartItem.index].value / 12));
 										lblHeightInches.text = String(data.chart[0].data[event.hitData.chartItem.index].value % 12);
 										//lblDate.text = outerDocument.getDate(data.chart[0].data[event.hitData.chartItem.index].date);
-										myLineSeries.setStyle("itemRenderer",new ClassFactory(ASclasses.MyCircleItemRendererOverWidget));
-										myLineSeries2.setStyle("itemRenderer",new ClassFactory(ASclasses.MyCircleItemRendererOverWidget));
+										myLineSeries.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyCircleItemRendererOverWidget));
+										myLineSeries2.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyCircleItemRendererOverWidget));
 									}
 									private function chartRolloutEventHandler(event:ChartItemEvent):void {
 										//lblTemperature.width = 40;
@@ -86,8 +86,8 @@
 										lblHeightFeet.text = String(Math.floor(data.chart[0].data[data.chart[0].data.length - 1].value / 12));
 										lblHeightInches.text = String(data.chart[0].data[data.chart[0].data.length - 1].value % 12);
 										//lblDate.text = outerDocument.getDate(data.chart[0].data[data.chart[0].data.length - 1].date);
-										myLineSeries.setStyle("itemRenderer",new ClassFactory(ASclasses.MyCircleItemRenderer));
-										myLineSeries2.setStyle("itemRenderer",new ClassFactory(ASclasses.MyCircleItemRenderer));
+										myLineSeries.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyCircleItemRenderer));
+										myLineSeries2.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyCircleItemRenderer));
 									}
 								]]>
 							</fx:Script>
@@ -134,7 +134,7 @@
 												<s:SolidColorStroke color="0x86888A" weight="2" alpha=".4" />
 											</mx:lineStroke>
 										</mx:LineSeries>
-										<mx:LineSeries id="myLineSeries" yField="value" xField="date" itemRenderer="ASclasses.MyCircleItemRenderer" radius="4" adjustedRadius="4" fill="{parentApplication.colorVitalSignsWidgetBlack}" selectedIndex="0"><!--form="curve" -->
+										<mx:LineSeries id="myLineSeries" yField="value" xField="date" itemRenderer="components.itemrenderers.chart.MyCircleItemRenderer" radius="4" adjustedRadius="4" fill="{parentApplication.colorVitalSignsWidgetBlack}" selectedIndex="0"><!--form="curve" -->
 											<mx:lineStroke>
 												<s:SolidColorStroke color="0xFFFFFF" weight="2" />
 											</mx:lineStroke>
@@ -147,7 +147,7 @@
 												<s:SolidColorStroke color="0x86888A" weight="2" alpha=".4" />
 											</mx:lineStroke>
 										</mx:LineSeries>
-										<mx:LineSeries id="myLineSeries2" yField="value2" xField="date" includeInLayout="{data.chartType == 'double'}" visible="{data.chartType == 'double'}" itemRenderer="ASclasses.MyCircleItemRenderer" radius="4" adjustedRadius="4" fill="{parentApplication.colorVitalSignsWidgetBlack}"><!--form="curve" -->
+										<mx:LineSeries id="myLineSeries2" yField="value2" xField="date" includeInLayout="{data.chartType == 'double'}" visible="{data.chartType == 'double'}" itemRenderer="components.itemrenderers.chart.MyCircleItemRenderer" radius="4" adjustedRadius="4" fill="{parentApplication.colorVitalSignsWidgetBlack}"><!--form="curve" -->
 											<mx:lineStroke>
 												<s:SolidColorStroke color="0xFFFFFF" weight="2" />
 											</mx:lineStroke>
