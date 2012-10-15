@@ -111,7 +111,7 @@
 					if( (module = moduleViews.getChildByName( activeModule ) as INavigatorContent ) != null )
 					{
 						moduleViews.selectedChild = module;
-						module.visible = true;
+						moduleViews.visible = true;
 					}
 					else
 					{
@@ -405,7 +405,7 @@
 			<mx:ViewStack id="moduleViews" includeIn="module" width="975">
 				
 				<s:NavigatorContent id="modAppointments">
-					<modules:AppointmentsModule width="975" paddingTop="10" showHeader="false" />
+					<modules:AppointmentsModule width="975" paddingTop="10" showHeader="false" currentState="simple" />
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modMedicalRecords">
@@ -414,6 +414,10 @@
 				
 				<s:NavigatorContent id="modImmunizations">
 					<modules:ImmunizationsModule width="975" paddingTop="10" showHeader="false" />
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent id="modVitalSigns">
+					<modules:VitalSignsModule width="975" paddingTop="10" showHeader="false" />
 				</s:NavigatorContent>
 				
 			</mx:ViewStack>
