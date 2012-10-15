@@ -81,7 +81,7 @@
 			{
 				if( !model.dataLoaded )
 				{
-					controller.addEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
+					model.addEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
 					
 					var evt:ApplicationDataEvent = new ApplicationDataEvent( ApplicationDataEvent.LOAD, true );
 					evt.data = Constants.MEDICATIONS;

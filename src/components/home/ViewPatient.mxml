@@ -13,6 +13,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import ASclasses.Constants;
+			
 			import ASfiles.ProviderConstants;
 			
 			import controllers.Controller;
@@ -29,6 +31,8 @@
 			import mx.core.INavigatorContent;
 			import mx.core.UIComponent;
 			import mx.events.CloseEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.ListEvent;
 			import mx.rpc.events.ResultEvent;
 			
 			import spark.components.Group;
@@ -234,12 +238,21 @@
 				invalidateProperties();
 			}
 			
+			private function onAlertSelect(event:ListEvent ):void
+			{
+				if( activeModule == Constants.MODULE_MEDICATIONS )
+				{
+					MedicationsModule( modMedications.getElementAt(0) ).showMedicationDetailsByName( event.itemRenderer.data.description );
+				}
+			}
+			
 			private function init():void 
 			{
 				stage.addEventListener( Event.RESIZE, onResize );
 				
 				onResize();
 				
+				alertsWidget.addEventListener( ListEvent.ITEM_CLICK, onAlertSelect );
 				alertsWidget.dropDownDataProvider = new ArrayCollection(['     Add New Internal Note','     View...']);
 				
 				if( !controller.model.patientAlertsLoaded ) 
@@ -421,7 +434,7 @@
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modMedications">
-					<modules:MedicationsModule width="975" paddingTop="10" showHeader="false" />
+					<modules:MedicationsModule width="975" paddingTop="10" showHeader="false" currentState="provider" />
 				</s:NavigatorContent>
 				
 			</mx:ViewStack>

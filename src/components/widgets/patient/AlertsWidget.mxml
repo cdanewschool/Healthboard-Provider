@@ -11,6 +11,7 @@
 			
 			import mx.collections.ArrayCollection;
 			import mx.events.CollectionEvent;
+			import mx.events.ListEvent;
 			
  			private var _alerts:ArrayCollection;
 
@@ -98,6 +99,10 @@
 				}
 			}
 			
+			private function onItemClick(event:ListEvent):void
+			{
+				dispatchEvent( event );
+			}
 		]]>
 	</fx:Script>
 	
@@ -113,7 +118,7 @@
 		borderVisible="false" 
 		alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
 		horizontalGridLines="true" horizontalGridLineColor="0x444442" horizontalScrollPolicy="off" 
-		rowCount="5" rowHeight="22">
+		rowCount="5" rowHeight="22" itemClick="onItemClick(event)">
 		<mx:columns>
 			<mx:DataGridColumn dataField="urgency" headerText="Urgency" width="68">
 				<mx:itemRenderer>
