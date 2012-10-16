@@ -421,20 +421,28 @@
 					<modules:AppointmentsModule width="975" paddingTop="10" showHeader="false" currentState="simple" />
 				</s:NavigatorContent>
 				
-				<s:NavigatorContent id="modMedicalRecords">
-					<modules:MedicalRecordsModule width="975" paddingTop="10" showHeader="false" currentState="provider" />
+				<s:NavigatorContent id="modExercise">
+					<modules:ExerciseModule width="975" paddingTop="10" showHeader="false" currentState="provider" />
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modImmunizations">
 					<modules:ImmunizationsModule width="975" paddingTop="10" showHeader="false" />
 				</s:NavigatorContent>
 				
-				<s:NavigatorContent id="modVitalSigns">
-					<modules:VitalSignsModule width="975" paddingTop="10" showHeader="false" />
+				<s:NavigatorContent id="modMedicalRecords">
+					<modules:MedicalRecordsModule width="975" paddingTop="10" showHeader="false" currentState="provider" />
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modMedications">
 					<modules:MedicationsModule width="975" paddingTop="10" showHeader="false" currentState="provider" />
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent id="modNutrition">
+					<modules:NutritionModule width="975" paddingTop="10" showHeader="false" />
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent id="modVitalSigns">
+					<modules:VitalSignsModule width="975" paddingTop="10" showHeader="false" />
 				</s:NavigatorContent>
 				
 			</mx:ViewStack>
