@@ -17,13 +17,8 @@
 		<![CDATA[
 			import ASfiles.ProviderConstants;
 			
-			import components.popups.UserContextMenu;
 			import components.provider.ProviderProfile;
 			import components.provider.ViewProvider;
-			
-			import controllers.ApplicationController;
-			import controllers.AppointmentsController;
-			import controllers.ChatController;
 			
 			import events.ApplicationEvent;
 			import events.ProfileEvent;
@@ -33,21 +28,13 @@
 			import models.ProvidersModel;
 			import models.UserModel;
 			
-			import mx.collections.ArrayCollection;
 			import mx.events.ListEvent;
-			import mx.events.ToolTipEvent;
-			import mx.managers.PopUpManager;
-			import mx.managers.ToolTipManager;
-			
-			import utils.DateUtil;
 			
 			[Bindable] public var model:ProvidersModel;
 			[Bindable] public var teamRollOverRowIndex:int;
 			public var link:LinkButton;
 			
 			private const SEARCH_PLACEHOLDER:String = 'Search Patients';
-			
-			private var userOptions:UserContextMenu;
 			
 			private function selectTeam(event:MouseEvent):void
 			{
@@ -65,45 +52,6 @@
 				evt.data = ProviderConstants.MODULE_MESSAGES;
 				evt.message = message;
 				dispatchEvent( evt );	
-			}
-			
-			private function onUserAction( event:ProfileEvent ):void
-			{
-				if( event.type == ProfileEvent.VIEW_PROFILE )
-				{
-					showTeamMember( event.user );
-				}
-				else if( event.type == ProfileEvent.VIEW_APPOINTMENTS )
-				{
-					if( AppointmentsController.getInstance().model.selectedProviders.getItemIndex( event.user ) == -1 )
-					{
-						AppointmentsController.getInstance().model.selectedProviders.addItem( event.user );
-					}
-					
-					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-					evt.data = ProviderConstants.MODULE_APPOINTMENTS;
-					dispatchEvent( evt );
-				}
-				else if( event.type == ProfileEvent.SEND_MESSAGE )
-				{
-					sendMessage( [event.user] );
-				}
-				else if( event.type == ProfileEvent.START_CHAT )
-				{
-					ChatController.getInstance().chat( ApplicationController.getInstance().user, event.user );
-				}
-				
-				closeContextMenu();
-			}
-			
-			private function closeContextMenu():void
-			{
-				userOptions.removeEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
-				userOptions.removeEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
-				userOptions.removeEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );
-				userOptions.removeEventListener( ProfileEvent.START_CHAT, onUserAction );
-				
-				PopUpManager.removePopUp( userOptions );
 			}
 			
 			private function update():void
@@ -229,7 +177,7 @@
 				link.setStyle("styleName",'linkBtn');	
 			}
 			
-			private function showTeamMember( data:UserModel ):void
+			public function showTeamMember( data:UserModel ):void
 			{	
 				var viewTeamMember:ViewProvider = new ViewProvider();
 				viewTeamMember.provider = data as ProviderModel;
@@ -251,40 +199,18 @@
 			
 			protected function onTeamClick(event:ListEvent):void 
 			{
-				var message:Message = new Message();
-				message.recipients = [ DataGrid(event.currentTarget).selectedItem ];
-				
-				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-				evt.data = ProviderConstants.MODULE_MESSAGES;
-				evt.message = message;
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_CONTEXT_MENU, true );
+				evt.user = DataGrid(event.currentTarget).selectedItem as UserModel;
 				dispatchEvent( evt );
+				
+				DataGrid(event.currentTarget).selectedItem = null;
 			}
 			
 			protected function onTeamSelect(event:ProfileEvent):void 
 			{
-				if( userOptions ) closeContextMenu();
-				
-				userOptions = new UserContextMenu();
-				userOptions.user = event.user;
-				userOptions.addEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
-				userOptions.addEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
-				userOptions.addEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );
-				userOptions.addEventListener( ProfileEvent.START_CHAT, onUserAction );
-				
-				userOptions.x = stage.mouseX;
-				userOptions.y = stage.mouseY;
-				
-				PopUpManager.addPopUp( userOptions, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
-			}
-			
-			private function onClick( event:MouseEvent ):void
-			{
-				if( userOptions 
-					&& userOptions.parent 
-					&& !userOptions.hitTestPoint( event.stageX, event.stageY ) )
-				{
-					closeContextMenu();
-				}
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_CONTEXT_MENU, true );
+				evt.user = event.user;
+				dispatchEvent( evt );
 			}
 			
 			private function onTeamRollOver(event:ListEvent):void
@@ -294,7 +220,6 @@
 			
 			private function init():void
 			{
-				addEventListener( MouseEvent.CLICK, onClick );
 			}
 			
 		]]>
@@ -479,9 +404,11 @@
 														]]>
 													</fx:Script>
 													<s:Label text="{data.firstName + ' ' + data.lastName}" fontSize="12" paddingLeft="10" fontFamily="myMyriad" width="115" />
+													<!--
 													<mx:HBox width="30">
 														<s:Image id="iconImage" source="@Embed('images/grayEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
 													</mx:HBox>
+													-->
 												</mx:HBox>
 											</fx:Component>
 										</mx:itemRenderer>

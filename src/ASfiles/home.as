@@ -2,8 +2,11 @@ import ASfiles.ProviderConstants;
 
 import components.AutoComplete;
 import components.home.ViewPatient;
+import components.modules.TeamModule;
+import components.popups.UserContextMenu;
 
 import controllers.ApplicationController;
+import controllers.AppointmentsController;
 import controllers.ChatController;
 
 import events.ApplicationEvent;
@@ -13,16 +16,19 @@ import events.ProfileEvent;
 
 import external.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
 
+import flash.display.DisplayObject;
 import flash.display.InteractiveObject;
 import flash.events.Event;
 import flash.events.FocusEvent;
 import flash.events.MouseEvent;
+import flash.events.TimerEvent;
 import flash.geom.Point;
-
+import flash.utils.Timer;
 import flashx.textLayout.elements.BreakElement;
 
 import models.Chat;
 import models.ChatSearch;
+import models.Message;
 import models.PatientModel;
 import models.ProviderModel;
 import models.ProvidersModel;
@@ -50,10 +56,15 @@ private function init():void
 	providersXMLdata.send();
 	
 	if( ProviderConstants.DEBUG ) this.currentState = "providerHome";
+
+	userContextMenuTimer = new Timer( 2000, 1 );
+	userContextMenuTimer.addEventListener(TimerEvent.TIMER_COMPLETE,onUserMenuDelay);
 	
 	this.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
 	this.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
+	
 	this.addEventListener( ApplicationEvent.NAVIGATE, onNavigate );
+	this.addEventListener( ApplicationEvent.SHOW_CONTEXT_MENU, onShowContextMenu );
 }
 
 [Bindable] public var fullname:String;
@@ -355,19 +366,25 @@ private function initChatHistory():void
 
 private function onNavigate(event:ApplicationEvent):void
 {
+	var module:INavigatorContent;
+	
 	if( event.data is int )
 	{
 		viewStackProviderModules.selectedIndex = event.data;
+		
+		module = viewStackProviderModules.selectedChild;
 	}
 	else if( event.data is String )
 	{
 		if( this.currentState == 'providerHome' ) 
 		{
-			var module:String = event.data.toString();
+			var moduleName:String = event.data.toString();
 			
-			if( this.viewStackProviderModules.getChildByName( module ) ) 
+			if( this.viewStackProviderModules.getChildByName( moduleName ) ) 
 			{
-				this.viewStackProviderModules.selectedChild = this.viewStackProviderModules.getChildByName( module ) as INavigatorContent;
+				module = this.viewStackProviderModules.getChildByName( moduleName ) as INavigatorContent;
+				
+				this.viewStackProviderModules.selectedChild = module;
 				
 				if( event.data == ProviderConstants.MODULE_MESSAGES )
 				{
@@ -380,6 +397,17 @@ private function onNavigate(event:ApplicationEvent):void
 				{
 					this.viewStackMain.selectedIndex = 0;
 				}
+			}
+		}
+	}
+	
+	if( module )
+	{
+		if( module is TeamModule )
+		{
+			if( event.user )
+			{
+				TeamModule(module).showTeamMember( event.user );
 			}
 		}
 	}
@@ -402,3 +430,96 @@ public function falsifyWidget(widget:String):void
 {
 }
 
+/**
+ * User context menu
+*/
+private var userContextMenu:UserContextMenu;
+private var userContextMenuTimer:Timer;
+
+private function onShowContextMenu(event:ApplicationEvent):void 
+{
+	if( userContextMenu ) hideContextMenu();
+	
+	userContextMenu = new UserContextMenu();
+	userContextMenu.user = event.user;
+	userContextMenu.addEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
+	userContextMenu.addEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
+	userContextMenu.addEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );
+	userContextMenu.addEventListener( ProfileEvent.START_CHAT, onUserAction );
+	
+	userContextMenu.x = this.stage.mouseX;
+	userContextMenu.y = this.stage.mouseY;
+	
+	PopUpManager.addPopUp( userContextMenu, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
+	
+	userContextMenuTimer.reset();
+	userContextMenuTimer.start();
+}
+
+private function hideContextMenu():void
+{
+	userContextMenu.removeEventListener( ProfileEvent.VIEW_PROFILE, onUserAction );
+	userContextMenu.removeEventListener( ProfileEvent.VIEW_APPOINTMENTS, onUserAction );
+	userContextMenu.removeEventListener( ProfileEvent.SEND_MESSAGE, onUserAction );
+	userContextMenu.removeEventListener( ProfileEvent.START_CHAT, onUserAction );
+	
+	PopUpManager.removePopUp( userContextMenu );
+}
+
+private function onUserAction( event:ProfileEvent ):void
+{
+	var evt:ApplicationEvent;
+	
+	if( event.type == ProfileEvent.VIEW_PROFILE )
+	{
+		evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+		evt.data = ProviderConstants.MODULE_TEAM;
+		evt.user = event.user;
+		this.dispatchEvent( evt );
+	}
+	else if( event.type == ProfileEvent.VIEW_APPOINTMENTS )
+	{
+		if( AppointmentsController.getInstance().model.selectedProviders.getItemIndex( event.user ) == -1 )
+		{
+			AppointmentsController.getInstance().model.selectedProviders.addItem( event.user );
+		}
+		
+		evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+		evt.data = ProviderConstants.MODULE_APPOINTMENTS;
+		this.dispatchEvent( evt );
+	}
+	else if( event.type == ProfileEvent.SEND_MESSAGE )
+	{
+		var message:Message = new Message();
+		message.recipients = [ event.user ];
+		
+		evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+		evt.data = ProviderConstants.MODULE_MESSAGES;
+		evt.message = message;
+		this.dispatchEvent( evt );
+	}
+	else if( event.type == ProfileEvent.START_CHAT )
+	{
+		ChatController.getInstance().chat( ApplicationController.getInstance().user, event.user );
+	}
+	
+	hideContextMenu();
+}
+
+private function onUserMenuDelay( event:TimerEvent ):void
+{
+	if( userContextMenu 
+		&& userContextMenu.parent )
+	{
+		if( !userContextMenu.hitTestPoint(this.stage.mouseX,this.stage.mouseY)
+			&& !userContextMenu.chatModes.hitTestPoint(this.stage.mouseX,this.stage.mouseY) )
+		{
+			hideContextMenu();
+		}
+		else
+		{
+			userContextMenuTimer.reset();
+			userContextMenuTimer.start();
+		}
+	}
+}

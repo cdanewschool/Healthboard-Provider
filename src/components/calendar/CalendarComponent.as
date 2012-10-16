@@ -149,17 +149,11 @@ package components.calendar
 				
 				header.height = 20;
 				
-				/*_layout = (content.layout as TileLayout);
+				_layout = (content.layout as TileLayout);
 				_layout.columnWidth = (unscaledWidth - _layout.columnCount * _layout.horizontalGap) / _layout.columnCount;
 				//_layout.rowHeight = (unscaledHeight - _layout.rowCount * _layout.verticalGap) / _layout.rowCount;
 				
-				content.height = unscaledHeight - header.height - gap;*/
-				
-				var rows:int = Math.floor(content.dataProvider.length/_layout.columnCount);
-				               
-               _layout = (content.layout as TileLayout);
-               _layout.columnWidth = (unscaledWidth - ((_layout.columnCount-1) * _layout.horizontalGap)) / _layout.columnCount;
-               _layout.rowHeight = (unscaledHeight - header.height - ((rows-1) * _layout.verticalGap)) / rows;
+				content.height = unscaledHeight - header.height - gap;
 			}
 		}
 		

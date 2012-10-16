@@ -175,7 +175,9 @@
 				toHours.text = StringUtil.leftPad( appointment.to.hours.toString() );
 				toMinutes.text = StringUtil.leftPad( appointment.to.minutes.toString() );
 				
-				for(var i:int=0,r:int=0;i<Appointment.APPOINTMENT_TYPES.length-1;i++)		//"-1" because we don't need to include the "pending" type
+				//	"-1" because we don't need to include the "pending" type
+				//	TODO: check for the pending type, vs assuming it is at the end of the array
+				for(var i:int=0,r:int=0;i<Appointment.APPOINTMENT_TYPES.length-1;i++)
 				{
 					var def:Object = Appointment.APPOINTMENT_TYPES[i];
 					
@@ -230,9 +232,12 @@
 				
 			}
 			
-			private function handleFromChange():void {
+			private function handleFromChange():void 
+			{
 				appointment.from = fromDate.selectedDate;
-				if(appointment.to < appointment.from) {
+
+				if(appointment.to < appointment.from) 
+				{
 					appointment.to = appointment.from;
 					toDate.text = fromDate.text;
 				}

@@ -13,6 +13,7 @@ package components.popups
 	import mx.controls.Image;
 	import mx.controls.Label;
 	import mx.controls.LinkButton;
+	import mx.controls.Spacer;
 	import mx.controls.ToolTip;
 	import mx.core.BitmapAsset;
 	
@@ -22,6 +23,7 @@ package components.popups
 	import spark.components.PopUpAnchor;
 	import spark.components.VGroup;
 	import spark.components.supportClasses.ButtonBarHorizontalLayout;
+	import spark.effects.Fade;
 	import spark.events.IndexChangeEvent;
 	
 	public class UserContextMenu extends BorderContainer
@@ -43,12 +45,19 @@ package components.popups
 		private var rows:VGroup;
 		
 		private var statusLabel:Label;
-		private var chatModes:ButtonBar;
+		public var chatModes:ButtonBar;
 		private var anchor:PopUpAnchor;
 		
 		public function UserContextMenu()
 		{
 			super();
+			
+			var fade:Fade = new Fade(this);
+			fade.alphaFrom = 0;
+			fade.alphaTo = 1;
+			fade.duration = 300;
+			
+			setStyle("addedEffect", fade );
 			
 			setStyle("backgroundColor", 0x4D4D4D);
 			setStyle("borderColor", 0xBDBCBC);
@@ -65,13 +74,14 @@ package components.popups
 			super.createChildren();
 			
 			rows = new VGroup();
-			rows.gap = 3;
+			rows.gap = 1;
 			addElement( rows );
 			
 			var row:HGroup;
 			var label:Label;
 			var icon:Image;
 			var button:LinkButton;
+			var pad:Spacer;
 			
 			row = new HGroup();
 			row.gap = 1;
@@ -91,13 +101,16 @@ package components.popups
 			
 			row = new HGroup();
 			row.gap = 1;
-			row..setStyle('paddingLeft',3);
 			row.verticalAlign = "middle";
 			rows.addElement( row );
 			
 			icon = new Image();
 			icon.source = new profileIcon();
 			row.addElement( icon );
+			
+			pad = new Spacer();
+			pad.width = 1;
+			row.addElement( pad );
 			
 			button = new LinkButton();
 			button.label = "View profile";
@@ -142,6 +155,10 @@ package components.popups
 			row.gap = 1;
 			row.verticalAlign = "middle";
 			rows.addElement( row );
+			
+			pad = new Spacer();
+			pad.width = 1;
+			row.addElement( pad );
 			
 			icon = new Image();
 			icon.source = new chatIcon();

@@ -59,15 +59,12 @@
 			
 			private function onRollOver(event:MouseEvent):void
 			{
-				//setStyle("backgroundColor", "0x00ADEE");
-				//setStyle("backgroundAlpha", .2);
 				setStyle("backgroundColor", "0x31535E");
 			}
 			
 			private function onRollOut(event:MouseEvent):void
 			{
 				setStyle("backgroundColor", "0x3C3C3B");
-				//setStyle("backgroundAlpha", 1);
 			}
 			
 			private function onClick(event:MouseEvent):void

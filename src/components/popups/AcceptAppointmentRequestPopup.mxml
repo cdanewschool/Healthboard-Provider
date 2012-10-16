@@ -58,10 +58,6 @@
 			
 			<s:borderStroke>
 				<s:SolidColorStroke color="0x4D4D4D" alpha=".5" />
-				<!--<s:LinearGradientStroke rotation="0" weight="0">
-					<s:GradientEntry color="0xffffff" />
-					<s:GradientEntry color="0xCCCCCC" alpha=".3" />
-				</s:LinearGradientStroke>-->
 			</s:borderStroke>
 			
 			<s:backgroundFill>

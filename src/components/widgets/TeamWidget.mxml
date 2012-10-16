@@ -15,13 +15,11 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import ASfiles.ProviderConstants;
-			
 			import events.ApplicationEvent;
 			import events.EnhancedTitleWindowEvent;
 			
-			import models.Message;
 			import models.ProvidersModel;
+			import models.UserModel;
 			
 			import mx.binding.utils.BindingUtils;
 			import mx.collections.ArrayCollection;
@@ -47,15 +45,13 @@
 				teamRollOverRowIndex = event.rowIndex;
 			}
 			
-			private function onTeamClick(event:ListEvent):void
+			protected function onTeamClick(event:ListEvent):void 
 			{
-				var message:Message = new Message();
-				message.recipients = [ DataGrid(event.currentTarget).selectedItem ];
-				
-				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-				evt.data = ProviderConstants.MODULE_MESSAGES;
-				evt.message = message;
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_CONTEXT_MENU, true );
+				evt.user = DataGrid(event.currentTarget).selectedItem as UserModel;
 				dispatchEvent( evt );
+				
+				DataGrid(event.currentTarget).selectedItem = null;
 			}
 			
 			private function onSetTeam(value:Object):void
@@ -138,9 +134,11 @@
 								]]>
 							</fx:Script>
 							<s:Label text="{data.firstName + ' ' + data.lastName}" color="0xAEDBE2" fontSize="12" paddingLeft="10" width="117" fontFamily="myMyriad" />
+							<!--
 							<mx:HBox width="16" paddingTop="0">
 								<s:Image id="iconImage" source="@Embed('images/grayEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
 							</mx:HBox>
+							-->
 						</mx:HBox>
 					</fx:Component>
 				</mx:itemRenderer>

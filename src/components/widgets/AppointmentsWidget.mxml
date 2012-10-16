@@ -10,7 +10,6 @@
 	
 	<fx:Declarations>
 		<mx:SolidColorStroke id="xAxisStroke" color="0xB3B3B3" alpha=".1" />
-		<!--<mx:SolidColorStroke id="yAxisStroke" color="0x86888A" alpha="1" />-->
 		<mx:SolidColorStroke id="whiteStroke" color="0xffffff" alpha="1" weight="0" />
 		
 		<fx:Array id="gridBackground">

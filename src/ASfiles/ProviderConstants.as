@@ -9,5 +9,6 @@ package ASfiles
 		
 		public static const MODULE_MESSAGES:String = "modMessages";
 		public static const MODULE_APPOINTMENTS:String = "modAppointments";
+		public static const MODULE_TEAM:String = "modTeam";
 	}
 }
