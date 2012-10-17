@@ -3,7 +3,7 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	width="371" height="378"
+	width="352" height="355"
 	controlBarVisible="true" 
 	skinClass="skins.general.myHeaderlessTitleWindow"
 	creationComplete="init()">
@@ -40,12 +40,12 @@
 	</fx:Script>
 	
 	<s:layout>
-		<s:VerticalLayout paddingLeft="15" paddingTop="15" paddingRight="15" gap="15" horizontalAlign="left" />
+		<s:VerticalLayout paddingLeft="12" paddingTop="12" paddingRight="12" gap="12" horizontalAlign="left" />
 	</s:layout>
 	
 	<s:VGroup gap="5">
 		<s:Label text="Are you sure you want to accept this request?" styleName="darkGrayBold16" />
-		<mx:Text text="Once you accept these requests, a message will be sent to the patient informing them of your confirmation." styleName="grayText11" width="275" />
+		<mx:Text text="Once you accept these requests, a message will be sent to the patient informing them of your confirmation." styleName="grayText11" width="267" />
 	</s:VGroup>
 	
 	<s:Group width="100%">
@@ -57,10 +57,7 @@
 		<s:BorderContainer width="250" height="228">
 			
 			<s:borderStroke>
-				<s:LinearGradientStroke rotation="0" weight="0">
-					<s:GradientEntry color="0xffffff" />
-					<s:GradientEntry color="0xCCCCCC" alpha=".3" />
-				</s:LinearGradientStroke>
+				<s:SolidColorStroke color="0x4D4D4D" alpha=".5" />
 			</s:borderStroke>
 			
 			<s:backgroundFill>
@@ -70,7 +67,7 @@
 				</s:LinearGradient>
 			</s:backgroundFill>
 			
-			<s:VGroup gap="5" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">
+			<s:VGroup gap="5" paddingLeft="10" paddingTop="15" paddingRight="10" paddingBottom="10">
 				
 				<mx:FormItem label="Patient:" labelWidth="75" labelStyleName="darkGrayBold12">
 					<s:Label text="{appointment.patient.fullName}" styleName="darkGray12" />
@@ -112,8 +109,8 @@
 			<s:BasicLayout />
 		</s:layout>
 		<s:HGroup gap="10" right="0">
-			<s:Button label="Accept Request" width="122" height="24" click="accept();" skinClass="skins.general.IconButtonSkin" left="0" />
-			<s:Button label="Cancel" width="46" height="24" click="cancel();" skinClass="skins.general.IconButtonSkin" />
+			<s:Button label="Accept Request" width="98" height="24" click="accept();" skinClass="skins.general.IconButtonSkin" left="0" />
+			<s:Button label="Cancel" width="58" height="24" click="cancel();" skinClass="skins.general.IconButtonSkin" />
 		</s:HGroup>
 	</s:Group>
 	

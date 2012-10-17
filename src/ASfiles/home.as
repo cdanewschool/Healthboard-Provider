@@ -24,6 +24,7 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
 import flash.utils.Timer;
+import flashx.textLayout.elements.BreakElement;
 
 import models.ApplicationModel;
 import models.Chat;
@@ -85,61 +86,51 @@ private function onResize():void
 	FlexGlobals.topLevelApplication.height = this.stage.stageHeight;
 }
 
-/*
-public function get bgeMedications():Array { return chartStyles.bgeMedications; }
-public function get bgeMedicationsWidget():Array { return chartStyles.bgeMedicationsWidget; }
-public function get canvasMed():CartesianDataCanvas { return chartStyles.canvasMed; }
-public function get canvasMedWidget():CartesianDataCanvas { return chartStyles.canvasMedWidget; }
-public function get medicationsVerticalGridLine():SolidColorStroke { return chartStyles.medicationsVerticalGridLine; }
-*/
-
-protected function bar_initializeHandlerMain():void {
-	// Set first tab as non-closable
-	tabsMain.setTabClosePolicy(0, false);
-}
-
 //THE FOLLOWING TWO ARE MONSTER FUNCTIONS THAT PREVENT THE DROPDOWN FROM CLOSING WHEN CLICKING ON THE CALENDAR
 //SEE http://www.blastanova.com/blog/2010/06/23/a-custom-multi-selection-spark-dropdownlist/ FOR REFERENCE
-protected function dropDownCalendar_openHandler(event:DropDownEvent):void {
+protected function dropDownCalendar_openHandler(event:DropDownEvent):void 
+{
 	patientBirthDateChooser.addEventListener(MouseEvent.MOUSE_DOWN, stopPropagation, false, 0, true);
+	advBirthDateChooser.addEventListener(MouseEvent.MOUSE_DOWN, stopPropagation, false, 0, true);
 }
-protected function stopPropagation(event:Event):void {
+
+protected function stopPropagation(event:Event):void 
+{
 	event.stopImmediatePropagation();
 }
 
-protected function dateChooser_changeHandler(event:CalendarLayoutChangeEvent):void {
-	txtPatientBirthDay.text = String(patientBirthDateChooser.selectedDate.date);
-	txtPatientBirthMonth.text = String(patientBirthDateChooser.displayedMonth + 1);
+protected function dateChooser_changeHandler(event:CalendarLayoutChangeEvent):void 
+{
+	txtPatientBirthDay.text = patientBirthDateChooser.selectedDate.date < 10 ? '0' + patientBirthDateChooser.selectedDate.date : String(patientBirthDateChooser.selectedDate.date);
+	txtPatientBirthMonth.text = patientBirthDateChooser.displayedMonth < 9 ? '0' + (patientBirthDateChooser.displayedMonth + 1) : String(patientBirthDateChooser.displayedMonth + 1);
 	txtPatientBirthYear.text = String(patientBirthDateChooser.displayedYear);
 	dropDownCalendar.closeDropDown(true);					
 }
 
+protected function advDateChooser_changeHandler(event:CalendarLayoutChangeEvent):void 
+{
+	txtAdvBirthDay.text = advBirthDateChooser.selectedDate.date < 10 ? '0' + advBirthDateChooser.selectedDate.date : String(advBirthDateChooser.selectedDate.date);
+	txtAdvBirthMonth.text = advBirthDateChooser.displayedMonth < 9 ? '0' + (advBirthDateChooser.displayedMonth + 1) : String(advBirthDateChooser.displayedMonth + 1);
+	txtAdvBirthYear.text = String(advBirthDateChooser.displayedYear);
+	dropDownAdvCalendar.closeDropDown(true);					
+}
+
 protected function dgPatients_itemClickHandler(event:ListEvent):void 
 {
-	var myData:PatientModel = PatientModel( event.itemRenderer.data );
-	
-	MainController(controller).showPatient( myData );
+	var user:PatientModel = PatientModel( event.itemRenderer.data );
+	MainController(controller).showPatient( user );
 }
 
-private function patientsSearchFilter():void 
+protected function onPatientProfileClick(event:ProfileEvent):void
 {
-	ProviderApplicationModel(model).patients.filterFunction = filterPatientsSearch;
-	ProviderApplicationModel(model).patients.refresh();
+	var user:PatientModel = PatientModel( event.user );
+	MainController(controller).showPatient( user );
 }
 
-private function filterPatientsSearch(item:Object):Boolean {
-	var pattern:RegExp = new RegExp("[^]*"+patientSearch.text+"[^]*", "i");
-	var searchFilter:Boolean = (patientSearch.text == 'Search' || patientSearch.text == '') ? true : (pattern.test(item.lastName) || pattern.test(item.firstName));
-
-	var birthDayFilter:Boolean = (txtPatientBirthDay.text == 'dd' || txtPatientBirthDay.text == '') ? true : item.dob.substr(3,2) == txtPatientBirthDay.text;
-	var birthMonthFilter:Boolean = (txtPatientBirthMonth.text == 'mm' || txtPatientBirthMonth.text == '') ? true : item.dob.substr(0,2) == txtPatientBirthMonth.text;
-	var birthYearFilter:Boolean = (txtPatientBirthYear.text == 'year' || txtPatientBirthYear.text == '') ? true : item.dob.substr(6,4) == txtPatientBirthYear.text;
-	
-	var genderFilter:Boolean = dropPatientsSex.selectedIndex == 0 ? true : item.sex == dropPatientsSex.selectedItem.label;
-
-	var notifFilter:Boolean = showPatientsAll.selected ? true : item.urgency != "Not urgent";
-	
-	return searchFilter && birthDayFilter && birthMonthFilter && birthYearFilter && genderFilter && notifFilter;
+protected function onPatientNameClick(event:MouseEvent):void 
+{
+	var user:PatientModel = PatientModel( LinkButton(event.currentTarget).data );
+	MainController(controller).showPatient( user );
 }
 
 private function toggleAvailability(event:MouseEvent):void
@@ -156,7 +147,6 @@ private function toggleAvailability(event:MouseEvent):void
 public function falsifyWidget(widget:String):void 
 {
 }
-
 
 protected function onTabClose( event:ListEvent ):void
 {

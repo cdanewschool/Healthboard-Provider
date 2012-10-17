@@ -8,10 +8,11 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import models.ProviderModel;
 			import ASfiles.ProviderConstants;
 			
-			import events.ProviderEvent;
+			import events.ProfileEvent;
+			
+			import models.ProviderModel;
 			
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
@@ -26,15 +27,15 @@
 				
 				editWindow = new EditProvider();
 				editWindow.provider = provider.clone();
-				editWindow.addEventListener( ProviderEvent.SAVE, onSave );
+				editWindow.addEventListener( ProfileEvent.SAVE, onSave );
 				
 				PopUpManager.addPopUp(editWindow, this.parent.parent.parent as DisplayObject, true);
 				PopUpManager.centerPopUp(editWindow);
 			}
 			
-			private function onSave( event:ProviderEvent ):void
+			private function onSave( event:ProfileEvent ):void
 			{
-				provider.copy( event.provider );
+				provider.copy( event.user as ProviderModel );
 				
 				closePopup();
 			}

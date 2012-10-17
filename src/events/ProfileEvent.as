@@ -14,11 +14,15 @@ package events
 		public static const START_CHAT:String = "ProfileEvent.START_CHAT";
 		public static const SHOW_CONTEXT_MENU:String = "showContextMenu";
 		
+		public static const SELECT:String = "ProfileEvent.SELECT";
+		public static const SAVE:String = "ProfileEvent.SAVE";
+		
 		public var user:UserModel;
 		
-		public function ProfileEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
+		public function ProfileEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false, user:UserModel = null)
 		{
 			super(type, bubbles, cancelable);
+			this.user = user;
 		}
 		
 		override public function clone():Event

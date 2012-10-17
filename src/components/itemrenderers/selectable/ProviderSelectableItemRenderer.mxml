@@ -14,9 +14,11 @@
 		<![CDATA[
 			import models.ProviderModel;
 			
-			override protected function init():void
+			import mx.events.FlexEvent;
+			
+			override protected function onDataChange(event:FlexEvent):void
 			{
-				super.init();
+				super.onDataChange(event);
 				
 				checkbox.label = ProviderModel(data).fullName;
 			}

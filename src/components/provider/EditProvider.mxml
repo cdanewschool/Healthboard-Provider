@@ -16,8 +16,9 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import events.ProfileEvent;
+			
 			import models.ProviderModel;
-			import events.ProviderEvent;
 			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Text;
@@ -50,7 +51,7 @@
 			
 			private function save():void
 			{
-				var evt:ProviderEvent = new ProviderEvent( ProviderEvent.SAVE, false, false, provider );
+				var evt:ProfileEvent = new ProfileEvent( ProfileEvent.SAVE, false, false, provider );
 				dispatchEvent( evt );
 			}
 			
@@ -77,24 +78,24 @@
 	
 	<mx:Form id="myForm" styleName="whiteText13" paddingLeft="-3">			
 		
-		<s:HGroup gap="156">
+		<s:HGroup gap="148">
 			
 			<s:VGroup gap="13">
 				<mx:FormHeading label="{provider.fullName}" styleName="blueBoldSubtitle" paddingTop="-5"/>
 				<s:HGroup paddingTop="-4">
-					<s:Label width="99" textAlign="right" text="DOB:" />
+					<s:Label width="107" textAlign="right" text="DOB:" />
 					<s:Label text="{provider.birthday}" />
 				</s:HGroup>
 				<s:HGroup> 
-					<s:Label width="99" textAlign="right" text="Sex:" />
+					<s:Label width="107" textAlign="right" text="Sex:" />
 					<s:Label text="{provider.sex}" />
 				</s:HGroup>
 				<s:HGroup>
-					<s:Label width="99" textAlign="right" text="Team:" />
+					<s:Label width="107" textAlign="right" text="Team:" />
 					<s:Label text="{provider.team}" />
 				</s:HGroup>
 				<s:HGroup>
-					<s:Label width="99" textAlign="right" text="Role:" />
+					<s:Label width="107" textAlign="right" text="Role:" />
 					<s:Label text="{provider.role}" />
 				</s:HGroup>
 			</s:VGroup>
@@ -103,27 +104,27 @@
 				<s:Label text="Security" paddingLeft="264" styleName="greenBoldText" paddingBottom="10" />
 				
 				<mx:FormItem label="Password:" labelWidth="250">
-					<s:TextInput maxChars="20" text="{provider.password}" styleName="black" displayAsPassword="true" focusOut="saveField(event,'password')" />
+					<s:TextInput maxChars="20" text="{provider.password}" styleName="black" width="160" displayAsPassword="true" focusOut="saveField(event,'password')" />
 				</mx:FormItem>
 				<mx:FormItem label="Password confirmation:" labelWidth="250">
-					<s:TextInput maxChars="20" text="{provider.password}" styleName="black" displayAsPassword="true" />
+					<s:TextInput maxChars="20" text="{provider.password}" styleName="black" width="160" displayAsPassword="true" />
 				</mx:FormItem>
 				<mx:FormItem label="Security Question:" labelWidth="250">
 					<s:DropDownList dataProvider="{securityQuestions}" selectedIndex="{parseInt(provider.securityQuestion)}" styleName="buttonText" width="194" focusOut="saveField(event,'password')"/>
 				</mx:FormItem>
 				<mx:FormItem label="Answer for Security Question:" labelWidth="250">
-					<s:TextInput text="{provider.securityAnswer}" styleName="black" focusOut="saveField(event,'securityAnswer')"/>
+					<s:TextInput text="{provider.securityAnswer}" styleName="black" width="160" focusOut="saveField(event,'securityAnswer')"/>
 				</mx:FormItem>
 				<mx:FormItem label="E-mail Address:" labelWidth="250">
-					<s:TextInput text="{provider.email}" styleName="black" focusOut="saveField(event,'email')"/>
+					<s:TextInput text="{provider.email}" styleName="black" width="160" focusOut="saveField(event,'email')"/>
 				</mx:FormItem>
 				
 			</s:VGroup>
 			
 		</s:HGroup>
 		
-		<s:HGroup paddingBottom="15" paddingTop="5">
-			<s:Line xFrom="0" xTo="700">
+		<s:HGroup paddingBottom="13" paddingTop="10">
+			<s:Line xFrom="0" xTo="805">
 				<s:stroke>
 					<s:SolidColorStroke color="0x898989" weight="1"/>
 				</s:stroke>
@@ -131,24 +132,23 @@
 		</s:HGroup>
 		
 		<s:HGroup>
-			
 			<s:VGroup>
+				<s:Label text="Education and Experience" paddingLeft="123" styleName="greenBoldText" />
 				
-				<s:Label text="Education and Experience" paddingLeft="136" styleName="greenBoldText" />
-				
-				<mx:FormItem label="Education:" labelWidth="122" width="392" height="50">
-					<s:TextArea text="{provider.education}" styleName="black" width="270" height="50" fontSize="11" focusOut="saveField(event,'education')"/>
+				<mx:FormItem label="Education:" labelWidth="109" width="449" height="47">
+					<s:TextArea text="{provider.education}" styleName="black" width="343" height="47" focusOut="saveField(event,'education')"/>
 				</mx:FormItem>
-				<mx:FormItem label="Board Certification:" labelWidth="122" width="392" height="50">
-					<s:TextArea text="{provider.certification}" styleName="black" width="270" height="50" fontSize="11" focusOut="saveField(event,'certification')"/>
+				<mx:FormItem label="Board Certification:" labelWidth="109" width="449" height="47">
+					<s:TextArea text="{provider.certification}" styleName="black" width="343" height="47" focusOut="saveField(event,'certification')"/>
 				</mx:FormItem>
-				<mx:FormItem label="Specialty:" labelWidth="122" width="392" height="24" >
-					<s:TextInput text="{provider.specialty}" styleName="black" width="270" focusOut="saveField(event,'specialty')" />
+				<mx:FormItem label="Specialty:" labelWidth="109" width="449" height="24" >
+					<s:TextInput text="{provider.specialty}" styleName="black" width="343" focusOut="saveField(event,'specialty')" />
 				</mx:FormItem>
 			</s:VGroup>
 			
-			<s:VGroup>
-				<s:Label text="Role and Office Information" paddingLeft="114" styleName="greenBoldText" />
+			<s:VGroup gap="13">
+				<s:Label text="Role and Office Information" paddingLeft="133" styleName="greenBoldText" />
+				<!-- Theoretically, these should only be TEXT FIELDS if the user is an ADMIN...
 				<mx:FormItem label="Position:" labelWidth="100" height="24">
 					<s:TextInput text="{provider.role}" styleName="black" focusOut="saveField(event,'role')"/>
 				</mx:FormItem>
@@ -163,13 +163,32 @@
 				</mx:FormItem>
 				<mx:FormItem label="Office Phone:" labelWidth="100" height="24">
 					<s:TextInput text="{provider.phone}" styleName="black" focusOut="saveField(event,'phone')"/>
-				</mx:FormItem>
+				</mx:FormItem>-->
+				<s:HGroup gap="16"> 
+					<s:Label width="117" textAlign="right" text="Position:" />
+					<s:Label text="{provider.role}" />
+				</s:HGroup>
+				<s:HGroup gap="16"> 
+					<s:Label width="117" textAlign="right" text="Current Team:" />
+					<s:Label text="{provider.team}" />
+				</s:HGroup>
+				<s:HGroup gap="16"> 
+					<s:Label width="117" textAlign="right" text="Location:" />
+					<s:Label text="{provider.location}" />
+				</s:HGroup>
+				<s:HGroup gap="16"> 
+					<s:Label width="117" textAlign="right" text="Office:" />
+					<s:Label text="{provider.office}" />
+				</s:HGroup>
+				<s:HGroup gap="16"> 
+					<s:Label width="117" textAlign="right" text="Office Phone:" />
+					<s:Label text="{provider.phone}" />
+				</s:HGroup>
 			</s:VGroup>
-			
 		</s:HGroup>
 		
-		<s:HGroup paddingBottom="15" paddingTop="10">
-			<s:Line xFrom="0" xTo="700">
+		<s:HGroup paddingBottom="13" paddingTop="14">
+			<s:Line xFrom="0" xTo="805">
 				<s:stroke>
 					<s:SolidColorStroke color="0x898989" weight="1"/>
 				</s:stroke>
@@ -177,47 +196,45 @@
 		</s:HGroup>
 		
 		<s:HGroup>
-			
-			<s:VGroup>
+			<s:VGroup gap="3">
+				<s:Label text="Address" paddingLeft="124" styleName="greenBoldText" paddingBottom="7" />
 				
-				<s:Label text="Address" paddingLeft="136" styleName="greenBoldText" />
-				
-				<mx:FormItem label="Street 1:" labelWidth="122" height="24" width="300">
-					<s:TextInput text="{provider.street1}" styleName="black" focusOut="saveField(event,'street1')"/>
+				<mx:FormItem label="Street 1:" labelWidth="109">
+					<s:TextInput text="{provider.street1}" styleName="black" width="160" focusOut="saveField(event,'street1')"/>
 				</mx:FormItem>
-				<mx:FormItem label="Street 2:" labelWidth="122" height="24" width="300">
-					<s:TextInput text="{provider.street2}" styleName="black" focusOut="saveField(event,'street2')"/>
+				<mx:FormItem label="Street 2:" labelWidth="109">
+					<s:TextInput text="{provider.street2}" styleName="black" width="160" focusOut="saveField(event,'street2')"/>
 				</mx:FormItem>
-				<mx:FormItem label="City:" labelWidth="122" height="24" width="300">
-					<s:TextInput text="{provider.city}" styleName="black" focusOut="saveField(event,'city')"/>
+				<mx:FormItem label="City:" labelWidth="109">
+					<s:TextInput text="{provider.city}" styleName="black" width="160" focusOut="saveField(event,'city')"/>
 				</mx:FormItem>
-				<mx:FormItem label="State:" labelWidth="122" height="24" width="300">
-					<s:DropDownList dataProvider="{stateAbbreviations}" selectedItem="{provider.state}" styleName="buttonText" focusOut="saveField(event,'state')"/>
+				<mx:FormItem label="State/Province:" labelWidth="109">
+					<s:DropDownList dataProvider="{stateAbbreviations}" width="160" selectedItem="{provider.state}" styleName="buttonText" focusOut="saveField(event,'state')"/>
 				</mx:FormItem>
-				<mx:FormItem label="Zip/Postal Code:" labelWidth="122" height="24" width="300">
-					<s:TextInput text="{provider.zip}" styleName="black" focusOut="saveField(event,'zip')"/>
+				<mx:FormItem label="Zip/Postal Code:" labelWidth="109">
+					<s:TextInput text="{provider.zip}" styleName="black" width="160" focusOut="saveField(event,'zip')"/>
 				</mx:FormItem>
 			</s:VGroup>
 			
-			<s:VGroup>
-				<s:Label text="Emergency Contact" paddingLeft="207" styleName="greenBoldText" />
-				<mx:FormItem label="Name:" labelWidth="193" height="24">
-					<s:TextInput text="{provider.emergencyName}" styleName="black" focusOut="saveField(event,'emergencyName')"/>
+			<s:VGroup gap="3">
+				<s:Label text="Emergency Contact" paddingLeft="299" styleName="greenBoldText" paddingBottom="7" />
+				<mx:FormItem label="Name:" labelWidth="285">
+					<s:TextInput text="{provider.emergencyName}" styleName="black" width="160" focusOut="saveField(event,'emergencyName')"/>
 				</mx:FormItem>
-				<mx:FormItem label="Relation:" labelWidth="193" height="24">
-					<s:DropDownList dataProvider="{relations}" selectedIndex="{parseInt(provider.emergencyRelation)}" styleName="buttonText" focusOut="saveField(event,'emergencyRelation')"/>
+				<mx:FormItem label="Relation:" labelWidth="285">
+					<s:DropDownList dataProvider="{relations}" selectedIndex="{parseInt(provider.emergencyRelation)}" styleName="buttonText" width="160" focusOut="saveField(event,'emergencyRelation')"/>
 				</mx:FormItem>
-				<mx:FormItem label="Emergency Phone 1:" labelWidth="193" height="24">
-					<s:TextInput text="{provider.emergencyPhone1}" styleName="black" focusOut="saveField(event,'emergencyPhone1')"/>
+				<mx:FormItem label="Emergency Phone 1:" labelWidth="285">
+					<s:TextInput text="{provider.emergencyPhone1}" styleName="black" width="160" focusOut="saveField(event,'emergencyPhone1')"/>
 				</mx:FormItem>
-				<mx:FormItem label="Emergency Phone 2:" labelWidth="193" height="24">
-					<s:TextInput text="{provider.emergencyPhone2}" styleName="black" focusOut="saveField(event,'emergencyPhone2')"/>
+				<mx:FormItem label="Emergency Phone 2:" labelWidth="285">
+					<s:TextInput text="{provider.emergencyPhone2}" styleName="black" width="160" focusOut="saveField(event,'emergencyPhone2')"/>
 				</mx:FormItem>
 			</s:VGroup>
 		</s:HGroup>
 		
-		<s:HGroup paddingBottom="15" paddingTop="10">
-			<s:Line xFrom="0" xTo="700">
+		<s:HGroup paddingBottom="13" paddingTop="14">
+			<s:Line xFrom="0" xTo="805">
 				<s:stroke>
 					<s:SolidColorStroke color="0x898989" weight="1"/>
 				</s:stroke>
@@ -228,9 +245,9 @@
 			<s:layout>
 				<s:BasicLayout />
 			</s:layout>
-			<s:HGroup horizontalCenter="0" gap="20">
-				<s:Button label="Save" click="save()" styleName="orangeButton" />
-				<s:Button label="Cancel" click="{PopUpManager.removePopUp( this )}" />
+			<s:HGroup horizontalAlign="center" width="100%">
+				<s:Button label="Save" click="save()" styleName="orangeButton" height="24" />
+				<s:Button label="Cancel" click="{PopUpManager.removePopUp( this )}" styleName="buttonText" height="24" fontSize="14" />
 			</s:HGroup>
 		</s:Group>
 		

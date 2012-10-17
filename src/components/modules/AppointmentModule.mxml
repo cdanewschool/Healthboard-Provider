@@ -434,6 +434,7 @@
 				renderer.setStyle('tickPlacement', 'none');
 				renderer.setStyle('minorTickPlacement', 'none');
 				renderer.setStyle('labelAlign', 'center');
+				renderer.setStyle('labelGap',-1);
 				
 				if( currentState == MODE_DAY )
 				{
@@ -464,6 +465,7 @@
 					chart.horizontalAxisRenderers = [renderer];
 					chart.series = [column];
 					
+					renderer.setStyle('fontWeight','bold');
 					renderer.labelRenderer = new ClassFactory(DailyCustomChartLabel);
 					renderer.addEventListener( TeamAppointmentEvent.CANCEL_ALL, onCancelAllForProvider );
 					renderer.addEventListener( TeamAppointmentEvent.VIEW_PROVIDER, onViewProvider );
@@ -1008,8 +1010,9 @@
 	
 	<fx:Declarations>
 		<mx:SolidColorStroke id="xAxisStroke" color="0xB3B3B3" alpha=".1" />
-		<mx:SolidColorStroke id="yAxisStroke" color="0x86888A" alpha="1" />
-		<mx:SolidColorStroke id="whiteStroke" color="0xffffff" alpha="1" weight="0" />
+		<!--<mx:SolidColorStroke id="yAxisStroke" color="0x86888A" alpha="1" />-->
+		<mx:SolidColorStroke id="whiteStroke" color="0xffffff" alpha=".5" />
+		<mx:SolidColorStroke id="minorTickGrayStroke" color="0xCCCCCC" alpha=".1" />
 		
 		<fx:Array id="gridBackground">
 			
@@ -1019,11 +1022,11 @@
 				gridDirection="both">
 				
 				<mx:horizontalStroke>
-					<mx:SolidColorStroke weight="1" color="0xCCCCCC" alpha=".2" />
+					<mx:SolidColorStroke weight="1" color="0xFFFFFF" alpha=".4" />
 				</mx:horizontalStroke>
 				
 				<mx:verticalStroke>
-					<mx:SolidColorStroke weight="1" color="0xCCCCCC" alpha=".2" />
+					<mx:SolidColorStroke weight="1" color="0xFFFFFF" alpha=".4" />
 				</mx:verticalStroke>
 				
 			</mx:GridLines>
@@ -1041,36 +1044,36 @@
 		showSearch="true" searchPlaceholder="Search Appointments" searchFunction="{onHeaderSearch}"
 		actionSuffix="requests in need of confirmation." />
 	
-	<s:Group y="15">
-		
-		<mx:ViewStack 
-			id="appointmentTypeViews" 
-			width="990" height="605" 
-			borderColor="0xBDBCBC" cornerRadius="2" backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" y="37">
+	<s:HGroup width="100%" horizontalAlign="center" paddingTop="14">
+		<s:Group>
 			
-			<s:NavigatorContent label="Visits/Teleconsults">
+			<mx:ViewStack 
+				id="appointmentTypeViews" 
+				width="991" height="605" 
+				borderColor="0xBDBCBC" cornerRadius="2" backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" y="22">
 				
-				<s:HGroup gap="0">
+				<s:NavigatorContent label="Visits/Teleconsults">
 					
-					<s:VGroup width="812" gap="0">
+					<s:HGroup gap="0">
 						
-						<!--	header	-->
-						<s:BorderContainer width="100%" height="40" borderVisible="false" backgroundColor="0x717070">
+						<s:VGroup width="812" gap="0">
 							
-							<s:Group height="40" y="5">
-								
+							<!--	header	-->
+							<s:BorderContainer width="100%" height="37" borderVisible="false" backgroundColor="0x717070">
 								<s:layout>
-									<s:BasicLayout />
+									<s:HorizontalLayout verticalAlign="middle" paddingRight="6" paddingLeft="8"/>
 								</s:layout>
-								
+																	
 								<!--	buttons	-->
-								<s:HGroup x="5" y="5">
-									<s:Button label="+ Add Appointment" width="107" height="24" click="onAddAppointmentClick(event)" skinClass="skins.general.IconButtonSkin" />
-									<s:Button label="Print Appointments" width="107" height="24" click="onPrintAppointmentClick(event)" skinClass="skins.general.IconButtonSkin" />
+								<s:HGroup>
+									<s:Button label="+ Add Appointment" width="115" height="24" click="onAddAppointmentClick(event)" skinClass="skins.general.IconButtonSkin" />
+									<s:Button label="Print Appointments" width="115" height="24" click="onPrintAppointmentClick(event)" skinClass="skins.general.IconButtonSkin" />
 								</s:HGroup>
 								
+								<s:Spacer width="100%" />
+								
 								<!--	filter thing	-->
-								<s:HGroup verticalAlign="middle" x="435" y="5">
+								<s:HGroup verticalAlign="middle">
 									<s:Label text="Show:" styleName="white12" />
 									<components:MultiSelectDropDownList 
 										id="providerSelect"
@@ -1079,19 +1082,19 @@
 										itemRenderer="components.itemrenderers.selectable.ProviderSelectableItemRenderer" selectionChange="onChangeSelectedProviders(event)"  />
 								</s:HGroup>
 								
-								<s:HGroup x="630" y="5" gap="-1">
-									<s:Button width="24" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('images/arrowLeft.png')" click="navigate(-1)" />
-									<s:Button width="24" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('images/diamond.png')" click="navigate(0)"/>
-									<s:Button width="24" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('images/arrowRight.png')" click="navigate(1)"/>
+								<s:HGroup gap="-1" paddingLeft="19">
+									<s:Button width="26" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('images/arrowLeft.png')" click="navigate(-1)" />
+									<s:Button width="26" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('images/diamond.png')" click="navigate(0)"/>
+									<s:Button width="26" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('images/arrowRight.png')" click="navigate(1)"/>
 								</s:HGroup>
 								
 								<!--	mode selector	-->
-								<s:HGroup x="710" y="5">
+								<s:HGroup>
 									
 									<s:ButtonBar 
 										id="modeSelect" 
 										styleName="greyButtonBar"
-										height="24" width="95" selectedIndex="0" requireSelection="true"
+										height="24" width="94" selectedIndex="0" requireSelection="true"
 										dataProvider="{viewModes}" iconField="icon" change="selectMode(event)"
 										labelFunction="getCalendarModeLabel"
 										firstButton="skins.general.IconButtonSkin"
@@ -1105,69 +1108,66 @@
 									</s:ButtonBar>
 									
 								</s:HGroup>
-								
-							</s:Group>
+							</s:BorderContainer>
 							
-						</s:BorderContainer>
-						
-						<s:Line xFrom="0" xTo="812">
-							<s:stroke>
-								<s:SolidColorStroke color="0xffffff" weight="1" />
-							</s:stroke>
-						</s:Line>
-						
-						<s:HGroup width="812" height="568" gap="0">
-							
-							<!--	left sidebar	-->
-							<s:VGroup width="150">
-								
-								<!--	requests	-->
-								<s:VGroup width="150" height="350" paddingTop="10">
-									<s:Label text="Requests" styleName="greenBold12" width="100%" textAlign="center" />
-									<s:VGroup id="requests" gap="10" paddingLeft="15" paddingRight="15" paddingTop="15" />
-								</s:VGroup>
-								
-								<!--	calendar	-->
-								<mx:DateChooser 
-									width="150" height="200"
-									id="dateChooser" showToday="false"
-									contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" headerStyleName="dateChooserVitalGrayHeader"
-									fontSize="11"
-									change="onSelectDate(event)" />
-								
-							</s:VGroup>
-							
-							<s:Line yFrom="0" yTo="568">
+							<s:Line xFrom="0" xTo="812">
 								<s:stroke>
-									<s:SolidColorStroke color="0xBDBCBC" weight="1" />
+									<s:SolidColorStroke color="0xffffff" weight="1" />
 								</s:stroke>
 							</s:Line>
 							
-							<s:BorderContainer id="calendarContainer" backgroundColor="0x3C3C3B" width="662" height="568">
+							<s:HGroup width="812" height="568" gap="0">
 								
-								<s:HGroup x="10" y="10" gap="45" includeIn="day,week">
-									<s:Label id="yearLabel" styleName="greenBold12" width="100%" textAlign="center" />
-									<s:Label id="dateLabel" includeIn="day" styleName="white11" />
-								</s:HGroup>
-								
-								<s:Group x="10" y="10" includeIn="month" width="100%">
-									<s:Label id="monthLabel" styleName="greenBold12" width="100%" textAlign="center" />
-								</s:Group>
-								
-								<mx:ViewStack id="calendarViews" borderVisible="false" width="662" height="504" y="30" selectedIndex="{currentState==MODE_MONTH?1:0}">
+								<!--	left sidebar	-->
+								<s:VGroup width="148">
 									
-									<s:NavigatorContent>
+									<!--	requests	-->
+									<s:VGroup width="148" height="368" paddingTop="10">
+										<s:Label text="Requests" styleName="greenBold12" width="100%" textAlign="center" />
+										<s:VGroup id="requests" gap="10" paddingLeft="15" paddingRight="15" paddingTop="4" />
+									</s:VGroup>
+									
+									<!--	calendar	-->
+									<mx:DateChooser 
+										width="148"
+										id="dateChooser" showToday="false"
+										contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" headerStyleName="dateChooserVitalGrayHeader"
+										fontSize="11"
+										change="onSelectDate(event)" />
+									
+								</s:VGroup>
+								
+								<s:Line yFrom="0" yTo="568">
+									<s:stroke>
+										<s:SolidColorStroke color="0xBDBCBC" weight="1" />
+									</s:stroke>
+								</s:Line>
+								
+								<s:BorderContainer id="calendarContainer" backgroundColor="0x3C3C3B" width="662" height="568">
+									
+									<s:HGroup x="10" y="10" gap="45" includeIn="day,week">
+										<s:Label id="yearLabel" styleName="greenBold12" width="100%" textAlign="center" />
+										<s:Label id="dateLabel" includeIn="day" styleName="white11" />
+									</s:HGroup>
+									
+									<s:Group x="10" y="10" includeIn="month" width="100%">
+										<s:Label id="monthLabel" styleName="greenBold12" width="100%" textAlign="center" />
+									</s:Group>
+									
+									<mx:ViewStack id="calendarViews" borderVisible="false" width="662" height="501" y="30" selectedIndex="{currentState==MODE_MONTH?1:0}">
 										
+										<s:NavigatorContent>
+											
 											<s:VGroup>
 												
-												<s:Scroller width="662" height="504" horizontalScrollPolicy="off">
+												<s:Scroller width="663" height="504" horizontalScrollPolicy="off">
 													
 													<s:Group>
 														
 														<mx:ColumnChart
 															id="chart"
 															backgroundElements="{gridBackground}" columnWidthRatio="1"
-															dataProvider="{appointments}" showDataTips="false" width="650" height="800" paddingLeft="40" 
+															dataProvider="{appointments}" showDataTips="false" width="650" height="1720" paddingLeft="40" 
 															selectionMode="single" change="onSelectAppointment(event)" chartClick="{selectedAppointment=null;selectedProvider=null}"
 															dragEnabled="true" dropEnabled="true" dragEnter="onDragStart(event)" dragDrop="onDragDrop(event)"
 															itemRollOverColor="0x00adee" itemSelectionColor="0x00adee" creationComplete="updateView()" >
@@ -1177,7 +1177,7 @@
 															</mx:horizontalAxis>
 															
 															<mx:verticalAxis>
-																<mx:LinearAxis id="yAxis" minimum="{DateUtil.HOUR*6}" maximum="{DateUtil.HOUR*17}" labelFunction="getTimeLabel" interval="{DateUtil.HOUR}" minorInterval="{DateUtil.HOUR/4}" direction="inverted" alignLabelsToInterval="false" />
+																<mx:LinearAxis id="yAxis" minimum="{DateUtil.HOUR*6}" maximum="{DateUtil.HOUR*24}" labelFunction="getTimeLabel" interval="{DateUtil.HOUR}" minorInterval="{DateUtil.HOUR/4}" direction="inverted" alignLabelsToInterval="false" />
 															</mx:verticalAxis>
 															
 															<mx:series>
@@ -1189,7 +1189,7 @@
 															</mx:horizontalAxisRenderers>
 															
 															<mx:verticalAxisRenderers>
-																<mx:AxisRenderer axis="{yAxis}" axisStroke="{yAxisStroke}" styleName="white12" showLine="true" tickPlacement="inside" minorTickPlacement="inside" labelAlign="bottom" labelGap="0" />
+																<mx:AxisRenderer axis="{yAxis}" styleName="white12" showLine="false" tickPlacement="none" minorTickPlacement="inside" minorTickLength="650" minorTickStroke="{minorTickGrayStroke}" labelAlign="bottom" labelGap="0" />
 															</mx:verticalAxisRenderers>
 															
 														</mx:ColumnChart>
@@ -1200,174 +1200,174 @@
 												
 											</s:VGroup>
 											
-									</s:NavigatorContent>
+										</s:NavigatorContent>
+										
+										<s:NavigatorContent>
+											<calendar:CalendarComponent 
+												id="monthView" 
+												width="662" height="470" paddingLeft="-2"
+												itemRenderer="components.calendar.CalendarItem" 
+												selectedDate="{selectedDate}" change="onSelectDate(event)"  />
+										</s:NavigatorContent>
+										
+									</mx:ViewStack>
 									
-									<s:NavigatorContent>
-										<calendar:CalendarComponent 
-											id="monthView" 
-											width="662" height="504" 
-											itemRenderer="components.calendar.CalendarItem" 
-											selectedDate="{selectedDate}" change="onSelectDate(event)"  />
-									</s:NavigatorContent>
+									<s:BorderContainer backgroundColor="0x4A4A49" width="100%" height="34" x="-1" y="{calendarContainer.height-34}" borderVisible="false">
+										<s:HGroup id="legend" gap="63" paddingLeft="43" paddingTop="8" />
+									</s:BorderContainer>
 									
-								</mx:ViewStack>
-								
-								<s:BorderContainer backgroundColor="0x4A4A49" width="100%" height="34" x="-1" y="{calendarContainer.height-34}">
-									<s:HGroup id="legend" gap="60" paddingLeft="20" paddingTop="6" />
+									<s:Line xFrom="0" xTo="662" y="{calendarContainer.height-4}">
+										<s:stroke>
+											<s:SolidColorStroke color="0xBDBCBC" weight="1" />
+										</s:stroke>
+									</s:Line>
+									
 								</s:BorderContainer>
 								
-								<s:Line xFrom="0" xTo="662" y="{calendarContainer.height-7}">
+							</s:HGroup>
+							
+						</s:VGroup>
+						
+						<!--	right sidebar	-->
+						<s:VGroup width="180">
+							
+							<s:HGroup>
+								
+								<s:Line yFrom="0" yTo="607">
 									<s:stroke>
 										<s:SolidColorStroke color="0xBDBCBC" weight="1" />
 									</s:stroke>
 								</s:Line>
 								
-							</s:BorderContainer>
-							
-						</s:HGroup>
-						
-					</s:VGroup>
-
-					<!--	right sidebar	-->
-					<s:VGroup width="180">
-						
-						<s:HGroup>
-							
-							<s:Line yFrom="0" yTo="607">
-								<s:stroke>
-									<s:SolidColorStroke color="0xBDBCBC" weight="1" />
-								</s:stroke>
-							</s:Line>
-							
-							<!--	appointment details	-->
-							<s:VGroup  width="180" paddingTop="20">
-								<s:Label text="Appointment Details" styleName="greenBold12" width="100%" textAlign="center" />
-								
-								<s:Label text="Select an appointment to view details" styleName="gray9Italic" width="100%" textAlign="center" visible="{selectedAppointment==null &amp;&amp; selectedProvider==null}" includeInLayout="{selectedAppointment==null &amp;&amp; selectedProvider==null}" />
-								
-								<s:VGroup visible="{selectedAppointment!=null}" includeInLayout="{selectedAppointment!=null}" paddingTop="15" gap="0">
+								<!--	appointment details	-->
+								<s:VGroup  width="180" paddingTop="20">
+									<s:Label text="Appointment Details" styleName="greenBold12" width="100%" textAlign="center" />
 									
-									<s:Label id="providerName" styleName="blue9SemiBold" width="100%" textAlign="center" />
+									<s:Label text="Select an appointment to view details" styleName="gray9Italic" width="100%" textAlign="center" visible="{selectedAppointment==null &amp;&amp; selectedProvider==null}" includeInLayout="{selectedAppointment==null &amp;&amp; selectedProvider==null}" />
 									
-									<s:Spacer height="10" />
-									
-									<s:Line xFrom="5" xTo="170">
-										<s:stroke>
-											<s:SolidColorStroke color="0x9E9E9E" weight="1" />
-										</s:stroke>
-									</s:Line>
-									
-									<s:Spacer height="10" />
-									
-									<mx:FormItem label="From:" labelWidth="60" height="16" labelStyleName="white9Bold">
-										<s:Label text="{selectedAppointment.fromDateString()}" styleName="white9" paddingLeft="-10" />
-									</mx:FormItem>
-									<mx:FormItem label="To:" labelWidth="60" height="16" labelStyleName="white9Bold">
-										<s:Label text="{selectedAppointment.toDateString()}" styleName="white9" paddingLeft="-10" />
-									</mx:FormItem>
-									<mx:FormItem label="Location:" labelWidth="60" height="16" labelStyleName="white9Bold" >
-										<mx:Text text="{selectedAppointment.location}" styleName="white9" paddingLeft="-10" />
-									</mx:FormItem>
-									
-									<s:Spacer height="10" />
-									
-									<s:Line xFrom="5" xTo="170">
-										<s:stroke>
-											<s:SolidColorStroke color="0x9E9E9E" weight="1" />
-										</s:stroke>
-									</s:Line>
-									
-									<s:Spacer height="10" />
-									
-									<mx:FormItem label="Patient" labelWidth="60" height="16" labelStyleName="white9Bold">
-										<mx:LinkButton id="patientName" styleName="linkBtnBlue" fontSize="9" paddingLeft="-10"/>
-									</mx:FormItem>
-									<mx:FormItem label="Telephone:" labelWidth="60" height="16" labelStyleName="white9Bold" >
-										<s:Label text="{selectedAppointment.patient.phone}" styleName="white9" paddingLeft="-10"/>
-									</mx:FormItem>
-									<mx:FormItem label="Email:" labelWidth="60" height="16" labelStyleName="white9Bold" >
-										<s:Label text="{selectedAppointment.patient.email}" styleName="white9" paddingLeft="-10"/>
-									</mx:FormItem>
-									
-									<s:Spacer height="10" />
-									
-									<s:Line xFrom="5" xTo="170">
-										<s:stroke>
-											<s:SolidColorStroke color="0x9E9E9E" weight="1" />
-										</s:stroke>
-									</s:Line>
-
-									<s:Spacer height="10" />
-									
-									<mx:FormItem label="Type:" labelWidth="60" height="16" labelStyleName="white9Bold" >
-										<s:Label text="{Appointment.getTypeByKey(selectedAppointment.type).label}" styleName="white9" fontSize="9" paddingLeft="-10"/>
-									</mx:FormItem>
-									<mx:FormItem label="Reason:" labelWidth="60" height="16" labelStyleName="white9Bold">
-										<s:Label text="{selectedAppointment.reason}" styleName="white9" paddingLeft="-10"/>
-									</mx:FormItem>
-									
-									<s:Spacer height="10" />
-									
-									<s:Line xFrom="5" xTo="170">
-										<s:stroke>
-											<s:SolidColorStroke color="0x9E9E9E" weight="1" />
-										</s:stroke>
-									</s:Line>
-									
-									<s:Spacer height="10" />
-									
-									<mx:FormItem label="Prerequisite:" labelWidth="60" labelStyleName="white9Bold">
-										<s:VGroup id="prerequisites" paddingLeft="-10" gap="-4"/>
-									</mx:FormItem>
-									
-									<s:Spacer height="10" />
-									
-									<s:Line xFrom="5" xTo="170">
-										<s:stroke>
-											<s:SolidColorStroke color="0x9E9E9E" weight="1" />
-										</s:stroke>
-									</s:Line>
-									
-									<s:Spacer height="15" />
-									
-									<mx:LinkButton label="Send Message" styleName="linkBtnGray" fontSize="9" width="100%" textAlign="center"/>
-									
-									<s:Spacer height="15" />
-									
-									<s:VGroup horizontalAlign="center" width="100%">
-										<s:Button label="{selectedAppointment.isPending?'Accept Request':'Edit Appointment'}" width="122" height="24" click="onEditOrAcceptAppointmentClick(event)" styleName="tightButton" />
-										<s:Button label="{selectedAppointment.isPending?'Decline Request':'Cancel Appointment'}" width="122" height="24" click="onCancelOrDeclineAppointmentClick(event)" styleName="tightButton" />
+									<s:VGroup visible="{selectedAppointment!=null}" includeInLayout="{selectedAppointment!=null}" paddingTop="15" gap="0">
+										
+										<s:Label id="providerName" styleName="blue9SemiBold" width="100%" textAlign="center" />
+										
+										<s:Spacer height="10" />
+										
+										<s:Line xFrom="5" xTo="170">
+											<s:stroke>
+												<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+											</s:stroke>
+										</s:Line>
+										
+										<s:Spacer height="10" />
+										
+										<mx:FormItem label="From:" labelWidth="60" height="16" labelStyleName="white9Bold">
+											<s:Label text="{selectedAppointment.fromDateString()}" styleName="white9" paddingLeft="-10" />
+										</mx:FormItem>
+										<mx:FormItem label="To:" labelWidth="60" height="16" labelStyleName="white9Bold">
+											<s:Label text="{selectedAppointment.toDateString()}" styleName="white9" paddingLeft="-10" />
+										</mx:FormItem>
+										<mx:FormItem label="Location:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+											<mx:Text text="{selectedAppointment.location}" styleName="white9" paddingLeft="-10" />
+										</mx:FormItem>
+										
+										<s:Spacer height="10" />
+										
+										<s:Line xFrom="5" xTo="170">
+											<s:stroke>
+												<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+											</s:stroke>
+										</s:Line>
+										
+										<s:Spacer height="10" />
+										
+										<mx:FormItem label="Patient" labelWidth="60" height="16" labelStyleName="white9Bold">
+											<mx:LinkButton id="patientName" styleName="linkBtnBlue" fontSize="9" paddingLeft="-10"/>
+										</mx:FormItem>
+										<mx:FormItem label="Telephone:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+											<s:Label text="{selectedAppointment.patient.phone}" styleName="white9" paddingLeft="-10"/>
+										</mx:FormItem>
+										<mx:FormItem label="Email:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+											<s:Label text="{selectedAppointment.patient.email}" styleName="white9" paddingLeft="-10"/>
+										</mx:FormItem>
+										
+										<s:Spacer height="10" />
+										
+										<s:Line xFrom="5" xTo="170">
+											<s:stroke>
+												<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+											</s:stroke>
+										</s:Line>
+										
+										<s:Spacer height="10" />
+										
+										<mx:FormItem label="Type:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+											<s:Label text="{Appointment.getTypeByKey(selectedAppointment.type).label}" styleName="white9" fontSize="9" paddingLeft="-10"/>
+										</mx:FormItem>
+										<mx:FormItem label="Reason:" labelWidth="60" height="16" labelStyleName="white9Bold">
+											<s:Label text="{selectedAppointment.reason}" styleName="white9" paddingLeft="-10"/>
+										</mx:FormItem>
+										
+										<s:Spacer height="10" />
+										
+										<s:Line xFrom="5" xTo="170">
+											<s:stroke>
+												<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+											</s:stroke>
+										</s:Line>
+										
+										<s:Spacer height="10" />
+										
+										<mx:FormItem label="Prerequisite:" labelWidth="60" labelStyleName="white9Bold">
+											<s:VGroup id="prerequisites" paddingLeft="-10" gap="-4"/>
+										</mx:FormItem>
+										
+										<s:Spacer height="10" />
+										
+										<s:Line xFrom="5" xTo="170">
+											<s:stroke>
+												<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+											</s:stroke>
+										</s:Line>
+										
+										<s:Spacer height="15" />
+										
+										<mx:LinkButton label="Send Message" styleName="linkBtnGray" fontSize="9" width="100%" textAlign="center"/>
+										
+										<s:Spacer height="15" />
+										
+										<s:VGroup horizontalAlign="center" width="100%">
+											<s:Button label="{selectedAppointment.isPending?'Accept Request':'Edit Appointment'}" width="122" height="24" click="onEditOrAcceptAppointmentClick(event)" styleName="tightButton" />
+											<s:Button label="{selectedAppointment.isPending?'Decline Request':'Cancel Appointment'}" width="122" height="24" click="onCancelOrDeclineAppointmentClick(event)" styleName="tightButton" />
+										</s:VGroup>
+										
 									</s:VGroup>
+									
+									<appointments:ProviderScheduleList 
+										id="providerScheduleList" 
+										visible="{providerScheduleList.providers!=null &amp;&amp; selectedAppointment!=null}" includeInLayout="{providerScheduleList.visible}"
+										date="{selectedDate}" 
+										paddingTop="15" paddingLeft="10" 
+										showOverview="{currentState==MODE_MONTH}"
+										titleAlign="{currentState==MODE_MONTH?'left':'center'}"
+										titleStyleName="{currentState==MODE_MONTH?'white9Bold':'blue9SemiBold'}" />
 									
 								</s:VGroup>
 								
-								<appointments:ProviderScheduleList 
-									id="providerScheduleList" 
-									visible="{providerScheduleList.providers!=null &amp;&amp; selectedAppointment!=null}" includeInLayout="{providerScheduleList.visible}"
-									date="{selectedDate}" 
-									paddingTop="15" paddingLeft="10" 
-									showOverview="{currentState==MODE_MONTH}"
-									titleAlign="{currentState==MODE_MONTH?'left':'center'}"
-									titleStyleName="{currentState==MODE_MONTH?'white9Bold':'blue9SemiBold'}" />
-								
-							</s:VGroup>
+							</s:HGroup>
 							
-						</s:HGroup>
+						</s:VGroup>
 						
-					</s:VGroup>
+					</s:HGroup>
 					
-				</s:HGroup>
+				</s:NavigatorContent>
 				
-			</s:NavigatorContent>
+				<s:NavigatorContent label="Classes">
+				</s:NavigatorContent>
+				
+			</mx:ViewStack>
 			
-			<s:NavigatorContent label="Classes">
-			</s:NavigatorContent>
+			<plus:TabBarPlus gap="6" cornerRadius="4" styleName="messagesTabs" closePolicy="never" dataProvider="{appointmentTypeViews}" />
 			
-		</mx:ViewStack>
-		
-		<plus:TabBarPlus gap="6" cornerRadius="4" styleName="messagesTabs" closePolicy="never" dataProvider="{appointmentTypeViews}" height="38" fontSize="14" />
-		
-	</s:Group>
-	
+		</s:Group>
+	</s:HGroup>	
 	
 </s:NavigatorContent>

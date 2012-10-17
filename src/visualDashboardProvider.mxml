@@ -10,7 +10,7 @@
 			   xmlns:ASclasses="ASclasses.*"
 			   fontFamily="myMyriad"
 			   minWidth="1024" minHeight="768" resize="onResize()"
-			   creationComplete="init();onResize()" xmlns:modules="components.modules.*" xmlns:widgets="components.widgets.*" xmlns:views="components.views.*">
+			   creationComplete="init();onResize()" xmlns:modules="components.modules.*" xmlns:widgets="components.widgets.*" xmlns:views="components.views.*" xmlns:components="components.*">
 
 	<fx:Script>
 		<![CDATA[
@@ -24,43 +24,9 @@
 	<fx:Script source="ASfiles/home.as" />
 	<fx:Script source="ASfiles/messages.as" />
 	<fx:Script source="ASfiles/patients.as" />
-	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/home.as" />-->
-	<fx:Script source="../../visualDashboardShared/sharedASfiles/messages.as" />
-	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/appointments.as" />-->
-	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/immunizations.as" />-->
-	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/medicalRecords.as" />-->
-	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/medications.as" />-->	<!--	this should be able to removed once the myTreeMedRec placeholder is replaced	-->
-	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/exercise.as" />-->
-	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/vitalSigns.as" />-->
-	<!--<fx:Script source="../../visualDashboardShared/sharedASfiles/nutrition.as" />-->
+	<fx:Script source="../../visualDashboardShared/src/sharedASfiles/messages.as" />
 	
 	<fx:Declarations>
-		
-		<!--
-		<mx:HTTPService id="patientsXMLdata"
-						url="data/patients.xml"
-						result="patientsResultHandler(event)" />
-		
-		<mx:HTTPService id="immunizationsXMLdata"
-						url="data/immunizations.xml"
-						result="AppProperties.getInstance().controller.immunizationsController.dataResultHandler(event)" />
-		
-		<mx:HTTPService id="medicalRecordsXMLdata"
-						url="../../visualDashboardShared/data/medicalRecords.xml"
-						result="AppProperties.getInstance().controller.medicalRecordsController.dataResultHandler(event)" />
-		
-		<mx:HTTPService id="medicationsXMLdataForWidget"
-						url="data/medications.xml"
-						result="AppProperties.getInstance().controller.medicationsController.dataResultHandler(event)" />
-		
-		<mx:HTTPService id="providersXMLdata"
-						url="data/providers.xml"
-						result="providersResultHandler(event)" />
-		
-		<mx:HTTPService id="appointmentsXMLdata"
-						url="data/appointments.xml"
-						result="TeamAppointmentsController.getInstance().resultHandler(event)" />
-	-->
 		
 		<s:SolidColor id="colorMedicalRecordsOutpatient" color="0x71B2D1" /><!--also used for Medication's "Prescription Drugs"-->
 		<s:SolidColor id="colorMedicalRecordsInpatient" color="0xDC9D00" /><!--also used for Medication's "Supplements"-->
@@ -75,17 +41,6 @@
 		<s:State name="forgotPassword" />
 		<s:State name="passwordSent" />
 		<s:State name="loggedIn" />
-		<!--<s:State name="widgetView" enterState="filterMedsFromWidget();" />
-		<s:State name="modCalendar" />
-		<s:State name="modImmunizations" />
-		<s:State name="modMessages" />
-		<s:State name="modMedicalRecords" />
-		<s:State name="modMedications" enterState="if(wasMedicationDataLoaded &amp;&amp; medicationsData.filterFunction == filterMedicationsWidget) filterMedsFromStatus();" />
-		<s:State name="modVitalSigns" />
-		<s:State name="modEducationalResources" />
-		<s:State name="modExercise" />
-		<s:State name="modNutrition" />
-		<s:State name="profile" />-->
 	</s:states>
 	
 	<s:layout>
@@ -139,7 +94,7 @@
 		</s:Group>
 		
 		<s:VGroup paddingTop="-45">
-			<s:Group creationComplete="bar_initializeHandlerMain()">
+			<s:Group creationComplete="tabsMain.setTabClosePolicy(0, false)">
 				<mx:ViewStack id="viewStackMain" borderColor="0xBDBCBC" cornerRadius="2" width="1024" height="100%" x="0" y="22" creationPolicy="all" resizeToContent="true"><!--backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" change="updateBreadcrumb('messages')" -->
 					<s:NavigatorContent id="providerBox" icon="@Embed('images/healthboard.png')">
 						<s:layout>
@@ -221,7 +176,7 @@
 												<s:Spacer width="50%" />
 												<s:RadioButton groupName="showPatients" id="showPatientsNotif" label="Only show patients with notifications" click="patientsSearchFilter()" />
 											</s:HGroup>
-											<mx:LinkButton id="btnPatientsAdvancedSearch" label="Advanced Search »" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnPatientsAdvancedSearch.styleName='linkBtnUnderline';}" rollOut="btnPatientsAdvancedSearch.styleName='linkBtn';" paddingLeft="-3" />
+											<mx:LinkButton id="btnPatientsAdvancedSearch" label="Advanced Search »" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnPatientsAdvancedSearch.styleName='linkBtnUnderline';}" rollOut="btnPatientsAdvancedSearch.styleName='linkBtn';" click="{viewStackProviderModules.selectedChild = modPatients; showAdvancedSearch = true;}" paddingLeft="-3" />
 											<s:HGroup width="610" paddingTop="2" paddingBottom="4">
 												<s:VGroup gap="5">
 													<s:HGroup verticalAlign="middle" gap="3">
@@ -333,7 +288,7 @@
 								</s:BorderContainer>
 								<s:VGroup paddingLeft="9" paddingTop="15">
 									<s:Group creationComplete="{tabsPatients.setTabClosePolicy(0, false);}"><!--tabBarMedRedInitializeHandler()-->
-										<mx:ViewStack id="viewStackPatients" borderColor="0xBDBCBC" cornerRadius="2" backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" x="0" y="22" width="991">
+										<mx:ViewStack id="viewStackPatients" borderColor="0xBDBCBC" cornerRadius="2" backgroundColor="0x3D3D3C" borderVisible="true" borderStyle="solid" x="0" y="22" width="991">
 											<s:NavigatorContent label="Patient Search">
 												<s:layout>
 													<s:VerticalLayout gap="0" />
@@ -350,8 +305,8 @@
 													<s:Spacer width="100%" />
 													
 													<s:HGroup gap="0">
-														<s:Button id="btnPatientsChart" width="29" height="24" icon="@Embed('images/btnImmunizationsChart.png')" chromeColor="0xFF931E" /><!--click="switchMedicalRecordsView(0)"-->
-														<s:Button id="btnPatientsList" width="29" height="24" icon="@Embed('images/btnCalendarList.png')" styleName="buttonText" /><!--click="switchMedicalRecordsView(1)"-->
+														<s:Button id="btnPatientsChart" width="29" height="24" icon="@Embed('images/btnProfile.png')" chromeColor="{viewsPatients.selectedIndex==0?0xFF931E:0xB3B3B3}" click="{viewsPatients.selectedIndex = 0;update();}" /><!--click="switchMedicalRecordsView(0)"-->
+														<s:Button id="btnPatientsList" width="29" height="24" icon="@Embed('images/btnCalendarList.png')" chromeColor="{viewsPatients.selectedIndex==1?0xFF931E:0xB3B3B3}" click="{viewsPatients.selectedIndex = 1;}" /><!--click="switchMedicalRecordsView(1)"-->
 													</s:HGroup>					
 												</s:BorderContainer>
 												<s:Line xFrom="0" xTo="974">
@@ -363,46 +318,39 @@
 													<s:Label text="Keyword" fontSize="12" fontWeight="bold" color="0xFFFFFF" paddingLeft="10" />
 													<s:HGroup width="100%" paddingLeft="10" paddingRight="10">
 														<s:HGroup gap="-1" paddingTop="-2" paddingBottom="5">
-															<s:TextInput id="patientModuleSearch" text="First Name, Last Name, or ID Number" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" height="24" paddingLeft="7" paddingTop="5" width="228" click="{if(patientModuleSearch.text == 'First Name, Last Name, or ID Number') patientModuleSearch.text=''}" /><!--change="patientsSearchFilter()"-->
+															<s:TextInput id="patientModuleSearch" text="First Name, Last Name, or ID Number" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" height="24" paddingLeft="7" paddingTop="5" width="228" click="{if(patientModuleSearch.text == 'First Name, Last Name, or ID Number') patientModuleSearch.text=''}" change="{patientsModuleSearchFilter();}" />
 															<s:Button styleName="searchButtonIcon" width="24" height="24" />
 														</s:HGroup>
 														<s:Spacer width="100%" />
 														<s:HGroup verticalAlign="middle">
 															<s:Label text="Only show patients with" color="0xFFFFFF" />
-															<s:DropDownList id="dropDownPatientUrgencies" height="24" width="130" styleName="buttonText" selectedIndex="0">
-																<mx:ArrayCollection>
-																	<fx:String>All urgency</fx:String>
-																	<fx:String>Urgent</fx:String>
-																	<fx:String>Somewhat urgent</fx:String>
-																	<fx:String>Not urgent</fx:String>
-																</mx:ArrayCollection>
-															</s:DropDownList> 
-															<s:DropDownList id="dropDownPatientModules" height="24" width="130" styleName="buttonText" selectedIndex="0">
-																<mx:ArrayCollection>
-																	<fx:String>All modules</fx:String>
-																	<fx:String>...</fx:String>
-																	<fx:String>...</fx:String>
-																	<fx:String>...</fx:String>
-																</mx:ArrayCollection>
-															</s:DropDownList> 
+															<components:MultiSelectDropDownList
+																id="selectPatientUrgencies"
+																width="130" height="24" placeholderText="All urgency" placeholderTextPartial="%n% selections"
+																dataProvider="{arrUrgencies}" requireSelection="false"
+																itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" selectionChange="patientsModuleSearchFilter()" />
+															
+															<components:MultiSelectDropDownList
+																id="selectPatientModules"
+																width="130" height="24" placeholderText="All modules" placeholderTextPartial="%n% modules"
+																dataProvider="{arrModules}" requireSelection="false"
+																itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" />
+															
 														</s:HGroup>
 														<s:Spacer width="100%" />
 														<s:HGroup verticalAlign="middle">
 															<s:Label text="Show patients from" color="0xFFFFFF" />
-															<s:DropDownList id="dropDownPatientTeams" height="24" width="130" styleName="buttonText" selectedIndex="0">
-																<mx:ArrayCollection>
-																	<fx:String>All teams</fx:String>
-																	<fx:String>...</fx:String>
-																	<fx:String>...</fx:String>
-																	<fx:String>...</fx:String>
-																</mx:ArrayCollection>
-															</s:DropDownList> 
+															<components:MultiSelectDropDownList
+																id="selectPatientTeams"
+																width="130" height="24" placeholderText="All teams" placeholderTextPartial="%n% teams"
+																dataProvider="{arrTeams}" requireSelection="false"
+																itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" selectionChange="patientsModuleSearchFilter()" /> 
 														</s:HGroup>
 													</s:HGroup>
-													<s:HGroup width="270" paddingTop="-10">
-														<mx:LinkButton id="btnAdvancedSearch" label="Advanced Search »" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnAdvancedSearch.styleName='linkBtnUnderline';" rollOut="btnAdvancedSearch.styleName='linkBtn';" />
-														<s:Spacer width="100%" />
-														<mx:LinkButton id="btnClearSearchCriteria" label="Clear Search Criteria »" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnClearSearchCriteria.styleName='linkBtnUnderline';" rollOut="btnClearSearchCriteria.styleName='linkBtn';" />
+													<s:HGroup paddingTop="-10">
+														<mx:LinkButton id="btnAdvancedSearch" label="{!showAdvancedSearch ? 'Advanced Search »' : 'Cancel Advanced Search »'}" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnAdvancedSearch.styleName='linkBtnUnderline';" rollOut="btnAdvancedSearch.styleName='linkBtn';" click="{showAdvancedSearch = !showAdvancedSearch;}" />
+														<s:Spacer width="{!showAdvancedSearch ? 16 : -20}" />
+														<mx:LinkButton id="btnClearSearchCriteria" label="Clear Search Criteria »" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnClearSearchCriteria.styleName='linkBtnUnderline';" rollOut="btnClearSearchCriteria.styleName='linkBtn';" click="clearPatientSearch();" />
 													</s:HGroup>
 													<s:HGroup paddingLeft="10">
 														<s:Line xFrom="0" xTo="967">
@@ -412,10 +360,93 @@
 														</s:Line>
 													</s:HGroup>
 												</s:VGroup>
-												<s:VGroup id="searchResults" paddingTop="10">
+												<s:VGroup id="advancedSearch" visible="{showAdvancedSearch}" includeInLayout="{showAdvancedSearch}" paddingTop="8" paddingLeft="10" color="0xFFFFFF" width="100%">
+													<components:MultiSelectDropDownList
+														id="selectAdvancedSearchParameters" 
+														width="171" height="24" placeholderText="Show 8 Search Parameters" placeholderTextPartial="Show %n% Search Parameters"
+														dataProvider="{arrSearchParameters}" requireSelection="false"
+														itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" />
+														<!--<components:layout>
+															<s:TileLayout requestedRowCount="21" />
+														</components:layout>
+													</components:MultiSelectDropDownList>-->
+													
+													<s:HGroup width="100%" paddingTop="7" paddingBottom="7">
+														<s:VGroup gap="5" paddingRight="21">
+															<s:TextInput id="txtAdvFirstLast" width="171" height="24" text="e.g., Arthur Adams" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvFirstLast.text == 'e.g., Arthur Adams') txtAdvFirstLast.text=''}" change="patientsModuleSearchFilter();" />
+															<s:Label text="First and/or last name" fontStyle="italic" />
+														</s:VGroup>
+														<s:VGroup gap="5" paddingRight="65">
+															<s:HGroup verticalAlign="middle" gap="3">
+																<s:TextInput id="txtAdvBirthDay" width="26" height="24" text="dd" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" click="{if(txtAdvBirthDay.text == 'dd') txtAdvBirthDay.text=''}" change="patientsModuleSearchFilter();" />
+																<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+																<s:TextInput id="txtAdvBirthMonth" width="26" height="24" text="mm" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" click="{if(txtAdvBirthMonth.text == 'mm') txtAdvBirthMonth.text=''}" change="patientsModuleSearchFilter();" />
+																<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+																<s:TextInput id="txtAdvBirthYear" width="31" height="24" text="year" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="4" click="{if(txtAdvBirthYear.text == 'year') txtAdvBirthYear.text=''}" change="patientsModuleSearchFilter();" />
+																<s:DropDownList id="dropDownAdvCalendar" dropShadowVisible="false" skinClass="skins.general.MyCalendarDropDownListSkin" itemRenderer="spark.skins.spark.DefaultComplexItemRenderer" width="25" requireSelection="false" click="{event.stopImmediatePropagation()}" open="dropDownCalendar_openHandler(event)">
+																	<s:dataProvider>
+																		<s:ArrayList>
+																			<mx:DateChooser id="advBirthDateChooser" showToday="true" yearNavigationEnabled="true"
+																							contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" headerStyleName="dateChooserVitalGrayHeader"
+																							fontSize="11" change="{advDateChooser_changeHandler(event); patientsModuleSearchFilter();}" />
+																		</s:ArrayList>
+																	</s:dataProvider>
+																</s:DropDownList>
+															</s:HGroup>
+															<s:Label text="Date of Birth" fontStyle="italic" />
+														</s:VGroup>
+														<s:VGroup gap="5" paddingRight="105">
+															<components:MultiSelectDropDownList
+																id="selectSexes"
+																width="74" height="24" placeholderText="All" placeholderTextPartial="%n% selections"
+																dataProvider="{arrSexes}" requireSelection="false"
+																itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" selectionChange="patientsModuleSearchFilter();" />
+															<s:Label text="Sex" fontStyle="italic" />
+														</s:VGroup>
+														<s:VGroup paddingRight="140">
+															<s:HGroup verticalAlign="middle">
+																<s:Label text="From" color="0xBCBABB" fontSize="12" />
+																<s:TextInput id="txtAdvAgeFrom" width="26" height="24" text="##" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" click="{if(txtAdvAgeFrom.text == '##') txtAdvAgeFrom.text=''}" change="patientsModuleSearchFilter()" />
+																<s:Label text="To" color="0xBCBABB" fontSize="12" />
+																<s:TextInput id="txtAdvAgeTo" width="26" height="24" text="##" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" click="{if(txtAdvAgeTo.text == '##') txtAdvAgeTo.text=''}" change="patientsModuleSearchFilter()" />
+															</s:HGroup>
+															<s:Label text="Age or Age Range" fontStyle="italic" />
+														</s:VGroup>
+														<s:VGroup gap="5">
+															<components:MultiSelectDropDownList
+																id="selectFamilyPrefix"
+																width="127" height="24" placeholderText="All" placeholderTextPartial="%n% selections"
+																dataProvider="{arrFamilyPrefixes}" requireSelection="false"
+																itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" />
+															<s:Label text="Family Prefix" fontStyle="italic" />
+														</s:VGroup>
+													</s:HGroup>
+													<s:HGroup>
+														<s:VGroup gap="5" paddingRight="38">
+															<s:TextInput id="txtAdvID" width="82" height="24" text="#########" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvID.text == '#########') txtAdvID.text=''}" change="patientsModuleSearchFilter()" />
+															<s:Label text="ID Number" fontStyle="italic" />
+														</s:VGroup>
+														<s:VGroup gap="5" paddingRight="52">
+															<s:TextInput id="txtAdvSSN" width="82" height="24" text="###-##-####" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvSSN.text == '###-##-####') txtAdvSSN.text=''}" change="patientsModuleSearchFilter()" />
+															<s:Label text="Patient's SSN" fontStyle="italic" />
+														</s:VGroup>
+														<s:VGroup gap="5">
+															<s:TextInput id="txtAdvSponsorSSN" width="82" height="24" text="###-##-####" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" click="{if(txtAdvSponsorSSN.text == '###-##-####') txtAdvSponsorSSN.text=''}" change="patientsModuleSearchFilter()" />
+															<s:Label text="Sponsor's SSN" fontStyle="italic" />
+														</s:VGroup>
+													</s:HGroup>
+													<s:HGroup paddingTop="10">
+														<s:Line xFrom="0" xTo="967">
+															<s:stroke>
+																<s:SolidColorStroke color="#5B5B5B"/>
+															</s:stroke>
+														</s:Line>
+													</s:HGroup>
+												</s:VGroup>
+												<s:VGroup id="searchResults" paddingTop="10" visible="false">
 													<s:HGroup color="0xCCCCCC" fontStyle="italic" gap="2" paddingLeft="10">
 														<s:Label text="There are"  />
-														<s:Label text="95" color="0xFF931E" fontWeight="bold" />
+														<s:Label text="{model.patients.length}" color="0xFF931E" fontWeight="bold" />
 														<s:Label text="patients who fit your criteria." />
 													</s:HGroup>
 													<s:HGroup paddingTop="6">
@@ -425,40 +456,109 @@
 															</s:stroke>
 														</s:Line>
 													</s:HGroup>
-													<mx:LinkButton id="btnCustomizeTable" label="Customize Table" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnCustomizeTable.styleName='linkBtnUnderline';" rollOut="btnCustomizeTable.styleName='linkBtn';" paddingLeft="10" />
-													<mx:DataGrid id="patientsList" dataProvider="{ProviderApplicationModel(controller.model).patients}" fontFamily="myMyriadNoCFF" paddingLeft="-2"
-																 itemClick="dgPatients_itemClickHandler(event)"
-																 width="989" height="462"
-																 selectionColor="0x31535E" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF"
-																 alternatingItemColors="[0x303030,0x3c3c3b]"
-																 color="0xFFFFFF" fontSize="10" verticalAlign="middle"
-																 headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeaderAlternative" headerHeight="30" paddingTop="6"
-																 rowHeight="27" horizontalGridLines="false"><!--defaultDataGridItemRenderer="mx.controls.dataGridClasses.FTEDataGridItemRenderer"-->
-														<mx:columns>
-															<mx:DataGridColumn dataField="urgency" headerText="Urgency" width="68">
-																<mx:itemRenderer>
-																	<fx:Component>
-																		<mx:HBox width="68" horizontalAlign="center">
-																			<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 'Urgent'}" includeInLayout="{data.urgency == 'Urgent'}" />
-																			<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 'Somewhat urgent'}" includeInLayout="{data.urgency == 'Somewhat urgent'}" />
-																		</mx:HBox>
-																	</fx:Component>
-																</mx:itemRenderer>
-															</mx:DataGridColumn>
-															<mx:DataGridColumn dataField="id" headerText="ID Number" width="95" />
-															<mx:DataGridColumn dataField="team" headerText="Team" width="62" />
-															<mx:DataGridColumn dataField="lastName" headerText="Last Name" width="101" />
-															<mx:DataGridColumn dataField="firstName" headerText="First Name" width="100" />
-															<mx:DataGridColumn dataField="rank" headerText="Rank" width="148" />
-															<mx:DataGridColumn dataField="sex" headerText="Sex" width="58" />
-															<mx:DataGridColumn dataField="lastVisit" headerText="Last Visit" width="80" />
-															<mx:DataGridColumn dataField="age" headerText="Age" labelFunction="lblPatientsAge" width="50" />
-															<mx:DataGridColumn dataField="dob" headerText="DOB" width="80" />
-															<mx:DataGridColumn dataField="healthConditions" headerText="Health Conditions" width="130" />
-														</mx:columns>
-													</mx:DataGrid>
+													<mx:ViewStack id="viewsPatients" selectedIndex="1"><!--borderColor="0xBDBCBC" cornerRadius="2" backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" x="0" y="22" width="991"-->
+														<s:NavigatorContent>
+															<s:layout>
+																<s:HorizontalLayout />
+															</s:layout>
+															<s:VGroup paddingTop="9" paddingLeft="12" gap="7" styleName="whiteText13">
+																<mx:LinkButton id="btnSortUrgency" label="Sort by Urgency" click="sortPatients('urgency');" />
+																<mx:LinkButton id="btnSortID" label="Sort by Patient ID" click="sortPatients('id');" />
+																<mx:LinkButton id="btnSortLastName" label="Sort by Last Name" styleName="messageFolderSelected" click="sortPatients('lastName');" />
+																<mx:LinkButton id="btnSortFirstName" label="Sort by First Name" click="sortPatients('firstName');" />
+																<mx:LinkButton id="btnSortAge" label="Sort by Age" click="sortPatients('dob');" />
+																<mx:LinkButton id="btnSortRank" label="Sort by Rank" click="sortPatients('rank');" />
+																<mx:LinkButton id="btnSortBranch" label="Sort by Service Branch" click="sortPatients('serviceBranch');" />
+																<mx:LinkButton id="btnSortSex" label="Sort by Sex" click="sortPatients('sex');" />
+																<mx:LinkButton id="btnSortBloodType" label="Sort by Blood Type" click="sortPatients('bloodType');" />
+																<mx:LinkButton id="btnSortLastVisit" label="Sort by Last Visit" click="sortPatients('lastVisit');" />
+															</s:VGroup>
+															<s:VGroup paddingTop="-7">
+																<s:Line yFrom="0" yTo="496">
+																	<s:stroke>
+																		<s:SolidColorStroke color="#7C7C7C" alpha="0.8" />
+																	</s:stroke>
+																</s:Line>
+															</s:VGroup>
+															
+															<s:Scroller width="100%" height="{showAdvancedSearch ? 330 : 489}">
+																<s:HGroup width="100%" paddingLeft="9" paddingTop="10">
+																	<s:VGroup id="patientsLinks" gap="-5" width="130" />
+																	
+																	<s:TileGroup 
+																		id="patientsProfileList" 
+																		horizontalGap="19" verticalGap="19" 
+																		requestedColumnCount="2" columnWidth="{ProviderProfile.WIDTH}" 
+																		paddingBottom="20" />
+																	
+																</s:HGroup>
+															</s:Scroller>
+														</s:NavigatorContent>
+														
+														<s:NavigatorContent>
+															<s:layout>
+																<s:VerticalLayout />
+															</s:layout>
+															<mx:LinkButton id="btnCustomizeTable" label="Customize Table" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnCustomizeTable.styleName='linkBtnUnderline';" rollOut="btnCustomizeTable.styleName='linkBtn';" click="customizeTable()" paddingLeft="10" />
+															<mx:DataGrid id="patientsList" dataProvider="{model.patients}" fontFamily="myMyriadNoCFF" paddingLeft="-2"
+																		 itemClick="dgPatients_itemClickHandler(event)"
+																		 width="989" height="{!showAdvancedSearch ? 462 : 303}"
+																		 selectionColor="0x31535E" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF"
+																		 alternatingItemColors="[0x303030,0x3c3c3b]"
+																		 color="0xFFFFFF" fontSize="10" verticalAlign="middle"
+																		 headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeaderAlternative" headerHeight="30" paddingTop="6"
+																		 rowHeight="27" variableRowHeight="true" horizontalGridLines="false"><!--defaultDataGridItemRenderer="mx.controls.dataGridClasses.FTEDataGridItemRenderer"-->
+																<mx:columns>
+																	<mx:DataGridColumn dataField="urgency" headerText="Urgency" width="68">
+																		<mx:itemRenderer>
+																			<fx:Component>
+																				<mx:HBox width="68" horizontalAlign="center">
+																					<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 'Urgent'}" includeInLayout="{data.urgency == 'Urgent'}" />
+																					<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 'Somewhat urgent'}" includeInLayout="{data.urgency == 'Somewhat urgent'}" />
+																				</mx:HBox>
+																			</fx:Component>
+																		</mx:itemRenderer>
+																	</mx:DataGridColumn>
+																	<mx:DataGridColumn dataField="id" headerText="ID Number" width="95" visible="{colId}" />
+																	<mx:DataGridColumn dataField="photo" headerText="Photo" width="95" visible="{colPhoto}">
+																		<mx:itemRenderer>
+																			<fx:Component>
+																				<mx:HBox horizontalAlign="center" creationComplete="setSource();">
+																					<fx:Script>		
+																						<![CDATA[
+																							private function setSource():void {
+																								imgPatient.source = "images/patients/small/" + data.lastName.toLowerCase() + ".jpg";
+																							}
+																							
+																							private function onTargetUserImageLoadError(event:IOErrorEvent):void {
+																								Image(event.currentTarget).source = "images/patients/small/default.jpg";
+																							}
+																						]]>
+																					</fx:Script>
+																					<s:Image id="imgPatient" source="images/patients/small/default.jpg" ioError="onTargetUserImageLoadError(event)" />
+																				</mx:HBox>
+																			</fx:Component>
+																		</mx:itemRenderer>
+																	</mx:DataGridColumn>
+																	<mx:DataGridColumn dataField="team" headerText="Team" width="62" visible="{colTeam}" />
+																	<mx:DataGridColumn dataField="lastName" headerText="Last Name" width="101" visible="{colLastName}" />
+																	<mx:DataGridColumn dataField="firstName" headerText="First Name" width="100" visible="{colFirstName}" />
+																	<mx:DataGridColumn dataField="serviceBranch" headerText="Service Branch" visible="{colBranch}" />
+																	<mx:DataGridColumn dataField="rank" headerText="Rank" width="148" visible="{colRank}" />
+																	<mx:DataGridColumn dataField="occupation" headerText="Occupation" visible="{colOccupation}" />
+																	<mx:DataGridColumn dataField="sex" headerText="Sex" width="58" visible="{colSex}" />
+																	<mx:DataGridColumn dataField="lastVisit" headerText="Last Visit" width="80" visible="{colLastVisit}" />
+																	<mx:DataGridColumn dataField="age" headerText="Age" labelFunction="lblPatientsAge" width="50" visible="{colAge}" />
+																	<mx:DataGridColumn dataField="dob" headerText="DOB" width="80" visible="{colDob}" />
+																	<mx:DataGridColumn dataField="bloodType" headerText="Blood Type" visible="{colBloodType}" />
+																	<mx:DataGridColumn dataField="race" headerText="Race" visible="{colRace}" />
+																	<mx:DataGridColumn dataField="healthConditions" headerText="Health Conditions" width="130" visible="{colHealthConditions}" />
+																</mx:columns>
+															</mx:DataGrid>
+														</s:NavigatorContent>
+													</mx:ViewStack>
+													
 												</s:VGroup>
-												
 												
 											</s:NavigatorContent>
 										</mx:ViewStack>
