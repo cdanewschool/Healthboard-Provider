@@ -70,8 +70,6 @@ private function init():void
 	
 	model.chartStyles = chartStyles = new ChartStyles();
 	
-	BindingUtils.bindProperty( controller.exerciseController.model, 'fullName', model, 'fullname');	//	temp
-	
 	//	eventually this should go in maincontroller
 	this.addEventListener( TabPlus.CLOSE_TAB_EVENT, onTabClose );
 	
