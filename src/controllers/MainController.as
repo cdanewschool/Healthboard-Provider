@@ -441,5 +441,13 @@ package controllers
 			
 			teamAppointmentsController.model.dataService.send();
 		}
+		
+		override public function getModuleTitle(module:String):String
+		{
+			var title:String = super.getModuleTitle(module);
+			
+			if( module == ProviderConstants.MODULE_DECISION_SUPPORT ) return "Decision Support";
+			if( module == ProviderConstants.MODULE_TEAM ) return "Team Profile";
+		}
 	}
 }
