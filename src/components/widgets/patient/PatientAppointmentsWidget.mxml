@@ -12,6 +12,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import ASclasses.Constants;
+			
 			import controllers.AppointmentsController;
 			import controllers.Controller;
 			import controllers.MainController;
@@ -25,6 +27,8 @@
 			
 			import spark.filters.DropShadowFilter;
 			
+			import utils.StringUtil;
+			
 			[Bindable] private var selectedAppointment:Object;
 			
 			[Bindable] private var controller:AppointmentsController = AppProperties.getInstance().controller.appointmentsController;
@@ -35,10 +39,12 @@
 				
 				if( selectedAppointment )
 				{
-					month.text = selectedAppointment.month;
-					date.text = selectedAppointment.date;
-					appointmentTime.label = selectedAppointment.daytime;
-					details.text = selectedAppointment.details;
+					month.text = Constants.MONTHS[ selectedAppointment.date.month ].toUpperCase();
+					date.text = selectedAppointment.date.date;
+					
+					appointmentTime.label = Constants.DAYS[ selectedAppointment.date.day ].toUpperCase() + ' ' + StringUtil.leftPad(selectedAppointment.hour) + ':' + StringUtil.leftPad(selectedAppointment.mins.toString()) + ' ' + selectedAppointment.meridiem.toUpperCase();
+					
+					details.text = selectedAppointment.type + '\n' + selectedAppointment.provider + '\n(999) 999-9999';
 				}
 			}
 			
