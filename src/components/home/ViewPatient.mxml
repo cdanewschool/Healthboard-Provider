@@ -385,7 +385,7 @@
 						headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
 						includeIn="default" creationComplete="recentActivitiesWidget.module = Constants.MODULE_RECENT_ACTIVITIES" />
 						
-					<patient:PatientAppointmentsWidget 
+					<widgets:PatientAppointmentsWidget 
 						id="appointmentsWidget" 
 						width="305" title="Appointments (4)" 
 						collapsible="true" headerClickable="false" 
