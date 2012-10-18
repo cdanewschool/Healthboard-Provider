@@ -75,8 +75,8 @@
 				
 				<s:HGroup paddingRight="14">
 					
-					<mx:LinkButton label="{MainController(AppProperties.getInstance().controller).user.available == UserModel.STATE_AVAILABLE ? 'Available' : 'Unavailable'}" click="toggleAvailability(event)" toolTip="{MainController(AppProperties.getInstance().controller).user.available == UserModel.STATE_AVAILABLE ? 'Change status to unavailable' : 'Change status to available'}" styleName="linkBtnYellow" />
-					<mx:LinkButton id="btnProfile" label="{AppProperties.getInstance().controller.model.fullname}" color="0xAEDBE2" textRollOverColor="0xAEDBE2" textSelectedColor="0xAEDBE2" skin="{null}" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, ProviderConstants.STATE_PROFILE) )" rollOver="btnProfile.styleName='linkBtnUnderline';" rollOut="btnProfile.styleName='linkBtn';" />
+					<mx:LinkButton label="{controller.user.available == UserModel.STATE_AVAILABLE ? 'Available' : 'Unavailable'}" click="toggleAvailability(event)" toolTip="{MainController(AppProperties.getInstance().controller).user.available == UserModel.STATE_AVAILABLE ? 'Change status to unavailable' : 'Change status to available'}" styleName="linkBtnYellow" />
+					<mx:LinkButton id="btnProfile" label="{controller.user.fullName}" color="0xAEDBE2" textRollOverColor="0xAEDBE2" textSelectedColor="0xAEDBE2" skin="{null}" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, ProviderConstants.STATE_PROFILE) )" rollOver="btnProfile.styleName='linkBtnUnderline';" rollOut="btnProfile.styleName='linkBtn';" />
 					
 					<mx:LinkButton id="btnLogout" label="Logout" color="0xE6E6E6" textRollOverColor="0xE6E6E6" textSelectedColor="0xE6E6E6" skin="{null}" paddingLeft="1" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.STATE_DEFAULT) )" rollOver="btnLogout.styleName='linkBtnUnderline';" rollOut="btnLogout.styleName='linkBtn';" />
 					
