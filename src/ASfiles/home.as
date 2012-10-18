@@ -169,7 +169,7 @@ protected function onTabClose( event:ListEvent ):void
 			arrOpenTabs.splice(index-1,1);
 			viewStackMessages.selectedIndex--;
 		}
-		else if( this.currentState == ProviderConstants.MODULE_MEDICATIONS ) 
+		else if( this.currentState == Constants.MODULE_MEDICATIONS ) 
 		{
 			controller.medicationsController.model.openTabs.splice(index-1,1);
 		}

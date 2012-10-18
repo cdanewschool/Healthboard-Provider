@@ -7,6 +7,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import ASclasses.Constants;
+			
 			import ASfiles.ProviderConstants;
 			
 			import mx.collections.ArrayCollection;
@@ -62,11 +64,11 @@
 				
 				var type:String = item.type;
 				
-				if( activeModule == ProviderConstants.MODULE_APPOINTMENTS )
+				if( activeModule == Constants.MODULE_APPOINTMENTS )
 					return type == "Appointments";
-				else if( activeModule == ProviderConstants.MODULE_MEDICATIONS )
+				else if( activeModule == Constants.MODULE_MEDICATIONS )
 					return type == "Medications";
-				else if( activeModule == ProviderConstants.MODULE_IMMUNIZATIONS )
+				else if( activeModule == Constants.MODULE_IMMUNIZATIONS )
 					return type == "Immunizations";
 				
 				return false;

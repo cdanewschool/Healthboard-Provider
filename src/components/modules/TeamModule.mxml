@@ -15,6 +15,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import ASclasses.Constants;
+			
 			import ASfiles.ProviderConstants;
 			
 			import components.provider.ProviderProfile;
@@ -22,7 +24,7 @@
 			
 			import events.ApplicationEvent;
 			import events.ProfileEvent;
-
+			
 			import models.Message;
 			import models.ProviderModel;
 			import models.ProvidersModel;
@@ -49,7 +51,7 @@
 				message.recipientAlias = alias;
 				
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-				evt.data = ProviderConstants.MODULE_MESSAGES;
+				evt.data = Constants.MODULE_MESSAGES;
 				evt.message = message;
 				dispatchEvent( evt );	
 			}
@@ -132,7 +134,7 @@
 			private function onTeamScheduleClick(event:MouseEvent):void
 			{
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-				evt.data = ProviderConstants.MODULE_APPOINTMENTS;
+				evt.data = Constants.MODULE_APPOINTMENTS;
 				dispatchEvent( evt );
 			}
 			

@@ -4,8 +4,11 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:components="components.*"
+	xmlns:plus="external.TabBarPlus.plus.*" 
+	xmlns:appointments="components.appointments.*" 
+	xmlns:calendar="components.calendar.*" 
 	width="100%" height="100%" 
-	creationComplete="init()" xmlns:plus="external.TabBarPlus.plus.*" xmlns:appointments="components.appointments.*" xmlns:calendar="components.calendar.*">
+	creationPolicy="all" creationComplete="init()" >
 	
 	<fx:Metadata>
 		[Event(name="navigate", type="events.ApplicationEvent")]
@@ -364,7 +367,7 @@
 					message.urgency = Message.URGENCY_URGENT;
 					
 					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-					evt.data = ProviderConstants.MODULE_MESSAGES;
+					evt.data = Constants.MODULE_MESSAGES;
 					evt.message = message;
 					dispatchEvent( evt );
 					
@@ -572,7 +575,7 @@
 				message.recipients = patients;
 				
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-				evt.data = ProviderConstants.MODULE_MESSAGES;
+				evt.data = Constants.MODULE_MESSAGES;
 				evt.message = message;
 				dispatchEvent( evt );
 			}

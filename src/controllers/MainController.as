@@ -195,7 +195,7 @@ package controllers
 				}
 				
 				evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-				evt.data = ProviderConstants.MODULE_APPOINTMENTS;
+				evt.data = Constants.MODULE_APPOINTMENTS;
 				application.dispatchEvent( evt );
 			}
 			else if( event.type == ProfileEvent.SEND_MESSAGE )
@@ -204,7 +204,7 @@ package controllers
 				message.recipients = [ event.user ];
 				
 				evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-				evt.data = ProviderConstants.MODULE_MESSAGES;
+				evt.data = Constants.MODULE_MESSAGES;
 				evt.message = message;
 				application.dispatchEvent( evt );
 			}
@@ -349,7 +349,7 @@ package controllers
 						
 						visualDashboardProvider(application).viewStackProviderModules.selectedChild = module;
 						
-						if( event.data == ProviderConstants.MODULE_MESSAGES )
+						if( event.data == Constants.MODULE_MESSAGES )
 						{
 							//createNewMessage( 1 );	//TODO fix
 							
@@ -448,6 +448,8 @@ package controllers
 			
 			if( module == ProviderConstants.MODULE_DECISION_SUPPORT ) return "Decision Support";
 			if( module == ProviderConstants.MODULE_TEAM ) return "Team Profile";
+			
+			return title;
 		}
 	}
 }
