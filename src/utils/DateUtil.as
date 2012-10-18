@@ -6,7 +6,7 @@ package utils
 	import flash.globalization.DateTimeStyle;
 	import flash.globalization.LocaleID;
 	
-	import utils.StringUtil;
+	import util.StringUtil;
 	
 	public class DateUtil
 	{

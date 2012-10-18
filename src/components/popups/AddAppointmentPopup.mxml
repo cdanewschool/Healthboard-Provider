@@ -39,7 +39,7 @@
 			import spark.events.IndexChangeEvent;
 			
 			import utils.DateUtil;
-			import utils.StringUtil;
+			import util.StringUtil;
 			
 			public static const MODE_ADD:String = "add";
 			public static const MODE_EDIT:String = "edit";
