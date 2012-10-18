@@ -60,7 +60,7 @@
 			private function showCalendar():void
 			{
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE );
-				evt.data = 'modCalendar';
+				evt.data = Constants.MODULE_APPOINTMENTS;
 				dispatchEvent( evt );
 			}
 			
