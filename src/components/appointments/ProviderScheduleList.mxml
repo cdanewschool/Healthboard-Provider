@@ -115,9 +115,11 @@
 				
 				if( dirty )
 				{
+					dirty = false;
+					
 					removeAllElements();
 					
-					if( !date || !providers ) return;
+					if( !date || !providers )  return;
 					
 					for each(var provider:ProviderModel in providers)
 					{
