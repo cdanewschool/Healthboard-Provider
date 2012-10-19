@@ -484,7 +484,7 @@
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modImmunizations">
-					<modules:ImmunizationsModule width="975" paddingTop="10" showHeader="false" />
+					<modules:ImmunizationsModule width="975" paddingTop="10" showHeader="false" currentState="provider" />
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modMedicalRecords">
