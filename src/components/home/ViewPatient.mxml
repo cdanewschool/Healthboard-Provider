@@ -347,13 +347,13 @@
 		
 		<s:HGroup color="0xFFFFFF" verticalAlign="middle" paddingLeft="-7" gap="4" fontSize="22">
 			
-			<s:Label id="patientName" paddingTop="2" paddingLeft="10" styleName="blue22" />
+			<s:Label id="patientName" paddingTop="2" paddingLeft="10" styleName="{currentState==STATE_MODULE ? 'blue22' : 'white22Bold'}" />
 			
 			<s:HGroup visible="{currentState == STATE_MODULE}" verticalAlign="middle" gap="5">
 				
 				<mx:Label text="»" styleName="white2Bold" width="15" />
 				
-				<mx:Label id="moduleTitle" styleName="white2Bold" />
+				<mx:Label id="moduleTitle" styleName="white22Bold" />
 				
 				<mx:LinkButton label="▼" fontSize="10" color="0xFFFFFF" paddingTop="2" paddingLeft="2" click="toggleLibrary()" skin="{null}" />
 				
@@ -367,7 +367,7 @@
 		
 		<s:VGroup id="content">
 			
-			<s:HGroup id="widgetContainer" gap="22" paddingTop="11" minHeight="591" includeIn="default">
+			<s:HGroup id="widgetContainer" gap="22" paddingTop="11" minHeight="591">
 				
 				<!-- column 1	-->
 				<s:VGroup gap="17">
