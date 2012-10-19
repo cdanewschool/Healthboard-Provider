@@ -3,7 +3,8 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*">
+	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
+	creationComplete="init()">
 	
 	<fx:Script>
 		<![CDATA[
@@ -11,15 +12,26 @@
 			
 			import ASfiles.ProviderConstants;
 			
+			import events.EnhancedTitleWindowEvent;
+			
+			import external.collapsibleTitleWindow.skins.EnhancedTitleWindowSkin;
+			
 			import mx.collections.ArrayCollection;
 			import mx.events.CollectionEvent;
 			import mx.events.ListEvent;
 			
+			import spark.components.Label;
+			
  			private var _alerts:ArrayCollection;
-
+			
+			private var allAlerts:ArrayCollection;
+			private var moduleAlerts:ArrayCollection;
+			
 			private var _activeModule:String;
 			
 			private var dirty:Boolean;
+			
+			private var restrictToModule:Boolean = true;
 			
 			[Bindable]
 			public function get alerts():ArrayCollection
@@ -33,8 +45,10 @@
 				
 				if( _alerts )
 				{
-					_alerts.filterFunction = filterByModule;
-					_alerts.refresh();
+					allAlerts = new ArrayCollection( _alerts.source );
+					
+					moduleAlerts = new ArrayCollection( _alerts.source );
+					moduleAlerts.filterFunction = filterByModule;
 					
 					invalidateProperties();
 					
@@ -51,7 +65,7 @@
 			{
 				_activeModule = value;
 				
-				if( _alerts ) _alerts.refresh();
+				restrictToModule = true;
 				
 				dirty = true;
 				
@@ -76,19 +90,77 @@
 			
 			override protected function commitProperties():void
 			{
-				super.commitProperties();
-				
 				if( dirty )
 				{
-					title = (activeModule ? AppProperties.getInstance().controller.getModuleTitle(activeModule) : "Health Focus") + ( alerts && alerts.length ? " (" + alerts.length + ")" : '' ); 
+					if( alerts )
+					{
+						moduleAlerts.refresh();
+						
+						datagrid.dataProvider = activeModule && restrictToModule ? moduleAlerts : allAlerts;
+					}
+					
+					subTitleDisplay.removeEventListener( MouseEvent.CLICK, onSubtitleClick );
+					
+					if( activeModule ) subTitleDisplay.addEventListener( MouseEvent.CLICK, onSubtitleClick );
+					
+					(titleDisplay as Label).setStyle( 'color', activeModule ? 0xF2902B : 0xFFFFFF );
+					
+					(subTitleDisplay as Label).visible = activeModule != null;
+					
+					title = (activeModule ? AppProperties.getInstance().controller.getModuleTitle(activeModule) : "Health Focus") + ( moduleAlerts && moduleAlerts.length ? " (" + moduleAlerts.length + ")" : '' ); 
+					subtitle = activeModule ? "|   View All Alerts (" + allAlerts.length + ")" : '';
 					
 					dirty = false;
 				}
+				
+				super.commitProperties();
+			}
+			
+			private function onTitleClick( event:MouseEvent ):void
+			{
+				restrictToModule = true;
+				
+				dirty = true;
+				
+				invalidateProperties();
+			}
+			
+			private function onSubtitleClick( event:MouseEvent ):void
+			{
+				restrictToModule = false;
+				
+				dirty = true;
+				
+				invalidateProperties();
 			}
 			
 			private function onItemClick(event:ListEvent):void
 			{
 				dispatchEvent( event );
+			}
+			
+			private function onSubtitleRollOver(event:MouseEvent):void
+			{
+				//(subTitleDisplay as Label).styleName  = "linkBtnUnderline";
+			}
+			
+			private function onSubtitleRollOut(event:MouseEvent):void
+			{
+				//(subTitleDisplay as Label).styleName  = "linkBtn";
+			}
+			
+			private function init():void
+			{
+				titleDisplay.addEventListener( MouseEvent.CLICK, onTitleClick );
+				
+				subTitleDisplay.addEventListener( MouseEvent.ROLL_OVER, onSubtitleRollOver );
+				subTitleDisplay.addEventListener( MouseEvent.ROLL_OUT, onSubtitleRollOut );
+				
+				(titleDisplay as Label).setStyle( 'fontWeight', 'bold' );
+				(subTitleDisplay as Label).setStyle( 'color', 0xFFFFFF );
+				
+				(titleDisplay as Label).buttonMode = true;
+				(subTitleDisplay as Label).buttonMode = true;
 			}
 		]]>
 	</fx:Script>
@@ -98,7 +170,8 @@
 	</fx:Declarations>
 	
 	<mx:DataGrid 
-		dataProvider="{alerts}" fontFamily="myMyriadNoCFF"
+		id="datagrid"
+		fontFamily="myMyriadNoCFF"
 		width="100%" 
 		color="0xFFFFFF" verticalAlign="middle"
 	 	headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
