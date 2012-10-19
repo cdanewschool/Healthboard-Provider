@@ -103,7 +103,12 @@
 					
 					if( activeModule ) subTitleDisplay.addEventListener( MouseEvent.CLICK, onSubtitleClick );
 					
-					(titleDisplay as Label).setStyle( 'color', activeModule ? 0xF2902B : 0xFFFFFF );
+					var isFiltered:Boolean = activeModule != null && restrictToModule;
+					
+					(titleDisplay as Label).setStyle( 'color', isFiltered ? 0xF2902B : 0xFFFFFF );
+					(subTitleDisplay as Label).setStyle( 'color', !isFiltered ? 0xF2902B : 0xFFFFFF );
+					(titleDisplay as Label).setStyle( 'fontWeight', isFiltered || !activeModule ? 'bold' : 'normal' );
+					(subTitleDisplay as Label).setStyle( 'fontWeight', !isFiltered ? 'bold' : 'normal' );
 					
 					(subTitleDisplay as Label).visible = activeModule != null;
 					
@@ -139,26 +144,9 @@
 				dispatchEvent( event );
 			}
 			
-			private function onSubtitleRollOver(event:MouseEvent):void
-			{
-				//(subTitleDisplay as Label).styleName  = "linkBtnUnderline";
-			}
-			
-			private function onSubtitleRollOut(event:MouseEvent):void
-			{
-				//(subTitleDisplay as Label).styleName  = "linkBtn";
-			}
-			
 			private function init():void
 			{
 				titleDisplay.addEventListener( MouseEvent.CLICK, onTitleClick );
-				
-				subTitleDisplay.addEventListener( MouseEvent.ROLL_OVER, onSubtitleRollOver );
-				subTitleDisplay.addEventListener( MouseEvent.ROLL_OUT, onSubtitleRollOut );
-				
-				(titleDisplay as Label).setStyle( 'fontWeight', 'bold' );
-				(subTitleDisplay as Label).setStyle( 'color', 0xFFFFFF );
-				
 				(titleDisplay as Label).buttonMode = true;
 				(subTitleDisplay as Label).buttonMode = true;
 			}
