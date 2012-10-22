@@ -81,12 +81,14 @@
 					<mx:LinkButton id="btnLogout" label="Logout" color="0xE6E6E6" textRollOverColor="0xE6E6E6" textSelectedColor="0xE6E6E6" skin="{null}" paddingLeft="1" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.STATE_DEFAULT) )" rollOver="btnLogout.styleName='linkBtnUnderline';" rollOut="btnLogout.styleName='linkBtn';" />
 					
 					<s:HGroup paddingTop="-6" paddingLeft="-9">
-						<s:DropDownList id="dropDownView" dropShadowVisible="false" skinClass="skins.general.MyOptionsDropDownListSkin" color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" contentBackgroundColor="0xFFFFFF" width="35" fontSize="12"><!--change="dropDownView_changeHandler(event)"--> 
-							<mx:ArrayCollection>
-								<fx:String>     Preferences</fx:String>
-								<fx:String>     Sync Now</fx:String>
-							</mx:ArrayCollection>
-						</s:DropDownList>
+						<s:DropDownList 
+							id="dropDownView" 
+							dataProvider="{model.preferences}" labelField="label" 
+							change="controller.selectPreference(event)" 
+							dropShadowVisible="false" 
+							skinClass="skins.general.MyOptionsDropDownListSkin" itemRenderer="components.itemrenderers.EnabledListItemRenderer"
+							color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" contentBackgroundColor="0xFFFFFF" 
+							width="35" fontSize="12" /><!--change="dropDownView_changeHandler(event)"--> 
 					</s:HGroup>
 				</s:HGroup>
 			</s:BorderContainer>

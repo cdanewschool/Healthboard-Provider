@@ -40,7 +40,8 @@ package controllers
 	
 	import spark.events.IndexChangeEvent;
 	
-	import utils.DateUtil;
+	import util.DateFormatters;
+	import util.DateUtil;
 
 	public class MainController extends Controller
 	{
@@ -78,6 +79,18 @@ package controllers
 			medicationsController = new ProviderMedicationsController();
 			teamAppointmentsController = new TeamAppointmentsController();
 			
+			var lastSynced:Date = today;
+			lastSynced.time -= DateUtil.DAY * Math.random();
+			
+			model.preferences = new ArrayCollection
+				( 
+					[ 
+						{id:"preferences", label:"Preferences", tooltip:"Set preferences for general settings, notifications and modules."}, 
+						{id:"sync_status", label: "Last synced " + DateFormatters.syncTime.format( lastSynced ), enabled:false }, 
+						{id:"sync", label:"Sync Now"} 
+					] 
+				);
+			
 			ProviderApplicationModel(model).patientsDataService.url = "data/patients.xml";
 			ProviderApplicationModel(model).patientsDataService.addEventListener( ResultEvent.RESULT, patientsResultHandler );
 			
@@ -97,6 +110,28 @@ package controllers
 			for each(user in users) if( user.id == id ) return user;
 			
 			return null;
+		}
+		
+		override public function selectPreference( event:IndexChangeEvent ):void
+		{
+			var item:Object = model.preferences.getItemAt( event.newIndex );
+			
+			if( item.id == "preferences" )
+			{
+				//	launch preferences window
+			}
+			else if( item.id == "sync" )
+			{
+				item.enabled = false;
+				
+				for each(item in model.preferences)
+				{
+					if( item.id == "sync_status" )
+					{
+						item.label = "All information up to date";
+					}
+				}
+			}
 		}
 		
 		/**
