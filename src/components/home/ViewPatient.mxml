@@ -500,7 +500,7 @@
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modVitalSigns">
-					<modules:VitalSignsModule width="975" paddingTop="10" showHeader="false" />
+					<modules:VitalSignsModule width="975" paddingTop="10" showHeader="false" currentState="provider" />
 				</s:NavigatorContent>
 				
 			</mx:ViewStack>
