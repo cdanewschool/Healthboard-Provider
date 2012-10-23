@@ -83,9 +83,9 @@
 					<s:HGroup paddingTop="-6" paddingLeft="-9">
 						<s:DropDownList 
 							id="dropDownView" 
-							dataProvider="{model.preferences}" labelField="label" 
-							change="controller.selectPreference(event)" 
-							dropShadowVisible="false" 
+							dataProvider="{model.settings}" labelField="label" 
+							change="controller.selectSetting(event)" 
+							dropShadowVisible="false" horizontalScrollPolicy="off"
 							skinClass="skins.general.MyOptionsDropDownListSkin" itemRenderer="components.itemrenderers.EnabledListItemRenderer"
 							color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" contentBackgroundColor="0xFFFFFF" 
 							width="35" fontSize="12" /><!--change="dropDownView_changeHandler(event)"--> 

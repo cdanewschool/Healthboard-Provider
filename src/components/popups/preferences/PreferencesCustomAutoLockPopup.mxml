@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	controlBarVisible="true" 
+	skinClass="skins.general.myHeaderlessTitleWindow"
+	width="293" height="156" 
+	creationComplete="init()">
+	
+	<fx:Script>
+		<![CDATA[
+			import enum.TimeFrequencyType;
+			
+			import models.UserPreferences;
+			
+			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
+			
+			import models.ApplicationModel;
+			import controllers.MainController;
+			
+			private var controller:MainController = AppProperties.getInstance().controller as MainController;
+			[Bindable] private var model:ApplicationModel = controller.model;
+			
+			private function onSaveClick():void
+			{
+				model.preferences.autoLockIntervalMinutes = customAutoLockInterval.value
+					
+				close();
+			}
+			
+			private function close():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function init():void
+			{
+				controlBarVisible = false;
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:BasicLayout />
+	</s:layout>
+	
+	<s:VGroup left="10" top="10">
+		
+		<s:Label text="Custom Timer" styleName="darkGrayBold16" />
+		
+		<s:Label text="Maximum 120 minutes" styleName="darkGray12Italic" />
+		
+		<s:Spacer height="10" />
+		
+		<s:HGroup paddingLeft="75">
+			<s:Label text="Time:" styleName="black12" />
+			<s:NumericStepper 
+				id="customAutoLockInterval" 
+				minimum="0" maximum="120" stepSize="5" 
+				value="{model.preferences.autoLockIntervalMinutes}" />
+			<s:Label text="minutes" styleName="black12" />
+		</s:HGroup>
+		
+		<s:Line xFrom="0" xTo="273">
+			<s:stroke>
+				<s:SolidColorStroke color="0x4D4D4D" alpha="1" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+	</s:VGroup>
+	
+	<s:HGroup width="100%" horizontalAlign="right" bottom="10" right="10">
+		<s:Button label="Save" click="onSaveClick()" />
+		<s:Button label="Cancel" click="close()" />
+	</s:HGroup>
+	
+</s:TitleWindow>
