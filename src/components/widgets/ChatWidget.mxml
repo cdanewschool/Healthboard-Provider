@@ -207,7 +207,7 @@
 			<s:HGroup gap="3">
 				<s:ButtonBar 
 					id="chatType" styleName="greyButtonBar"
-					width="210" height="22" dataProvider="{ChatSearch.MODES}" iconField="icon" labelField="label" change="chat(event)" enabled="{targetUser!=null}"
+					width="210" height="22" dataProvider="{ChatSearch.MODES}" iconField="icon" labelField="label" change="chat(event)" enabled="{targetUser!=null}" 
 					firstButton="skins.general.IconButtonSkin"
 					middleButton="skins.general.IconButtonSkin" 
 					lastButton="skins.general.IconButtonSkin" fontSize="11">

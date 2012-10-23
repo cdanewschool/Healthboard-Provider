@@ -20,6 +20,8 @@
 			import controllers.ChatController;
 			import controllers.MainController;
 			
+			import enum.ControlAlign;
+			
 			import models.Chat;
 			import models.ChatMessage;
 			import models.ChatSearch;
@@ -206,8 +208,28 @@
 			
 			private function position():void
 			{
-				this.x = stage.stageWidth - (this.width + 10);
-				this.y = stage.stageHeight - (this.height + 10);
+				var align:String = AppProperties.getInstance().controller.model.preferences.chatPopupDefaultPosition;
+				
+				if( align == ControlAlign.TOP_LEFT )
+				{
+					this.x = 0;
+					this.y = 0;
+				}
+				else if( align == ControlAlign.TOP_RIGHT )
+				{
+					this.x = stage.stageWidth - (this.width + 10);
+					this.y = 0;
+				}
+				else if( align == ControlAlign.BOTTOM_LEFT )
+				{
+					this.x = 0;
+					this.y = stage.stageHeight - (this.height + 10);
+				}
+				else if( align == ControlAlign.BOTTOM_RIGHT )
+				{
+					this.x = stage.stageWidth - (this.width + 10);
+					this.y = stage.stageHeight - (this.height + 10);
+				}
 			}
 			
 			private function onClose(event:Event):void

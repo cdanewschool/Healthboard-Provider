@@ -3,7 +3,7 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	width="100%" toolTip="{data.tooltip}"
+	toolTip="{data.tooltip}" width="190"
 	dataChange="onDataChange(event)">
 	
 	<fx:Declarations>
@@ -21,6 +21,6 @@
 		]]>
 	</fx:Script>
 	
-	<s:Label text="{data.label}" width="100%" />
+	<s:Label id="field" text="{data.label}" paddingLeft="10" paddingRight="10" paddingTop="5" paddingBottom="5" maxDisplayedLines="1" />
 	
 </s:ItemRenderer>

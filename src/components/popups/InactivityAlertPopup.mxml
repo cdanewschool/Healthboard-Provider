@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	controlBarVisible="true" 
+	skinClass="skins.general.myHeaderlessTitleWindow"
+	width="331" height="84" 
+	creationComplete="init()">
+	
+	<fx:Script>
+		<![CDATA[
+			import controllers.MainController;
+			
+			import enum.TimeFrequencyType;
+			
+			import models.ApplicationModel;
+			import models.UserPreferences;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			import util.DateUtil;
+			
+			private var controller:MainController = AppProperties.getInstance().controller as MainController;
+			[Bindable] private var model:ApplicationModel = controller.model;
+			
+			private var timer:Timer;
+			
+			private function onTimerComplete(event:TimerEvent):void
+			{
+				PopUpManager.removePopUp(this);
+				
+				controller.logout();
+			}
+			
+			private function init():void
+			{
+				controlBarVisible = false;
+				
+				timer = new Timer( DateUtil.MINUTE, 1 );
+				timer.addEventListener( TimerEvent.TIMER_COMPLETE, onTimerComplete );
+				timer.start();
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" gap="15" />
+	</s:layout>
+	
+	<s:HGroup paddingTop="20">
+		
+		<s:Label text="You will be logged off in 60 seconds due to inactivity." styleName="darkGray12" />
+		
+	</s:HGroup>
+	
+	<s:Button label="Continue This Session" width="125" click="dispatchEvent( new CloseEvent( CloseEvent.CLOSE ) )" />
+	
+</s:TitleWindow>

@@ -7,7 +7,9 @@ package controllers
 	import components.AutoComplete;
 	import components.home.ViewPatient;
 	import components.modules.TeamModule;
+	import components.popups.InactivityAlertPopup;
 	import components.popups.UserContextMenu;
+	import components.popups.preferences.PreferencesPopup;
 	
 	import events.ApplicationEvent;
 	import events.AutoCompleteEvent;
@@ -19,6 +21,7 @@ package controllers
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
+	import flash.utils.getTimer;
 	
 	import models.ApplicationModel;
 	import models.Chat;
@@ -29,15 +32,18 @@ package controllers
 	import models.ProviderModel;
 	import models.TeamAppointmentsModel;
 	import models.UserModel;
+	import models.UserPreferences;
 	import models.modules.AppointmentsModel;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
 	import mx.core.INavigatorContent;
+	import mx.events.CloseEvent;
 	import mx.events.ListEvent;
 	import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
 	
+	import spark.components.DropDownList;
 	import spark.events.IndexChangeEvent;
 	
 	import util.DateFormatters;
@@ -61,6 +67,8 @@ package controllers
 		
 		public var arrOpenPatients:Array = new Array();	//	TODO: move
 		
+		private var inactivityAlert:InactivityAlertPopup;
+		
 		public function MainController()
 		{
 			super();
@@ -82,10 +90,12 @@ package controllers
 			var lastSynced:Date = today;
 			lastSynced.time -= DateUtil.DAY * Math.random();
 			
-			model.preferences = new ArrayCollection
+			model.preferences = new UserPreferences();
+			model.settings = new ArrayCollection
 				( 
 					[ 
 						{id:"preferences", label:"Preferences", tooltip:"Set preferences for general settings, notifications and modules."}, 
+						{id:"",label: "---------------------------------------------------", enabled:false }, 
 						{id:"sync_status", label: "Last synced " + DateFormatters.syncTime.format( lastSynced ), enabled:false }, 
 						{id:"sync", label:"Sync Now"} 
 					] 
@@ -112,13 +122,17 @@ package controllers
 			return null;
 		}
 		
-		override public function selectPreference( event:IndexChangeEvent ):void
+		override public function selectSetting( event:IndexChangeEvent ):void
 		{
-			var item:Object = model.preferences.getItemAt( event.newIndex );
+			super.selectSetting(event);
+			
+			var item:Object = model.settings.getItemAt( event.newIndex );
 			
 			if( item.id == "preferences" )
 			{
-				//	launch preferences window
+				var popup:PreferencesPopup = PopUpManager.createPopUp( application, PreferencesPopup ) as PreferencesPopup;
+				popup.preferences = model.preferences.clone();
+				PopUpManager.centerPopUp( popup );
 			}
 			else if( item.id == "sync" )
 			{
@@ -132,6 +146,8 @@ package controllers
 					}
 				}
 			}
+			
+			DropDownList(event.currentTarget).selectedItem = null;
 		}
 		
 		/**
@@ -400,6 +416,22 @@ package controllers
 			}
 			
 			onHideAutoComplete();
+		}
+		
+		override protected function showInactivityTimeout():void
+		{
+			if( inactivityAlert && inactivityAlert.parent ) return;
+			
+			inactivityAlert = PopUpManager.createPopUp( application, InactivityAlertPopup, true ) as InactivityAlertPopup;
+			inactivityAlert.addEventListener( CloseEvent.CLOSE, onInactivityAlertClose );
+			PopUpManager.centerPopUp( inactivityAlert );
+		}
+		
+		private function onInactivityAlertClose( event:CloseEvent ):void
+		{
+			lastActivity = getTimer();
+			
+			PopUpManager.removePopUp( inactivityAlert );
 		}
 		
 		private function patientsResultHandler(event:ResultEvent):void 
