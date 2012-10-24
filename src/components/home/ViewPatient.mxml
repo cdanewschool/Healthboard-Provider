@@ -315,6 +315,10 @@
 				{
 					healthFocusXMLdata.send();
 				}
+				else
+				{
+					alertsWidget.alerts = controller.model.patientAlerts;
+				}
 			}
 		]]>
 	</fx:Script>
