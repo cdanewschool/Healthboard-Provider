@@ -111,7 +111,7 @@ package models
 		{
 			var str:String = (from.month + 1) + '/' + from.date + '/' + from.fullYear + ' ';
 			str += 'appointment at ' + DateUtil.formatTimeFromDate( from ) + ' with ' + (actionable?"<a href='showPatient,"+patient.id+"'><span color='0xAEDBE2'>":null) + patient.fullName + (actionable?"</span></a>":null);
-			str += '\n' + getTypeByKey( type ).label + (room?' in Room ' + room:null) + (reason?' - ' + reason:null);
+			str += '\n' + getTypeByKey( type ).label + (room!=null?' in Room ' + room:'') + (reason?' - ' + reason:'');
 			str += '\nPrerequisite: ' + getPrerequisitesString( actionable );
 			
 			return str;
