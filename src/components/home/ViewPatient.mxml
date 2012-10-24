@@ -138,7 +138,7 @@
 					moduleTitle.text = AppProperties.getInstance().controller.getModuleTitle( activeModuleID );
 				}
 				
-				label = patientName.text = patient.fullName;
+				label = patient.fullName;
 				
 				alertsWidget.activeModule = activeModuleID;
 				
@@ -263,6 +263,8 @@
 			}
 			
 			public function get activeModuleID():String{ return _activeModuleID; }
+			
+			[Bindable]
 			public function get patient():PatientModel{ return _patient;}
 			public function get selectedAppointment():Object{ return _selectedAppointment; }
 
@@ -347,7 +349,20 @@
 		
 		<s:HGroup color="0xFFFFFF" verticalAlign="middle" paddingLeft="-7" gap="4" fontSize="22">
 			
-			<s:Label id="patientName" paddingTop="2" paddingLeft="10" styleName="{currentState==STATE_MODULE ? 'blue22' : 'white22Bold'}" />
+			<s:Label 
+				paddingTop="2" paddingLeft="10" 
+				text="{patient.fullName}"
+				styleName="{currentState==STATE_MODULE ? 'blue22' : 'white22Bold'}" 
+				visible="{currentState==STATE_DEFAULT}" includeInLayout="{currentState==STATE_DEFAULT}" />
+			
+			<mx:LinkButton 
+				id="patientName"
+				label="{patient.fullName}"
+				styleName="blue22" 
+				rollOver="patientName.styleName = 'linkBtnUnderline'" 
+				rollOut="patientName.styleName = 'linkBtn'" 
+				click="currentState = STATE_DEFAULT"  skin="{null}"
+				visible="{currentState==STATE_MODULE}" includeInLayout="{currentState==STATE_MODULE}"/>
 			
 			<s:HGroup visible="{currentState == STATE_MODULE}" verticalAlign="middle" gap="5">
 				
