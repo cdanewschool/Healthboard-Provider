@@ -88,8 +88,8 @@ private function onResize():void
 //SEE http://www.blastanova.com/blog/2010/06/23/a-custom-multi-selection-spark-dropdownlist/ FOR REFERENCE
 protected function dropDownCalendar_openHandler(event:DropDownEvent):void 
 {
-	patientBirthDateChooser.addEventListener(MouseEvent.MOUSE_DOWN, stopPropagation, false, 0, true);
-	advBirthDateChooser.addEventListener(MouseEvent.MOUSE_DOWN, stopPropagation, false, 0, true);
+	if( patientBirthDateChooser ) patientBirthDateChooser.addEventListener(MouseEvent.MOUSE_DOWN, stopPropagation, false, 0, true);
+	if( advBirthDateChooser ) advBirthDateChooser.addEventListener(MouseEvent.MOUSE_DOWN, stopPropagation, false, 0, true);
 }
 
 protected function stopPropagation(event:Event):void 
