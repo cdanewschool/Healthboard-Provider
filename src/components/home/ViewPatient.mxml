@@ -362,7 +362,7 @@
 			<mx:LinkButton 
 				id="patientName"
 				label="{patient.fullName}"
-				styleName="blue22" 
+				color="0xAEDEE2" textRollOverColor="0xAEDEE2" textSelectedColor="0xAEDEE2" fontSize="22"
 				rollOver="patientName.styleName = 'linkBtnUnderline'" 
 				rollOut="patientName.styleName = 'linkBtn'" 
 				click="currentState = STATE_DEFAULT"  skin="{null}"
