@@ -17,9 +17,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>[source path] visualDashboardShared</name>
+			<name>[source path] src</name>
 			<type>2</type>
-			<locationURI>DOCUMENTS/visualDashboardShared</locationURI>
+			<locationURI>DOCUMENTS/visualDashboardShared/src</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
