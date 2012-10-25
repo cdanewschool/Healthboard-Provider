@@ -951,7 +951,7 @@
 			{
 				if( direction == 0 )
 				{
-					var today:Date = MainController(AppProperties.getInstance().controller).today;
+					var today:Date = MainController(AppProperties.getInstance().controller).model.today;
 					selectedDate = new Date( today.fullYear, today.month, today.date );
 				}
 				else if( currentState == MODE_MONTH )
@@ -996,7 +996,7 @@
 					legend.addElement( container );
 				}
 				
-				var today:Date = MainController(AppProperties.getInstance().controller).today;
+				var today:Date = MainController(AppProperties.getInstance().controller).model.today;
 				selectedDate = new Date( today.fullYear, today.month, today.date );
 				
 				onAppointmentsChange();

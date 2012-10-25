@@ -35,7 +35,7 @@
 			
 			private function initDate():void
 			{
-				var today:Date = MainController(AppProperties.getInstance().controller).today;
+				var today:Date = MainController(AppProperties.getInstance().controller).model.today;
 				date.text = Constants.MONTHS[ today.month ] + " " + today.date + ", " + today.fullYear;
 			}
 			

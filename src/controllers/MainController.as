@@ -54,8 +54,6 @@ package controllers
 		public var chatController:ChatController;
 		public var teamAppointmentsController:TeamAppointmentsController;
 		
-		public var today:Date;
-		
 		//	TODO: move to model
 		[Bindable] public var user:UserModel;	//	logged-in user, i.e. Dr. Berg
 		
@@ -73,8 +71,6 @@ package controllers
 		{
 			super();
 			
-			today = new Date( 2012, 09, 12 );			//	simulate october 12th
-			
 			model = new ProviderApplicationModel();
 			
 			userContextMenuTimer = new Timer( 2000, 1 );
@@ -87,7 +83,7 @@ package controllers
 			medicationsController = new ProviderMedicationsController();
 			teamAppointmentsController = new TeamAppointmentsController();
 			
-			var lastSynced:Date = today;
+			var lastSynced:Date = model.today;
 			lastSynced.time -= DateUtil.DAY * Math.random();
 			
 			model.preferences = new UserPreferences();

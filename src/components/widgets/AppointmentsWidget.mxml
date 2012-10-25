@@ -93,7 +93,7 @@
 			[Bindable] public var appointments:ArrayCollection;
 			[Bindable] private var providers:ArrayCollection;
 			
-			private var today:Date = MainController(AppProperties.getInstance().controller).today;
+			private var today:Date = MainController(AppProperties.getInstance().controller).model.today;
 			
 			private var nextAppointment:Appointment;
 			
