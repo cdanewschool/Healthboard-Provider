@@ -118,6 +118,9 @@ package controllers
 			
 			for each(var result:Object in results)
 			{
+				result.from = modernizeDate( result.from );
+				result.to = modernizeDate( result.to );
+				
 				var appointment:Appointment = Appointment.fromObj(result);
 				appointments.addItem( appointment );
 			}
