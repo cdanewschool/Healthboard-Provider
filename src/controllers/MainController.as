@@ -83,7 +83,7 @@ package controllers
 			medicationsController = new ProviderMedicationsController();
 			teamAppointmentsController = new TeamAppointmentsController();
 			
-			var lastSynced:Date = model.today;
+			var lastSynced:Date = new Date( model.today.fullYear, model.today.month, model.today.date );;
 			lastSynced.time -= DateUtil.DAY * Math.random();
 			
 			model.preferences = new UserPreferences();
