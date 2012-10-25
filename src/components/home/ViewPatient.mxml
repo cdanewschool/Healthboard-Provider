@@ -349,7 +349,7 @@
 			</s:LinearGradient>
 		</s:backgroundFill>
 		
-		<s:Image source="images/patientHome.png" buttonMode="true" click="{currentState = STATE_DEFAULT}" />
+		<s:Image source="@Embed('images/patientHome.png')" buttonMode="true" click="{currentState = STATE_DEFAULT}" />
 		
 		<s:HGroup color="0xFFFFFF" verticalAlign="middle" paddingLeft="-7" gap="4" fontSize="22">
 			
