@@ -78,7 +78,7 @@ package models
 		{
 			location = "The New York Clinic\n99 Main St.\nNew York, NY 11111";	//	temp
 			
-			var today:Date = MainController(AppProperties.getInstance().controller).today;
+			var today:Date = MainController(AppProperties.getInstance().controller).model.today;
 			
 			from = new Date( today.fullYear, today.month, today.date, 10 );
 			to = new Date( today.fullYear, today.month, today.date, 11 );
@@ -111,7 +111,7 @@ package models
 		{
 			var str:String = (from.month + 1) + '/' + from.date + '/' + from.fullYear + ' ';
 			str += 'appointment at ' + DateUtil.formatTimeFromDate( from ) + ' with ' + (actionable?"<a href='showPatient,"+patient.id+"'><span color='0xAEDBE2'>":null) + patient.fullName + (actionable?"</span></a>":null);
-			str += '\n' + getTypeByKey( type ).label + (room!=null?' in Room ' + room:'') + (reason?' - ' + reason:'');
+			str += '\n' + getTypeByKey( type ).label + (room?' in Room ' + room:null) + (reason?' - ' + reason:null);
 			str += '\nPrerequisite: ' + getPrerequisitesString( actionable );
 			
 			return str;
