@@ -50,7 +50,7 @@
 				message.recipients = recipients;
 				message.recipientAlias = alias;
 				
-				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
 				evt.data = Constants.MODULE_MESSAGES;
 				evt.message = message;
 				dispatchEvent( evt );	

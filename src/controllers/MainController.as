@@ -34,6 +34,7 @@ package controllers
 	import models.UserModel;
 	import models.UserPreferences;
 	import models.modules.AppointmentsModel;
+	import models.modules.MessagesModel;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
@@ -241,7 +242,7 @@ package controllers
 					TeamAppointmentsModel( teamAppointmentsController.model ).selectedProviders.addItem( event.user );
 				}
 				
-				evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				evt = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
 				evt.data = Constants.MODULE_APPOINTMENTS;
 				application.dispatchEvent( evt );
 			}
@@ -250,7 +251,7 @@ package controllers
 				var message:Message = new Message();
 				message.recipients = [ event.user ];
 				
-				evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				evt = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
 				evt.data = Constants.MODULE_MESSAGES;
 				evt.message = message;
 				application.dispatchEvent( evt );
@@ -320,6 +321,12 @@ package controllers
 			
 			var child:DisplayObject;
 			
+			if( event.message )
+			{
+				if( event.message.recipients ) MessagesModel(messagesController.model).pendingRecipients = event.message.recipients;
+				if( event.message.recipientType ) MessagesModel(messagesController.model).pendingRecipientType = event.message.recipientType;
+			}
+			
 			if( visualDashboardProvider(application).viewStackProviderModules
 				&& (child = visualDashboardProvider(application).viewStackProviderModules.getChildByName( event.data ) ) != null )
 			{
@@ -330,6 +337,26 @@ package controllers
 		override protected function onTabClose( event:ListEvent ):void
 		{
 			super.onTabClose(event);
+			
+			if( TabBarPlus( event.target.owner).dataProvider is IList )
+			{
+				var dataProvider:IList = TabBarPlus( event.target.owner).dataProvider as IList;
+				var index:int = event.rowIndex;
+				
+				if( application.currentState == Constants.MODULE_MEDICATIONS ) 
+				{
+					medicationsController.model.openTabs.splice(index-1,1);
+				}
+				else if( application.currentState == model.viewMode ) 
+				{
+					if( dataProvider == visualDashboardProvider(application).viewStackMain) 
+						arrOpenPatients.splice(index-1,1);
+				}
+			}
+			else 
+			{
+				trace("Bad data provider");
+			}
 			
 			/*
 			
@@ -395,13 +422,6 @@ package controllers
 						module = visualDashboardProvider(application).viewStackProviderModules.getChildByName( moduleName ) as INavigatorContent;
 						
 						visualDashboardProvider(application).viewStackProviderModules.selectedChild = module;
-						
-						if( event.data == Constants.MODULE_MESSAGES )
-						{
-							//createNewMessage( 1 );	//TODO fix
-							
-							visualDashboardProvider(application).viewStackMessages.selectedIndex = visualDashboardProvider(application).viewStackMessages.length - 2;
-						}
 						
 						if( visualDashboardProvider(application).viewStackMain.selectedIndex != 0 )
 						{
