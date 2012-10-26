@@ -4,7 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
-	title="{'Messages ' + controller.getUnreadMessageCountString()}" 
+	title="{'Messages ' + model.unreadMessageCount ? '(' + model.unreadMessageCount + ')' : ''}" 
 	creationComplete="init()">
 	
 	<fx:Declarations>
