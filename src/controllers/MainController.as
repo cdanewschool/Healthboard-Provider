@@ -34,6 +34,7 @@ package controllers
 	import models.UserModel;
 	import models.UserPreferences;
 	import models.modules.AppointmentsModel;
+	import models.modules.MessagesModel;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
@@ -241,7 +242,7 @@ package controllers
 					TeamAppointmentsModel( teamAppointmentsController.model ).selectedProviders.addItem( event.user );
 				}
 				
-				evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				evt = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
 				evt.data = Constants.MODULE_APPOINTMENTS;
 				application.dispatchEvent( evt );
 			}
@@ -250,7 +251,7 @@ package controllers
 				var message:Message = new Message();
 				message.recipients = [ event.user ];
 				
-				evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				evt = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
 				evt.data = Constants.MODULE_MESSAGES;
 				evt.message = message;
 				application.dispatchEvent( evt );
@@ -320,6 +321,12 @@ package controllers
 			
 			var child:DisplayObject;
 			
+			if( event.message )
+			{
+				if( event.message.recipients ) MessagesModel(messagesController.model).pendingRecipients = event.message.recipients;
+				if( event.message.recipientType ) MessagesModel(messagesController.model).pendingRecipientType = event.message.recipientType;
+			}
+			
 			if( visualDashboardProvider(application).viewStackProviderModules
 				&& (child = visualDashboardProvider(application).viewStackProviderModules.getChildByName( event.data ) ) != null )
 			{
@@ -331,37 +338,18 @@ package controllers
 		{
 			super.onTabClose(event);
 			
-			/*
-			
-			TODO: fix
 			if( TabBarPlus( event.target.owner).dataProvider is IList )
 			{
 				var dataProvider:IList = TabBarPlus( event.target.owner).dataProvider as IList;
 				var index:int = event.rowIndex;
 				
-				if( dataProvider == visualDashboardProvider(application).viewStackMessages ) 
+				if( application.currentState == Constants.MODULE_MEDICATIONS ) 
 				{
-					//	this array will hold the index values of each "NEW" message in arrOpenTabs. Its purpose is to know which "NEW" message we're closing (if it is in fact a new message)
-					var arrNewMessagesInOpenTabs:Array = new Array(); 
-					
-					for(var i:uint = 0; i < arrOpenTabs.length; i++) 
-					{
-						if( arrOpenTabs[i] == "NEW") arrNewMessagesInOpenTabs.push(i);
-					}
-					
-					if( arrOpenTabs[index-1] == "NEW" ) 
-						arrNewMessages.splice( arrNewMessagesInOpenTabs.indexOf(index-1), 1 );
-					
-					arrOpenTabs.splice(index-1,1);
-					viewStackMessages.selectedIndex--;
+					medicationsController.model.openTabs.splice(index-1,1);
 				}
-				else if( this.currentState == ProviderConstants.MODULE_MEDICATIONS ) 
+				else if( application.currentState == model.viewMode ) 
 				{
-					arrOpenTabsME.splice(index-1,1);
-				{
-				else if( this.currentState == ProviderConstants.STATE_PROVIDER_HOME ) 
-				{		//aka PROVIDER PORTAL!
-					if( dataProvider == viewStackMain) 
+					if( dataProvider == visualDashboardProvider(application).viewStackMain) 
 						arrOpenPatients.splice(index-1,1);
 				}
 			}
@@ -369,7 +357,6 @@ package controllers
 			{
 				trace("Bad data provider");
 			}
-			*/
 		}
 		
 		override protected function onNavigate(event:ApplicationEvent):void
@@ -395,13 +382,6 @@ package controllers
 						module = visualDashboardProvider(application).viewStackProviderModules.getChildByName( moduleName ) as INavigatorContent;
 						
 						visualDashboardProvider(application).viewStackProviderModules.selectedChild = module;
-						
-						if( event.data == Constants.MODULE_MESSAGES )
-						{
-							//createNewMessage( 1 );	//TODO fix
-							
-							visualDashboardProvider(application).viewStackMessages.selectedIndex = visualDashboardProvider(application).viewStackMessages.length - 2;
-						}
 						
 						if( visualDashboardProvider(application).viewStackMain.selectedIndex != 0 )
 						{
@@ -499,7 +479,7 @@ package controllers
 				var end:Date = new Date();
 				end.setTime( start.time + (DateUtil.HOUR * Math.random()) );
 				
-				user.addChat( new Chat( user, ChatSearch(chatController.model).getUser( def.id, def.type ), start, end ) );
+				chatController.saveChat( user, new Chat( user, ChatSearch(chatController.model).getUser( def.id, def.type ), start, end ) );
 			}
 			
 			teamAppointmentsController.model.dataService.send();

@@ -70,9 +70,6 @@ private function init():void
 	
 	model.chartStyles = chartStyles = new ChartStyles();
 	
-	//	eventually this should go in maincontroller
-	this.addEventListener( TabPlus.CLOSE_TAB_EVENT, onTabClose );
-	
 	ProviderApplicationModel(model).patientsDataService.send();
 	ProviderApplicationModel(model).providersDataService.send();
 }
@@ -144,49 +141,4 @@ private function toggleAvailability(event:MouseEvent):void
 
 public function falsifyWidget(widget:String):void 
 {
-}
-
-protected function onTabClose( event:ListEvent ):void
-{
-	if( TabBarPlus( event.target.owner).dataProvider is IList )
-	{
-		var dataProvider:IList = TabBarPlus( event.target.owner).dataProvider as IList;
-		var index:int = event.rowIndex;
-		
-		if( dataProvider == viewStackMessages ) 
-		{
-			//	this array will hold the index values of each "NEW" message in arrOpenTabs. Its purpose is to know which "NEW" message we're closing (if it is in fact a new message)
-			var arrNewMessagesInOpenTabs:Array = new Array(); 
-			
-			for(var i:uint = 0; i < arrOpenTabs.length; i++) 
-			{
-				if( arrOpenTabs[i] == "NEW") arrNewMessagesInOpenTabs.push(i);
-			}
-			
-			if( arrOpenTabs[index-1] == "NEW" ) 
-				arrNewMessages.splice( arrNewMessagesInOpenTabs.indexOf(index-1), 1 );
-			
-			arrOpenTabs.splice(index-1,1);
-			viewStackMessages.selectedIndex--;
-		}
-		else if( this.currentState == Constants.MODULE_MEDICATIONS ) 
-		{
-			controller.medicationsController.model.openTabs.splice(index-1,1);
-		}
-		/*
-		else if( this.currentState == "modImmunizations" ) 
-		{
-			arrOpenTabsIM.splice(index-1,1);
-		}
-		*/
-		else if( this.currentState == Constants.STATE_LOGGED_IN ) 
-		{		//aka PROVIDER PORTAL!
-			if( dataProvider == viewStackMain) 
-				controller.arrOpenPatients.splice(index-1,1);
-		}
-	}
-	else 
-	{
-		trace("Bad data provider");
-	}
 }

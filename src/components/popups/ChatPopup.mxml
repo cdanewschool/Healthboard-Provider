@@ -235,7 +235,8 @@
 			private function onClose(event:Event):void
 			{
 				chat.endTime = new Date();
-				user.addChat( chat );
+				
+				controller.saveChat( user, chat );
 				
 				if( sourceUserVideo ) sourceUserVideo.source = null;
 				
