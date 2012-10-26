@@ -19,6 +19,7 @@ package controllers
 	import models.FileUpload;
 	import models.UserModel;
 	
+	import mx.collections.ArrayCollection;
 	import mx.core.IFlexDisplayObject;
 	import mx.events.CloseEvent;
 	import mx.managers.PopUpManager;
@@ -112,6 +113,12 @@ package controllers
 				
 				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
 			}
+		}
+		
+		public function saveChat( user:UserModel, chat:Chat ):void
+		{
+			if( !user.chatHistory ) user.chatHistory = new ArrayCollection();
+			user.chatHistory.addItem( chat );
 		}
 		
 		private function onPopupCancel( event:Event ):void

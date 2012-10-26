@@ -519,7 +519,7 @@ package controllers
 				var end:Date = new Date();
 				end.setTime( start.time + (DateUtil.HOUR * Math.random()) );
 				
-				user.addChat( new Chat( user, ChatSearch(chatController.model).getUser( def.id, def.type ), start, end ) );
+				chatController.saveChat( user, new Chat( user, ChatSearch(chatController.model).getUser( def.id, def.type ), start, end ) );
 			}
 			
 			teamAppointmentsController.model.dataService.send();
