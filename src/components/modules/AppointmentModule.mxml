@@ -224,8 +224,8 @@
 				}
 				
 				//	update labels
-				patientName.label = selectedAppointment ? selectedAppointment.patient.fullName : '';
-				providerName.text = selectedAppointment ? selectedAppointment.provider.fullName : '';
+				patientName.label = selectedAppointment && selectedAppointment.patient ? selectedAppointment.patient.fullName : '';
+				providerName.text = selectedAppointment && selectedAppointment.patient ? selectedAppointment.provider.fullName : '';
 			}
 			
 			private function onHeaderSearch():void
@@ -291,6 +291,10 @@
 			private function addAppointment( event:TeamAppointmentEvent ):void
 			{
 				model.addAppointment( addAppointmentPopup.appointment );
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true );
+				evt.data = "Your appointment has been added";
+				dispatchEvent( evt );
 				
 				onAddAppointmentCancel(null);
 			}
@@ -366,7 +370,7 @@
 					message.body = "All appointments for Wednesday, October 12, 2011 will be delayed by 15–20 minutes. I apologize for the inconvenience and thank you for your patience.";
 					message.urgency = Message.URGENCY_URGENT;
 					
-					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
 					evt.data = Constants.MODULE_MESSAGES;
 					evt.message = message;
 					dispatchEvent( evt );
@@ -574,7 +578,7 @@
 				var message:Message = new Message();
 				message.recipients = patients;
 				
-				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
 				evt.data = Constants.MODULE_MESSAGES;
 				evt.message = message;
 				dispatchEvent( evt );
@@ -601,6 +605,17 @@
 				pendingAppointments = appointments && appointments.length ? appointments.source : [];
 				
 				confirmCancelAppointments();
+			}
+			
+			private function onMessageProviderClick():void
+			{
+				var message:Message = new Message();
+				message.recipients = [selectedAppointment.provider];
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
+				evt.data = Constants.MODULE_MESSAGES;
+				evt.message = message;
+				dispatchEvent( evt );
 			}
 			
 			private function onViewProvider( event:TeamAppointmentEvent ):void
@@ -791,7 +806,12 @@
 			private function onDeclineRequest(event:TeamAppointmentEvent):void
 			{
 				removeAppointment( event.appointment );
+				
 				refreshRequestList();
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true );
+				evt.data = "The appointment request has been declined";
+				dispatchEvent( evt );
 			}
 			
 			private function onAcceptRequest(event:TeamAppointmentEvent):void
@@ -808,6 +828,10 @@
 			private function onAcceptConfirm(event:TeamAppointmentEvent):void
 			{
 				onAcceptCancel();	
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true );
+				evt.data = "The appointment request has been accepted";
+				dispatchEvent( evt );
 				
 				acceptAppointment( event.appointment );
 			}
@@ -1333,7 +1357,7 @@
 										
 										<s:Spacer height="15" />
 										
-										<mx:LinkButton label="Send Message" styleName="linkBtnGray" fontSize="9" width="100%" textAlign="center"/>
+										<mx:LinkButton label="Send Message" styleName="linkBtnGray" fontSize="9" width="100%" textAlign="center" click="onMessageProviderClick()" />
 										
 										<s:Spacer height="15" />
 										
