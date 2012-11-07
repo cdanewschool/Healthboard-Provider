@@ -441,7 +441,7 @@
 						color="0xFFFFFF" 
 						showDropDown="true" />
 					
-					<patient:MedicationsWidget
+					<widgets:PatientMedicationsWidget
 						id="medicationsWidget" width="633" title="Medications" 
 						collapsible="true" headerClickable="false" 
 						module="modMedications" titleBarHeight="30" 
