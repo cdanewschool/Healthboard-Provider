@@ -18,6 +18,8 @@ package controllers
 	import mx.graphics.LinearGradient;
 	import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
+	
+	import util.DateUtil;
 
 	[Bindable]
 	public class TeamAppointmentsController extends BaseModuleController
@@ -118,8 +120,8 @@ package controllers
 			
 			for each(var result:Object in results)
 			{
-				result.from = modernizeDate( result.from );
-				result.to = modernizeDate( result.to );
+				result.from = DateUtil.modernizeDate( result.from );
+				result.to = DateUtil.modernizeDate( result.to );
 				
 				var appointment:Appointment = Appointment.fromObj(result);
 				appointments.addItem( appointment );
