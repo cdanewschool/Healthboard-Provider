@@ -84,11 +84,11 @@
 				<mx:FormHeading label="{provider.fullName}" styleName="blueBoldSubtitle" paddingTop="-5"/>
 				<s:HGroup paddingTop="-4">
 					<s:Label width="107" textAlign="right" text="DOB:" />
-					<s:Label text="{provider.birthday}" />
+					<s:Label text="{provider.birthdateLabel}" />
 				</s:HGroup>
 				<s:HGroup> 
 					<s:Label width="107" textAlign="right" text="Sex:" />
-					<s:Label text="{provider.sex}" />
+					<s:Label text="{provider.sexLabel}" />
 				</s:HGroup>
 				<s:HGroup>
 					<s:Label width="107" textAlign="right" text="Team:" />

@@ -74,7 +74,7 @@
 			<s:Label text="{provider.fullName}" styleName="blueBoldSubtitle" paddingBottom="4" />
 			<s:HGroup>
 				<s:Label text="DOB:" textAlign="right" width="81" styleName="whiteText13" />
-				<s:Label text="{provider.birthday}" styleName="whiteText13" />
+				<s:Label text="{provider.birthdateLabel}" styleName="whiteText13" />
 			</s:HGroup>
 			<s:HGroup>
 				<s:Label text="Age:" textAlign="right" width="81" styleName="whiteText13" />

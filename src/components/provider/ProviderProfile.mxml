@@ -46,9 +46,9 @@
 					
 					valueOne.text = user.userType == UserModel.TYPE_PROVIDER ? ProviderModel(user).specialty : user.id.toString();
 					valueTwo.text = user.userType == UserModel.TYPE_PROVIDER ? ProviderModel(user).status : PatientModel(user).ssn;
-					valueThree.text = user.userType == UserModel.TYPE_PROVIDER ? ProviderModel(user).role : PatientModel(user).dob;
-					valueFour.text = user.userType == UserModel.TYPE_PROVIDER ? user.team : user.sex;
-					valueFive.text = user.userType == UserModel.TYPE_PROVIDER ? '' : PatientModel(user).rank;
+					valueThree.text = user.userType == UserModel.TYPE_PROVIDER ? ProviderModel(user).role : PatientModel(user).birthdateLabel;
+					valueFour.text = user.userType == UserModel.TYPE_PROVIDER ? user.team : user.sexLabel;
+					valueFive.text = user.userType == UserModel.TYPE_PROVIDER ? '' : PatientModel(user).serviceRank;
 				}
 			}
 

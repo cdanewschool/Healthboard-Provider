@@ -5,17 +5,6 @@ package models
 	[Bindable]
 	public class ProviderModel extends UserModel
 	{
-		//	baisc
-		public var age:String;
-		public var birthday:String;
-		
-		//	address
-		public var street1:String;
-		public var street2:String;
-		public var city:String;
-		public var state:String;
-		public var zip:String;
-		
 		public var education:String;
 		
 		//	work
@@ -96,7 +85,11 @@ package models
 			{
 				if( val.hasOwnProperty( prop ) )
 				{
-					val[prop] = data[prop];
+					try
+					{
+						val[prop] = data[prop];
+					}
+					catch(e:Error){}
 				}
 			}
 			
