@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<advisories>
+	
+	<!-- 	active -->
+	<advisory id="1" title="Influenza  A" active="true" startDate="{{MONTH-5}}/25/{{YEAR}}">
+		<updates>
+			<update 
+				date="{{MONTH}}/{{DAY}}/{{YEAR}}" source="CDC.org" 
+				affectedStatesCount="50" caseReportCount="10108"
+				text="Positive test results have been reported from all 50 states. Influenza activity slowly began to increase in March 2012. Although influenza activity is monitored in many ways, influenza season is considered to have begun when >10% of respiratory specimens tested by participating laboratories are positive for influenza. The weekly percentage of specimens testing positive for influenza did not exceed 10% until the week ending May 1, 2012. During the week ending April 28, 2012, 15% of specimens tested positive for influenza.">
+					<deaths>
+						<death latitude="38.87997" longitude="-77.0977" />
+						<death latitude="38.8657397" longitude="-77.34677" />
+						<death latitude="38.6997" longitude="-77.256" />
+						<death latitude="38.86997" longitude="-77.766" />
+						<death latitude="38.76997" longitude="-77.336" />
+						<death latitude="38.45397" longitude="-77.456" />
+						<death latitude="38.23677" longitude="-77.234" />
+						<death latitude="38.43507" longitude="-77.434" />
+						<death latitude="38.6997" longitude="-77.23423" />
+						<death latitude="38.78997" longitude="-77.123" />
+						<death latitude="38.67967" longitude="-77.2323" />
+						<death latitude="37.98957" longitude="-77.23432" />
+						<death latitude="38.56947" longitude="-77.345" />
+						<death latitude="38.45997" longitude="-77.543" />
+						<death latitude="38.65955" longitude="-77.133345" />
+						<death latitude="38.9497" longitude="-77.0135" />
+						<death latitude="38.5696" longitude="-77.1423" />
+						<death latitude="38.75697" longitude="-77.23432" />
+						<death latitude="38.6797" longitude="-77.234" />
+						<death latitude="38.4596" longitude="-77.234" />
+						<death latitude="38.7895" longitude="-77.437" />
+						<death latitude="38.56723" longitude="-77.123" />
+						<death latitude="38.5693" longitude="-77.01231" />
+						<death latitude="38.6796" longitude="-77.14567" />
+						<death latitude="38.567456" longitude="-77.013" />
+						<death latitude="38.7897" longitude="-77.1023" />
+						<death latitude="38.67997" longitude="-77.30894" />
+						<death latitude="38.8797" longitude="-77.2347" />
+					</deaths>
+					<hospitalizations>
+						<hospitalization latitude="38.87997" longitude="-77.1456" />
+						<hospitalization latitude="38.832497" longitude="-77.0234" />
+						<hospitalization latitude="38.347997" longitude="-77.12423" />
+						<hospitalization latitude="38.856997" longitude="-77.234" />
+						<hospitalization latitude="38.234997" longitude="-77.12" />
+						<hospitalization latitude="38.677997" longitude="-77.0977" />
+					</hospitalizations>
+				</update>
+			<update date="{{MONTH-3}}/23/{{YEAR}}" source="CDC.org" text="The percent of respiratory specimens testing positive for influenza has surpassed 10 %, a general marker..."
+				affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="10108" deathCountTotal="53">
+			</update>
+		</updates>
+	</advisory>
+	
+	<advisory id="2" title="Escherichia Coli 0145" active="true">
+		<updates>
+			<update 
+				date="{{MONTH-1}}/01/{{YEAR}}" source="CDC.org" text="A respiratory specimen from the patient was positive for influenza at the hospital. The virus was identified by real-time, reverse transcription–polymerase chain reaction (rRT-PCR) testing at the Indiana State Public Health Laboratory as an inconclusive influenza A virus, consistent with results seen with other recent A(H3N2)v infections. Genome sequencing at CDC confirmed the virus as A(H3N2)v with the M gene from the A(H1N1)pdm09 virus, similar to the viruses identified in the other cases of human infection in the United States." 
+				affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="95" deathCountTotal="12">
+				<deaths>
+					<death latitude="38.87997" longitude="-77.0977" />
+				</deaths>
+				<hospitalizations>
+					<hospitalization latitude="38.87997" longitude="-77.1456" />
+				</hospitalizations>	
+			</update>
+		</updates>
+	</advisory>
+	
+	<advisory id="3" title="Heat Wave Advisory" active="true">
+		<updates>
+			<update date="{{MONTH-2}}/30/{{YEAR}}" source="CDC.org" text="Temperatures to approach or even surpass 110 degrees for the next several days onward with the cha..." 
+					affectedCount="0" atRiskCount="0" deathCount="0" deathCountTotal="3" />
+		</updates>
+	</advisory>
+	
+	<advisory id="4" title="Salmonella Bareilly" active="true">
+		<updates>
+			<update date="{{MONTH-3}}/30/{{YEAR}}" source="CDC.org" text="A total of 425 persons infected with the outbreak strains of Salmonella Bareilly were reported from 28... "
+					affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="33" atRiskTotal="153" deathCountTotal="5" />
+		</updates>
+	</advisory>
+	
+	<!-- 	past advisories -->
+	<advisory id="5" title="Salmonella Typhimurium" active="false">
+		<updates>
+			<update date="{{MONTH-3}}/01/{{YEAR}}" source="CDC.org" text="This particular outbreak appears to be over." final="true"
+					affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="33" atRiskTotal="153" deathCountTotal="5" />
+		</updates>
+	</advisory>
+	
+	<advisory id="6" title="Salmonella Pomona">
+		<updates>
+			<update date="{{MONTH-2}}/25/{{YEAR}}" source="CDC.org" text="This particular outbreak appears to be over." final="true"
+				affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="104" deathCountTotal="3" />
+		</updates>
+	</advisory>
+	
+	<advisory id="7" title="Salmonella Hadar">
+		<updates>
+			<update date="{{MONTH-2}}/25/{{YEAR}}" source="CDC.org" text="This particular outbreak appears to be over." final="true"
+					affectedCount="0" atRiskCount="0" deathCount="0" deathCountTotal="3" />
+		</updates>
+	</advisory>
+	
+	<advisory id="8" title="Salmonella Tennessee">
+		<updates>
+			<update date="{{MONTH-2}}/25/{{YEAR}}" source="CDC.org" text="This particular outbreak appears to be over." final="true"
+					affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="216" deathCountTotal="0" />
+		</updates>
+	</advisory>
+	
+	<advisory id="9" title="Escherichia Coli 0157">
+		<updates>
+			<update date="{{MONTH-4}}/25/{{YEAR}}" source="CDC.org" text="This particular outbreak appears to be over." final="true"
+					affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="52" deathCountTotal="0" />
+		</updates>
+	</advisory>
+	
+	<advisory id="10" title="Listeriosis">
+		<updates>
+			<update date="{{MONTH-3}}/25/{{YEAR}}" source="CDC.org" text="This particular outbreak appears to be over." final="true"
+					affectedCount="0" atRiskCount="0" deathCount="0"  affectedCountTotal="43" deathCountTotal="0" />
+		</updates>
+	</advisory>
+	
+</advisories>

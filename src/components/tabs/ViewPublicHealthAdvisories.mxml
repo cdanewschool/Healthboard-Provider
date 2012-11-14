@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:general="components.general.*"
+	styleName="navigatorContent"
+	width="100%" height="100%">
+	
+	<fx:Script>
+		<![CDATA[
+			import controllers.MainController;
+			import controllers.PublicHealthAdvisoriesController;
+			
+			import enum.DateRanges;
+			
+			import events.AdvisoryEvent;
+			import events.ApplicationEvent;
+			
+			import models.modules.advisories.PublicHealthAdvisoriesModel;
+			
+			import mx.collections.ArrayCollection;
+			
+			import spark.collections.Sort;
+			
+			import util.DateUtil;
+			
+			[Bindable] private var controller:PublicHealthAdvisoriesController = MainController(AppProperties.getInstance().controller).advisoryController as PublicHealthAdvisoriesController;
+			[Bindable] public var model:PublicHealthAdvisoriesModel = controller.model as PublicHealthAdvisoriesModel;
+			
+			[Bindable] private var restrictToActive:Boolean;
+			[Bindable] private var headerText:String;
+			[Bindable] private var dateRange:String = DateRanges.YEAR;
+			
+			private var sort:Sort = new Sort();
+			private var today:Date = AppProperties.getInstance().controller.model.today;
+			
+			private var _dataProvider:ArrayCollection;
+			
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			
+			[Bindable] 
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+				
+				if( dataProvider )
+				{
+					sort.compareFunction = controller.sortCompare;
+					
+					dataProvider.sort = sort;
+					dataProvider.refresh();
+					
+					restrictToActive = dataProvider == model.activeAdvisories;
+					
+					label = restrictToActive ? "Overview": "Past Advisories";
+					headerText = (restrictToActive ? "Active Advisories" : "Past Advisories") + " (" + dataProvider.length + ")";
+				}
+			}
+
+			private function setDateRange(range:String=null):void
+			{
+				dateRange = range;
+				
+				updateDateRange();
+			}
+			
+			private function updateDateRange():void 
+			{
+				model.minDate = new Date( today.fullYear, today.month, today.date );
+				model.maxDate = new Date( today.fullYear, today.month, today.date );
+				
+				model.minDate.time += DateUtil.DAY;
+				model.maxDate.time += DateUtil.DAY;
+				
+				if( dateRange == DateRanges.WEEK_TWO )
+				{
+					model.minDate.time -= (DateUtil.WEEK * 2);
+				}
+				else if( dateRange == DateRanges.MONTH )
+				{
+					model.minDate.time -= (DateUtil.MONTH);
+				}
+				else
+				{
+					model.minDate.time -= DateUtil.YEAR;
+				}
+				
+				dataProvider.refresh();
+			}
+			
+			private function onCaseReportClick(event:MouseEvent):void
+			{
+				controller.showCaseReport();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" />
+	</s:layout>
+	
+	<s:BorderContainer width="100%" height="37" styleName="navigatorContentHeaderBar">
+		
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingRight="6" paddingLeft="8"/>
+		</s:layout>
+		
+		<s:Button label="Case Report" height="24" styleName="button" click="onCaseReportClick(event)" />
+		<s:Button label="Print" height="24" styleName="button" />
+		<s:Button label="Export" height="24" styleName="button" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true, false, 'Your file has been exported') )" />
+		<s:Button label="Message" height="24" styleName="button" />
+		
+		<s:Spacer width="100%" />
+		
+		<s:HGroup gap="0" paddingTop="1">
+			
+			<s:Label text="Time Range:" paddingTop="6" />
+			
+			<general:customLinkButton label="{DateRanges.WEEK_TWO}" click="setDateRange(DateRanges.WEEK_TWO)" selected="{dateRange==DateRanges.WEEK_TWO}" styleName="toggleButton" paddingLeft="4" paddingRight="4" />
+			<general:customLinkButton label="{DateRanges.MONTH}" click="setDateRange(DateRanges.MONTH)" selected="{dateRange==DateRanges.MONTH}" styleName="toggleButton" paddingLeft="4" paddingRight="4" />
+			<general:customLinkButton label="{DateRanges.YEAR}" click="setDateRange(DateRanges.YEAR)" selected="{dateRange==DateRanges.YEAR}" styleName="toggleButton" paddingLeft="4" paddingRight="4" />
+			<general:customLinkButton label="All" click="setDateRange()" selected="{dateRange==null}" styleName="toggleButton" paddingLeft="4" paddingRight="4" />
+			<general:customLinkButton id="btnMedCustom" label="Custom" />
+			
+		</s:HGroup>
+		
+	</s:BorderContainer>
+	
+	<s:Line xFrom="0" xTo="974">
+		<s:stroke>
+			<s:SolidColorStroke color="#3F3E3D" />
+		</s:stroke>
+	</s:Line>
+	
+	<s:Spacer height="10" />
+	
+	<s:HGroup width="100%" paddingLeft="10">
+		
+		<mx:Label text="{headerText}" styleName="headerAlternateColor1 bold" fontSize="13" />
+		
+		<general:MainLinkButton
+			id="pastAdvisories"
+			label="View Past Advisories" 
+			click="dispatchEvent( new AdvisoryEvent( AdvisoryEvent.SHOW_ALL, true ) )" styleName="linkButton linkButtonStyle1" 
+			visible="{restrictToActive}" />
+		
+		<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle" paddingRight="10">
+			
+			<s:DropDownList 
+				id="sortSelect" width="170" height="24" labelField="value" 
+				selectedItem="{model.sortMode}"
+				creationComplete="sortSelect.dataProvider=model.sortModes; sortSelect.selectedItem = model.sortMode;" 
+				change="model.sortMode = sortSelect.selectedItem; dataProvider.refresh()" />
+			
+		</s:HGroup>
+		
+	</s:HGroup>	
+	
+	<s:Spacer height="10" />
+	
+	<s:HGroup width="100%" paddingLeft="10" paddingRight="0">
+			
+		<mx:TileList 
+			id="advisoryList" 
+			width="100%" height="560"
+			contentBackgroundAlpha="0" borderAlpha="0"  
+			dataProvider="{dataProvider}" columnCount="4" columnWidth="230" rowHeight="280" 
+			itemRenderer="components.itemrenderers.PublicHealthAdvisoryItemRenderer" selectable="false" />
+		
+	</s:HGroup>
+	
+</s:NavigatorContent>

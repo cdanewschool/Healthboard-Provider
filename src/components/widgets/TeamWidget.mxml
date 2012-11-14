@@ -104,7 +104,7 @@
 	<mx:DataGrid 
 		id="providerLists"
 		buttonMode="false" selectable="true" 
-		width="303" height="316" fontFamily="myMyriadNoCFF"
+		width="303" height="100" fontFamily="myMyriadNoCFF"
 		color="0xFFFFFF" verticalAlign="middle" 
 		dataProvider="{model.providers}"
 		headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader" headerHeight="30" paddingTop="6"

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enhancedtitlewindow:EnhancedTitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
+	width="305" creationComplete="init()" show="onShow()">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Metadata>
+		[Event(name="collapsed", type="events.EnhancedTitleWindowEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import ASfiles.ProviderConstants;
+			
+			import controllers.MainController;
+			import controllers.PublicHealthAdvisoriesController;
+			
+			import events.AdvisoryEvent;
+			import events.ApplicationDataEvent;
+			import events.ApplicationEvent;
+			import events.EnhancedTitleWindowEvent;
+			
+			import models.modules.advisories.PublicHealthAdvisoriesModel;
+			import models.modules.advisories.PublicHealthAdvisory;
+			
+			import mx.events.ListEvent;
+			
+			import util.DateFormatters;
+			
+			private const SEARCH_PLACEHOLDER:String = "Search";
+			
+			[Bindable] private var controller:PublicHealthAdvisoriesController = MainController(AppProperties.getInstance().controller).advisoryController as PublicHealthAdvisoriesController;
+			[Bindable] public var model:PublicHealthAdvisoriesModel = controller.model as PublicHealthAdvisoriesModel;
+			
+			private function update():void
+			{
+				model.searchText = search.text;
+				model.activeAdvisories.refresh();
+			}
+			
+			private function getDate(item:PublicHealthAdvisory, column:DataGridColumn):String
+			{
+				return item.update ? DateFormatters.dateOnlyBackslashDelimited.format(item.update.date) : 'N/A';
+			}
+			
+			private function onDataLoaded(event:ApplicationDataEvent=null):void
+			{
+				model.removeEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
+				
+				onShow();
+			}
+			
+			private function onItemClick(event:ListEvent):void
+			{
+				var advisory:PublicHealthAdvisory = event.itemRenderer.data as PublicHealthAdvisory;
+				model.pendingAdvisory = advisory;
+				
+				var aEvt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, ProviderConstants.MODULE_PUBLIC_HEALTH_ADVISORY );
+				dispatchEvent( aEvt );
+			}
+			
+			private function onShow():void
+			{
+				search.text = SEARCH_PLACEHOLDER;
+				
+				model.reset();
+				model.activeAdvisories.refresh();
+			}
+			
+			private function init():void
+			{
+				if( !model.dataLoaded )
+				{
+					model.addEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
+					
+					var evt:ApplicationDataEvent = new ApplicationDataEvent( ApplicationDataEvent.LOAD, true );
+					evt.data = PublicHealthAdvisoriesModel.ID;
+					dispatchEvent( evt );
+				}
+				else
+				{
+					onDataLoaded();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<enhancedtitlewindow:layout>
+		<s:VerticalLayout paddingLeft="0" paddingTop="10" paddingRight="10" paddingBottom="0"/>
+	</enhancedtitlewindow:layout>
+	
+	<s:Spacer height="-5" />
+	
+	<s:HGroup verticalAlign="middle" paddingLeft="10">
+		
+		<s:HGroup gap="-1" verticalAlign="middle" paddingLeft="4">
+			<s:TextInput id="search" text="{SEARCH_PLACEHOLDER}" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="260" height="24" click="{if(search.text == SEARCH_PLACEHOLDER) search.text=''}" change="update()" />
+			<s:Button styleName="searchButtonIcon" width="24" height="24" />
+		</s:HGroup>
+		
+	</s:HGroup>
+	
+	<s:HGroup paddingLeft="10" paddingBottom="-4">
+		<s:Line xFrom="0" xTo="281">
+			<s:stroke>
+				<s:SolidColorStroke color="0x676767" weight="1" />
+			</s:stroke>
+		</s:Line>
+	</s:HGroup>
+	
+	<mx:DataGrid 
+		id="providerLists"
+		buttonMode="false" selectable="true" 
+		width="303" height="100" fontFamily="myMyriadNoCFF"
+		color="0xFFFFFF" verticalAlign="middle" 
+		dataProvider="{model.activeAdvisories}"
+		headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" sortableColumns="false" headerStyleName="dataGridHeader" headerHeight="30" paddingTop="6"
+		borderVisible="false" horizontalGridLines="true" horizontalGridLineColor="0x444442" verticalGridLines="true" 
+		alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
+		horizontalScrollPolicy="off" verticalScrollPolicy="auto" rowHeight="22" horizontalSeparatorSkin="{null}" itemClick="onItemClick(event)">
+
+		<mx:columns>
+			<mx:DataGridColumn dataField="title" width="178" headerText="Advisory" />
+			<mx:DataGridColumn dataField="date" width="102" headerText="Last Updated" labelFunction="getDate" />
+		</mx:columns>
+	</mx:DataGrid>
+	
+</enhancedtitlewindow:EnhancedTitleWindow>

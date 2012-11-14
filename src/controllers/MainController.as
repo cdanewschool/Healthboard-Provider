@@ -9,9 +9,14 @@ package controllers
 	import components.modules.TeamModule;
 	import components.popups.InactivityAlertPopup;
 	import components.popups.UserContextMenu;
+	import components.popups.VerifyCredentialsPopup;
 	import components.popups.preferences.PreferencesPopup;
 	
+	import enum.RiskLevel;
+	
+	import events.ApplicationDataEvent;
 	import events.ApplicationEvent;
+	import events.AuthenticationEvent;
 	import events.AutoCompleteEvent;
 	import events.ProfileEvent;
 	
@@ -35,14 +40,19 @@ package controllers
 	import models.UserPreferences;
 	import models.modules.AppointmentsModel;
 	import models.modules.MessagesModel;
+	import models.modules.advisories.PatientAdvisoryStatus;
+	import models.modules.advisories.PublicHealthAdvisoriesModel;
+	import models.modules.advisories.PublicHealthAdvisory;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
+	import mx.containers.TitleWindow;
 	import mx.core.INavigatorContent;
 	import mx.events.CloseEvent;
 	import mx.events.ListEvent;
 	import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
+	import mx.utils.ObjectProxy;
 	
 	import spark.components.DropDownList;
 	import spark.events.IndexChangeEvent;
@@ -52,6 +62,7 @@ package controllers
 
 	public class MainController extends Controller
 	{
+		public var advisoryController:PublicHealthAdvisoriesController;
 		public var chatController:ChatController;
 		public var teamAppointmentsController:TeamAppointmentsController;
 		
@@ -66,7 +77,10 @@ package controllers
 		
 		public var arrOpenPatients:Array = new Array();	//	TODO: move
 		
+		private var authenticationPopup:VerifyCredentialsPopup;
 		private var inactivityAlert:InactivityAlertPopup;
+		
+		private var patientsLoaded:Boolean;
 		
 		public function MainController()
 		{
@@ -77,12 +91,15 @@ package controllers
 			userContextMenuTimer = new Timer( 2000, 1 );
 			userContextMenuTimer.addEventListener( TimerEvent.TIMER_COMPLETE, onUserMenuDelay );
 			
+			advisoryController = new PublicHealthAdvisoriesController();
 			chatController = new ChatController();
 			exerciseController = new ProviderExerciseController();
 			immunizationsController = new ProviderImmunizationsController();
 			medicalRecordsController = new ProviderMedicalRecordsController();
 			medicationsController = new ProviderMedicationsController();
 			teamAppointmentsController = new TeamAppointmentsController();
+			
+			advisoryController.model.addEventListener( ApplicationDataEvent.LOADED, onAdvisoriesLoaded );
 			
 			var lastSynced:Date = new Date( model.today.fullYear, model.today.month, model.today.date );;
 			lastSynced.time -= DateUtil.DAY * Math.random();
@@ -104,9 +121,46 @@ package controllers
 			ProviderApplicationModel(model).providersDataService.url = "data/providers.xml";
 			ProviderApplicationModel(model).providersDataService.addEventListener( ResultEvent.RESULT, providersResultHandler );
 			
+			application.addEventListener( AuthenticationEvent.PROMPT, onPromptForAuthentication );
 			application.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
 			application.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
 			application.addEventListener( ProfileEvent.SHOW_CONTEXT_MENU, onShowContextMenu );
+		}
+		
+		override protected function onAuthenticated(event:AuthenticationEvent):void
+		{
+			if( !initialized )
+			{
+				advisoryController.init();
+				chatController.init();
+				teamAppointmentsController.init();
+			}
+			
+			super.onAuthenticated(event);
+		}
+		
+		protected function onPromptForAuthentication( event:AuthenticationEvent ):void
+		{
+			if( authenticationPopup
+				&& authenticationPopup.parent )
+			{
+				PopUpManager.removePopUp( authenticationPopup );
+			}
+			
+			authenticationPopup = PopUpManager.createPopUp( application, VerifyCredentialsPopup ) as VerifyCredentialsPopup;
+			authenticationPopup.onAuthenticatedCallback = event.onAuthenticatedCallback;
+			authenticationPopup.user = user;
+			authenticationPopup.addEventListener( AuthenticationEvent.SUCCESS, onAuthenticationCheckSuccess );
+			PopUpManager.centerPopUp( authenticationPopup );
+		}
+		
+		protected function onAuthenticationCheckSuccess( event:AuthenticationEvent ):void
+		{
+			if( authenticationPopup
+				&& authenticationPopup.onAuthenticatedCallback != null )
+			{
+				authenticationPopup.onAuthenticatedCallback();
+			}
 		}
 		
 		public function getUser( id:int, type:String = null ):UserModel
@@ -412,7 +466,7 @@ package controllers
 		
 		private function patientsResultHandler(event:ResultEvent):void 
 		{
-			var results:ArrayCollection = event.result.patients.patient;
+			var results:ArrayCollection = event.result.patients.patient is ArrayCollection ? event.result.patients.patient : new ArrayCollection( [event.result.patients.patient] );
 			
 			var patients:ArrayCollection = new ArrayCollection();
 			
@@ -422,8 +476,11 @@ package controllers
 				patients.addItem( patient );
 			}
 			
+			patientsLoaded = true;
+			
 			ProviderApplicationModel(model).patients = ChatSearch( chatController.model ).patients = patients;
 			
+			onAdvisoriesLoaded();
 			initChatHistory();
 		}
 		
@@ -451,6 +508,31 @@ package controllers
 			ProviderApplicationModel(model).providersModel.providerTeams = new ArrayCollection( teams );
 			
 			initChatHistory();
+		}
+		
+		private function onAdvisoriesLoaded( event:ApplicationDataEvent = null ):void
+		{
+			if( !advisoryController.model.dataLoaded && patientsLoaded ) return;
+			
+			for each(var patient:PatientModel in ProviderApplicationModel(model).patients)
+			{
+				for each(var advisoryStatus:PatientAdvisoryStatus in patient.advisories)
+				{
+					var advisory:PublicHealthAdvisory = advisoryController.getAdvisoryById( advisoryStatus.advisoryId );
+					
+					if( advisory )
+					{
+						if( advisoryStatus.riskLevel > RiskLevel.NOT_AFFECTED )
+						{
+							advisory.update.addAffectedInNetwork( patient );
+						}
+						else if( advisoryStatus.riskLevel > RiskLevel.AFFECTED )
+						{
+							advisory.update.addAtRiskInNetwork( patient );
+						}
+					}
+				}
+			}
 		}
 		
 		private function initChatHistory():void
@@ -493,6 +575,21 @@ package controllers
 			if( module == ProviderConstants.MODULE_TEAM ) return "Team Profile";
 			
 			return title;
+		}
+		
+		override public function loadData( id:String ):Boolean
+		{
+			if( id == PublicHealthAdvisoriesModel.ID )
+			{
+				if( !advisoryController.model.dataLoaded ) 
+				{
+					advisoryController.model.dataService.send();
+					
+					return true;
+				}
+			}
+			
+			return super.loadData( id );
 		}
 	}
 }

@@ -27,7 +27,7 @@
 	</fx:Declarations>
 	
 	<fx:Style source="css/styles.css" />
-	
+	<fx:Style source="css/themes/default.css" />
 	<s:states>
 		<s:State name="default" />
 		<s:State name="forgotPassword" />
@@ -111,7 +111,7 @@
 							</s:stroke>
 						</s:Line>
 						
-						<mx:ViewStack id="viewStackProviderModules" paddingTop="-1" width="1024" resizeToContent="true">
+						<mx:ViewStack id="viewStackProviderModules" paddingTop="-1" width="1024" resizeToContent="true" creationPolicy="auto">
 							
 							<s:NavigatorContent>
 								
@@ -122,6 +122,7 @@
 								<s:HGroup gap="22" paddingTop="33" paddingLeft="32" minHeight="591" fontSize="12">
 									
 									<s:VGroup id="sidebarWidgets" gap="17">
+										
 										<!-- see http://blog.9mmedia.com/?p=535 -->
 										<widgets:MessagesWidget id="widgetMessages" width="305" collapsible="true" headerClickable="false" module="modMessages" showCloseButton="false" titleBarHeight="30" />
 										
@@ -129,6 +130,8 @@
 										
 										<widgets:TeamWidget id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" model="{ProviderApplicationModel(controller.model).providersModel}" module="modTeam" />
 									
+										<widgets:PublicHealthAdvisoryWidget id="widgetAdvisory" width="305" title="Public Health Advisory ({widgetAdvisory.model.activeAdvisories.length})" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" module="modPublicHealthAdvisory" />
+										
 									</s:VGroup>
 									
 									<s:VGroup gap="17">
@@ -230,16 +233,21 @@
 														<mx:itemRenderer>
 															<fx:Component>
 																<mx:HBox width="68" horizontalAlign="center">
-																	<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 'Urgent'}" includeInLayout="{data.urgency == 'Urgent'}" />
-																	<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 'Somewhat urgent'}" includeInLayout="{data.urgency == 'Somewhat urgent'}" />
+																	<fx:Script>
+																		<![CDATA[
+																			import enum.UrgencyType;
+																		]]>
+																	</fx:Script>
+																	<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == UrgencyType.URGENT}" includeInLayout="{data.urgency == UrgencyType.URGENT}" />
+																	<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency ==  UrgencyType.SOMEWHAT_URGENT}" includeInLayout="{data.urgency == UrgencyType.SOMEWHAT_URGENT}" />
 																</mx:HBox>
 															</fx:Component>
 														</mx:itemRenderer>
 													</mx:DataGridColumn>
 													<mx:DataGridColumn dataField="lastName" headerText="Last Name" width="101" />
 													<mx:DataGridColumn dataField="firstName" headerText="First Name" width="100" />
-													<mx:DataGridColumn dataField="sex" headerText="Sex" width="58" />
-													<mx:DataGridColumn dataField="dob" headerText="DOB" width="80" />
+													<mx:DataGridColumn dataField="sexLabel" headerText="Sex" width="58" />
+													<mx:DataGridColumn dataField="birthdateLabel" headerText="DOB" width="80" />
 													<mx:DataGridColumn dataField="status" headerText="Status" width="205" />
 												</mx:columns>
 												
@@ -509,7 +517,7 @@
 																<mx:LinkButton id="btnSortID" label="Sort by Patient ID" click="sortPatients('id');" />
 																<mx:LinkButton id="btnSortLastName" label="Sort by Last Name" styleName="messageFolderSelected" click="sortPatients('lastName');" />
 																<mx:LinkButton id="btnSortFirstName" label="Sort by First Name" click="sortPatients('firstName');" />
-																<mx:LinkButton id="btnSortAge" label="Sort by Age" click="sortPatients('dob');" />
+																<mx:LinkButton id="btnSortAge" label="Sort by Age" click="sortPatients('birthdate');" />
 																<mx:LinkButton id="btnSortRank" label="Sort by Rank" click="sortPatients('rank');" />
 																<mx:LinkButton id="btnSortBranch" label="Sort by Service Branch" click="sortPatients('serviceBranch');" />
 																<mx:LinkButton id="btnSortSex" label="Sort by Sex" click="sortPatients('sex');" />
@@ -597,13 +605,13 @@
 																	<mx:DataGridColumn dataField="serviceBranch" headerText="Service Branch" visible="{colBranch}" />
 																	<mx:DataGridColumn dataField="rank" headerText="Rank" width="148" visible="{colRank}" />
 																	<mx:DataGridColumn dataField="occupation" headerText="Occupation" visible="{colOccupation}" />
-																	<mx:DataGridColumn dataField="sex" headerText="Sex" width="58" visible="{colSex}" />
-																	<mx:DataGridColumn dataField="lastVisit" headerText="Last Visit" width="80" visible="{colLastVisit}" />
+																	<mx:DataGridColumn dataField="sexLabel" headerText="Sex" width="58" visible="{colSex}" />
+																	<mx:DataGridColumn dataField="lastVisitLabel" headerText="Last Visit" width="80" visible="{colLastVisit}" />
 																	<mx:DataGridColumn dataField="age" headerText="Age" labelFunction="lblPatientsAge" width="50" visible="{colAge}" />
-																	<mx:DataGridColumn dataField="dob" headerText="DOB" width="80" visible="{colDob}" />
+																	<mx:DataGridColumn dataField="birthdateLabel" headerText="DOB" width="80" visible="{colDob}" />
 																	<mx:DataGridColumn dataField="bloodType" headerText="Blood Type" visible="{colBloodType}" />
 																	<mx:DataGridColumn dataField="race" headerText="Race" visible="{colRace}" />
-																	<mx:DataGridColumn dataField="healthConditions" headerText="Health Conditions" width="130" visible="{colHealthConditions}" />
+																	<mx:DataGridColumn dataField="conditions" headerText="Health Conditions" width="130" visible="{colHealthConditions}" />
 																</mx:columns>
 															</mx:DataGrid>
 														</s:NavigatorContent>
@@ -629,6 +637,9 @@
 							
 							<!--	appointments	-->
 							<modules:AppointmentModule id="modAppointments" />
+							
+							<!--	public health advisory	-->
+							<modules:PublicHealthAdvisoryModule id="modPublicHealthAdvisory" />
 							
 						</mx:ViewStack>
 						

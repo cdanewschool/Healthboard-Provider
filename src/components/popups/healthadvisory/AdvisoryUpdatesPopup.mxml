@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	width="496" height="524"
+	styleName="headerlessPopup"
+	creationComplete="init()">
+	
+	<fx:Declarations>
+		<s:NumberFormatter id="numberFormatter" />
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import models.modules.advisories.PublicHealthAdvisory;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.SortField;
+			import mx.formatters.DateFormatter;
+			import mx.managers.PopUpManager;
+			
+			import spark.collections.Sort;
+			
+			import util.DateFormatters;
+			
+ 			private var _advisory:PublicHealthAdvisory;
+			
+			private var sort:Sort;
+			
+			[Bindable] private var dataProvider:ArrayCollection;
+			
+			[Bindable] public var dateFormatter:DateFormatter = new DateFormatter();
+			
+			public function get advisory():PublicHealthAdvisory
+			{
+				return _advisory;
+			}
+
+			public function set advisory(value:PublicHealthAdvisory):void
+			{
+				_advisory = value;
+				
+				if( advisory )
+				{
+					dataProvider = new ArrayCollection( advisory.updates.source );
+					dataProvider.sort = sort;
+					dataProvider.refresh();
+				}
+				
+				invalidateProperties();
+			}
+
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if( advisory )
+				{
+					header.text = advisory.title;
+					
+					intitialDate.text = "Initial Date of Oubreak: " + DateFormatters.dateFormatter.format( advisory.startDate );
+				}
+			}
+			
+			private function close():void
+			{
+				PopUpManager.removePopUp( this );
+			}
+			
+			private function init():void
+			{
+				sort = new Sort();
+				sort.fields = [ new SortField( 'date', false, false, true ) ];
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="20" paddingTop="20" paddingRight="20" gap="15" />
+	</s:layout>
+	
+	<s:Label id="header" styleName="headerlessPopupTitle" />
+	
+	<s:HGroup width="100%" verticalAlign="middle">
+		
+		<s:Label id="intitialDate" styleName="italic subheadText" fontSize="16" />
+		
+		<s:HGroup paddingLeft="10" width="100%" textAlign="right">
+			
+			<s:Label text="Time Range:" styleName="dropdownLabelText" fontSize="12" />
+			
+		</s:HGroup>
+		
+	</s:HGroup>
+	
+	<s:Scroller width="100%" height="390">
+		
+		<s:DataGroup dataProvider="{dataProvider}">
+			
+			<s:layout>
+				<s:VerticalLayout paddingRight="10" />
+			</s:layout>
+			
+			<s:itemRenderer>
+				
+				<fx:Component>
+					
+					<s:ItemRenderer width="100%" autoDrawBackground="false">
+						
+						<s:VGroup width="100%" gap="20">
+							
+							<s:BorderContainer width="100%" height="24" styleName="headerlessPopupModuleHeaderBackground">
+								
+								<s:layout>
+									<s:HorizontalLayout paddingLeft="5" paddingRight="5" verticalAlign="middle" />
+								</s:layout>
+								
+								<s:Label text="{outerDocument.dateFormatter.format(data.date)}" fontSize="13" />
+								<s:Label width="100%" textAlign="right" text="Source:" fontSize="12" paddingTop="3" />
+								<mx:LinkButton label="{data.source}" styleName="linkButtonStyle2" fontSize="12" />
+								
+							</s:BorderContainer>
+							
+							<s:HGroup width="100%">
+								
+								<s:VGroup width="40%" paddingLeft="20">
+									
+									<s:VGroup paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5" styleName="bold" fontSize="12">
+										
+										<s:Label text="My Patients" />
+										
+										<s:HGroup gap="15">
+											<s:Label width="35" text="{data.affectedCount>-1?outerDocument.numberFormatter.format(data.affectedCount):'N/A'}" fontSize="12" textAlign="right" />
+											<s:Label text="Affected" />
+										</s:HGroup>
+										
+										<s:HGroup gap="15">
+											<s:Label width="35" text="{data.atRiskCount>-1?outerDocument.numberFormatter.format(data.atRiskCount):'N/A'}" fontSize="12" textAlign="right" />
+											<s:Label text="At Risk" />
+										</s:HGroup>
+										
+										<s:HGroup gap="15">
+											<s:Label width="35" text="{data.deathCount>-1?outerDocument.numberFormatter.format(data.deathCount):'N/A'}" fontSize="12" textAlign="right" />
+											<s:Label text="Deaths" />
+										</s:HGroup>
+										
+										<s:HGroup gap="15">
+											<s:Label width="35" text="{data.deathCount>-1?outerDocument.numberFormatter.format(data.deathCount):'N/A'}" fontSize="12" textAlign="right" />
+											<s:Label text="Hospitalization" />
+										</s:HGroup>
+										
+									</s:VGroup>
+									
+									<s:BorderContainer styleName="headerlessPopupInset">
+										
+										<s:layout>
+											<s:VerticalLayout paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5" />
+										</s:layout>
+										
+										<s:Label text="National" />
+										
+										<s:HGroup gap="15">
+											<s:Label width="35" text="{data.affectedCountTotal>-1?outerDocument.numberFormatter.format(data.affectedCountTotal):'N/A'}" fontSize="12"  textAlign="right" />
+											<s:Label text="Case Reports" />
+										</s:HGroup>
+										
+										<s:HGroup gap="15">
+											<s:Label width="35" text="{data.atRiskCountTotal>-1?outerDocument.numberFormatter.format(data.atRiskCountTotal):'N/A'}" fontSize="12" textAlign="right" />
+											<s:Label text="States" />
+										</s:HGroup>
+										
+										<s:HGroup gap="15">
+											<s:Label width="35" text="{data.deathCountTotal>-1?outerDocument.numberFormatter.format(data.deathCountTotal):'N/A'}" fontSize="12" textAlign="right" />
+											<s:Label text="Deaths" />
+										</s:HGroup>
+										
+										<s:HGroup gap="15">
+											<s:Label width="35" text="{data.deathCountTotal>-1?outerDocument.numberFormatter.format(data.deathCountTotal):'N/A'}" fontSize="12" textAlign="right" />
+											<s:Label text="Hospitalization"  />
+										</s:HGroup>
+										
+									</s:BorderContainer>
+									
+								</s:VGroup>
+								
+								<mx:Text width="60%" text="— {data.text}" color="0x000000" paddingLeft="10" />
+								
+							</s:HGroup>
+							
+						</s:VGroup>
+						
+					</s:ItemRenderer>
+					
+				</fx:Component>
+				
+			</s:itemRenderer>
+			
+		</s:DataGroup>
+		
+	</s:Scroller>
+	
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:Button label="Close" click="close()" styleName="button" fontSize="11" />
+	</s:HGroup>
+	
+</s:TitleWindow>

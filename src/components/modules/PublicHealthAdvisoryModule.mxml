@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:components="components.*" 
+	xmlns:general="components.general.*" 
+	xmlns:plus="external.TabBarPlus.plus.*" 
+	xmlns:tabs="components.tabs.*"
+	width="100%" height="100%" 
+	creationComplete="init()" show="onShow()">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import components.tabs.PublicHealthAdvisoryDetails;
+			
+			import controllers.MainController;
+			import controllers.PublicHealthAdvisoriesController;
+			
+			import enum.DateRanges;
+			
+			import events.AdvisoryEvent;
+			import events.ApplicationDataEvent;
+			import events.ApplicationEvent;
+			
+			import external.TabBarPlus.plus.TabPlus;
+			
+			import models.modules.advisories.PublicHealthAdvisoriesModel;
+			import models.modules.advisories.PublicHealthAdvisory;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.Sort;
+			import mx.events.ListEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import util.DateUtil;
+			
+			[Bindable] private var controller:PublicHealthAdvisoriesController = MainController(AppProperties.getInstance().controller).advisoryController as PublicHealthAdvisoriesController;
+			[Bindable] public var model:PublicHealthAdvisoriesModel = controller.model as PublicHealthAdvisoriesModel;
+			
+			private function search():void
+			{
+				model.searchText = header.search.text;
+				model.advisories.refresh();
+			}
+			
+			private function tabsChange(event:IndexChangeEvent):void 
+			{
+				invalidateDisplayList();
+			}
+			
+			private function onShowAdvisory(event:AdvisoryEvent,initialViewIndex:int = 0):void
+			{
+				var advisory:PublicHealthAdvisory = event.data;
+				
+				var open:Boolean = false;
+				
+				for(var j:uint = 0; j < model.openTabs.length; j++) 
+				{
+					if( model.openTabs[j] == event.data ) 
+					{
+						open = true;
+						viewStack.selectedIndex = j + 1;
+						
+						break;
+					}
+				}
+				
+				if(!open) 
+				{
+					var details:PublicHealthAdvisoryDetails = new PublicHealthAdvisoryDetails();
+					details.initialViewIndex = initialViewIndex;
+					details.advisory = advisory;
+					
+					viewStack.addChild(details);
+					
+					tabs.selectedIndex = viewStack.length - 1;
+					
+					model.openTabs.push( advisory );
+				}
+			}
+			
+			private function onShowAll(event:AdvisoryEvent):void
+			{
+				if( !viewStack.getChildByName( 'allAdvisories' ) )
+				{
+					var view:ViewPublicHealthAdvisories = new ViewPublicHealthAdvisories();
+					view.name = "allAdvisories";
+					view.dataProvider = model.advisories;
+					
+					viewStack.addChild(view);
+					
+					tabs.selectedIndex = viewStack.length - 1;
+				}
+			}
+			
+			private function onShowPatients(event:AdvisoryEvent):void
+			{
+				onShowAdvisory(event,1);
+			}
+			
+			private function onTabClose( event:ListEvent ):void
+			{
+				var index:int = event.rowIndex;
+				
+				model.openTabs.splice(index-1,1);
+				
+				viewStack.selectedIndex--;
+				
+				event.stopImmediatePropagation();
+			}
+			
+			private function onDataLoaded(event:ApplicationDataEvent=null):void
+			{	
+				model.removeEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
+				
+				onShow();
+			}
+			
+			private function onShow():void
+			{
+				if( model.pendingAdvisory != null )
+				{
+					var evt:AdvisoryEvent = new AdvisoryEvent( AdvisoryEvent.SHOW_ADVISORY, true, false, model.pendingAdvisory );
+					dispatchEvent( evt );
+					
+					model.pendingAdvisory = null;
+				}
+			}
+			
+			private function init():void
+			{
+				if( !model.dataLoaded )
+				{
+					model.addEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
+					
+					var evt:ApplicationDataEvent = new ApplicationDataEvent( ApplicationDataEvent.LOAD, true );
+					evt.data = PublicHealthAdvisoriesModel.ID;
+					dispatchEvent( evt );
+				}
+				else
+				{
+					onDataLoaded();
+				}
+				
+				addEventListener( TabPlus.CLOSE_TAB_EVENT, onTabClose );
+				
+				addEventListener( AdvisoryEvent.SHOW_ADVISORY, onShowAdvisory );
+				addEventListener( AdvisoryEvent.SHOW_ALL, onShowAll );
+				addEventListener( AdvisoryEvent.SHOW_PATIENTS, onShowPatients );
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<components:ModuleHeader 
+		id="header"
+		icon="@Embed('images/patientHome.png')"
+		title="Public Health Advisory" 
+		actionPrefix="There are" actionSuffix="active advisories." actionCount="{model.activeAdvisories.length}" 
+		showSearch="true" searchFunction="search" searchPlaceholder="Search Public Health Advisory" showBackground="true" />
+	
+	<s:Spacer height="10" />
+	
+	<s:VGroup width="100%" paddingTop="14" gap="25">
+		
+		<s:Group width="100%" creationComplete="{tabs.setTabClosePolicy(0, false);}">
+			
+			<mx:ViewStack id="viewStack" styleName="viewStack" borderVisible="true" x="0" y="22" resizeToContent="true">
+				
+				<!--	overview	-->
+				<tabs:ViewPublicHealthAdvisories dataProvider="{model.activeAdvisories}" />
+				
+			</mx:ViewStack>
+			
+			<plus:TabBarPlus id="tabs" gap="6" cornerRadius="4" styleName="messagesTabs" closePolicy="always" dataProvider="{viewStack}" change="tabsChange(event)" />
+			
+		</s:Group>	
+	
+	</s:VGroup>
+	
+</s:NavigatorContent>
