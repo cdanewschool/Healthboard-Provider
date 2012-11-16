@@ -140,7 +140,7 @@
 										<enhancedtitlewindow:EnhancedTitleWindow id="widgetMyPatients" width="633" title="My Patients (8)" collapsible="true" headerClickable="false" module="modPatients" displayWarning="true" warningToolTip="There are patients who need attention" showCloseButton="false" titleBarHeight="30" color="0xFFFFFF"><!--creationComplete="{if(!wasMedicationDataLoaded) medicationsXMLdataForWidget.send();}"-->
 											
 											<enhancedtitlewindow:layout>
-												<s:VerticalLayout paddingLeft="11" paddingTop="12" paddingBottom="8"/>
+												<s:VerticalLayout paddingLeft="11" paddingTop="12" />
 											</enhancedtitlewindow:layout>
 											
 											<s:Label text="Patient Search" fontWeight="bold" fontSize="12" />
@@ -221,13 +221,13 @@
 											</s:HGroup>
 											
 											<mx:DataGrid 
-												dataProvider="{ProviderApplicationModel(controller.model).patients}" fontFamily="myMyriadNoCFF"
+												dataProvider="{ProviderApplicationModel(controller.model).patients}"
 												itemClick="dgPatients_itemClickHandler(event)"
+												styleName="standardDataGrid" fontSize="12" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
 												width="100%" 
-												color="0xFFFFFF" verticalAlign="middle"
-												headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
-												borderVisible="false" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-												horizontalScrollPolicy="off" rowCount="8" rowHeight="22" paddingTop="6"><!--dataProvider="{acMessagesToDisplay}" creationComplete="showInboxMessages()" itemClick="openMessage(event);"-->
+												headerStyleName="dataGridHeader"
+												horizontalGridLines="true" horizontalGridLineColor="0x444442"
+												horizontalScrollPolicy="off" rowCount="9" rowHeight="22" headerHeight="25" paddingTop="6"><!--dataProvider="{acMessagesToDisplay}" creationComplete="showInboxMessages()" itemClick="openMessage(event);"-->
 												
 												<mx:columns>
 													<mx:DataGridColumn dataField="urgency" headerText="Urgency" width="68">

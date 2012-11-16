@@ -107,8 +107,8 @@
 		
 	</s:HGroup>
 	
-	<s:HGroup paddingLeft="10" paddingBottom="-4">
-		<s:Line xFrom="0" xTo="281">
+	<s:HGroup paddingBottom="-6">
+		<s:Line xFrom="0" xTo="303">
 			<s:stroke>
 				<s:SolidColorStroke color="0x676767" weight="1" />
 			</s:stroke>
@@ -118,12 +118,11 @@
 	<mx:DataGrid 
 		id="providerLists"
 		buttonMode="false" selectable="true" 
-		width="303" height="100" fontFamily="myMyriadNoCFF"
-		color="0xFFFFFF" verticalAlign="middle" 
+		width="303" rowCount="4"
+		styleName="standardDataGrid" fontSize="12" alternatingItemColors="[0x3C3C3B,0x3C3C3B]" headerHeight="22"
 		dataProvider="{model.activeAdvisories}"
-		headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" sortableColumns="false" headerStyleName="dataGridHeader" headerHeight="30" paddingTop="6"
-		borderVisible="false" horizontalGridLines="true" horizontalGridLineColor="0x444442" verticalGridLines="true" 
-		alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
+		sortableColumns="false" headerStyleName="dataGridHeader"
+		horizontalGridLines="true" horizontalGridLineColor="0x444442" verticalGridLines="true" 
 		horizontalScrollPolicy="off" verticalScrollPolicy="auto" rowHeight="22" horizontalSeparatorSkin="{null}" itemClick="onItemClick(event)">
 
 		<mx:columns>
