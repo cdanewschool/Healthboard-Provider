@@ -82,8 +82,8 @@
 			
 			private var stateDirty:Boolean;
 			
-			[Bindable] [Embed("images/btnWidgetTriggerOpen.png")] public var widgetTriggerOpen:Class;
-			[Bindable] [Embed("images/btnWidgetTriggerClose.png")] public var widgetTriggerClose:Class;
+			[Bindable] [Embed("/images/btnWidgetTriggerOpen.png")] public var widgetTriggerOpen:Class;
+			[Bindable] [Embed("/images/btnWidgetTriggerClose.png")] public var widgetTriggerClose:Class;
 			
  			private var _activeModuleID:String;
 			
@@ -349,7 +349,7 @@
 			</s:LinearGradient>
 		</s:backgroundFill>
 		
-		<s:Image source="@Embed('images/patientHome.png')" buttonMode="true" click="{currentState = STATE_DEFAULT}" />
+		<s:Image source="@Embed('/images/patientHome.png')" buttonMode="true" click="{currentState = STATE_DEFAULT}" />
 		
 		<s:HGroup color="0xFFFFFF" verticalAlign="middle" paddingLeft="-7" gap="4" fontSize="22">
 			
@@ -543,132 +543,132 @@
 					
 					<s:HGroup id="patientProfileTrigger">
 						<s:VGroup horizontalAlign="center" gap="4">
-							<s:Image source="@Embed('images/widgetLibProviderPatientProfile.png')" />
+							<s:Image source="@Embed('/images/widgetLibProviderPatientProfile.png')" />
 							<s:Label text="{'Patient\'s\nProfile'}" fontSize="11" color="0xFFFFFF" textAlign="center" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_PATIENT_PROFILE )" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderPatientProfile.png')" overSkin="@Embed('images/widgetLibProviderPatientProfileOver.png')" downSkin="@Embed('images/widgetLibProviderPatientProfileDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderPatientProfile.png')" overSkin="@Embed('/images/widgetLibProviderPatientProfileOver.png')" downSkin="@Embed('/images/widgetLibProviderPatientProfileDown.png')" />
 							<s:Label text="{'Patient\'s\nProfile'}" fontSize="11" color="0x666666" fontStyle="italic" textAlign="center" />
 						</s:VGroup>
 					</s:HGroup>
 					
 					<s:HGroup id="recentActivitiesTrigger">
 						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_RECENT_ACTIVITIES ) : null" buttonMode="{currentState==STATE_MODULE}">
-							<s:Image source="@Embed('images/widgetLibProviderRecentActivities.png')" />
+							<s:Image source="@Embed('/images/widgetLibProviderRecentActivities.png')" />
 							<s:Label text="{'Recent\nActivities'}" fontSize="11" color="0xFFFFFF" textAlign="center" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_RECENT_ACTIVITIES )" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderRecentActivities.png')" overSkin="@Embed('images/widgetLibProviderRecentActivitiesOver.png')" downSkin="@Embed('images/widgetLibProviderRecentActivitiesDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderRecentActivities.png')" overSkin="@Embed('/images/widgetLibProviderRecentActivitiesOver.png')" downSkin="@Embed('/images/widgetLibProviderRecentActivitiesDown.png')" />
 							<s:Label text="{'Recent\nActivities'}" fontSize="11" color="0x666666" fontStyle="italic" textAlign="center" />
 						</s:VGroup>
 					</s:HGroup>
 					
 					<s:HGroup paddingLeft="-6" paddingRight="-6" id="appointmentsTrigger">
 						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_APPOINTMENTS ) : null" buttonMode="{currentState==STATE_MODULE}">
-							<s:Image source="@Embed('images/widgetLibProviderAppointments.png')" />
+							<s:Image source="@Embed('/images/widgetLibProviderAppointments.png')" />
 							<s:Label text="Appointments" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_APPOINTMENTS )" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderAppointments.png')" overSkin="@Embed('images/widgetLibProviderAppointmentsOver.png')" downSkin="@Embed('images/widgetLibProviderAppointmentsDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderAppointments.png')" overSkin="@Embed('/images/widgetLibProviderAppointmentsOver.png')" downSkin="@Embed('/images/widgetLibProviderAppointmentsDown.png')" />
 							<s:Label text="Appointments" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
 					
 					<s:HGroup paddingLeft="-7" paddingRight="-7" id="immunizationsTrigger">
 						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_IMMUNIZATIONS ) : null" buttonMode="{currentState==STATE_MODULE}">
-							<s:Image source="@Embed('images/widgetLibProviderImmunizations.png')" />
+							<s:Image source="@Embed('/images/widgetLibProviderImmunizations.png')" />
 							<s:Label text="Immunizations" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_IMMUNIZATIONS )" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderImmunizations.png')" overSkin="@Embed('images/widgetLibProviderImmunizationsOver.png')" downSkin="@Embed('images/widgetLibProviderImmunizationsDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderImmunizations.png')" overSkin="@Embed('/images/widgetLibProviderImmunizationsOver.png')" downSkin="@Embed('/images/widgetLibProviderImmunizationsDown.png')" />
 							<s:Label text="Immunizations" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
 					
 					<s:HGroup id="medicalRecordsTrigger">
 						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_MEDICAL_RECORDS ) : null" buttonMode="{currentState==STATE_MODULE}">
-							<s:Image source="@Embed('images/widgetLibProviderMedicalRecords.png')" />
+							<s:Image source="@Embed('/images/widgetLibProviderMedicalRecords.png')" />
 							<s:Label text="{'Medical\nRecords'}" fontSize="11" color="0xFFFFFF" textAlign="center" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_MEDICAL_RECORDS )" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderMedicalRecords.png')" overSkin="@Embed('images/widgetLibProviderMedicalRecordsOver.png')" downSkin="@Embed('images/widgetLibProviderMedicalRecordsDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderMedicalRecords.png')" overSkin="@Embed('/images/widgetLibProviderMedicalRecordsOver.png')" downSkin="@Embed('/images/widgetLibProviderMedicalRecordsDown.png')" />
 							<s:Label text="{'Medical\nRecords'}" fontSize="11" color="0x666666" fontStyle="italic" textAlign="center" />
 						</s:VGroup>
 					</s:HGroup>
 					
 					<s:HGroup paddingLeft="-3" paddingRight="-3" id="alertsTrigger">
 						<s:VGroup horizontalAlign="center" gap="4">
-							<s:Image source="@Embed('images/widgetLibProviderHealthFocus.png')" />
+							<s:Image source="@Embed('/images/widgetLibProviderHealthFocus.png')" />
 							<s:Label text="Health Focus" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_ALERTS )" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderHealthFocus.png')" overSkin="@Embed('images/widgetLibProviderHealthFocusOver.png')" downSkin="@Embed('images/widgetLibProviderHealthFocusDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderHealthFocus.png')" overSkin="@Embed('/images/widgetLibProviderHealthFocusOver.png')" downSkin="@Embed('/images/widgetLibProviderHealthFocusDown.png')" />
 							<s:Label text="Health Focus" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
 					
 					<s:HGroup paddingRight="-1" id="medicationsTrigger">
 						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_MEDICATIONS ) : null" buttonMode="{currentState==STATE_MODULE}">
-							<s:Image source="@Embed('images/widgetLibProviderMedications.png')" />
+							<s:Image source="@Embed('/images/widgetLibProviderMedications.png')" />
 							<s:Label text="Medications" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_MEDICATIONS )" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderMedications.png')" overSkin="@Embed('images/widgetLibProviderMedicationsOver.png')" downSkin="@Embed('images/widgetLibProviderMedicationsDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderMedications.png')" overSkin="@Embed('/images/widgetLibProviderMedicationsOver.png')" downSkin="@Embed('/images/widgetLibProviderMedicationsDown.png')" />
 							<s:Label text="Medications" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
 					
 					<s:HGroup id="nutritionTrigger">
 						<s:VGroup horizontalAlign="center" gap="4">
-							<s:Image source="@Embed('images/widgetLibProviderNutrition.png')" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_NUTRITION ) : null" buttonMode="{currentState==STATE_MODULE}"/>
+							<s:Image source="@Embed('/images/widgetLibProviderNutrition.png')" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_NUTRITION ) : null" buttonMode="{currentState==STATE_MODULE}"/>
 							<s:Label text="Nutrition" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_NUTRITION )" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderNutrition.png')" overSkin="@Embed('images/widgetLibProviderNutritionOver.png')" downSkin="@Embed('images/widgetLibProviderNutritionDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderNutrition.png')" overSkin="@Embed('/images/widgetLibProviderNutritionOver.png')" downSkin="@Embed('/images/widgetLibProviderNutritionDown.png')" />
 							<s:Label text="Nutrition" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
 					
 					<s:HGroup id="exerciseTrigger">
 						<s:VGroup horizontalAlign="center" gap="4">
-							<s:Image source="@Embed('images/widgetLibProviderExercise.png')" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_EXERCISE ) : null" buttonMode="{currentState==STATE_MODULE}"/>
+							<s:Image source="@Embed('/images/widgetLibProviderExercise.png')" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_EXERCISE ) : null" buttonMode="{currentState==STATE_MODULE}"/>
 							<s:Label text="Exercise" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_EXERCISE )" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderExercise.png')" overSkin="@Embed('images/widgetLibProviderExerciseOver.png')" downSkin="@Embed('images/widgetLibProviderExerciseDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderExercise.png')" overSkin="@Embed('/images/widgetLibProviderExerciseOver.png')" downSkin="@Embed('/images/widgetLibProviderExerciseDown.png')" />
 							<s:Label text="Exercise" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
 					
 					<s:HGroup id="vitalSignsTrigger">
 						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_EXERCISE ) : null" buttonMode="{currentState==STATE_MODULE}">
-							<s:Image source="@Embed('images/widgetLibProviderVitalSigns.png')" />
+							<s:Image source="@Embed('/images/widgetLibProviderVitalSigns.png')" />
 							<s:Label text="Vital Signs" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_VITAL_SIGNS )" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderVitalSigns.png')" overSkin="@Embed('images/widgetLibProviderVitalSignsOver.png')" downSkin="@Embed('images/widgetLibProviderVitalSignsDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderVitalSigns.png')" overSkin="@Embed('/images/widgetLibProviderVitalSignsOver.png')" downSkin="@Embed('/images/widgetLibProviderVitalSignsDown.png')" />
 							<s:Label text="Vital Signs" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>
 					
 					<!--<s:HGroup>
 						<s:VGroup visible="{widgetEducationalResourcesOpen}" includeInLayout="{widgetEducationalResourcesOpen}" horizontalAlign="center" gap="4">
-							<s:Image source="@Embed('images/widgetLibProviderEducationalResources.png')" />
+							<s:Image source="@Embed('/images/widgetLibProviderEducationalResources.png')" />
 							<s:Label text="{'Educational\nResources'}" textAlign="center" lineHeight="11" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
 						<s:VGroup visible="{!widgetEducationalResourcesOpen}" includeInLayout="{!widgetEducationalResourcesOpen}" horizontalAlign="center" gap="4" click="{widgetEducationalResourcesOpen = true}" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderEducationalResources.png')" overSkin="@Embed('images/widgetLibProviderEducationalResourcesOver.png')" downSkin="@Embed('images/widgetLibProviderEducationalResourcesDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderEducationalResources.png')" overSkin="@Embed('/images/widgetLibProviderEducationalResourcesOver.png')" downSkin="@Embed('/images/widgetLibProviderEducationalResourcesDown.png')" />
 							<s:Label text="{'Educational\nResources'}" textAlign="center" lineHeight="11" fontSize="11" color="0x666666" fontStyle="italic" />
 						</s:VGroup>
 					</s:HGroup>-->
 					
 					<s:HGroup id="decisionSupportTrigger">
 						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( ProviderConstants.MODULE_DECISION_SUPPORT ) : null" buttonMode="{currentState==STATE_MODULE}">
-							<s:Image source="@Embed('images/widgetLibProviderDecisionSupport.png')" />
+							<s:Image source="@Embed('/images/widgetLibProviderDecisionSupport.png')" />
 							<s:Label text="{'Decision\nSupport'}" fontSize="11" color="0xFFFFFF" textAlign="center" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_DECISION_SUPPORT )" buttonMode="true">
-							<mx:Button upSkin="@Embed('images/widgetLibProviderDecisionSupport.png')" overSkin="@Embed('images/widgetLibProviderDecisionSupportOver.png')" downSkin="@Embed('images/widgetLibProviderDecisionSupportDown.png')" />
+							<mx:Button upSkin="@Embed('/images/widgetLibProviderDecisionSupport.png')" overSkin="@Embed('/images/widgetLibProviderDecisionSupportOver.png')" downSkin="@Embed('/images/widgetLibProviderDecisionSupportDown.png')" />
 							<s:Label text="{'Decision\nSupport'}" fontSize="11" color="0x666666" fontStyle="italic" textAlign="center" />
 						</s:VGroup>
 					</s:HGroup>

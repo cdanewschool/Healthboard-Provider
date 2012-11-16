@@ -29,16 +29,16 @@ package components.popups
 	
 	public class UserContextMenu extends BorderContainer
 	{
-		[Embed('images/tooltip/profile.png')]
+		[Embed('/images/tooltip/profile.png')]
 		private var profileIcon:Class;
 		
-		[Embed('images/tooltip/message.png')]
+		[Embed('/images/tooltip/message.png')]
 		private var messageIcon:Class;
 		
-		[Embed('images/tooltip/appointments.png')]
+		[Embed('/images/tooltip/appointments.png')]
 		private var appointmentsIcon:Class;
 		
-		[Embed('images/tooltip/chat.png')]
+		[Embed('/images/tooltip/chat.png')]
 		private var chatIcon:Class;
 		
 		private var _user:UserModel;

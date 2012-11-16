@@ -28,6 +28,7 @@
 	
 	<fx:Style source="css/styles.css" />
 	<fx:Style source="css/themes/default.css" />
+
 	<s:states>
 		<s:State name="default" />
 		<s:State name="forgotPassword" />
@@ -99,7 +100,7 @@
 				
 				<mx:ViewStack id="viewStackMain" borderColor="0xBDBCBC" cornerRadius="2" width="1024" height="100%" x="0" y="22" resizeToContent="true"><!--backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" change="updateBreadcrumb('messages')" -->
 					
-					<s:NavigatorContent id="providerBox" icon="@Embed('images/healthboard.png')">
+					<s:NavigatorContent id="providerBox" icon="@Embed('/images/healthboard.png')">
 						
 						<s:layout>
 							<s:VerticalLayout gap="0" paddingTop="15" />
@@ -238,8 +239,8 @@
 																			import enum.UrgencyType;
 																		]]>
 																	</fx:Script>
-																	<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == UrgencyType.URGENT}" includeInLayout="{data.urgency == UrgencyType.URGENT}" />
-																	<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency ==  UrgencyType.SOMEWHAT_URGENT}" includeInLayout="{data.urgency == UrgencyType.SOMEWHAT_URGENT}" />
+																	<s:Image source="@Embed('/images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == UrgencyType.URGENT}" includeInLayout="{data.urgency == UrgencyType.URGENT}" />
+																	<s:Image source="@Embed('/images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency ==  UrgencyType.SOMEWHAT_URGENT}" includeInLayout="{data.urgency == UrgencyType.SOMEWHAT_URGENT}" />
 																</mx:HBox>
 															</fx:Component>
 														</mx:itemRenderer>
@@ -282,7 +283,7 @@
 										</s:LinearGradient>
 									</s:backgroundFill>
 									
-									<s:Image source="@Embed('images/patientHome.png')" buttonMode="true" click="{viewStackProviderModules.selectedIndex = 0}" />
+									<s:Image source="@Embed('/images/patientHome.png')" buttonMode="true" click="{viewStackProviderModules.selectedIndex = 0}" />
 									<s:Label id="lblBreadcrumbPatient" text="Patients" color="0xFFFFFF" fontSize="22" fontWeight="bold" paddingTop="2" paddingLeft="3" />
 									<s:Label text="▼" fontSize="10" color="0xFFFFFF" paddingTop="4" paddingLeft="12" />
 									<s:Spacer width="100%" />
@@ -319,8 +320,8 @@
 													<s:Spacer width="100%" />
 													
 													<s:HGroup gap="0">
-														<s:Button id="btnPatientsChart" width="29" height="24" icon="@Embed('images/btnProfile.png')" chromeColor="{viewsPatients.selectedIndex==0?0xFF931E:0xB3B3B3}" click="{viewsPatients.selectedIndex = 0;update();}" /><!--click="switchMedicalRecordsView(0)"-->
-														<s:Button id="btnPatientsList" width="29" height="24" icon="@Embed('images/btnCalendarList.png')" chromeColor="{viewsPatients.selectedIndex==1?0xFF931E:0xB3B3B3}" click="{viewsPatients.selectedIndex = 1;}" /><!--click="switchMedicalRecordsView(1)"-->
+														<s:Button id="btnPatientsChart" width="29" height="24" icon="@Embed('/images/btnProfile.png')" chromeColor="{viewsPatients.selectedIndex==0?0xFF931E:0xB3B3B3}" click="{viewsPatients.selectedIndex = 0;update();}" /><!--click="switchMedicalRecordsView(0)"-->
+														<s:Button id="btnPatientsList" width="29" height="24" icon="@Embed('/images/btnCalendarList.png')" chromeColor="{viewsPatients.selectedIndex==1?0xFF931E:0xB3B3B3}" click="{viewsPatients.selectedIndex = 1;}" /><!--click="switchMedicalRecordsView(1)"-->
 													</s:HGroup>
 													
 												</s:BorderContainer>
@@ -572,8 +573,8 @@
 																		<mx:itemRenderer>
 																			<fx:Component>
 																				<mx:HBox width="68" horizontalAlign="center">
-																					<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 'Urgent'}" includeInLayout="{data.urgency == 'Urgent'}" />
-																					<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 'Somewhat urgent'}" includeInLayout="{data.urgency == 'Somewhat urgent'}" />
+																					<s:Image source="@Embed('/images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 'Urgent'}" includeInLayout="{data.urgency == 'Urgent'}" />
+																					<s:Image source="@Embed('/images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 'Somewhat urgent'}" includeInLayout="{data.urgency == 'Somewhat urgent'}" />
 																				</mx:HBox>
 																			</fx:Component>
 																		</mx:itemRenderer>

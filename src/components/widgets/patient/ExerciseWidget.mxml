@@ -92,7 +92,7 @@
 							</mx:states>
 							
 							<s:HGroup width="140" gap="-2">
-								<mx:LinkButton icon.expanded="@Embed(source='images/smallArrowGray.png')" icon.collapsed="@Embed(source='images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.exerciseType}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedExercisesPixels+= (data.exerciseType == 'Most Recent PRT') ? 210 : (data.exerciseType == 'Physician-assigned' ? 130 : 71);} else {this.currentState = 'expanded'; outerDocument.collapsedExercisesPixels-= (data.exerciseType == 'Most Recent PRT') ? 210 : (data.exerciseType == 'Physician-assigned' ? 130 : 71);}}" />
+								<mx:LinkButton icon.expanded="@Embed(source='/images/smallArrowGray.png')" icon.collapsed="@Embed(source='/images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.exerciseType}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedExercisesPixels+= (data.exerciseType == 'Most Recent PRT') ? 210 : (data.exerciseType == 'Physician-assigned' ? 130 : 71);} else {this.currentState = 'expanded'; outerDocument.collapsedExercisesPixels-= (data.exerciseType == 'Most Recent PRT') ? 210 : (data.exerciseType == 'Physician-assigned' ? 130 : 71);}}" />
 								<mx:Label text="{'(Last: ' + DateUtil.getDate(data.lastDate) + ')'}" fontSize="12" color="0x868686" paddingTop="1" />
 							</s:HGroup>
 							
@@ -186,8 +186,8 @@
 													</fx:Declarations>
 													
 													<s:VGroup width="23" horizontalAlign="center">
-														<s:Image visible="{data.measure == 'Run / Walk'}" includeInLayout="{data.measure == 'Run / Walk'}" source="@Embed('images/exRunWidget.png')" />
-														<s:Image visible="{data.measure == 'Bike'}" includeInLayout="{data.measure == 'Bike'}" source="@Embed('images/exBikeWidget.png')" />
+														<s:Image visible="{data.measure == 'Run / Walk'}" includeInLayout="{data.measure == 'Run / Walk'}" source="@Embed('/images/exRunWidget.png')" />
+														<s:Image visible="{data.measure == 'Bike'}" includeInLayout="{data.measure == 'Bike'}" source="@Embed('/images/exBikeWidget.png')" />
 													</s:VGroup>
 													
 													<mx:LineChart id="chart" width="150" height="52" backgroundElements="{bge}" seriesFilters="[]" selectionMode="single" itemRollOver="chartRolloverEventHandler(event)" itemRollOut="chartRolloutEventHandler(event)"><!--itemRollOverColor="0xFBB03B" itemSelectionColor="0xFBB03B" showDataTips="true" itemRollOut="{myLineSeries.selectedIndex = 2}" -->

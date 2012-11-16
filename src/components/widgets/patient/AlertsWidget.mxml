@@ -172,8 +172,8 @@
 				<mx:itemRenderer>
 					<fx:Component>
 						<mx:HBox width="68" horizontalAlign="center">
-							<s:Image source="@Embed('images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 'Urgent'}" includeInLayout="{data.urgency == 'Urgent'}" />
-							<s:Image source="@Embed('images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 'Somewhat urgent'}" includeInLayout="{data.urgency == 'Somewhat urgent'}" />
+							<s:Image source="@Embed('/images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 'Urgent'}" includeInLayout="{data.urgency == 'Urgent'}" />
+							<s:Image source="@Embed('/images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 'Somewhat urgent'}" includeInLayout="{data.urgency == 'Somewhat urgent'}" />
 						</mx:HBox>
 					</fx:Component>
 				</mx:itemRenderer>
@@ -188,8 +188,8 @@
 							<mx:Label text="{data.description}" />
 							<s:Spacer width="100%" />
 							<s:HGroup paddingTop="7" paddingLeft="-7" paddingRight="7" alpha=".6">
-								<s:Image source="@Embed('images/btnHealthFocusMsg.png')" toolTip="Click to send message" buttonMode="true" /><!--click="nutDeleteHandler(event)"-->
-								<s:Image source="@Embed('images/btnHealthFocusComplete.png')" toolTip="Click to mark complete" buttonMode="true" /><!--click="nutDeleteHandler(event)"-->
+								<s:Image source="@Embed('/images/btnHealthFocusMsg.png')" toolTip="Click to send message" buttonMode="true" /><!--click="nutDeleteHandler(event)"-->
+								<s:Image source="@Embed('/images/btnHealthFocusComplete.png')" toolTip="Click to mark complete" buttonMode="true" /><!--click="nutDeleteHandler(event)"-->
 							</s:HGroup>
 						</mx:HBox>
 					</fx:Component>

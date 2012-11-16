@@ -137,7 +137,7 @@
 							<s:Label text="{data.firstName + ' ' + data.lastName}" color="0xAEDBE2" fontSize="12" paddingLeft="10" width="117" fontFamily="myMyriad" />
 							<!--
 							<mx:HBox width="16" paddingTop="0">
-								<s:Image id="iconImage" source="@Embed('images/grayEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
+								<s:Image id="iconImage" source="@Embed('/images/grayEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
 							</mx:HBox>
 							-->
 						</mx:HBox>

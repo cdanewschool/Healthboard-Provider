@@ -120,7 +120,7 @@
 			<mx:FormItem labelWidth="80" label="Reason for Report:" labelStyleName="headerlessPopupFormLabel">
 				<s:HGroup>
 					<s:DropDownList id="reason" width="88" height="24" dataProvider="{reasons}" selectedIndex="0" labelField="label" change="reason.errorString=''" />
-					<s:Image source="@Embed('images/redWarning2.png')" visible="{reason.errorString!=''}" />
+					<s:Image source="@Embed('/images/redWarning2.png')" visible="{reason.errorString!=''}" />
 				</s:HGroup>
 			</mx:FormItem>
 			

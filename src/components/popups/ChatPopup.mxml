@@ -328,7 +328,7 @@
 		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
 	</enhancedtitlewindow:layout>
 	
-	<s:Image includeIn="voiceChat" source="@Embed('images/chatPhoneReadout.jpg')" />
+	<s:Image includeIn="voiceChat" source="@Embed('/images/chatPhoneReadout.jpg')" />
 	
 	<s:Group includeIn="videoChat">
 		

@@ -11,6 +11,7 @@ package controllers
 	import models.modules.advisories.PublicHealthAdvisory;
 	
 	import mx.collections.ArrayCollection;
+	import mx.collections.Sort;
 	import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
 
@@ -41,12 +42,17 @@ package controllers
 				advisories.addItem( advisory );
 			}
 			
+			var sort:Sort = new Sort();
+			sort.compareFunction = sortCompare;
+			
 			model.advisories = advisories;
 			model.advisories.filterFunction = filter;
+			model.advisories.sort = sort;
 			model.advisories.refresh();
 			
 			model.activeAdvisories = new ArrayCollection( model.advisories.source );
 			model.activeAdvisories.filterFunction = filterByActive;
+			model.activeAdvisories.sort = sort;
 			model.activeAdvisories.refresh();
 			
 			super.dataResultHandler(event);
@@ -102,8 +108,8 @@ package controllers
 			var model:PublicHealthAdvisoriesModel = model as PublicHealthAdvisoriesModel;
 			var sortField:String = model.sortMode.data;
 			
-			var n1:int = 0;
-			var n2:int = 0;
+			var n1:Number = 0;
+			var n2:Number = 0;
 			
 			if( !(a.update && b.update) ) return 0;
 			

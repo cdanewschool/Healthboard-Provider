@@ -25,12 +25,12 @@
 			</s:stroke>
 		</s:Line>
 		<s:HGroup paddingTop="9" paddingLeft="4" gap="16" verticalAlign="middle">
-			<s:Image source="@Embed('images/nutritionJournalFood.png')" />
+			<s:Image source="@Embed('/images/nutritionJournalFood.png')" />
 			<s:Label fontSize="14" color="0xFFFFFF" text="1700" textAlign="right" width="63" />
 			<s:Label fontSize="12" color="0x868686" text="Calories Consumed" />
 		</s:HGroup>
 		<s:HGroup paddingBottom="5" paddingLeft="4" gap="16" verticalAlign="middle">
-			<s:Image source="@Embed('images/nutritionJournalExercise.png')" />
+			<s:Image source="@Embed('/images/nutritionJournalExercise.png')" />
 			<s:Label fontSize="14" color="0xFFFFFF" text="- 0" textAlign="right" width="63" />
 			<s:Label fontSize="12" color="0x868686" text="Calories Burned" />
 		</s:HGroup>

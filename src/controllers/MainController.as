@@ -173,6 +173,15 @@ package controllers
 			return null;
 		}
 		
+		override public function savePreferences( preferences:UserPreferences ):void
+		{
+			var colorSchemeChanged:Boolean = preferences.colorScheme != model.preferences.colorScheme;
+			
+			model.preferences.copy( preferences );
+			
+			if( colorSchemeChanged ) loadStyles();
+		}
+		
 		override public function selectSetting( event:IndexChangeEvent ):void
 		{
 			super.selectSetting(event);

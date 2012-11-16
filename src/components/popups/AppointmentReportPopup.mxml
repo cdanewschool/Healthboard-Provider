@@ -132,7 +132,7 @@
 	
 	<s:VGroup id="container" paddingTop="10" paddingLeft="30" paddingRight="30" gap="20">
 		
-		<s:Image source="@Embed('images/logo-black.png')" />
+		<s:Image source="@Embed('/images/logo-black.png')" />
 		
 		<s:Label text="Appointments" textAlign="center" width="100%" styleName="black16SemiBold" />
 		

@@ -164,14 +164,14 @@
 	
 	<components:ModuleHeader 
 		id="header"
-		icon="@Embed('images/patientHome.png')"
+		icon="@Embed('/images/patientHome.png')"
 		title="Public Health Advisory" 
 		actionPrefix="There are" actionSuffix="active advisories." actionCount="{model.activeAdvisories.length}" 
 		showSearch="true" searchFunction="search" searchPlaceholder="Search Public Health Advisory" showBackground="true" />
 	
 	<s:Spacer height="10" />
 	
-	<s:VGroup width="100%" paddingTop="14" gap="25">
+	<s:VGroup width="100%" gap="25">
 		
 		<s:Group width="100%" creationComplete="{tabs.setTabClosePolicy(0, false);}">
 			

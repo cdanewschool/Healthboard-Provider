@@ -65,7 +65,7 @@
 							</mx:transition>
 							-->
 							
-							<mx:LinkButton icon.expanded="@Embed(source='images/smallArrowGray.png')" icon.collapsed="@Embed(source='images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.section}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedDecisionSupportPixels+= (data.section == 'Cardiovascular Risk') ? 169 : 137;} else {this.currentState = 'expanded'; outerDocument.collapsedDecisionSupportPixels-= (data.section == 'Cardiovascular Risk') ? 169 : 137;}}" />
+							<mx:LinkButton icon.expanded="@Embed(source='/images/smallArrowGray.png')" icon.collapsed="@Embed(source='/images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.section}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedDecisionSupportPixels+= (data.section == 'Cardiovascular Risk') ? 169 : 137;} else {this.currentState = 'expanded'; outerDocument.collapsedDecisionSupportPixels-= (data.section == 'Cardiovascular Risk') ? 169 : 137;}}" />
 							
 							<s:Group includeIn="expanded"><!--includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}"-->
 								<s:Line xFrom="0" xTo="280">

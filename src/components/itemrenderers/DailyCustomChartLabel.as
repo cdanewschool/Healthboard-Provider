@@ -32,7 +32,7 @@ package components.itemrenderers
 		
 		private var options:ArrayCollection = new ArrayCollection( ['Message All','Cancel All'] );
 		
-		[Embed(source="images/smallArrowGray.png")]
+		[Embed(source="/images/smallArrowGray.png")]
 		private var iconClass:Class;
 		
 		public function DailyCustomChartLabel()

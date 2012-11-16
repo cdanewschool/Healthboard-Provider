@@ -114,7 +114,7 @@
 							-->
 							
 							<s:HGroup width="140" gap="-2">
-								<mx:LinkButton icon.expanded="@Embed(source='images/smallArrowGray.png')" icon.collapsed="@Embed(source='images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.vital}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedPixels++;} else {this.currentState = 'expanded'; outerDocument.collapsedPixels--;}}" />
+								<mx:LinkButton icon.expanded="@Embed(source='/images/smallArrowGray.png')" icon.collapsed="@Embed(source='/images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.vital}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedPixels++;} else {this.currentState = 'expanded'; outerDocument.collapsedPixels--;}}" />
 								<mx:Label text="{'(Last: ' + DateUtil.getDate(data.chart[0].data[data.chart[0].data.length - 1].date) + ')'}" fontSize="12" color="0x868686" paddingTop="1" />
 							</s:HGroup>
 							

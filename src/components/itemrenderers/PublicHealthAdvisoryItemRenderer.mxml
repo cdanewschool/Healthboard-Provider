@@ -95,7 +95,7 @@
 			<mx:GridRow>
 				<mx:GridItem width="75">
 					<s:HGroup verticalAlign="middle">
-						<s:Image source="@Embed('images/advisory/affected.png')" />
+						<s:Image source="@Embed('/images/advisory/affected.png')" />
 						<s:Label text="Affected" styleName="whiteText11" />
 					</s:HGroup>
 				</mx:GridItem>
@@ -107,7 +107,7 @@
 			<mx:GridRow>
 				<mx:GridItem width="75">
 					<s:HGroup verticalAlign="middle">
-						<s:Image source="@Embed('images/advisory/risk.png')" />
+						<s:Image source="@Embed('/images/advisory/risk.png')" />
 						<s:Label text="At Risk" styleName="whiteText11" />
 					</s:HGroup>
 				</mx:GridItem>
@@ -119,7 +119,7 @@
 			<mx:GridRow>
 				<mx:GridItem width="75">
 					<s:HGroup verticalAlign="middle">
-						<s:Image source="@Embed('images/advisory/death.png')" />
+						<s:Image source="@Embed('/images/advisory/death.png')" />
 						<s:Label text="Deaths" styleName="whiteText11" />
 					</s:HGroup>
 				</mx:GridItem>

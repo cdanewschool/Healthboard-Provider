@@ -583,25 +583,25 @@
 											
 											<s:HGroup verticalAlign="middle">
 												<s:CheckBox id="showAffectedPatients" selected="true" click="patientsAffectedLayer.visible = showAffectedPatients.selected" />
-												<s:Image source="@Embed('images/advisory/markers/affected.png')" />
+												<s:Image source="@Embed('/images/advisory/markers/affected.png')" />
 												<s:Label text="Affected Patients" styleName="white11" color="0xF2F2F2" />
 											</s:HGroup>
 											
 											<s:HGroup verticalAlign="middle">
 												<s:CheckBox id="showHospitalized" selected="true" click="hospitalizationsLayer.visible = showHospitalized.selected" />
-												<s:Image source="@Embed('images/advisory/markers/hospitalized.png')" />
+												<s:Image source="@Embed('/images/advisory/markers/hospitalized.png')" />
 												<s:Label text="Hospitalized" styleName="white11" color="0xF2F2F2" />
 											</s:HGroup>
 											
 											<s:HGroup verticalAlign="middle">
 												<s:CheckBox id="showDeaths" selected="true" click="deathsLayer.visible = showDeaths.selected" />
-												<s:Image source="@Embed('images/advisory/markers/death.png')" />
+												<s:Image source="@Embed('/images/advisory/markers/death.png')" />
 												<s:Label text="Deaths" styleName="white11" color="0xF2F2F2" />
 											</s:HGroup>
 											
 											<s:HGroup verticalAlign="middle">
 												<s:CheckBox id="showUnaffectedPatients" selected="true" click="patientsUnaffectedLayer.visible = showUnaffectedPatients.selected" />
-												<s:Image source="@Embed('images/advisory/markers/patient.png')" />
+												<s:Image source="@Embed('/images/advisory/markers/patient.png')" />
 												<s:Label text="My Patients" styleName="white11" color="0xF2F2F2" />
 											</s:HGroup>
 											
@@ -616,17 +616,17 @@
 											<s:Label text="Rate of Risk" styleName="blue11Bold" />
 											
 											<s:HGroup verticalAlign="middle">
-												<s:Image source="@Embed('images/advisory/risk/low.jpg')" />
+												<s:Image source="@Embed('/images/advisory/risk/low.jpg')" />
 												<s:Label text="Low" styleName="white11" color="0xF2F2F2" />
 											</s:HGroup>
 											
 											<s:HGroup verticalAlign="middle">
-												<s:Image source="@Embed('images/advisory/risk/moderate.jpg')" />
+												<s:Image source="@Embed('/images/advisory/risk/moderate.jpg')" />
 												<s:Label text="Moderate" styleName="white11" color="0xF2F2F2" />
 											</s:HGroup>
 											
 											<s:HGroup verticalAlign="middle">
-												<s:Image source="@Embed('images/advisory/risk/high.jpg')" />
+												<s:Image source="@Embed('/images/advisory/risk/high.jpg')" />
 												<s:Label text="High" styleName="white11" color="0xF2F2F2" />
 											</s:HGroup>
 											
@@ -737,7 +737,7 @@
 								
 								<s:HGroup verticalAlign="middle">
 									<s:Label text="{patient.fullName}" styleName="blue13Bold" fontSize="14" />
-									<s:Image source="@Embed('images/grayEnvelope.png')" />
+									<s:Image source="@Embed('/images/grayEnvelope.png')" />
 								</s:HGroup>
 								
 								<s:HGroup gap="15">

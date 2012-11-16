@@ -1067,7 +1067,7 @@
 	
 	<components:ModuleHeader 
 		id="header" 
-		title="Appointments" icon="@Embed('images/patientHome.png')" 
+		title="Appointments" icon="@Embed('/images/patientHome.png')" 
 		showSearch="true" searchPlaceholder="Search Appointments" searchFunction="{onHeaderSearch}"
 		actionSuffix="requests in need of confirmation." />
 	
@@ -1110,9 +1110,9 @@
 								</s:HGroup>
 								
 								<s:HGroup gap="-1" paddingLeft="19">
-									<s:Button width="26" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('images/arrowLeft.png')" click="navigate(-1)" />
-									<s:Button width="26" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('images/diamond.png')" click="navigate(0)"/>
-									<s:Button width="26" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('images/arrowRight.png')" click="navigate(1)"/>
+									<s:Button width="26" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('/images/arrowLeft.png')" click="navigate(-1)" />
+									<s:Button width="26" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('/images/diamond.png')" click="navigate(0)"/>
+									<s:Button width="26" height="24" skinClass="skins.general.IconButtonSkin" icon="@Embed('/images/arrowRight.png')" click="navigate(1)"/>
 								</s:HGroup>
 								
 								<!--	mode selector	-->

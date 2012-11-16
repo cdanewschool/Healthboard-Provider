@@ -23,6 +23,8 @@ package models
 			providersDataService = new HTTPService();
 			
 			providersModel = new ProvidersModel();
+			
+			preferences = new UserPreferences();
 		}
 	}
 }

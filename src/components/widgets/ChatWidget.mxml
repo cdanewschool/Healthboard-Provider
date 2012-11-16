@@ -219,9 +219,9 @@
 				</s:ButtonBar>
 					
 				<!--
-				<s:Button width="62" height="22" label="Text" icon="@Embed('images/button_icons/text.png')" iconPlacement="left" click="chat( ChatModel.MODE_TEXT )" fontSize="11" enabled="{model.user!=null}" />  
-				<s:Button width="62" height="22" label="Voice" icon="@Embed('images/button_icons/voice.png')" iconPlacement="left" click="chat( ChatModel.MODE_VOICE )" fontSize="11" enabled="{model.user!=null}" />
-				<s:Button width="62" height="22" label="Video" icon="@Embed('images/button_icons/video.png')" iconPlacement="left" click="chat( ChatModel.MODE_VIDEO )" fontSize="11" enabled="{model.user!=null}" />
+				<s:Button width="62" height="22" label="Text" icon="@Embed('/images/button_icons/text.png')" iconPlacement="left" click="chat( ChatModel.MODE_TEXT )" fontSize="11" enabled="{model.user!=null}" />  
+				<s:Button width="62" height="22" label="Voice" icon="@Embed('/images/button_icons/voice.png')" iconPlacement="left" click="chat( ChatModel.MODE_VOICE )" fontSize="11" enabled="{model.user!=null}" />
+				<s:Button width="62" height="22" label="Video" icon="@Embed('/images/button_icons/video.png')" iconPlacement="left" click="chat( ChatModel.MODE_VIDEO )" fontSize="11" enabled="{model.user!=null}" />
 				-->
 			</s:HGroup>
 			

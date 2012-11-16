@@ -231,7 +231,7 @@
 		<s:VerticalLayout />
 	</s:layout>
 	
-	<components:ModuleHeader id="header" title="Team Profile" icon="@Embed('images/patientHome.png')" showSearch="true" searchPlaceholder="Search Patients" searchFunction="{onHeaderSearch}" navigate="onHeaderClick(event)" />
+	<components:ModuleHeader id="header" title="Team Profile" icon="@Embed('/images/patientHome.png')" showSearch="true" searchPlaceholder="Search Patients" searchFunction="{onHeaderSearch}" navigate="onHeaderClick(event)" />
 	
 	<s:HGroup width="100%" paddingTop="14" gap="25" horizontalAlign="center">
 		
@@ -259,8 +259,8 @@
 						</s:layout>
 						
 						<s:HGroup gap="0" width="100%" horizontalAlign="right">
-							<s:Button id="btnTeamMembersProfile" width="29" height="24" icon="@Embed('images/btnProfile.png')" chromeColor="{viewsTeamMembers.selectedIndex==0?0xFF931E:0xB3B3B3}" click="viewsTeamMembers.selectedIndex=0;update()" />
-							<s:Button id="btnTeamMembersList" width="29" height="24" icon="@Embed('images/btnCalendarList.png')" styleName="buttonText" chromeColor="{viewsTeamMembers.selectedIndex==1?0xFF931E:0xB3B3B3}" click="viewsTeamMembers.selectedIndex=1"/>
+							<s:Button id="btnTeamMembersProfile" width="29" height="24" icon="@Embed('/images/btnProfile.png')" chromeColor="{viewsTeamMembers.selectedIndex==0?0xFF931E:0xB3B3B3}" click="viewsTeamMembers.selectedIndex=0;update()" />
+							<s:Button id="btnTeamMembersList" width="29" height="24" icon="@Embed('/images/btnCalendarList.png')" styleName="buttonText" chromeColor="{viewsTeamMembers.selectedIndex==1?0xFF931E:0xB3B3B3}" click="viewsTeamMembers.selectedIndex=1"/>
 						</s:HGroup>
 						
 					</s:BorderContainer>
@@ -408,7 +408,7 @@
 													<s:Label text="{data.firstName + ' ' + data.lastName}" fontSize="12" paddingLeft="10" fontFamily="myMyriad" width="115" />
 													<!--
 													<mx:HBox width="30">
-														<s:Image id="iconImage" source="@Embed('images/grayEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
+														<s:Image id="iconImage" source="@Embed('/images/grayEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
 													</mx:HBox>
 													-->
 												</mx:HBox>
