@@ -72,8 +72,6 @@
 			
 			private function onSaveClick():void
 			{
-				AppProperties.getInstance().controller.savePreferences( preferences );
-				
 				close();
 			}
 			
