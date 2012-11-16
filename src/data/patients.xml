@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <patients>
 
-	<patient id="130" lastName="Anderson" firstName="Fred" birthdate="10/03/1973" sex="1">
+	<patient id="131" lastName="Anderson" firstName="Fred" birthdate="10/03/1973" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="05/01/2012">
 			<advisory advisoryId="1" riskLevel="1" />
 		</advisories>
@@ -9,139 +9,175 @@
 		<relations>
 			<relation lastName="Anderson" firstName="Lisa" type="spouse" />
 		</relations>
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
 	</patient>
 	
-	<patient id="130" lastName="Arnolds" firstName="Richard" birthdate="10/03/1973" sex="1">
+	<patient id="132" lastName="Arnolds" firstName="Richard" birthdate="10/03/1973" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="05/01/2012">
 			<advisory advisoryId="1" riskLevel="1"  />
 		</advisories>
 		<location state="Washington DC" latitude="38.89636" longitude="-77.04227" />
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
 	</patient>
 	
-	<patient id="130" lastName="Barrett" firstName="John" birthdate="10/03/1973" sex="1">
+	<patient id="133" lastName="Barrett" firstName="John" birthdate="10/03/1973" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="05/01/2012">
 			<advisory advisoryId="1" riskLevel="1"  />
 		</advisories>
 		<location city="Arlington" state="Virginia" latitude="38.87997" longitude="-77.10677" />
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
 	</patient>
 	
-	<patient id="130" lastName="Brick" firstName="Christina" birthdate="10/03/1973" sex="0">
+	<patient id="134" lastName="Brick" firstName="Christina" birthdate="10/03/1973" sex="0" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="05/01/2012">
 			<advisory advisoryId="1" riskLevel="1"  />
 		</advisories>
 		<location state="Washington DC" latitude="38.904192" longitude="-77.059093" />
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
 	</patient>
 	
-	<patient id="130" lastName="Brooke" firstName="Michael" birthdate="10/03/1973" sex="1">
+	<patient id="135" lastName="Brooke" firstName="Michael" birthdate="10/03/1973" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="05/01/2012">
 			<advisory advisoryId="1" riskLevel="1"  />
 		</advisories>
 		<location city="Reisterstown" state="Maryland" latitude="39.469549" longitude="-76.829421" />
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
 	</patient>
 	
-	<patient id="130" lastName="Burg" firstName="Andre" birthdate="10/03/1973" sex="1">
+	<patient id="136" lastName="Burg" firstName="Andre" birthdate="10/03/1973" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="05/01/2012">
 			<advisory advisoryId="1" riskLevel="1"  />
 		</advisories>
 		<location city="Arlington" state="Virginia" latitude="38.879007" longitude="-77.086945" />
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
 	</patient>
 	
-	<patient id="130" lastName="Chang" firstName="Anne W." birthdate="01/01/1965" sex="0" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
-		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+	<patient id="130" lastName="Chang" firstName="Anne W." birthdate="01/01/1965" sex="0" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
+		<contact email="anne.chang@aol.com" phone="(212) 111-2222" />
 		<location city="Arlington" state="Virginia"  latitude="38.894974" longitude="-77.088747" />
 		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
 		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
 	</patient>
 	
-	<patient id="127" lastName="Cloud" firstName="John S." birthdate="01/01/1965" sex="1" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
-		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+	<patient id="127" lastName="Cloud" firstName="John S." birthdate="01/01/1965" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
+		<contact email="john.cloud@gmail.com" phone="(212) 111-2222" />
 		<location city="Arlington" state="Virginia" latitude="38.897045" longitude="-77.115269" />
 		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
 		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="1" />
 	</patient>
 	
-	<patient id="130" lastName="Colleen" firstName="Wallace" birthdate="10/03/1973" sex="0">
+	<patient id="137" lastName="Colleen" firstName="Wallace" birthdate="10/03/1973" sex="0" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="05/01/2012">
 			<advisory advisoryId="1" riskLevel="1" />
 		</advisories>
 		<location city="Arlington" state="Virginia" latitude="38.876468" longitude="-77.182131" />
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
 	</patient>
 	
-	<patient id="130" lastName="Cook" firstName="Adrian" birthdate="10/03/1973" sex="1">
+	<patient id="138" lastName="Cook" firstName="Adrian" birthdate="10/03/1973" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="04/27/2012">
 			<advisory advisoryId="1" riskLevel="1" />
 		</advisories>
 		<location city="Reisterstown" state="Maryland" latitude="39.466878" longitude="-76.833379" />
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
 	</patient>
 	
-	<patient id="130" lastName="Einstein" firstName="Ashley" birthdate="10/03/1973" sex="0">
+	<patient id="139" lastName="Einstein" firstName="Ashley" birthdate="10/03/1973" sex="0" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="05/01/2012">
 			<advisory advisoryId="1" riskLevel="3"  />
 		</advisories>
 		<location city="Baltimore" state="Maryland" latitude="39.287977" longitude="-76.598954" />
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
 	</patient>
 	
-	<patient id="130" lastName="Faust" firstName="Nicholas" birthdate="10/03/1973" sex="1">
+	<patient id="140" lastName="Faust" firstName="Nicholas" birthdate="10/03/1973" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="05/01/2012">
 			<advisory advisoryId="1" riskLevel="2"  />
 		</advisories>
 		<location city="Arlington" state="Virginia" latitude="38.858625" longitude="-77.200842" />
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="2" urgency="0" />
 	</patient>
 	
-	<patient id="130" lastName="Frankenstein" firstName="John" birthdate="10/03/1973" sex="1">
+	<patient id="141" lastName="Frankenstein" firstName="John" birthdate="10/03/1973" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="05/01/2012">
 			<advisory advisoryId="1" riskLevel="2"  />
 		</advisories>
 		<location city="Towson" state="Maryland" latitude="39.397121" longitude="-76.601400" />
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="2" urgency="0" />
 	</patient>
 	
-	<patient id="130" lastName="Giovanni" firstName="Richard" birthdate="10/03/1973" sex="1">
+	<patient id="142" lastName="Giovanni" firstName="Richard" birthdate="10/03/1973" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<advisories updated="05/01/2012">
 			<advisory advisoryId="1" riskLevel="1"  />
 		</advisories>
 		<location city="Towson" state="Maryland" latitude="39.391499" longitude="-76.59241" />
+		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="2" urgency="0" />
 	</patient>
 	
-	<patient id="126" lastName="Glover" firstName="Walter" birthdate="01/01/1965" sex="1" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
-		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+	<patient id="126" lastName="Glover" firstName="Walter" birthdate="01/01/1965" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
+		<contact email="gloverw@hotmail.com" phone="(212) 111-2222" />
 		<location city="Arlington" state="Virginia" latitude="38.825801" longitude="-77.204704" />
 		<occupation professionalTitle="IT" serviceBranch="Army" serviceRank="Captain" />
 		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
 	</patient>
 	
-	<patient id="123" lastName="Goodman" firstName="Isaac" birthdate="01/01/1965" sex="1" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
+	<patient id="123" lastName="Goodman" firstName="Isaac" birthdate="01/01/1965" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
 		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
 		<location city="Arlington" state="Virginia" latitude="38.82774" longitude="-77.158098" />
 		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
 		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="2" />
 	</patient>
 	
-	<patient id="129" lastName="Lee" firstName="Berg" birthdate="01/01/1965" sex="1" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
-		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+	<patient id="129" lastName="Lee" firstName="Berg" birthdate="01/01/1965" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
+		<contact email="blee@hotmail.com" phone="(212) 111-2222" />
 		<location city="Arlington" state="Virginia" latitude="38.812694" longitude="-77.097158" />
 		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
-		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="2" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="2" urgency="2" />
 	</patient>
 	
-	<patient id="125" lastName="Roberts" firstName="Lance" birthdate="01/01/1965" sex="1" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
-		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+	<patient id="125" lastName="Roberts" firstName="Lance" birthdate="01/01/1965" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
+		<contact email="lrobinson@aol.com" phone="(212) 111-2222" />
 		<location city="Arlington" state="Virginia" latitude="38.823594" longitude="-77.056818" />
 		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
 		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="1" />
 	</patient>
 	
-	<patient id="124" lastName="Robinson" firstName="Michael" birthdate="01/01/1965" sex="1" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
-		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+	<patient id="124" lastName="Robinson" firstName="Michael" birthdate="01/01/1965" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
+		<contact email="robinson.michael@gmail.com" phone="(212) 111-2222" />
 		<location city="Groveton" state="Virginia" latitude="38.771886" longitude="-77.093983" />
 		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
 		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="2" />
 	</patient>
 	
-	<patient id="128" lastName="Wunderlich" firstName="Michael" birthdate="01/01/1965" sex="1" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
-		<contact email="goodman@hotmail.com" phone="(212) 111-2222" />
+	<patient id="128" lastName="Wunderlich" firstName="Michael" birthdate="01/01/1965" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">
+		<contact email="wunderlich@comcast.net" phone="(212) 111-2222" />
 		<location city="Arlington" state="Virginia" latitude="38.813229" longitude="-77.071838" />
 		<occupation professionalTitle="Engineer" serviceBranch="Navy" serviceRank="Captain" />
-		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="1" urgency="0" />
+		<medical bloodType="A+" conditions="High cholesterol" lastVisit="12/10/2011" team="2" urgency="0" />
 	</patient>
 	
 	<!--  

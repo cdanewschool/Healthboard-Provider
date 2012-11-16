@@ -44,7 +44,7 @@
 	<s:VGroup paddingLeft="20" paddingTop="3">
 		<s:CheckBox id="checkUrgency" label="Urgency" selected="{parentApplication.colUrgency}" />
 		<s:CheckBox id="checkPhoto" label="Photo" selected="{parentApplication.colPhoto}" />
-		<s:CheckBox id="checkID" label="ID Number" selected="{parentApplication.colID}" />
+		<s:CheckBox id="checkID" label="ID Number" selected="{parentApplication.colId}" />
 		<s:CheckBox id="checkTeam" label="Team" selected="{parentApplication.colTeam}" />
 		<s:CheckBox id="checkLastName" label="Last Name" selected="{parentApplication.colLastName}" />
 		<s:CheckBox id="checkFirstName" label="First Name" selected="{parentApplication.colFirstName}" />
