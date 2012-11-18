@@ -522,7 +522,7 @@ package controllers
 					
 					if( advisory )
 					{
-						if( advisoryStatus.riskLevel > RiskLevel.NOT_AFFECTED )
+						if( advisoryStatus.riskLevel > RiskLevel.NONE )
 						{
 							advisory.update.addAffectedInNetwork( patient );
 						}

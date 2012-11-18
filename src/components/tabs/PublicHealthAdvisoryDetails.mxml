@@ -290,10 +290,10 @@
 				
 				if( !advisoryStatus ) return 'Not Affected';
 				
-				if( advisoryStatus.riskLevel == RiskLevel.NOT_AFFECTED ) return "Not Affected";
+				if( advisoryStatus.riskLevel == RiskLevel.NONE ) return "Not Affected";
 				if( advisoryStatus.riskLevel == RiskLevel.AFFECTED ) return "Affected";
-				if( advisoryStatus.riskLevel == RiskLevel.ROUTINE_RISK ) return "Routine Risk";
-				if( advisoryStatus.riskLevel == RiskLevel.HIGH_RISK ) return "High Risk";
+				if( advisoryStatus.riskLevel == RiskLevel.ROUTINE ) return "Routine Risk";
+				if( advisoryStatus.riskLevel == RiskLevel.HIGH ) return "High Risk";
 				
 				return 'Not Affected';
 			}
@@ -329,7 +329,7 @@
 				
 				if( sortField == PublicHealthAdvisoriesModel.PATIENT_FITLER_MODE_ATRISK )
 				{
-					valid = advisoryStatus != null && advisoryStatus.riskLevel >= RiskLevel.ROUTINE_RISK;
+					valid = advisoryStatus != null && advisoryStatus.riskLevel >= RiskLevel.ROUTINE;
 				}
 				else if( sortField == PublicHealthAdvisoriesModel.PATIENT_FITLER_MODE_AFFECTED )
 				{

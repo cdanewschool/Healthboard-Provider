@@ -2,9 +2,10 @@ package enum
 {
 	public class RiskLevel
 	{
-		public static const NOT_AFFECTED:int = 0;
-		public static const AFFECTED:int = 1;
-		public static const ROUTINE_RISK:int = 2;
-		public static const HIGH_RISK:int = 3;
+		public static const NONE:String = 'none';
+		public static const ROUTINE:String = 'routine';
+		public static const AFFECTED:String = 'affected';
+		public static const LOW:String = 'low';
+		public static const HIGH:String = 'high';
 	}
 }
