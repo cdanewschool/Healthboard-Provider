@@ -59,6 +59,6 @@
 		
 	</s:HGroup>
 	
-	<s:Button label="Continue This Session" width="125" click="dispatchEvent( new CloseEvent( CloseEvent.CLOSE ) )" />
+	<s:Button label="Continue This Session" width="125" click="timer.stop(); dispatchEvent( new CloseEvent( CloseEvent.CLOSE ) )" />
 	
 </s:TitleWindow>
