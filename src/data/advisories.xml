@@ -51,6 +51,140 @@
 				affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="10108" deathCountTotal="53">
 			</update>
 		</updates>
+		
+		<stats>
+			<week week="9">
+				<reports_new>0</reports_new>
+			    <reports_accum>0</reports_accum>
+			</week>
+			<week week="10">
+				<reports_new>1</reports_new>
+			    <reports_accum>1</reports_accum>
+			</week>
+			<week week="11">
+				<reports_new>1</reports_new>
+			    <reports_accum>2</reports_accum>
+			</week>
+			<week week="12">
+				<positive_local>4</positive_local>
+			    <positive_national>8</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>3</reports_accum>
+			</week>
+			<week week="13">
+				<positive_local>15</positive_local>
+			    <positive_national>13</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>5</reports_accum>
+			</week>
+			<week week="14">
+				<positive_local>10</positive_local>
+			    <positive_national>11</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>7</reports_accum>
+			</week>
+			<week week="15">
+				<positive_local>6</positive_local>
+			    <positive_national>5</positive_national>
+			    <reports_new>3</reports_new>
+			    <reports_accum>10</reports_accum>
+			</week>
+			<week week="16">
+				<positive_local>4</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>11</reports_accum>
+			</week>
+			<week week="17">
+				<positive_local>1</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			<week week="18">
+				<positive_local>3</positive_local>
+			    <positive_national>6</positive_national>
+			    <reports_new>0</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			
+			<half_week week="9">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="9.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.25</visits_national>
+			</half_week>
+			<half_week week="10">
+				<visits_ILA>1</visits_ILA>
+			    <visits_national>2.5</visits_national>
+			</half_week>
+			<half_week week="10.5">
+				<visits_ILA>4.5</visits_ILA>
+			    <visits_national>5</visits_national>
+			</half_week>
+			<half_week week="11">
+				<visits_ILA>1.5</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="11.5">
+				<visits_ILA>7</visits_ILA>
+			    <visits_national>5.5</visits_national>
+			</half_week>
+			<half_week week="12">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="12.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="13">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="13.5">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="14">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="14.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>4</visits_national>
+			</half_week>
+			<half_week week="15">
+				<visits_ILA>5.5</visits_ILA>
+			    <visits_national>4.25</visits_national>
+			</half_week>
+			<half_week week="15.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="16">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="16.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="17">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>1.75</visits_national>
+			</half_week>
+			<half_week week="17.5">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="18">
+				<visits_ILA>3</visits_ILA>
+			    <visits_national>1.25</visits_national>
+			</half_week>
+		</stats>
 	</advisory>
 	
 	<advisory id="2" title="Escherichia Coli 0145" active="true">
@@ -66,6 +200,140 @@
 				</hospitalizations>	
 			</update>
 		</updates>
+		
+		<stats>
+			<week week="9">
+				<reports_new>0</reports_new>
+			    <reports_accum>0</reports_accum>
+			</week>
+			<week week="10">
+				<reports_new>1</reports_new>
+			    <reports_accum>1</reports_accum>
+			</week>
+			<week week="11">
+				<reports_new>1</reports_new>
+			    <reports_accum>2</reports_accum>
+			</week>
+			<week week="12">
+				<positive_local>4</positive_local>
+			    <positive_national>8</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>3</reports_accum>
+			</week>
+			<week week="13">
+				<positive_local>15</positive_local>
+			    <positive_national>13</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>5</reports_accum>
+			</week>
+			<week week="14">
+				<positive_local>10</positive_local>
+			    <positive_national>11</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>7</reports_accum>
+			</week>
+			<week week="15">
+				<positive_local>6</positive_local>
+			    <positive_national>5</positive_national>
+			    <reports_new>3</reports_new>
+			    <reports_accum>10</reports_accum>
+			</week>
+			<week week="16">
+				<positive_local>4</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>11</reports_accum>
+			</week>
+			<week week="17">
+				<positive_local>1</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			<week week="18">
+				<positive_local>3</positive_local>
+			    <positive_national>6</positive_national>
+			    <reports_new>0</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			
+			<half_week week="9">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="9.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.25</visits_national>
+			</half_week>
+			<half_week week="10">
+				<visits_ILA>1</visits_ILA>
+			    <visits_national>2.5</visits_national>
+			</half_week>
+			<half_week week="10.5">
+				<visits_ILA>4.5</visits_ILA>
+			    <visits_national>5</visits_national>
+			</half_week>
+			<half_week week="11">
+				<visits_ILA>1.5</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="11.5">
+				<visits_ILA>7</visits_ILA>
+			    <visits_national>5.5</visits_national>
+			</half_week>
+			<half_week week="12">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="12.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="13">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="13.5">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="14">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="14.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>4</visits_national>
+			</half_week>
+			<half_week week="15">
+				<visits_ILA>5.5</visits_ILA>
+			    <visits_national>4.25</visits_national>
+			</half_week>
+			<half_week week="15.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="16">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="16.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="17">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>1.75</visits_national>
+			</half_week>
+			<half_week week="17.5">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="18">
+				<visits_ILA>3</visits_ILA>
+			    <visits_national>1.25</visits_national>
+			</half_week>
+		</stats>
 	</advisory>
 	
 	<advisory id="3" title="Heat Wave Advisory" active="true">
@@ -73,6 +341,140 @@
 			<update date="-2/30/*" source="CDC.org" text="Temperatures to approach or even surpass 110 degrees for the next several days onward with the cha..." 
 					affectedCount="0" atRiskCount="0" deathCount="0" deathCountTotal="3" />
 		</updates>
+		
+		<stats>
+			<week week="9">
+				<reports_new>0</reports_new>
+			    <reports_accum>0</reports_accum>
+			</week>
+			<week week="10">
+				<reports_new>1</reports_new>
+			    <reports_accum>1</reports_accum>
+			</week>
+			<week week="11">
+				<reports_new>1</reports_new>
+			    <reports_accum>2</reports_accum>
+			</week>
+			<week week="12">
+				<positive_local>4</positive_local>
+			    <positive_national>8</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>3</reports_accum>
+			</week>
+			<week week="13">
+				<positive_local>15</positive_local>
+			    <positive_national>13</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>5</reports_accum>
+			</week>
+			<week week="14">
+				<positive_local>10</positive_local>
+			    <positive_national>11</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>7</reports_accum>
+			</week>
+			<week week="15">
+				<positive_local>6</positive_local>
+			    <positive_national>5</positive_national>
+			    <reports_new>3</reports_new>
+			    <reports_accum>10</reports_accum>
+			</week>
+			<week week="16">
+				<positive_local>4</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>11</reports_accum>
+			</week>
+			<week week="17">
+				<positive_local>1</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			<week week="18">
+				<positive_local>3</positive_local>
+			    <positive_national>6</positive_national>
+			    <reports_new>0</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			
+			<half_week week="9">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="9.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.25</visits_national>
+			</half_week>
+			<half_week week="10">
+				<visits_ILA>1</visits_ILA>
+			    <visits_national>2.5</visits_national>
+			</half_week>
+			<half_week week="10.5">
+				<visits_ILA>4.5</visits_ILA>
+			    <visits_national>5</visits_national>
+			</half_week>
+			<half_week week="11">
+				<visits_ILA>1.5</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="11.5">
+				<visits_ILA>7</visits_ILA>
+			    <visits_national>5.5</visits_national>
+			</half_week>
+			<half_week week="12">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="12.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="13">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="13.5">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="14">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="14.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>4</visits_national>
+			</half_week>
+			<half_week week="15">
+				<visits_ILA>5.5</visits_ILA>
+			    <visits_national>4.25</visits_national>
+			</half_week>
+			<half_week week="15.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="16">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="16.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="17">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>1.75</visits_national>
+			</half_week>
+			<half_week week="17.5">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="18">
+				<visits_ILA>3</visits_ILA>
+			    <visits_national>1.25</visits_national>
+			</half_week>
+		</stats>
 	</advisory>
 	
 	<advisory id="4" title="Salmonella Bareilly" active="true">
@@ -80,6 +482,140 @@
 			<update date="-3/30/*" source="CDC.org" text="A total of 425 persons infected with the outbreak strains of Salmonella Bareilly were reported from 28... "
 					affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="33" atRiskTotal="153" deathCountTotal="5" />
 		</updates>
+		
+		<stats>
+			<week week="9">
+				<reports_new>0</reports_new>
+			    <reports_accum>0</reports_accum>
+			</week>
+			<week week="10">
+				<reports_new>1</reports_new>
+			    <reports_accum>1</reports_accum>
+			</week>
+			<week week="11">
+				<reports_new>1</reports_new>
+			    <reports_accum>2</reports_accum>
+			</week>
+			<week week="12">
+				<positive_local>4</positive_local>
+			    <positive_national>8</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>3</reports_accum>
+			</week>
+			<week week="13">
+				<positive_local>15</positive_local>
+			    <positive_national>13</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>5</reports_accum>
+			</week>
+			<week week="14">
+				<positive_local>10</positive_local>
+			    <positive_national>11</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>7</reports_accum>
+			</week>
+			<week week="15">
+				<positive_local>6</positive_local>
+			    <positive_national>5</positive_national>
+			    <reports_new>3</reports_new>
+			    <reports_accum>10</reports_accum>
+			</week>
+			<week week="16">
+				<positive_local>4</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>11</reports_accum>
+			</week>
+			<week week="17">
+				<positive_local>1</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			<week week="18">
+				<positive_local>3</positive_local>
+			    <positive_national>6</positive_national>
+			    <reports_new>0</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			
+			<half_week week="9">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="9.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.25</visits_national>
+			</half_week>
+			<half_week week="10">
+				<visits_ILA>1</visits_ILA>
+			    <visits_national>2.5</visits_national>
+			</half_week>
+			<half_week week="10.5">
+				<visits_ILA>4.5</visits_ILA>
+			    <visits_national>5</visits_national>
+			</half_week>
+			<half_week week="11">
+				<visits_ILA>1.5</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="11.5">
+				<visits_ILA>7</visits_ILA>
+			    <visits_national>5.5</visits_national>
+			</half_week>
+			<half_week week="12">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="12.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="13">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="13.5">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="14">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="14.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>4</visits_national>
+			</half_week>
+			<half_week week="15">
+				<visits_ILA>5.5</visits_ILA>
+			    <visits_national>4.25</visits_national>
+			</half_week>
+			<half_week week="15.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="16">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="16.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="17">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>1.75</visits_national>
+			</half_week>
+			<half_week week="17.5">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="18">
+				<visits_ILA>3</visits_ILA>
+			    <visits_national>1.25</visits_national>
+			</half_week>
+		</stats>
 	</advisory>
 	
 	<!-- 	past advisories -->
@@ -88,6 +624,140 @@
 			<update date="-3/01/*" source="CDC.org" text="This particular outbreak appears to be over." final="true"
 					affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="33" atRiskTotal="153" deathCountTotal="5" />
 		</updates>
+		
+		<stats>
+			<week week="9">
+				<reports_new>0</reports_new>
+			    <reports_accum>0</reports_accum>
+			</week>
+			<week week="10">
+				<reports_new>1</reports_new>
+			    <reports_accum>1</reports_accum>
+			</week>
+			<week week="11">
+				<reports_new>1</reports_new>
+			    <reports_accum>2</reports_accum>
+			</week>
+			<week week="12">
+				<positive_local>4</positive_local>
+			    <positive_national>8</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>3</reports_accum>
+			</week>
+			<week week="13">
+				<positive_local>15</positive_local>
+			    <positive_national>13</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>5</reports_accum>
+			</week>
+			<week week="14">
+				<positive_local>10</positive_local>
+			    <positive_national>11</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>7</reports_accum>
+			</week>
+			<week week="15">
+				<positive_local>6</positive_local>
+			    <positive_national>5</positive_national>
+			    <reports_new>3</reports_new>
+			    <reports_accum>10</reports_accum>
+			</week>
+			<week week="16">
+				<positive_local>4</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>11</reports_accum>
+			</week>
+			<week week="17">
+				<positive_local>1</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			<week week="18">
+				<positive_local>3</positive_local>
+			    <positive_national>6</positive_national>
+			    <reports_new>0</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			
+			<half_week week="9">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="9.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.25</visits_national>
+			</half_week>
+			<half_week week="10">
+				<visits_ILA>1</visits_ILA>
+			    <visits_national>2.5</visits_national>
+			</half_week>
+			<half_week week="10.5">
+				<visits_ILA>4.5</visits_ILA>
+			    <visits_national>5</visits_national>
+			</half_week>
+			<half_week week="11">
+				<visits_ILA>1.5</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="11.5">
+				<visits_ILA>7</visits_ILA>
+			    <visits_national>5.5</visits_national>
+			</half_week>
+			<half_week week="12">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="12.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="13">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="13.5">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="14">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="14.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>4</visits_national>
+			</half_week>
+			<half_week week="15">
+				<visits_ILA>5.5</visits_ILA>
+			    <visits_national>4.25</visits_national>
+			</half_week>
+			<half_week week="15.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="16">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="16.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="17">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>1.75</visits_national>
+			</half_week>
+			<half_week week="17.5">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="18">
+				<visits_ILA>3</visits_ILA>
+			    <visits_national>1.25</visits_national>
+			</half_week>
+		</stats>
 	</advisory>
 	
 	<advisory id="6" title="Salmonella Pomona">
@@ -95,6 +765,140 @@
 			<update date="-2/25/*" source="CDC.org" text="This particular outbreak appears to be over." final="true"
 				affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="104" deathCountTotal="3" />
 		</updates>
+		
+		<stats>
+			<week week="9">
+				<reports_new>0</reports_new>
+			    <reports_accum>0</reports_accum>
+			</week>
+			<week week="10">
+				<reports_new>1</reports_new>
+			    <reports_accum>1</reports_accum>
+			</week>
+			<week week="11">
+				<reports_new>1</reports_new>
+			    <reports_accum>2</reports_accum>
+			</week>
+			<week week="12">
+				<positive_local>4</positive_local>
+			    <positive_national>8</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>3</reports_accum>
+			</week>
+			<week week="13">
+				<positive_local>15</positive_local>
+			    <positive_national>13</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>5</reports_accum>
+			</week>
+			<week week="14">
+				<positive_local>10</positive_local>
+			    <positive_national>11</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>7</reports_accum>
+			</week>
+			<week week="15">
+				<positive_local>6</positive_local>
+			    <positive_national>5</positive_national>
+			    <reports_new>3</reports_new>
+			    <reports_accum>10</reports_accum>
+			</week>
+			<week week="16">
+				<positive_local>4</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>11</reports_accum>
+			</week>
+			<week week="17">
+				<positive_local>1</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			<week week="18">
+				<positive_local>3</positive_local>
+			    <positive_national>6</positive_national>
+			    <reports_new>0</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			
+			<half_week week="9">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="9.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.25</visits_national>
+			</half_week>
+			<half_week week="10">
+				<visits_ILA>1</visits_ILA>
+			    <visits_national>2.5</visits_national>
+			</half_week>
+			<half_week week="10.5">
+				<visits_ILA>4.5</visits_ILA>
+			    <visits_national>5</visits_national>
+			</half_week>
+			<half_week week="11">
+				<visits_ILA>1.5</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="11.5">
+				<visits_ILA>7</visits_ILA>
+			    <visits_national>5.5</visits_national>
+			</half_week>
+			<half_week week="12">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="12.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="13">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="13.5">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="14">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="14.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>4</visits_national>
+			</half_week>
+			<half_week week="15">
+				<visits_ILA>5.5</visits_ILA>
+			    <visits_national>4.25</visits_national>
+			</half_week>
+			<half_week week="15.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="16">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="16.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="17">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>1.75</visits_national>
+			</half_week>
+			<half_week week="17.5">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="18">
+				<visits_ILA>3</visits_ILA>
+			    <visits_national>1.25</visits_national>
+			</half_week>
+		</stats>
 	</advisory>
 	
 	<advisory id="7" title="Salmonella Hadar">
@@ -102,6 +906,140 @@
 			<update date="-2/25/*" source="CDC.org" text="This particular outbreak appears to be over." final="true"
 					affectedCount="0" atRiskCount="0" deathCount="0" deathCountTotal="3" />
 		</updates>
+		
+		<stats>
+			<week week="9">
+				<reports_new>0</reports_new>
+			    <reports_accum>0</reports_accum>
+			</week>
+			<week week="10">
+				<reports_new>1</reports_new>
+			    <reports_accum>1</reports_accum>
+			</week>
+			<week week="11">
+				<reports_new>1</reports_new>
+			    <reports_accum>2</reports_accum>
+			</week>
+			<week week="12">
+				<positive_local>4</positive_local>
+			    <positive_national>8</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>3</reports_accum>
+			</week>
+			<week week="13">
+				<positive_local>15</positive_local>
+			    <positive_national>13</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>5</reports_accum>
+			</week>
+			<week week="14">
+				<positive_local>10</positive_local>
+			    <positive_national>11</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>7</reports_accum>
+			</week>
+			<week week="15">
+				<positive_local>6</positive_local>
+			    <positive_national>5</positive_national>
+			    <reports_new>3</reports_new>
+			    <reports_accum>10</reports_accum>
+			</week>
+			<week week="16">
+				<positive_local>4</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>11</reports_accum>
+			</week>
+			<week week="17">
+				<positive_local>1</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			<week week="18">
+				<positive_local>3</positive_local>
+			    <positive_national>6</positive_national>
+			    <reports_new>0</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			
+			<half_week week="9">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="9.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.25</visits_national>
+			</half_week>
+			<half_week week="10">
+				<visits_ILA>1</visits_ILA>
+			    <visits_national>2.5</visits_national>
+			</half_week>
+			<half_week week="10.5">
+				<visits_ILA>4.5</visits_ILA>
+			    <visits_national>5</visits_national>
+			</half_week>
+			<half_week week="11">
+				<visits_ILA>1.5</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="11.5">
+				<visits_ILA>7</visits_ILA>
+			    <visits_national>5.5</visits_national>
+			</half_week>
+			<half_week week="12">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="12.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="13">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="13.5">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="14">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="14.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>4</visits_national>
+			</half_week>
+			<half_week week="15">
+				<visits_ILA>5.5</visits_ILA>
+			    <visits_national>4.25</visits_national>
+			</half_week>
+			<half_week week="15.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="16">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="16.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="17">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>1.75</visits_national>
+			</half_week>
+			<half_week week="17.5">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="18">
+				<visits_ILA>3</visits_ILA>
+			    <visits_national>1.25</visits_national>
+			</half_week>
+		</stats>
 	</advisory>
 	
 	<advisory id="8" title="Salmonella Tennessee">
@@ -109,6 +1047,140 @@
 			<update date="-2/25/*" source="CDC.org" text="This particular outbreak appears to be over." final="true"
 					affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="216" deathCountTotal="0" />
 		</updates>
+		
+		<stats>
+			<week week="9">
+				<reports_new>0</reports_new>
+			    <reports_accum>0</reports_accum>
+			</week>
+			<week week="10">
+				<reports_new>1</reports_new>
+			    <reports_accum>1</reports_accum>
+			</week>
+			<week week="11">
+				<reports_new>1</reports_new>
+			    <reports_accum>2</reports_accum>
+			</week>
+			<week week="12">
+				<positive_local>4</positive_local>
+			    <positive_national>8</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>3</reports_accum>
+			</week>
+			<week week="13">
+				<positive_local>15</positive_local>
+			    <positive_national>13</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>5</reports_accum>
+			</week>
+			<week week="14">
+				<positive_local>10</positive_local>
+			    <positive_national>11</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>7</reports_accum>
+			</week>
+			<week week="15">
+				<positive_local>6</positive_local>
+			    <positive_national>5</positive_national>
+			    <reports_new>3</reports_new>
+			    <reports_accum>10</reports_accum>
+			</week>
+			<week week="16">
+				<positive_local>4</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>11</reports_accum>
+			</week>
+			<week week="17">
+				<positive_local>1</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			<week week="18">
+				<positive_local>3</positive_local>
+			    <positive_national>6</positive_national>
+			    <reports_new>0</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			
+			<half_week week="9">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="9.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.25</visits_national>
+			</half_week>
+			<half_week week="10">
+				<visits_ILA>1</visits_ILA>
+			    <visits_national>2.5</visits_national>
+			</half_week>
+			<half_week week="10.5">
+				<visits_ILA>4.5</visits_ILA>
+			    <visits_national>5</visits_national>
+			</half_week>
+			<half_week week="11">
+				<visits_ILA>1.5</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="11.5">
+				<visits_ILA>7</visits_ILA>
+			    <visits_national>5.5</visits_national>
+			</half_week>
+			<half_week week="12">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="12.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="13">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="13.5">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="14">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="14.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>4</visits_national>
+			</half_week>
+			<half_week week="15">
+				<visits_ILA>5.5</visits_ILA>
+			    <visits_national>4.25</visits_national>
+			</half_week>
+			<half_week week="15.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="16">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="16.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="17">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>1.75</visits_national>
+			</half_week>
+			<half_week week="17.5">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="18">
+				<visits_ILA>3</visits_ILA>
+			    <visits_national>1.25</visits_national>
+			</half_week>
+		</stats>
 	</advisory>
 	
 	<advisory id="9" title="Escherichia Coli 0157">
@@ -116,6 +1188,140 @@
 			<update date="-4/25/*" source="CDC.org" text="This particular outbreak appears to be over." final="true"
 					affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="52" deathCountTotal="0" />
 		</updates>
+		
+		<stats>
+			<week week="9">
+				<reports_new>0</reports_new>
+			    <reports_accum>0</reports_accum>
+			</week>
+			<week week="10">
+				<reports_new>1</reports_new>
+			    <reports_accum>1</reports_accum>
+			</week>
+			<week week="11">
+				<reports_new>1</reports_new>
+			    <reports_accum>2</reports_accum>
+			</week>
+			<week week="12">
+				<positive_local>4</positive_local>
+			    <positive_national>8</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>3</reports_accum>
+			</week>
+			<week week="13">
+				<positive_local>15</positive_local>
+			    <positive_national>13</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>5</reports_accum>
+			</week>
+			<week week="14">
+				<positive_local>10</positive_local>
+			    <positive_national>11</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>7</reports_accum>
+			</week>
+			<week week="15">
+				<positive_local>6</positive_local>
+			    <positive_national>5</positive_national>
+			    <reports_new>3</reports_new>
+			    <reports_accum>10</reports_accum>
+			</week>
+			<week week="16">
+				<positive_local>4</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>11</reports_accum>
+			</week>
+			<week week="17">
+				<positive_local>1</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			<week week="18">
+				<positive_local>3</positive_local>
+			    <positive_national>6</positive_national>
+			    <reports_new>0</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			
+			<half_week week="9">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="9.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.25</visits_national>
+			</half_week>
+			<half_week week="10">
+				<visits_ILA>1</visits_ILA>
+			    <visits_national>2.5</visits_national>
+			</half_week>
+			<half_week week="10.5">
+				<visits_ILA>4.5</visits_ILA>
+			    <visits_national>5</visits_national>
+			</half_week>
+			<half_week week="11">
+				<visits_ILA>1.5</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="11.5">
+				<visits_ILA>7</visits_ILA>
+			    <visits_national>5.5</visits_national>
+			</half_week>
+			<half_week week="12">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="12.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="13">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="13.5">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="14">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="14.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>4</visits_national>
+			</half_week>
+			<half_week week="15">
+				<visits_ILA>5.5</visits_ILA>
+			    <visits_national>4.25</visits_national>
+			</half_week>
+			<half_week week="15.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="16">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="16.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="17">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>1.75</visits_national>
+			</half_week>
+			<half_week week="17.5">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="18">
+				<visits_ILA>3</visits_ILA>
+			    <visits_national>1.25</visits_national>
+			</half_week>
+		</stats>
 	</advisory>
 	
 	<advisory id="10" title="Listeriosis">
@@ -123,6 +1329,140 @@
 			<update date="-3/25/*" source="CDC.org" text="This particular outbreak appears to be over." final="true"
 					affectedCount="0" atRiskCount="0" deathCount="0"  affectedCountTotal="43" deathCountTotal="0" />
 		</updates>
+		
+		<stats>
+			<week week="9">
+				<reports_new>0</reports_new>
+			    <reports_accum>0</reports_accum>
+			</week>
+			<week week="10">
+				<reports_new>1</reports_new>
+			    <reports_accum>1</reports_accum>
+			</week>
+			<week week="11">
+				<reports_new>1</reports_new>
+			    <reports_accum>2</reports_accum>
+			</week>
+			<week week="12">
+				<positive_local>4</positive_local>
+			    <positive_national>8</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>3</reports_accum>
+			</week>
+			<week week="13">
+				<positive_local>15</positive_local>
+			    <positive_national>13</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>5</reports_accum>
+			</week>
+			<week week="14">
+				<positive_local>10</positive_local>
+			    <positive_national>11</positive_national>
+			    <reports_new>2</reports_new>
+			    <reports_accum>7</reports_accum>
+			</week>
+			<week week="15">
+				<positive_local>6</positive_local>
+			    <positive_national>5</positive_national>
+			    <reports_new>3</reports_new>
+			    <reports_accum>10</reports_accum>
+			</week>
+			<week week="16">
+				<positive_local>4</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>11</reports_accum>
+			</week>
+			<week week="17">
+				<positive_local>1</positive_local>
+			    <positive_national>3</positive_national>
+			    <reports_new>1</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			<week week="18">
+				<positive_local>3</positive_local>
+			    <positive_national>6</positive_national>
+			    <reports_new>0</reports_new>
+			    <reports_accum>12</reports_accum>
+			</week>
+			
+			<half_week week="9">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="9.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.25</visits_national>
+			</half_week>
+			<half_week week="10">
+				<visits_ILA>1</visits_ILA>
+			    <visits_national>2.5</visits_national>
+			</half_week>
+			<half_week week="10.5">
+				<visits_ILA>4.5</visits_ILA>
+			    <visits_national>5</visits_national>
+			</half_week>
+			<half_week week="11">
+				<visits_ILA>1.5</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="11.5">
+				<visits_ILA>7</visits_ILA>
+			    <visits_national>5.5</visits_national>
+			</half_week>
+			<half_week week="12">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="12.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.75</visits_national>
+			</half_week>
+			<half_week week="13">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="13.5">
+				<visits_ILA>2.25</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="14">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="14.5">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>4</visits_national>
+			</half_week>
+			<half_week week="15">
+				<visits_ILA>5.5</visits_ILA>
+			    <visits_national>4.25</visits_national>
+			</half_week>
+			<half_week week="15.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>3</visits_national>
+			</half_week>
+			<half_week week="16">
+				<visits_ILA>2.75</visits_ILA>
+			    <visits_national>3.5</visits_national>
+			</half_week>
+			<half_week week="16.5">
+				<visits_ILA>2</visits_ILA>
+			    <visits_national>2.75</visits_national>
+			</half_week>
+			<half_week week="17">
+				<visits_ILA>1.25</visits_ILA>
+			    <visits_national>1.75</visits_national>
+			</half_week>
+			<half_week week="17.5">
+				<visits_ILA>1.75</visits_ILA>
+			    <visits_national>1.5</visits_national>
+			</half_week>
+			<half_week week="18">
+				<visits_ILA>3</visits_ILA>
+			    <visits_national>1.25</visits_national>
+			</half_week>
+		</stats>
 	</advisory>
 	
 </advisories>

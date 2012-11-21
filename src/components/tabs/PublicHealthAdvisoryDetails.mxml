@@ -5,7 +5,7 @@
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:esri="http://www.esri.com/2008/ags"
 	xmlns:os="http://openscales.org"
-	creationComplete="init();">
+	creationComplete="init();" xmlns:general="components.general.*">
 	
 	<fx:Script>
 		<![CDATA[
@@ -34,6 +34,9 @@
 			import models.modules.advisories.PublicHealthAdvisoriesModel;
 			import models.modules.advisories.PublicHealthAdvisory;
 			
+			import mx.charts.HitData;
+			import mx.charts.series.items.ColumnSeriesItem;
+			import mx.charts.series.items.LineSeriesItem;
 			import mx.collections.ArrayCollection;
 			import mx.collections.Sort;
 			import mx.events.ListEvent;
@@ -345,6 +348,18 @@
 				
 				setView( initialViewIndex );
 			}
+			
+			public function dataTipsDoctorVisits(hd:HitData):String {
+				return "On <b>week " + hd.item.week + "</b>, there were <b>" + LineSeriesItem(hd.chartItem).yValue + "%</b> doctor visits for ILI on the <b>" + LineSeries(hd.element).displayName + "</b>";	
+			}
+			
+			public function dataTipsPositiveTests(hd:HitData):String {
+				return "On <b>week " + hd.item.week + "</b>, there were <b>" + ColumnSeriesItem(hd.chartItem).yValue + "%</b> positive test results on the <b>" + ColumnSeries(hd.element).displayName.toLowerCase() + " scale</b>";	
+			}
+			
+			public function dataTipsCaseReports(hd:HitData):String {
+				return "On <b>week " + hd.item.week + "</b>, there were <b>" + LineSeriesItem(hd.chartItem).yValue + " " + LineSeries(hd.element).displayName.toLowerCase() + "</b>";	
+			}
 		]]>
 	</fx:Script>
 	
@@ -372,6 +387,49 @@
 		<esri:SimpleMarkerSymbol id="unaffectedPatientMarker" alpha="1" color="0x666666" size="20" style="triangle">
 			<esri:SimpleLineSymbol width="1" alpha="1" color="0x74FF8B" style="solid" />
 		</esri:SimpleMarkerSymbol>
+		
+		<!--CHECK IF WE CAN REUSE THE SAME ARRAY SOMEHOW, INSTEAD OF DECLARING THE SAME THING 3 TIMES... IF CALLING THE SAME ARRAY FROM THE 3 DIFFERENT CHARTS, IT ONLY WORKS FOR ONE...-->		
+		<fx:Array id="bge">
+			<mx:GridLines gridDirection="vertical">
+				<mx:verticalStroke>
+					<mx:SolidColorStroke alpha="0"/>
+				</mx:verticalStroke>
+				<mx:verticalFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalFill>
+				<mx:verticalAlternateFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalAlternateFill>
+			</mx:GridLines>
+		</fx:Array>
+		
+		<fx:Array id="bge2">
+			<mx:GridLines gridDirection="vertical">
+				<mx:verticalStroke>
+					<mx:SolidColorStroke alpha="0"/>
+				</mx:verticalStroke>
+				<mx:verticalFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalFill>
+				<mx:verticalAlternateFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalAlternateFill>
+			</mx:GridLines>
+		</fx:Array>
+		
+		<fx:Array id="bge3">
+			<mx:GridLines gridDirection="vertical">
+				<mx:verticalStroke>
+					<mx:SolidColorStroke alpha="0"/>
+				</mx:verticalStroke>
+				<mx:verticalFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalFill>
+				<mx:verticalAlternateFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalAlternateFill>
+			</mx:GridLines>
+		</fx:Array>
 		
 	</fx:Declarations>
 	
@@ -528,7 +586,7 @@
 									<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
 										
 										<s:HGroup gap="-1" paddingLeft="4">
-											<s:TextInput id="search" text="{SEARCH_PLACEHOLDER}" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundColor="0xFFFFFF" contentBackgroundAlpha="1"  paddingLeft="7" paddingTop="5" width="166" height="24" click="{if(search.text == SEARCH_PLACEHOLDER) search.text=''}" />
+											<s:TextInput id="search" text="{SEARCH_PLACEHOLDER}" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundColor="0xFFFFFF" contentBackgroundAlpha="1"  paddingLeft="7" paddingTop="5" width="166" height="24" click="{if(search.text == SEARCH_PLACEHOLDER) search.text=''}" enter="mapSearch()" />
 											<s:Button styleName="searchButtonIcon" width="24" height="24" click="mapSearch()" />
 										</s:HGroup>
 										
@@ -538,36 +596,44 @@
 								
 								<s:HGroup>
 									
-									<esri:Map id="map" width="567" height="268" logoVisible="false" openHandCursorVisible="false" creationComplete="invalidateProperties()">
-										
-										<esri:extent>
+									<s:VGroup horizontalAlign="right" gap="3">
+										<esri:Map id="map" width="567" height="268" logoVisible="false" openHandCursorVisible="false" creationComplete="invalidateProperties()">
 											
-											<esri:Extent xmin="-14298000" ymin="2748000" xmax="-6815000" ymax="7117000">
-												<esri:SpatialReference wkid="102100"/>
-											</esri:Extent>
+											<esri:extent>
+												
+												<esri:Extent xmin="-14298000" ymin="2748000" xmax="-6815000" ymax="7117000">
+													<esri:SpatialReference wkid="102100"/>
+												</esri:Extent>
+												
+											</esri:extent>
 											
-										</esri:extent>
+											<esri:ArcGISTiledMapServiceLayer url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer"/>
+											
+											<esri:GraphicsLayer id="patientsAffectedLayer" symbol="{affectedPatientMarker}"/>
+											<esri:GraphicsLayer id="hospitalizationsLayer" symbol="{hospitalizationMarker}"/>
+											<esri:GraphicsLayer id="deathsLayer" symbol="{deathMarker}"/>
+											<esri:GraphicsLayer id="patientsUnaffectedLayer" symbol="{unaffectedPatientMarker}"/>
+											
+										</esri:Map>
 										
-										<esri:ArcGISTiledMapServiceLayer url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer"/>
-										
-										<esri:GraphicsLayer id="patientsAffectedLayer" symbol="{affectedPatientMarker}"/>
-										<esri:GraphicsLayer id="hospitalizationsLayer" symbol="{hospitalizationMarker}"/>
-										<esri:GraphicsLayer id="deathsLayer" symbol="{deathMarker}"/>
-										<esri:GraphicsLayer id="patientsUnaffectedLayer" symbol="{unaffectedPatientMarker}"/>
-										
-									</esri:Map>
-									
-									<!--
-									<os:Map id="fxmap" width="567" height="268" center="4.78783,45.68800" projection="EPSG:4326" creationComplete="initMap()"> 
+										<!--
+										<os:Map id="fxmap" width="567" height="268" center="4.78783,45.68800" projection="EPSG:4326" creationComplete="initMap()"> 
 										<os:Mapnik name="Mapnik"/> 
 										<os:MousePosition x="10" y="{fxmap.height-20}" displayProjection="EPSG:4326"/> 
 										<os:DragHandler/> 
 										<os:ClickHandler/> 
 										<os:WheelHandler/> 
-									</os:Map> 
-									
-									<os:PanZoom map="{map}" x="{fxmap.x+10}" y="{fxmap.y+10}"/>
-									-->
+										</os:Map> 
+										
+										<os:PanZoom map="{map}" x="{fxmap.x+10}" y="{fxmap.y+10}"/>
+										-->
+										
+										<s:HGroup fontSize="12" fontStyle="italic" verticalAlign="middle">
+											<s:Label text="Source:" color="0xE6E6E6" paddingTop="2" />
+											<general:MainLinkButton id="btnMapSource" label="CDC.org" styleName="linkButton linkButtonStyle1" paddingLeft="-6" paddingRight="0" />
+										</s:HGroup>
+										
+									</s:VGroup>
 									
 									<s:VGroup paddingLeft="20" gap="15">
 										
@@ -642,35 +708,143 @@
 							<s:HGroup gap="20">
 								
 								<!--	doctor's visits	-->
-								<s:BorderContainer width="245" height="276" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderWeight=".5">
+								<s:BorderContainer width="245" height="276" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderAlpha=".5">
 									
 									<s:layout>
-										<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
+										<s:VerticalLayout paddingTop="14" paddingBottom="10" />
 									</s:layout>
 									
-									<s:Label text="Doctor's Visits (%)" styleName="green12Bold" />
+									<s:Label text="Doctor's Visits (%)" styleName="green12Bold" paddingLeft="12" paddingBottom="-3" />
 									
+									<mx:LineChart id="doctorVisits" dataProvider="{advisory.arrStatsDetailed}" showDataTips="true" height="203" width="240" backgroundElements="{bge}" axisTitleStyleName="healthAdvisoryChartAxisTitles" dataTipFunction="dataTipsDoctorVisits">
+										<mx:series>
+											<mx:LineSeries yField="visits_national" xField="week" displayName="National Baseline" itemRenderer="mx.charts.renderers.CircleItemRenderer" radius="2.5">
+												<mx:lineStroke><s:SolidColorStroke color="0x808080" weight="1" /></mx:lineStroke>
+												<mx:fill><s:SolidColor color="0x808080" /></mx:fill>
+												<mx:stroke><s:SolidColorStroke color="0x808080" /></mx:stroke>
+											</mx:LineSeries>
+											<mx:LineSeries yField="visits_ILA" xField="week" displayName="Influenza-like Illness Surveillance Network (ILA)" itemRenderer="mx.charts.renderers.CircleItemRenderer" radius="2.5">
+												<mx:lineStroke><s:SolidColorStroke color="0xFF0000" weight="1" /></mx:lineStroke>
+												<mx:fill><s:SolidColor color="0xFF0000" /></mx:fill>
+												<mx:stroke><s:SolidColorStroke color="0xFF0000" /></mx:stroke>
+											</mx:LineSeries>
+										</mx:series>
+										<mx:seriesFilters>
+											<fx:Array />
+										</mx:seriesFilters>
+										<mx:horizontalAxis>
+											<mx:LinearAxis id="doctorVisitsXaxis" minimum="9" maximum="18" interval="1" title="Week" displayName="Week" />
+										</mx:horizontalAxis>
+										<mx:verticalAxis>
+											<mx:LinearAxis id="doctorVisitsYaxis" maximum="8" minimum="0" interval="1" title="% Visits for ILI" displayName="% Visits for ILI" />
+										</mx:verticalAxis>
+										<mx:horizontalAxisRenderers>
+											<mx:AxisRenderer axis="{doctorVisitsXaxis}" fontSize="10" color="0x808080" tickLength="4" tickPlacement="cross" minorTickPlacement="none" canDropLabels="false" canStagger="false" labelRotation="0">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:tickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:tickStroke>
+											</mx:AxisRenderer>
+										</mx:horizontalAxisRenderers>
+										<mx:verticalAxisRenderers>
+											<mx:AxisRenderer axis="{doctorVisitsYaxis}" fontSize="10" color="0x808080" tickLength="8" tickPlacement="outside" minorTickPlacement="none" canDropLabels="false" labelGap="-6" verticalAxisTitleAlignment="vertical">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:tickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:tickStroke>
+											</mx:AxisRenderer>
+										</mx:verticalAxisRenderers>
+									</mx:LineChart>
+									
+									<mx:Legend dataProvider="{doctorVisits}" fontFamily="myMyriadNoCFF" color="0x919191" fontSize="10" fontWeight="normal" markerHeight="8" markerWidth="8" verticalGap="-2" paddingTop="-12" paddingLeft="7" />
 								</s:BorderContainer>
 								
 								<!--	test results	-->
-								<s:BorderContainer width="245" height="276" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderWeight=".5">
+								<s:BorderContainer width="245" height="276" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderAlpha=".5">
 									
 									<s:layout>
-										<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
+										<s:VerticalLayout paddingTop="14" paddingBottom="10" />
 									</s:layout>
 									
-									<s:Label text="Positive Test Results" styleName="green12Bold" />
+									<s:Label text="Positive Test Results" styleName="green12Bold" paddingLeft="12" paddingBottom="-3" />
 									
+									<mx:ColumnChart id="positiveTestResults" dataProvider="{advisory.arrStats}" showDataTips="true" height="200" width="231" backgroundElements="{bge2}" axisTitleStyleName="healthAdvisoryChartAxisTitles" columnWidthRatio=".5" dataTipFunction="dataTipsPositiveTests">
+										<mx:series>
+											<mx:ColumnSeries yField="positive_local" xField="week" displayName="Local">
+												<mx:fill><s:SolidColor color="0x0079FF" alpha=".5" /></mx:fill>
+											</mx:ColumnSeries>
+											<mx:ColumnSeries yField="positive_national" xField="week" displayName="National">
+												<mx:fill><s:SolidColor color="0xD9E021" alpha=".5" /></mx:fill>
+											</mx:ColumnSeries>
+										</mx:series>
+										<mx:seriesFilters>
+											<fx:Array />
+										</mx:seriesFilters>
+										<mx:horizontalAxis>
+											<mx:LinearAxis id="positiveResultsXaxis" minimum="11.5" interval="1" title="Week" displayName="Week" />
+										</mx:horizontalAxis>
+										<mx:verticalAxis>
+											<mx:LinearAxis id="positiveResultsYaxis" maximum="16" minimum="0" interval="2" title="% Positive Tests" displayName="% Positive Tests" />
+										</mx:verticalAxis>
+										<mx:horizontalAxisRenderers>
+											<mx:AxisRenderer axis="{positiveResultsXaxis}" fontSize="10" color="0x808080" tickPlacement="none" minorTickPlacement="cross" minorTickLength="4" canDropLabels="false" canStagger="false" labelRotation="0">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:minorTickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:minorTickStroke>
+											</mx:AxisRenderer>
+										</mx:horizontalAxisRenderers>
+										<mx:verticalAxisRenderers>
+											<mx:AxisRenderer axis="{positiveResultsYaxis}" fontSize="10" color="0x808080" tickLength="8" tickPlacement="outside" minorTickPlacement="none" canDropLabels="false" labelGap="-6" verticalAxisTitleAlignment="vertical">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:tickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:tickStroke>
+											</mx:AxisRenderer>
+										</mx:verticalAxisRenderers>
+									</mx:ColumnChart>
+									
+									<mx:Legend dataProvider="{positiveTestResults}" fontFamily="myMyriadNoCFF" color="0x919191" fontSize="10" fontWeight="normal" markerHeight="8" markerWidth="8" verticalGap="-2" paddingTop="-12" paddingLeft="7" />
 								</s:BorderContainer>
 								
 								<!--	case report comparison	-->
-								<s:BorderContainer width="245" height="276" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderWeight=".5">
+								<s:BorderContainer width="245" height="276" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderAlpha=".5">
 									
 									<s:layout>
-										<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
+										<s:VerticalLayout paddingTop="14" paddingBottom="10" />
 									</s:layout>
 									
-									<s:Label text="Case Reports — Comparison" styleName="green12Bold" />
+									<s:Label text="Case Reports — Comparison" styleName="green12Bold" paddingLeft="12" paddingBottom="6" />
+									
+									<mx:LineChart id="caseReports" dataProvider="{advisory.arrStats}" showDataTips="true" height="195" width="240" backgroundElements="{bge3}" axisTitleStyleName="healthAdvisoryChartAxisTitles" dataTipFunction="dataTipsCaseReports">
+										<mx:series>
+											<mx:LineSeries yField="reports_new" xField="week" displayName="New Cases" itemRenderer="mx.charts.renderers.CircleItemRenderer" radius="2.5" form="curve">
+												<mx:lineStroke><s:SolidColorStroke color="0x29ABE2" weight="1" /></mx:lineStroke>
+												<mx:fill><s:SolidColor color="0x29ABE2" /></mx:fill>
+												<mx:stroke><s:SolidColorStroke color="0x29ABE2" /></mx:stroke>
+											</mx:LineSeries>
+											<mx:LineSeries yField="reports_accum" xField="week" displayName="Accumulated Cases" itemRenderer="mx.charts.renderers.CircleItemRenderer" radius="2.5" form="curve">
+												<mx:lineStroke><s:SolidColorStroke color="0x0071BC" weight="1" /></mx:lineStroke>
+												<mx:fill><s:SolidColor color="0x0071BC" /></mx:fill>
+												<mx:stroke><s:SolidColorStroke color="0x0071BC" /></mx:stroke>
+											</mx:LineSeries>
+										</mx:series>
+										<mx:seriesFilters>
+											<fx:Array />
+										</mx:seriesFilters>
+										<mx:horizontalAxis>
+											<mx:LinearAxis id="caseReportsXaxis" minimum="9" maximum="18" interval="1" title="Week" displayName="Week" />
+										</mx:horizontalAxis>
+										<mx:verticalAxis>
+											<mx:LinearAxis id="caseReportsYaxis" maximum="13" minimum="0" interval="2" title="Number of Cases" displayName="Number of Cases" />
+										</mx:verticalAxis>
+										<mx:horizontalAxisRenderers>
+											<mx:AxisRenderer axis="{caseReportsXaxis}" fontSize="10" color="0x808080" tickLength="4" tickPlacement="cross" minorTickPlacement="none" canDropLabels="false" canStagger="false" labelRotation="0">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:tickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:tickStroke>
+											</mx:AxisRenderer>
+										</mx:horizontalAxisRenderers>
+										<mx:verticalAxisRenderers>
+											<mx:AxisRenderer axis="{caseReportsYaxis}" fontSize="10" color="0x808080" tickLength="8" tickPlacement="outside" minorTickPlacement="none" canDropLabels="false" labelGap="-6" verticalAxisTitleAlignment="vertical">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:tickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:tickStroke>
+											</mx:AxisRenderer>
+										</mx:verticalAxisRenderers>
+									</mx:LineChart>
+									
+									<mx:Legend dataProvider="{caseReports}" fontFamily="myMyriadNoCFF" color="0x919191" fontSize="10" fontWeight="normal" markerHeight="8" markerWidth="8" verticalGap="-2" paddingTop="-12" paddingLeft="7" />
 									
 								</s:BorderContainer>
 								
