@@ -203,12 +203,12 @@
 						
 						<s:HGroup paddingLeft="5" gap="30">
 							<s:VGroup gap="5">
-								<s:Image source="images/preferences/viewModeButton.jpg" />
+								<s:Image source="/assets/images/preferences/viewModeButton.jpg" />
 								<s:RadioButton groupName="viewModeGroup" label="Button view" click="preferences.viewMode = ViewModeType.BUTTON" selected="{preferences.viewMode == ViewModeType.BUTTON}" />
 							</s:VGroup>
 							
 							<s:VGroup gap="5">
-								<s:Image source="images/preferences/viewModeWidget.jpg" />
+								<s:Image source="/assets/images/preferences/viewModeWidget.jpg" />
 								<s:RadioButton groupName="viewModeGroup" label="Widget view" click="preferences.viewMode = ViewModeType.WIDGET" selected="{preferences.viewMode == ViewModeType.WIDGET}"/>
 							</s:VGroup>
 						</s:HGroup>
@@ -221,17 +221,17 @@
 						<s:HGroup paddingLeft="5" gap="30">
 							
 							<s:VGroup gap="5">
-								<s:Image source="images/preferences/viewModeButton.jpg" />
+								<s:Image source="/assets/images/preferences/viewModeButton.jpg" />
 								<s:RadioButton groupName="colorSchemeGroup" label="Black" click="preferences.colorScheme = ColorSchemeType.BLACK" selected="{preferences.colorScheme == ColorSchemeType.BLACK}" />
 							</s:VGroup>
 							
 							<s:VGroup gap="5">
-								<s:Image source="images/preferences/viewModeButton.jpg" />
+								<s:Image source="/assets/images/preferences/viewModeButton.jpg" />
 								<s:RadioButton groupName="colorSchemeGroup" label="White" click="preferences.colorScheme = ColorSchemeType.WHITE" selected="{preferences.colorScheme == ColorSchemeType.WHITE}"/>
 							</s:VGroup>
 							
 							<s:VGroup gap="5">
-								<s:Image source="images/preferences/viewModeButton.jpg" />
+								<s:Image source="/assets/images/preferences/viewModeButton.jpg" />
 								<s:RadioButton groupName="colorSchemeGroup" label="Color deficiency" click="preferences.colorScheme = ColorSchemeType.DEFICIENCY" selected="{preferences.colorScheme == ColorSchemeType.DEFICIENCY}"/>
 							</s:VGroup>
 							
@@ -247,7 +247,7 @@
 							<s:HGroup verticalAlign="middle" gap="1">
 								<s:RadioButton groupName="fontSizeGroup" click="preferences.fontSize = 0" selected="{preferences.fontSize == 0}" />
 								<s:Spacer width="2" />
-								<s:Image source="images/preferences/fontSizeDefault.jpg" />
+								<s:Image source="/assets/images/preferences/fontSizeDefault.jpg" />
 								<s:Spacer width="7" />
 								<s:Label text="Defalut point size" styleName="darkGray12" />
 							</s:HGroup>
@@ -255,14 +255,14 @@
 							<s:HGroup verticalAlign="middle" gap="1">
 								<s:RadioButton groupName="fontSizeGroup" click="preferences.fontSize = 1" selected="{preferences.fontSize == 1}" />
 								<s:Spacer width="1" />
-								<s:Image source="images/preferences/fontSizePlusOne.jpg" />
+								<s:Image source="/assets/images/preferences/fontSizePlusOne.jpg" />
 								<s:Spacer width="4" />
 								<s:Label text="+1 point size" styleName="darkGray12" />
 							</s:HGroup>
 							
 							<s:HGroup verticalAlign="middle" gap="1">
 								<s:RadioButton groupName="fontSizeGroup" click="preferences.fontSize = 2" selected="{preferences.fontSize == 2}" />
-								<s:Image source="images/preferences/fontSizePlusTwo.jpg" />
+								<s:Image source="/assets/images/preferences/fontSizePlusTwo.jpg" />
 								<s:Spacer width="2" />
 								<s:Label text="+2 point size" styleName="darkGray12" />
 							</s:HGroup>
@@ -583,22 +583,22 @@
 							</s:layout>
 							
 							<s:VGroup>
-								<s:Image source="images/preferences/chatTopLeft.jpg" />
+								<s:Image source="/assets/images/preferences/chatTopLeft.jpg" />
 								<s:RadioButton groupName="chatPositionGroup" label="Top left" click="preferences.chatPopupDefaultPosition = ControlAlign.TOP_LEFT" selected="{preferences.chatPopupDefaultPosition == ControlAlign.TOP_LEFT}" />
 							</s:VGroup>
 							
 							<s:VGroup>
-								<s:Image source="images/preferences/chatTopRight.jpg" />
+								<s:Image source="/assets/images/preferences/chatTopRight.jpg" />
 								<s:RadioButton groupName="chatPositionGroup" label="Top Right" click="preferences.chatPopupDefaultPosition = ControlAlign.TOP_RIGHT" selected="{preferences.chatPopupDefaultPosition == ControlAlign.TOP_RIGHT}" />
 							</s:VGroup>
 							
 							<s:VGroup>
-								<s:Image source="images/preferences/chatBottomLeft.jpg" />
+								<s:Image source="/assets/images/preferences/chatBottomLeft.jpg" />
 								<s:RadioButton groupName="chatPositionGroup" label="Bottom left" click="preferences.chatPopupDefaultPosition = ControlAlign.BOTTOM_LEFT" selected="{preferences.chatPopupDefaultPosition == ControlAlign.BOTTOM_LEFT}" />
 							</s:VGroup>
 							
 							<s:VGroup>
-								<s:Image source="images/preferences/chatBottomRight.jpg" />
+								<s:Image source="/assets/images/preferences/chatBottomRight.jpg" />
 								<s:RadioButton groupName="chatPositionGroup" label="Bottom right" click="preferences.chatPopupDefaultPosition = ControlAlign.BOTTOM_RIGHT" selected="{preferences.chatPopupDefaultPosition == ControlAlign.BOTTOM_RIGHT}" />
 							</s:VGroup>
 							
