@@ -73,6 +73,9 @@ package models
 		public var room:String;
 		
 		public var prerequisites:ArrayCollection;
+		public var setReminder:Boolean;
+		public var reminderTime:int;
+		public var reminderTimeUnits:String;
 		
 		public function Appointment()
 		{
@@ -82,6 +85,9 @@ package models
 			
 			from = new Date( today.fullYear, today.month, today.date, 10 );
 			to = new Date( today.fullYear, today.month, today.date, 11 );
+			
+			reminderTime = 50;
+			reminderTimeUnits = "minutes";
 			
 			type = TYPE_VISIT;
 		}
@@ -96,7 +102,8 @@ package models
 		
 		public function getPrerequisitesString( actionable:Boolean = false ):String
 		{
-			if( prerequisites.length ) 
+			if( prerequisites 
+				&& prerequisites.length ) 
 			{
 				var items:Array = [];
 				for each(var prerequisite:AppointmentPrerequisite in prerequisites) 

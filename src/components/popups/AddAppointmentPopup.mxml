@@ -3,19 +3,14 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	width="371" height="456"
+	xmlns:popups="components.popups.*"
+	width="371" height="500"
 	controlBarVisible="true" 
 	skinClass="skins.general.myHeaderlessTitleWindow"
-	creationComplete="init()">
-	
-	<fx:Declarations>
-		<s:RadioButtonGroup id="appointmentTypes" itemClick="selectAppointmentType(event)" selectedValue="{appointment.type}" />
-	</fx:Declarations>
+	creationComplete="init()" >
 	
 	<fx:Script>
 		<![CDATA[
-			import controllers.AppointmentsController;
-			import controllers.Controller;
 			import controllers.MainController;
 			
 			import events.AutoCompleteEvent;
@@ -23,22 +18,16 @@
 			
 			import models.Appointment;
 			import models.ProviderApplicationModel;
-			import models.TeamAppointmentsModel;
 			import models.UserModel;
 			
 			import mx.collections.ArrayCollection;
 			import mx.controls.LinkButton;
-			import mx.events.CalendarLayoutChangeEvent;
-			import mx.events.CloseEvent;
 			import mx.events.ItemClickEvent;
-			import mx.managers.PopUpManager;
 			
 			import spark.components.List;
 			import spark.components.RadioButton;
-			import spark.events.DropDownEvent;
 			import spark.events.IndexChangeEvent;
 			
-			import utils.DateUtil;
 			import util.StringUtil;
 			
 			public static const MODE_ADD:String = "add";
@@ -51,7 +40,6 @@
 			private var patients:ArrayCollection;
 			
 			private const PATIENT_PLACEHOLDER:String = "Enter name";
-			private const REASON_PLACEHOLDER:String = "Enter a reason for visit";	//"Enter or select reason for visit";
 			
 			private function save():void
 			{
@@ -107,18 +95,6 @@
 				return item.firstName + ' ' + item.lastName;
 			}
 			
-			private function onReasonClick(event:MouseEvent):void
-			{
-				var link:LinkButton = LinkButton(event.currentTarget);
-				
-				appointment.reason = reason.text = link.label;
-			}
-			
-			private function selectAppointmentType(event:ItemClickEvent):void
-			{
-				appointment.type = RadioButtonGroup(event.currentTarget).selectedValue.toString();
-			}
-			
 			private function filter():void
 			{
 				patients.refresh();
@@ -131,28 +107,6 @@
 				
 				return searchFilter;
 			}
-
-			/*
-			protected function onDateDropDownOpen(event:DropDownEvent):void 
-			{
-				DropDownList(event.currentTarget).addEventListener(MouseEvent.MOUSE_DOWN, stopPropagation, false, 0, true);
-			}
-			
-			protected function stopPropagation(event:Event):void 
-			{
-				event.stopImmediatePropagation();
-			}
-			
-			private function setDate( date:Date, event:CalendarLayoutChangeEvent ):void
-			{
-				var dateChooser:DateChooser = DateChooser(event.currentTarget);
-				
-				date = dateChooser.selectedDate;
-				
-				DropDownList(dateChooser.parent).closeDropDown(true);
-				DropDownList(dateChooser.parent).removeEventListener(MouseEvent.MOUSE_DOWN, stopPropagation);
-			}
-			*/
 			
 			private function init():void
 			{
@@ -162,87 +116,6 @@
 				patients.filterFunction = filterPatients;
 				
 				patient.text = appointment.patient ? appointment.patient.fullName : PATIENT_PLACEHOLDER;
-				reason.text = appointment.reason != '' ? appointment.reason : REASON_PLACEHOLDER;
-				
-				fromDate.selectedDate = appointment.from;
-				fromHours.text = StringUtil.leftPad( appointment.from.hours.toString() );
-				fromMinutes.text = StringUtil.leftPad( appointment.from.minutes.toString() );
-				
-				//fromDate.text = appointment.from.month + '/' + appointment.from.date + '/' + appointment.from.fullYear;
-				//fromDatePicker.selectedDate = appointment.from;
-				//toDate.text = appointment.to.month + '/' + appointment.to.date + '/' + appointment.to.fullYear;
-				//toDatePicker.selectedDate = appointment.to;
-				
-				toDate.selectedDate = appointment.to;
-				toHours.text = StringUtil.leftPad( appointment.to.hours.toString() );
-				toMinutes.text = StringUtil.leftPad( appointment.to.minutes.toString() );
-				
-				//	"-1" because we don't need to include the "pending" type
-				//	TODO: check for the pending type, vs assuming it is at the end of the array
-				for(var i:int=0,r:int=0;i<Appointment.APPOINTMENT_TYPES.length-1;i++)
-				{
-					var def:Object = Appointment.APPOINTMENT_TYPES[i];
-					
-					var radio:RadioButton = new RadioButton();
-					radio.groupName = "appointmentTypes"
-					radio.value = def.value;
-					radio.label = def.label;
-					typeList.addElement( radio );
-				}
-				
-				/* var reasons:ArrayCollection = Appointment.REASONS;
-				var rows:int = Math.ceil( reasons.length/2 );
-				
-				var column:VGroup = new VGroup();
-				column.gap = -6;
-				reasonList.addElement( column );
-				
-				for(i=0,r=0;i<reasons.length;i++)
-				{
-					var link:LinkButton = new LinkButton();
-					link.label = reasons[i];
-					link.styleName = "linkBtnDarkBlue";
-					link.addEventListener( MouseEvent.CLICK, onReasonClick );
-					column.addElement( link );
-					
-					if( r == rows - 1 )
-					{
-						column = new VGroup();
-						column.gap = -6;
-						reasonList.addElement( column );
-						
-						r=0;
-					}
-					else
-					{
-						r++;
-					}
-				} */
-				
-				if( appointment.recurUnit )
-				{
-					for(i=0;i<Appointment.RECUR_TYPES.length;i++)
-					{
-						if( appointment.recurUnit == Appointment.RECUR_TYPES[i].value )
-						{
-							recurUnit.selectedIndex = i;
-							
-							break;
-						}
-					}
-				}
-				
-			}
-			
-			private function handleFromChange():void 
-			{
-				appointment.from = fromDate.selectedDate;
-
-				if(appointment.to < appointment.from) 
-				{
-					appointment.to = appointment.from;
-					toDate.text = fromDate.text;
-				}
 			}
 		]]>
 	</fx:Script>
@@ -257,54 +130,9 @@
 		<s:TextInput id="patient" styleName="{patient.text == PATIENT_PLACEHOLDER ? 'searchPlaceholder' : 'grayText11'}" paddingLeft="7" paddingTop="5" width="215" height="24" change="filter();showResults()" click="{if(patient.text == PATIENT_PLACEHOLDER) { patient.text=''} showResults()}" />
 	</mx:FormItem>
 	
-	<s:HGroup>
-		<mx:FormItem label="From:" labelWidth="67" labelStyleName="darkGrayBold12">
-			<mx:DateField id="fromDate" change="handleFromChange()" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput" width="100" height="24" dateChooserStyleName="dateChooserDark"/>
-		</mx:FormItem>
-		<mx:FormItem label="To:" labelWidth="22" labelStyleName="darkGrayBold12">
-			<mx:DateField id="toDate" change="{appointment.to = toDate.selectedDate}" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput" width="100" height="24" dateChooserStyleName="dateChooserDark"/>
-		</mx:FormItem>
-	</s:HGroup>
+	<popups:AddAppointmentForm id="form" width="100%" appointment="{appointment}" />
 	
-	<s:HGroup>
-		<mx:FormItem label="Time:" labelWidth="67" labelStyleName="darkGrayBold12">
-			<s:HGroup verticalAlign="middle">
-				<s:TextInput id="fromHours" width="25" height="24" restrict="0-9" change="{appointment.from.hours = parseInt(fromHours.text);}" focusOut="{fromHours.text = StringUtil.leftPad(fromHours.text)}" />
-				<s:TextInput id="fromMinutes" width="25" height="24" restrict="0-9" change="{appointment.from.minutes = parseInt(fromMinutes.text)}" focusOut="{fromMinutes.text = StringUtil.leftPad(fromMinutes.text)}"/>
-				<s:Label text="hr"/>
-			</s:HGroup>
-		</mx:FormItem>
-		<mx:FormItem label="" labelWidth="49">
-			<s:HGroup verticalAlign="middle">
-				<s:TextInput id="toHours" width="25" height="24" restrict="0-9" change="{appointment.to.hours = parseInt(toHours.text)}" focusOut="{toHours.text = StringUtil.leftPad(toHours.text)}"/>
-				<s:TextInput id="toMinutes" width="25" height="24" restrict="0-9" change="{appointment.to.minutes = parseInt(toMinutes.text)}" focusOut="{toMinutes.text = StringUtil.leftPad(toMinutes.text)}" />
-				<s:Label text="hr"/>
-			</s:HGroup>
-		</mx:FormItem>
-	</s:HGroup>
-	
-	<mx:FormItem label="" labelWidth="67">
-		<s:CheckBox id="isRecurring" label="Recurring {appointment.recurUnit?' every ' + Appointment.RECUR_TYPES.getItemAt(recurUnit.selectedIndex).label + '':''}" selected="{appointment.isRecurring}" change="{appointment.isRecurring = isRecurring.selected}" />
-		<mx:LinkBar 
-			id="recurUnit" 
-			linkButtonStyleName="linkBtnGray" contentBackgroundAlpha="0" horizontalGap="0" 
-			dataProvider="{Appointment.RECUR_TYPES}" labelField="labelShort" separatorWidth="0" 
-			itemClick="{appointment.recurUnit=Appointment.RECUR_TYPES[recurUnit.selectedIndex].value}" visible="{appointment.isRecurring}" />		
-	</mx:FormItem>
-	
-	<s:VGroup paddingLeft="30">
-		<s:Label text="What is the type of this appointment?" styleName="darkGray12" />
-		<s:VGroup id="typeList" gap="5" paddingLeft="51" />
-	</s:VGroup>
-	
-	<s:VGroup  paddingLeft="30" gap="9">
-		<s:Label text="What is your reason for this appointment?" styleName="darkGray12" />
-		<s:TextInput id="reason" styleName="{reason.text == REASON_PLACEHOLDER ? 'searchPlaceholder' : 'grayText11'}" paddingLeft="7" paddingTop="5" width="292" height="24" click="{if(reason.text == REASON_PLACEHOLDER) reason.text=''}" />
-		<!--<s:Label text="Common reasons for visit:" />
-		<s:HGroup id="reasonList" paddingLeft="10" />-->
-	</s:VGroup>
-	
-	<s:VGroup paddingTop="14">
+	<s:VGroup paddingTop="0">
 		<s:Line xFrom="0" xTo="328">
 			<s:stroke>
 				<s:SolidColorStroke color="0x4D4D4D" weight="1" alpha=".25" />
