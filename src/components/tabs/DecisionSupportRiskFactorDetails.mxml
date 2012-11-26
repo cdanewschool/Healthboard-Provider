@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:ASclasses="ASclasses.*" xmlns:general="components.general.*" 
+	width="100%" height="100%" creationPolicy="all">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import ASclasses.Constants;
+			
+			import controllers.DecisionSupportController;
+			import controllers.MainController;
+			
+			import events.ApplicationEvent;
+			
+			import models.ModuleMappable;
+			import models.PatientModel;
+			import models.modules.decisionsupport.DecisionSupportModel;
+			import models.modules.decisionsupport.RiskFactor;
+			import models.modules.decisionsupport.RiskFactorRecommendedTreatment;
+			import models.modules.decisionsupport.RiskFactorUpdate;
+			
+			import mx.events.ListEvent;
+			
+			import styles.ChartStyles;
+			
+			import util.DateFormatters;
+			
+ 			private var _riskFactor:RiskFactor;
+		
+			public var patient:PatientModel;
+			
+			[Bindable] public var controller:DecisionSupportController = MainController(AppProperties.getInstance().controller).decisionSupportController as DecisionSupportController;
+			[Bindable] public var model:DecisionSupportModel = controller.model as DecisionSupportModel;
+			
+			[Bindable] private var chartStyles:ChartStyles = AppProperties.getInstance().controller.model.chartStyles;
+			
+			[Bindable] private var currentUpdate:RiskFactorUpdate;
+			
+			[Bindable]
+			public function get riskFactor():RiskFactor
+			{
+				return _riskFactor;
+			}
+
+			public function set riskFactor(value:RiskFactor):void
+			{
+				_riskFactor = value;
+				
+				invalidateProperties();
+			}
+
+			private function onRecommendedTreatmentClick(event:ListEvent):void
+			{
+				var item:RiskFactorRecommendedTreatment = event.itemRenderer.data as RiskFactorRecommendedTreatment;
+				
+				if( item.area )
+				{
+					AppProperties.getInstance().controller.processModuleMappable( item as ModuleMappable );
+				}
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if( riskFactor )
+				{
+					var currentUpdate:RiskFactorUpdate = riskFactor.updates && riskFactor.updates.length ? riskFactor.updates.getItemAt( 0 ) as RiskFactorUpdate : null;
+					var previousUpdate:RiskFactorUpdate = riskFactor.updates && riskFactor.updates.length ? riskFactor.updates.getItemAt( riskFactor.updates.length ? riskFactor.updates.length-1 : 0 ) as RiskFactorUpdate : null;
+					
+					if( currentRiskLevel ) currentRiskLevel.text = currentUpdate.value + "%";
+					if( currentRecordDate ) currentRecordDate.text = currentUpdate ? DateFormatters.monthShortDayNumberYearFull.format( currentUpdate.date ) : '';
+					
+					if( previousRiskLevel ) previousRiskLevel.text = previousUpdate.value + "%";
+					if( previousRecordDate ) previousRecordDate.text = previousUpdate ? DateFormatters.monthShortDayNumberYearFull.format( previousUpdate.date ) : '';
+					
+					var riskChange:int = (currentUpdate.value - previousUpdate.value);
+					riskIncreaseChangeArrow.visible = riskIncreaseChangeArrow.includeInLayout = riskChange > 0;
+					
+					if( riskChangeLevel ) riskChangeLevel.text = riskChange + "%";
+					if( overallRiskChangeRange ) overallRiskChangeRange.text = previousUpdate && currentUpdate ? "from " + DateFormatters.monthShortDayNumberYearFull.format( previousUpdate.date ) + " to " + DateFormatters.monthShortDayNumberYearFull.format( currentUpdate.date ) : '';
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" />
+	</s:layout>
+	
+	<s:Group width="100%">
+		
+		<s:layout>
+			<s:BasicLayout />
+		</s:layout>
+		
+		<s:Label text="{riskFactor.name} Risk" styleName="greenBoldText" left="20" top="20" />
+		<s:Image source="@Embed(source='/images/erBtnHelp.png')" buttonMode="true" right="20" top="20" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_EDUCATIONAL_RESOURCES ) )" />
+	
+	</s:Group>
+	
+	<s:HGroup width="100%" paddingLeft="20" paddingTop="20" gap="40">
+		
+		<s:VGroup width="110" gap="5">
+			<s:Label id="currentRiskLevel" styleName="emphasizedNumber bold" fontSize="36" />
+			<s:Label text="Most recent record:" fontSize="13" styleName="emphasizedNumberSubtext italic" />
+			<s:Label id="currentRecordDate" fontSize="13" styleName="emphasizedNumberSubtext italic" />
+		</s:VGroup>
+		
+		<s:VGroup width="110" gap="5">
+			<s:Label id="previousRiskLevel" styleName="emphasizedNumber bold" color="0xFBB03B" fontSize="36" />
+			<s:Label text="Previous record:" fontSize="13" styleName="emphasizedNumberSubtext italic" />
+			<s:Label id="previousRecordDate" fontSize="13" styleName="emphasizedNumberSubtext italic" />
+		</s:VGroup>
+		
+		<s:HGroup>
+			<s:Image id="riskIncreaseChangeArrow" source="@Embed(source='/images/decisionsupport/highRiskArrow.png')" top="10" />
+			<s:VGroup width="110" gap="5">
+				<s:Label id="riskChangeLevel" styleName="emphasizedNumber bold" color="0xFBB03B" fontSize="36" />
+				<s:Label text="Overall risk change:" fontSize="13" styleName="emphasizedNumberSubtext italic" />
+				<s:Label id="overallRiskChangeRange" fontSize="13" styleName="emphasizedNumberSubtext italic" />
+			</s:VGroup>
+		</s:HGroup>
+		
+	</s:HGroup>
+	
+	<s:HGroup width="100%" color="0xFFFFFF" height="31" horizontalAlign="right" verticalAlign="middle">
+		
+		<s:Line xFrom="0" xTo="24">
+			<s:stroke>
+				<s:SolidColorStroke color="0x86888A" weight="2" alpha=".5"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:Label text="Projected" />
+		
+		<mx:Legend direction="horizontal" color="0xFFFFFF" fontFamily="myMyriadNoCFF" verticalAlign="bottom" paddingRight="14" paddingLeft="15" paddingTop="6">
+			<mx:LegendItem label="Patient Entry" fontSize="12" fontWeight="normal" legendMarkerRenderer="mx.charts.renderers.CircleItemRenderer" markerAspectRatio="1" markerHeight="12" markerWidth="12" fill="{chartStyles.colorVitalSignsPatient}"  stroke="{chartStyles.whiteStroke}" />
+			<mx:LegendItem label="Provider Entry" fontSize="12" fontWeight="normal" legendMarkerRenderer="mx.charts.renderers.BoxItemRenderer" markerAspectRatio="1" markerHeight="12" markerWidth="12" fill="{chartStyles.colorVitalSignsProvider}" stroke="{chartStyles.whiteStroke}" />
+		</mx:Legend>
+		
+	</s:HGroup>
+	
+	<s:Line xFrom="0" xTo="822">
+		<s:stroke>
+			<s:SolidColorStroke color="#7C7C7C"/>
+		</s:stroke>
+	</s:Line>
+	
+	<ASclasses:RowColorDataGrid 
+		id="riskFactorSubTypes" 
+		width="100%" 
+		dataProvider="{riskFactor.types}"
+		dropIndicatorSkin="skins.general.myDropIndicatorSkin"
+		color="0xFFFFFF" alternatingItemColors="[0x3C3C3B,0x4A4A49]" verticalAlign="middle"
+		selectionDuration="2000" useRollOver="false" 
+		headerHeight="0" selectable="false"
+		borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}"
+		variableRowHeight="true">
+
+		<ASclasses:columns>
+			
+			<mx:DataGridColumn dataField="name">
+				
+				<mx:itemRenderer>
+					
+					<fx:Component>
+						
+						<mx:HBox 
+							verticalAlign="middle" paddingLeft="20" height="{currentState=='expanded' ? 200 : 65}"
+							horizontalScrollPolicy="off" verticalScrollPolicy="off" 
+							dataChange="onDataChange(event)">
+							
+							<fx:Script>
+								<![CDATA[
+									import ASclasses.MyCustomDataTip;
+									
+									import models.modules.decisionsupport.RiskFactor;
+									import models.modules.decisionsupport.RiskFactorUpdate;
+									
+									import mx.charts.HitData;
+									import mx.charts.events.ChartItemEvent;
+									import mx.charts.renderers.BoxItemRenderer;
+									import mx.charts.series.items.LineSeriesItem;
+									import mx.collections.ArrayCollection;
+									import mx.controls.Alert;
+									import mx.events.FlexEvent;
+									import mx.managers.PopUpManager;
+									
+									import util.DateUtil;
+									import util.DateFormatters;
+									
+									[Bindable] private var riskFactorSubType:RiskFactor;
+									
+									[Bindable] private var chartMin:Number;
+									[Bindable] private var chartMax:Number;
+									[Bindable] private var minDate:Date;
+									[Bindable] private var maxDate:Date;
+									
+									[Bindable] private var  currentUpdate:RiskFactorUpdate;
+									[Bindable] private var  previousUpdate:RiskFactorUpdate;
+									
+									[Bindable] private var dataProvider:ArrayCollection;
+									
+									override public function set data(value:Object):void 
+									{
+										super.data = value;
+										
+										riskFactorSubType = data as RiskFactor;
+										
+										invalidateProperties();
+									}
+									
+									private function onDataChange(event:FlexEvent):void
+									{
+										invalidateProperties();
+									}
+									
+									override public function set currentState(value:String):void
+									{
+										super.currentState = value;
+										
+										invalidateProperties();
+									}
+									
+									override protected function commitProperties():void
+									{
+										super.commitProperties();
+										
+										if( riskFactorSubType )
+										{
+											if( riskFactorSubType.updates 
+												&& riskFactorSubType.updates.length )
+											{
+												//	in collapsed state, only first and last update should be shown
+												if( currentState == 'collapsed' )
+													dataProvider = riskFactorSubType.updates.length > 2 ? new ArrayCollection( [ riskFactorSubType.updates.getItemAt(0), riskFactorSubType.updates.getItemAt( riskFactorSubType.updates.length -1 ) ] ) : riskFactorSubType.updates;
+												//	in expanded state, all updates should be shown
+												else 
+													dataProvider = riskFactorSubType.updates;
+											}
+										}
+										
+										var range:Array = outerDocument.controller.getRangeForRiskFactor( riskFactorSubType, outerDocument.patient );
+										
+										//	determine chart min/max
+										chartMin = range[0];
+										chartMax = range[1];
+										
+										//	determine chart min/max
+										minDate = null;
+										maxDate = null;
+										
+										for each(var update:RiskFactorUpdate in dataProvider)
+										{
+											if( update.date )
+											{
+												minDate = minDate != null && minDate.time < update.date.time ? minDate : update.date;
+												maxDate = maxDate != null && maxDate.time > update.date.time ? maxDate : update.date;
+											}
+										}
+										
+										//	get current/last update
+										currentUpdate = dataProvider && dataProvider.length ? dataProvider.getItemAt( 0 ) as RiskFactorUpdate : null;
+										previousUpdate = dataProvider && dataProvider.length ? dataProvider.getItemAt( dataProvider.length ? dataProvider.length-1 : 0 ) as RiskFactorUpdate : null;		
+										
+										//	set text
+										valueLabel.text = currentUpdate.valueDisplay + ' ' + outerDocument.controller.getRiskUnitLabel( riskFactorSubType );
+										
+										changeLabel.text = '(' + currentUpdate.getDifferenceDisplay( previousUpdate ) + ' ' + outerDocument.controller.getRiskUnitLabel( riskFactorSubType ) + ')';
+									}
+									
+									private function onChartRollOver(event:ChartItemEvent):void 
+									{
+										
+									}
+									
+									private function onChartRollOut(event:ChartItemEvent=null):void 
+									{
+										
+									}
+									
+									private function chartChange(event:Event):void
+									{
+										event.stopImmediatePropagation();
+									}
+								]]>
+							</fx:Script>
+							
+							<fx:Declarations>
+								<fx:Array id="bge">
+								</fx:Array>
+							</fx:Declarations>
+							
+							<mx:states>
+								<s:State name="collapsed" />
+								<s:State name="expanded" />
+							</mx:states>
+							
+							<s:HGroup width="140">
+								
+								<general:MainLinkButton
+									label="{riskFactorSubType.name}" 
+									icon.expanded="@Embed(source='/images/smallArrow.png')" icon.collapsed="@Embed(source='/images/smallArrowCollapsed.png')" 
+									horizontalGap="10" styleName="linkButtonStyle6" fontSize="13" fontWeight="bold" toggle="true"  
+									click="{currentState = (currentState == 'expanded' ? 'collapsed' : 'expanded')}" />
+								
+							</s:HGroup>
+							
+							<s:VGroup width="460">
+								
+								<mx:LineChart 
+									id="chart" 
+									width="445" height="{currentState == 'expanded' ? 100: 40}" dataProvider="{dataProvider}" 
+									backgroundElements="{bge}" seriesFilters="[]" selectionMode="single" 
+									itemRollOver="onChartRollOver(event)" itemRollOut="onChartRollOut(event)" 
+									change="chartChange(event)">
+									
+									<mx:series>
+										
+										<mx:LineSeries yField="meanValue" xField="date" interactive="false">
+											<mx:lineStroke>
+												<s:SolidColorStroke color="0xFAFDFF" weight="2" alpha=".5" />
+											</mx:lineStroke>
+										</mx:LineSeries>
+										
+										<mx:LineSeries yField="value" xField="date" interactive="false">
+											<mx:lineStroke>
+												<s:SolidColorStroke color="0x86888A" weight="2" alpha=".5" />
+											</mx:lineStroke>
+										</mx:LineSeries>
+										
+										<mx:LineSeries id="series" yField="value" xField="date" radius="8" adjustedRadius="8" itemRenderer="components.itemrenderers.chart.MyMixedItemRenderer" fillFunction="{outerDocument.controller.fillFunction}" selectedIndex="0">
+											<mx:lineStroke>
+												<s:SolidColorStroke color="0xFFFFFF" weight="3" />
+											</mx:lineStroke>
+											<mx:stroke>
+												<mx:SolidColorStroke color="0xFFFFFF" weight="1"/>
+											</mx:stroke>
+										</mx:LineSeries>
+										
+										<mx:LineSeries yField="value2" xField="date" interactive="false" includeInLayout="{riskFactorSubType.dual}" visible="{riskFactorSubType.dual}">
+											<mx:lineStroke>
+												<s:SolidColorStroke color="0x86888A" weight="2" alpha=".5" />
+											</mx:lineStroke>
+										</mx:LineSeries>
+										
+										<mx:LineSeries yField="value2" xField="date" includeInLayout="{riskFactorSubType.dual}" visible="{riskFactorSubType.dual}" radius="8" adjustedRadius="8" itemRenderer="components.itemrenderers.chart.MyMixedItemRenderer" fillFunction="{outerDocument.controller.fillFunction}">
+											<mx:lineStroke>
+												<s:SolidColorStroke color="0xFFFFFF" weight="3" />
+											</mx:lineStroke>
+											<mx:stroke>
+												<mx:SolidColorStroke color="0xFFFFFF"/>
+											</mx:stroke>
+										</mx:LineSeries>
+										
+									</mx:series>
+									
+									<mx:horizontalAxis>
+										<mx:DateTimeAxis id="xaxis" minimum="{minDate}" maximum="{maxDate}" />
+									</mx:horizontalAxis>
+									
+									<mx:horizontalAxisRenderers>
+										<mx:AxisRenderer axis="{xaxis}" showLabels="{outerDocument.riskFactor.types.getItemIndex(riskFactorSubType) == outerDocument.riskFactor.types.length-1}" tickPlacement="none" showLine="false" visible="false"  />
+									</mx:horizontalAxisRenderers>
+									
+									<mx:verticalAxis>
+										<mx:LinearAxis id="yaxis" minimum="{chartMin}" maximum="{chartMax}"  />
+									</mx:verticalAxis>
+									
+									<mx:verticalAxisRenderers>
+										<mx:AxisRenderer axis="{yaxis}" showLabels="false" tickPlacement="none" showLine="false" visible="false" />
+									</mx:verticalAxisRenderers>
+									
+								</mx:LineChart>
+								
+							</s:VGroup>
+
+							<s:VGroup>
+								
+								<s:HGroup>
+									<s:Label text="Current" fontSize="13" />
+									<s:VGroup>
+										<s:Label id="valueLabel" color="0xE84E1B" fontSize="13" />
+										<s:Label id="changeLabel" color="0xE84E1B" fontSize="13" />
+									</s:VGroup>
+									
+								</s:HGroup>
+								
+								<s:DataGroup dataProvider="{currentUpdate.details}" visible="{currentUpdate!=null &amp;&amp; currentState == 'expanded'}" includeInLayout="{currentUpdate!=null &amp;&amp; currentState == 'expanded'}"> 
+									
+									<s:layout>
+										<s:VerticalLayout />
+									</s:layout> 
+									
+									<s:itemRenderer>
+										
+										<fx:Component>
+											
+											<mx:HBox width="100%" horizontalGap="5">
+												<s:Label text="{data.name}" color="0x99CC00" fontSize="13" fontWeight="bold" />
+												<s:Label text="{data.value + ' ' + outerDocument.outerDocument.controller.getRiskUnitLabel( outerDocument.outerDocument.riskFactor ) }" color="0xFFFFFF" fontSize="13" />
+											</mx:HBox>
+						
+										</fx:Component>
+										
+									</s:itemRenderer>
+								
+								</s:DataGroup>
+								
+								<s:Label 
+									id="measuredOnLabel" styleName="gray13Italic" 
+									visible="{currentUpdate!=null &amp;&amp; currentState == 'expanded'}" includeInLayout="{currentUpdate!=null &amp;&amp; currentState == 'expanded'}" 
+									creationComplete="measuredOnLabel.text = 'Measured on ' + DateFormatters.monthShortDayNumberYearFull.format( currentUpdate.date )" />
+								
+							</s:VGroup>
+							
+						</mx:HBox>
+						
+					</fx:Component>
+					
+				</mx:itemRenderer>
+				
+			</mx:DataGridColumn>
+			
+		</ASclasses:columns>
+		
+	</ASclasses:RowColorDataGrid>
+	
+	<s:HGroup width="784" height="372" paddingLeft="20" paddingRight="20" paddingTop="20" paddingBottom="20" contentBackgroundColor="0x5D5D5D">
+		
+		<s:BorderContainer width="50%" height="100%" backgroundColor="0x3C3C3B">
+			
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" />
+			</s:layout>
+			
+			<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
+				<s:Label text="Family Tree" styleName="greenBoldText" paddingLeft="10" />
+			</s:BorderContainer>
+
+			<!--	placeholder	-->
+			<s:Image source="@Embed(source='/images/decisionsupport/placeholders/familytree.png')" />
+			
+		</s:BorderContainer>
+		
+		<s:VGroup width="50%" height="100%">
+			
+			<s:BorderContainer width="100%" height="50%" backgroundColor="0x3C3C3B">
+				
+				<s:layout>
+					<s:VerticalLayout horizontalAlign="center" />
+				</s:layout>
+				
+				<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
+					<s:Label text="Recommended Treatments" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+				</s:BorderContainer>
+				
+				<mx:DataGrid
+					dataProvider="{riskFactor.treatments}"
+					fontFamily="myMyriadNoCFF"
+					width="100%" height="100%"
+					color="0xFFFFFF" verticalAlign="middle"
+					headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
+					borderVisible="true" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+					rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
+					horizontalScrollPolicy="off" rowHeight="22" paddingTop="6" 
+					itemClick="onRecommendedTreatmentClick(event)">
+					
+					<mx:columns>
+						<mx:DataGridColumn dataField="method" headerText="Method" width="115" />
+						<mx:DataGridColumn dataField="type" headerText="Type" width="115">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox>
+										<s:Label text="{data.type}" color="{data.area != null ? 0xAEDEE4 : 0xFFFFFF}" fontFamily="myMyriad" paddingLeft="5" />
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn dataField="description" headerText="Description" />
+					</mx:columns>
+					
+				</mx:DataGrid>
+				
+			</s:BorderContainer>
+			
+			<s:BorderContainer width="100%" height="50%" backgroundColor="0x3C3C3B">
+				
+				<s:layout>
+					<s:VerticalLayout horizontalAlign="center" />
+				</s:layout>
+				
+				<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
+					<s:Label text="Subject Matter Experts" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+				</s:BorderContainer>
+				
+				<mx:DataGrid
+					dataProvider="{riskFactor.experts}"
+					fontFamily="myMyriadNoCFF"
+					width="100%" height="100%"
+					color="0xFFFFFF" verticalAlign="middle"
+					headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
+					borderVisible="true" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+					rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
+					horizontalScrollPolicy="off" rowHeight="22" paddingTop="6">
+					
+					<mx:columns>
+						<mx:DataGridColumn dataField="name" headerText="Name" width="168" color="0xAEDEE4" />
+						<mx:DataGridColumn dataField="expertise" headerText="Expertise" width="115" />
+						<mx:DataGridColumn dataField="location" headerText="Location" width="115" />
+					</mx:columns>
+					
+				</mx:DataGrid>
+				
+			</s:BorderContainer>
+			
+		</s:VGroup>
+		
+	</s:HGroup>
+	
+</s:NavigatorContent>

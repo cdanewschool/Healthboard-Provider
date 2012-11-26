@@ -13,6 +13,7 @@ package controllers
 	import components.popups.preferences.PreferencesPopup;
 	
 	import enum.RiskLevel;
+	import enum.UrgencyType;
 	
 	import events.ApplicationDataEvent;
 	import events.ApplicationEvent;
@@ -43,6 +44,8 @@ package controllers
 	import models.modules.advisories.PatientAdvisoryStatus;
 	import models.modules.advisories.PublicHealthAdvisoriesModel;
 	import models.modules.advisories.PublicHealthAdvisory;
+	import models.modules.decisionsupport.RiskFactor;
+	import models.modules.decisionsupport.RiskFactorUpdate;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
@@ -64,6 +67,7 @@ package controllers
 	{
 		public var advisoryController:PublicHealthAdvisoriesController;
 		public var chatController:ChatController;
+		public var decisionSupportController:DecisionSupportController;
 		public var teamAppointmentsController:TeamAppointmentsController;
 		
 		//	TODO: move to model
@@ -93,6 +97,7 @@ package controllers
 			
 			advisoryController = new PublicHealthAdvisoriesController();
 			chatController = new ChatController();
+			decisionSupportController = new DecisionSupportController();
 			exerciseController = new ProviderExerciseController();
 			immunizationsController = new ProviderImmunizationsController();
 			medicalRecordsController = new ProviderMedicalRecordsController();
@@ -125,6 +130,15 @@ package controllers
 			application.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
 			application.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
 			application.addEventListener( ProfileEvent.SHOW_CONTEXT_MENU, onShowContextMenu );
+			
+			loadStyles();
+		}
+		
+		override public function set model(value:ApplicationModel):void
+		{
+			super.model = value;
+			
+			loadStyles();
 		}
 		
 		override protected function onAuthenticated(event:AuthenticationEvent):void
@@ -381,10 +395,22 @@ package controllers
 				if( event.message.recipientType ) MessagesModel(messagesController.model).pendingRecipientType = event.message.recipientType;
 			}
 			
+			//	show relevant application module if valid
 			if( visualDashboardProvider(application).viewStackProviderModules
 				&& (child = visualDashboardProvider(application).viewStackProviderModules.getChildByName( event.data ) ) != null )
 			{
 				visualDashboardProvider(application).viewStackProviderModules.selectedChild = child as INavigatorContent;
+				
+				if( visualDashboardProvider(application).viewStackMain.selectedIndex != 0 )
+				{
+					visualDashboardProvider(application).viewStackMain.selectedIndex = 0;
+				}
+			}
+			//	show relevant patient module if valid
+			else if( visualDashboardProvider(application).viewStackMain.selectedChild is ViewPatient 
+					&& ( (visualDashboardProvider(application).viewStackMain.selectedChild as ViewPatient).moduleContainer.getChildByName( event.data) != null ) )
+			{
+				(visualDashboardProvider(application).viewStackMain.selectedChild as ViewPatient).showModule( event.data );
 			}
 		}
 		
@@ -474,6 +500,27 @@ package controllers
 			{
 				var patient:PatientModel = PatientModel.fromObj(result);
 				patients.addItem( patient );
+				
+				for each(var riskFactor:RiskFactor in patient.riskFactorGroups)
+				{
+					for each(var riskFactorSubType:RiskFactor in riskFactor.types)
+					{
+						if( riskFactorSubType.updates 
+							&& riskFactorSubType.updates.length )
+						{
+							var update:RiskFactorUpdate = riskFactorSubType.updates.getItemAt(0) as RiskFactorUpdate;
+							
+							if( update.riskLevel == RiskLevel.HIGH )
+							{
+								var alert:Object = { urgency: UrgencyType.URGENT, date: update.date, type: "Decision Support", alert: "High Risk", description: riskFactor.name };
+								
+								model.patientAlerts.addItem( alert );
+								
+								break;
+							}
+						}	
+					}
+				}
 			}
 			
 			patientsLoaded = true;

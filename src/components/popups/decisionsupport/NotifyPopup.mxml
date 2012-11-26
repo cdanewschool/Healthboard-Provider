@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:popups="components.popups.*"
+	width="413" height="550"
+	controlBarVisible="true" 
+	skinClass="skins.general.myHeaderlessTitleWindow"
+	creationComplete="init()">
+	
+	<fx:Declarations>
+		<s:LinearGradient id="fill" rotation="90">
+			<s:GradientEntry color="0x0001000" alpha="1" ratio="0" />
+			<s:GradientEntry color="0x4E4E4E" alpha="1" ratio=".5" />
+			<s:GradientEntry color="0x221E20" alpha="1" ratio="1" />
+		</s:LinearGradient>
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import events.MessageEvent;
+			import events.TeamAppointmentEvent;
+			
+			import flash.filters.DropShadowFilter;
+			
+			import models.Appointment;
+			import models.Message;
+			import models.UserModel;
+			import models.modules.AppointmentsModel;
+			import models.modules.MessagesModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable] public var appointment:Appointment;
+			[Bindable] public var message:Message;
+			[Bindable] public var patient:UserModel;
+			
+			[Bindable] private var modes:ArrayCollection = new ArrayCollection
+				(
+					[
+						{label:"Appointments",data:AppointmentsModel.ID},
+						{label:"Messages",data:MessagesModel.ID}
+					]
+				);
+			
+			private function save():void
+			{
+				if( selectedModule.selectedItem.data == AppointmentsModel.ID )
+				{
+					appointment.patient = patient;
+					
+					dispatchEvent( new TeamAppointmentEvent( TeamAppointmentEvent.ADD ) );
+				}
+				else if( selectedModule.selectedItem.data == MessagesModel.ID )
+				{
+					dispatchEvent( new MessageEvent( MessageEvent.ADD ) );
+				}
+			}
+			
+			private function cancel():void
+			{
+				dispatchEvent( new Event( Event.CANCEL ) );
+				
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function onModuleSelect(event:IndexChangeEvent):void
+			{
+				views.selectedIndex = selectedModule.selectedItem.data == MessagesModel.ID ? 1 : 0;
+			}
+			
+			private function init():void
+			{
+				controlBarVisible = false;
+				
+				appointment = new Appointment();
+				message = new Message();
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="20" paddingTop="15" paddingRight="20" gap="10" horizontalAlign="left" />
+	</s:layout>
+	
+	<s:Label text="Notify" styleName="darkGrayBold16" paddingBottom="5" />
+	
+	<mx:FormItem label="Patient:" labelWidth="50" labelStyleName="darkGrayBold12">
+		<s:TextInput text="{patient.fullName}" paddingLeft="7" paddingTop="5" width="215" height="24" editable="false" />
+	</mx:FormItem>
+	
+	<mx:FormItem label="Module:" labelWidth="50" labelStyleName="darkGrayBold12">
+		<s:DropDownList id="selectedModule" dataProvider="{modes}" width="317" height="24" labelField="label" creationComplete="{selectedModule.selectedIndex = 0}" change="onModuleSelect(event)" />
+	</mx:FormItem>
+	
+	<s:HGroup paddingLeft="5">
+		
+		<!--	filters="{[new DropShadowFilter(0,90,0,.5,2,2)]}" 	-->
+		<s:BorderContainer width="368" height="381" backgroundFill="{views.selectedIndex==1?fill:null}" backgroundAlpha="{views.selectedIndex==1?1:0}">
+			
+			<mx:ViewStack id="views" >
+				
+				<s:NavigatorContent>
+					<popups:AddAppointmentForm width="100%" appointment="{appointment}" paddingTop="10" />
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent>
+					<popups:SendMessageForm width="100%" message="{message}" />
+				</s:NavigatorContent>
+				
+			</mx:ViewStack>
+			
+		</s:BorderContainer>
+		
+	</s:HGroup>
+
+	<s:VGroup>
+		
+		<s:Line xFrom="0" xTo="383">
+			<s:stroke>
+				<s:SolidColorStroke color="0x4D4D4D" weight="1" alpha=".25" />
+			</s:stroke>
+		</s:Line>
+		
+	</s:VGroup>
+	
+	<s:HGroup width="100%" horizontalAlign="right">
+		
+		<s:Button label="Submit" height="24" click="save();" skinClass="skins.general.IconButtonSkin" />
+		<s:Button label="Cancel" height="24" click="cancel();" skinClass="skins.general.IconButtonSkin" />
+		
+	</s:HGroup>
+	
+</s:TitleWindow>

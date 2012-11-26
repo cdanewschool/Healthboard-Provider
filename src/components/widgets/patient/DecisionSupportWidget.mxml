@@ -3,7 +3,8 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*">
+	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
+	maxHeight="453">
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
@@ -11,102 +12,88 @@
 	
 	<fx:Script>
 		<![CDATA[
-			[Bindable] public var collapsedDecisionSupportPixels:uint = 0;	//used for recalculating widget's height
+			import models.PatientModel;
+			import models.modules.decisionsupport.RiskFactor;
+			import models.modules.decisionsupport.RiskFactorUpdate;
+			
+			import util.DateFormatters;
+			
+			[Bindable] public var collapsedDecisionSupportPixels:uint = 0;
+			
+ 			private var _patient:PatientModel;
+			
+			[Bindable]
+			public function get patient():PatientModel
+			{
+				return _patient;
+			}
+
+			public function set patient(value:PatientModel):void
+			{
+				_patient = value;
+				
+				invalidateProperties();
+			}
+
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if( patient )
+				{
+					var date:Date;
+					
+					for each(var riskFactor:RiskFactor in patient.riskFactorGroups)
+					{
+						for each(var type:RiskFactor in riskFactor.types)
+						{
+							for each(var update:RiskFactorUpdate in type.updates)
+							{
+								if( !date ) 
+									date = update.date;
+								else if( update.date.time > date.time )
+									date = update.date;
+							}
+						}
+					}
+					
+					header.text = "Risk factors as of " + DateFormatters.monthShortDayNumberYearFull.format( date );
+				}
+				else
+				{
+					header.text = "No risk factors  as of " + DateFormatters.monthShortDayNumberYearFull.format( AppProperties.getInstance().controller.model.today );
+				}
+			}
+			
 		]]>
 	</fx:Script>
-		
+	
 	<enhancedtitlewindow:layout>
 		<s:VerticalLayout paddingLeft="10" paddingTop="8" paddingRight="10" />
 	</enhancedtitlewindow:layout>
 	
-	<s:Label text="Risk factors as of Oct 11, 2012" color="0xCCCCCC" fontSize="12" fontStyle="italic" />
+	<s:Label id="header" styleName="italic subheadText2" fontSize="12" fontStyle="italic" />
 	
-	<s:VGroup paddingBottom="-4">
+	<s:Group>
 		<s:Line xFrom="0" xTo="280">
 			<s:stroke>
 				<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
 			</s:stroke>
 		</s:Line>
-	</s:VGroup>
+	</s:Group>
 	
 	<mx:DataGrid 
-		id="dgDecisionSupportWidget" width="100%" height="{366 - collapsedDecisionSupportPixels}" selectable="false"
+		id="datagrid" width="100%" 
+		dataProvider="{patient.riskFactorGroups}" selectable="false"
 		color="0xFFFFFF" verticalAlign="middle" 
 		useRollOver="false"
 		headerHeight="0"
 		verticalScrollPolicy="off"
 		borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
-		 variableRowHeight="true">
-		
-		<mx:ArrayList>
-			<fx:Object section="Cardiovascular Risk" />
-			<fx:Object section="Deployment Risks" />
-		</mx:ArrayList>
-		
+		variableRowHeight="true">
+
 		<mx:columns>
-			
-			<mx:DataGridColumn dataField="vital">
-				<mx:itemRenderer>
-					<fx:Component>
-						<mx:VBox horizontalScrollPolicy="off" verticalScrollPolicy="off">
-							<mx:states>
-								<s:State name="expanded" />
-								<s:State name="collapsed" />
-							</mx:states>
-							
-							<!--
-							<mx:transitions>
-							<s:Transition fromState="collapsed">
-							<s:Resize target="{this}" duration="500" />
-							</s:Transition>
-							<s:Transition fromState="expanded">
-							<s:Resize target="{this}" duration="500" />
-							</s:Transition>
-							</mx:transition>
-							-->
-							
-							<mx:LinkButton icon.expanded="@Embed(source='/images/smallArrowGray.png')" icon.collapsed="@Embed(source='/images/smallArrowCollapsedGray.png')" horizontalGap="10" id="btnVital" label="{data.section}" fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" click="{if(this.currentState=='expanded') {this.currentState = 'collapsed'; outerDocument.collapsedDecisionSupportPixels+= (data.section == 'Cardiovascular Risk') ? 169 : 137;} else {this.currentState = 'expanded'; outerDocument.collapsedDecisionSupportPixels-= (data.section == 'Cardiovascular Risk') ? 169 : 137;}}" />
-							
-							<s:Group includeIn="expanded"><!--includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}"-->
-								<s:Line xFrom="0" xTo="280">
-									<s:stroke>
-										<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-									</s:stroke>
-								</s:Line>
-							</s:Group>
-							
-							<s:VGroup includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}" width="282" paddingLeft="30" verticalAlign="middle" fontSize="12" paddingTop="6" paddingBottom="6">
-								<s:HGroup includeInLayout="{data.section == 'Cardiovascular Risk'}" visible="{data.section == 'Cardiovascular Risk'}" gap="75">
-									<s:VGroup>
-										<s:Label text="{'Blood Pressure\nCholesterol\nBlood Sugar\nWeight\nSmoking'}" lineHeight="33" color="0xFFFFFF" />
-									</s:VGroup>
-									<s:VGroup>
-										<s:Label text="{'High Risk\nHigh Risk\nHigh Risk\nHigh Risk\nHigh Risk'}" fontStyle="italic" lineHeight="33" color="0xE84E1B" />
-									</s:VGroup>
-								</s:HGroup>
-								<s:HGroup includeInLayout="{data.section == 'Deployment Risks'}" visible="{data.section == 'Deployment Risks'}" gap="75">
-									<s:VGroup>
-										<s:Label text="{'Malaria\nSchistosiomasis\nDengue\nFiliarasis'}" lineHeight="33" color="0xFFFFFF" />
-									</s:VGroup>
-									<s:VGroup>
-										<s:Label text="{'Low Risk\nLow Risk\nLow Risk\nLow Risk'}" fontStyle="italic" lineHeight="33" color="0xF8E831" />
-									</s:VGroup>
-								</s:HGroup>
-							</s:VGroup>
-							
-							<s:Group>
-								<s:Line xFrom="0" xTo="280">
-									<s:stroke>
-										<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
-									</s:stroke>
-								</s:Line>
-							</s:Group>
-						</mx:VBox>
-						
-					</fx:Component>
-				</mx:itemRenderer>
-			</mx:DataGridColumn>
-			
+			<mx:DataGridColumn itemRenderer="components.itemrenderers.RiskFactorGroupItemRenderer" />
 		</mx:columns>
 		
 	</mx:DataGrid>

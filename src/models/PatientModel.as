@@ -1,9 +1,9 @@
 package models
 {
 	import models.modules.advisories.PatientAdvisoryStatus;
+	import models.modules.decisionsupport.RiskFactor;
 	
 	import mx.collections.ArrayCollection;
-	import mx.utils.ObjectProxy;
 	
 	import util.DateFormatters;
 
@@ -32,6 +32,8 @@ package models
 		public var advisoriesLastUpdated:Date;
 		
 		public var relations:ArrayCollection;
+		
+		public var riskFactorGroups:ArrayCollection;
 		
 		public function PatientModel()
 		{
@@ -77,6 +79,7 @@ package models
 			var medical:Object = data.medical;
 			var occupation:Object = data.occupation;
 			var relations:Object = data.relations;
+			var riskFactors:Object = data.riskFactors;
 			
 			var obj:Object;
 			
@@ -132,6 +135,18 @@ package models
 				for each(obj in relationsObjects)
 				{
 					val.relations.addItem( RelationModel.fromObj( obj ) );
+				}
+			}
+			
+			if( riskFactors )
+			{
+				val.riskFactorGroups = new ArrayCollection();
+				
+				var riskFactorObjects:ArrayCollection = riskFactors.type is ArrayCollection ? riskFactors.type : new ArrayCollection( [ riskFactors.type ] );
+				
+				for each(obj in riskFactorObjects)
+				{
+					val.riskFactorGroups.addItem( RiskFactor.fromObj( obj ) );
 				}
 			}
 			

@@ -24,6 +24,7 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
 import flash.utils.Timer;
+
 import flashx.textLayout.elements.BreakElement;
 
 import models.ApplicationModel;
@@ -64,8 +65,7 @@ import utils.DateUtil;
 
 private function init():void
 {
-	AppProperties.getInstance().controller = controller = new MainController();
-	
+	controller = AppProperties.getInstance().controller as MainController;
 	model = controller.model as ProviderApplicationModel;
 	
 	model.chartStyles = chartStyles = new ChartStyles();

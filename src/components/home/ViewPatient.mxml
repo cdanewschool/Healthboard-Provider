@@ -8,6 +8,7 @@
 	xmlns:radarchart="fr.kapit.radarchart.*"
 	xmlns:patient="components.widgets.patient.*" 
 	xmlns:modules="modules.*"
+	xmlns:modules1="components.modules.*"
 	creationComplete="init();">
 	
 	<s:layout>
@@ -130,6 +131,8 @@
 					
 					if( moduleContainer ) moduleContainer.visible = moduleContainer.includeInLayout = showModules;
 					
+					moduleContainer.verticalScrollPosition = 0;
+					
 					stateDirty = false;
 				}
 				
@@ -178,7 +181,9 @@
 			
 			private function healthFocusResultHandler(event:ResultEvent):void 
 			{
-				controller.model.patientAlerts = alertsWidget.alerts = event.result.alerts.alert;
+				var alerts:ArrayCollection = event.result.alerts.alert;
+				
+				controller.model.patientAlerts = alertsWidget.alerts = new ArrayCollection( controller.model.patientAlerts.source.concat( alerts.source ) );
 				
 				controller.model.patientAlertsLoaded = true;
 			}
@@ -217,7 +222,7 @@
 				}
 			}
 			
-			private function showModule( moduleID:String ):void
+			public function showModule( moduleID:String ):void
 			{
 				currentState = STATE_MODULE;
 				
@@ -455,10 +460,11 @@
 							<patient:DecisionSupportWidget
 								id="decisionSupportWidget" 
 								width="305" title="Decision Support" 
+								patient="{patient}" 
 								collapsible="true" headerClickable="false" 
 								module="decisionSupportModule" titleBarHeight="30" 
 								headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
-								creationComplete="decisionSupportWidget.module = ProviderConstants.MODULE_DECISION_SUPPORT"/>
+								creationComplete="decisionSupportWidget.module = ProviderConstants.MODULE_DECISION_SUPPORT" />
 							
 							<patient:NutritionWidget
 								id="nutritionWidget" 
@@ -492,7 +498,7 @@
 				</s:VGroup>
 			</s:HGroup>
 			
-			<mx:ViewStack id="moduleContainer" visible="false" width="975">
+			<mx:ViewStack id="moduleContainer" visible="false" width="975" resizeToContent="true">
 				
 				<s:NavigatorContent id="modAppointments">
 					<modules:AppointmentsModule width="975" paddingTop="10" showHeader="false" currentState="simple" />
@@ -520,6 +526,10 @@
 				
 				<s:NavigatorContent id="modVitalSigns">
 					<modules:VitalSignsModule width="975" paddingTop="10" showHeader="false" currentState="provider" />
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent id="modDecisionSupport">
+					<modules1:DecisionSupportModule width="975" paddingTop="10" patient="{patient}" />
 				</s:NavigatorContent>
 				
 			</mx:ViewStack>

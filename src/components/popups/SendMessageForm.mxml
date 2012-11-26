@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:general="components.general.*" 
+	xmlns:net="flash.net.*"
+	creationComplete="init()">
+	
+	<fx:Declarations>
+		<net:FileReference id="fileReference" select="onBrowseForFile(event);" complete="onBrowseForFileComplete(event);" />
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import controllers.MessagesController;
+			
+			import models.FileUpload;
+			import models.Message;
+			import models.modules.MessagesModel;
+			
+			[Bindable] public var controller:MessagesController = AppProperties.getInstance().controller.messagesController as MessagesController;
+			[Bindable] public var model:MessagesModel = controller.model as MessagesModel;
+			
+			[Bindable] public var message:Message;
+			
+			
+			private function browseAttachment(evt:MouseEvent):void 
+			{
+				fileReference.browse();
+			}
+			
+			private function onBrowseForFile(evt:Event):void 
+			{
+				fileReference.load();
+			}
+			
+			private function onBrowseForFileComplete(evt:Event):void 
+			{
+				var myAttachment:FileUpload = new FileUpload( fileReference.name, fileReference.size, fileReference.data );
+				
+				if( myAttachment.isImage() ) 
+				{
+					message.imageAttachments.addItem( myAttachment );
+				}
+				else 
+				{
+					message.nonImageAttachments.addItem(myAttachment);
+				}
+			}
+			
+			private function init():void
+			{
+			}
+		]]>
+	</fx:Script>
+	
+	<s:Form>
+		
+		<s:layout>
+			<s:FormLayout gap="-5" paddingLeft="-10" paddingTop="-10" />
+		</s:layout>
+		
+		<s:FormItem label="Subject:" color="0xFFFFFF">
+			
+			<s:ComboBox 
+				id="subject" 
+				prompt="Select a subject" width="333" color="0x4D4D4D" 
+				change="message.subject = subject.selectedItem" dataProvider="{model.predefinedSubjects}" />
+			
+		</s:FormItem>
+		
+		<s:FormItem>
+			
+			<s:VGroup paddingLeft="24">
+				
+				<s:TextArea id="messageText" width="310" fontSize="12" heightInLines="7" contentBackgroundColor="0xFFFFFF" contentBackgroundAlpha="1" />
+				
+				<s:HGroup width="100%" horizontalAlign="right" verticalAlign="top">
+					
+					<s:VGroup>
+						
+						<s:List id="listAttachments" dataProvider="{message.nonImageAttachments}" visible="{message.nonImageAttachments &amp;&amp; message.nonImageAttachments.length}" includeInLayout="{message.nonImageAttachments &amp;&amp; message.nonImageAttachments.length}" contentBackgroundAlpha="0" borderAlpha="0" color="0xAEDEE4">
+							
+							<s:layout>
+								<s:VerticalLayout requestedRowCount="{message.nonImageAttachments.length}" gap="-2" />
+							</s:layout>
+							
+							<s:itemRenderer>
+								
+								<fx:Component>
+									<mx:HBox horizontalGap="0" verticalAlign="middle">
+										<fx:Script>
+											<![CDATA[
+												protected function onDeleteAttachment(event:MouseEvent):void 
+												{
+													outerDocument.message.nonImageAttachments.removeItemAt( outerDocument.message.nonImageAttachments.getItemIndex(data) );
+												}
+											]]>
+										</fx:Script>
+										<mx:Label text="{data.name}" color="0xAEDEE4" />
+										<mx:Label text="{data.fileSize}" color="0xFFFFFF" />
+										<mx:Image source="@Embed('/images/messagesDelete.png')" toolTip="Delete attachment" buttonMode="true" click="onDeleteAttachment(event)" />
+									</mx:HBox>
+								</fx:Component>
+								
+							</s:itemRenderer>
+							
+						</s:List>
+						
+						<general:MainLinkButton id="btnAttachment" label="Add attachment" styleName="linkBtnBlue" fontSize="12" paddingLeft="-2" paddingTop="-5" click="browseAttachment(event)" />
+						
+					</s:VGroup>
+					
+					<s:DropDownList id="dropUrgency" selectedIndex="0" styleName="buttonText" height="24" width="126" skinClass="skins.messages.CustomDropdownListWithIcon">
+						<s:dataProvider>
+							<s:ArrayList>
+								<fx:Object label="Not urgent" />
+								<fx:Object label="Somewhat urgent" icon="@Embed('/images/messagesSomewhatUrgent.png')" />
+								<fx:Object label="Urgent" icon="@Embed('/images/messagesUrgent.png')" />
+							</s:ArrayList>							
+						</s:dataProvider>
+					</s:DropDownList>
+					
+					<s:Button label="Cancel" styleName="buttonText" height="24" click="dispatchEvent( new Event( Event.CANCEL ) )"/>
+					
+				</s:HGroup>
+				
+			</s:VGroup>
+			
+		</s:FormItem>
+		
+	</s:Form>
+	
+</s:Group>

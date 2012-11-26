@@ -78,8 +78,11 @@
 				
 				var type:String = item.type;
 				
+				//	TODO: make id based, not case-senstitive
 				if( activeModule == Constants.MODULE_APPOINTMENTS )
 					return type == "Appointments";
+				else if( activeModule == ProviderConstants.MODULE_DECISION_SUPPORT )
+					return type == "Decision Support";
 				else if( activeModule == Constants.MODULE_MEDICATIONS )
 					return type == "Medications";
 				else if( activeModule == Constants.MODULE_IMMUNIZATIONS )
@@ -172,8 +175,13 @@
 				<mx:itemRenderer>
 					<fx:Component>
 						<mx:HBox width="68" horizontalAlign="center">
-							<s:Image source="@Embed('/images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 'Urgent'}" includeInLayout="{data.urgency == 'Urgent'}" />
-							<s:Image source="@Embed('/images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 'Somewhat urgent'}" includeInLayout="{data.urgency == 'Somewhat urgent'}" />
+							<fx:Script>
+								<![CDATA[
+									import enum.UrgencyType;
+								]]>
+							</fx:Script>
+							<s:Image source="@Embed('/images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == UrgencyType.URGENT}" includeInLayout="{data.urgency == UrgencyType.URGENT}" />
+							<s:Image source="@Embed('/images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == UrgencyType.SOMEWHAT_URGENT}" includeInLayout="{data.urgency == UrgencyType.SOMEWHAT_URGENT}" />
 						</mx:HBox>
 					</fx:Component>
 				</mx:itemRenderer>
