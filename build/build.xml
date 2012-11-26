@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="Provider Portal">
+	
+	<!--	location of flex sdk	-->
+	<property name="FLEX_HOME" value="/Applications/Adobe Flash Builder 4.5/sdks/4.5.0" />
+	
+	<!--	references to project and lib directories	-->
+	<property name="APP_ROOT" value="../../visualDashboardProvider"/>
+	<property name="LIB_ROOT" value="../../visualDashboardShared"/>
+	
+	<!--	supported locale(s)	-->
+	<property name="LOCALE" value="en_US" />
+	
+    <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
+	
+	<target name="clean">
+		<delete dir="${APP_ROOT}/${OUTPUT_FOLDER}"/>
+	</target>
+	
+	<target name="copyAssets">
+		<copy todir="${APP_ROOT}/${OUTPUT_FOLDER}/data">
+			<fileset dir="${APP_ROOT}/src/data"/>
+			<fileset dir="${LIB_ROOT}/src/data"/>
+		</copy>
+		<copy todir="${APP_ROOT}/${OUTPUT_FOLDER}/assets/images">
+			<!--	http://stackoverflow.com/questions/3423555/copy-content-of-subfolders-with-ant	-->
+			<fileset dir="${LIB_ROOT}/src/assets/images">
+				<include name="*/**"/>
+				<exclude name="*"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="buildCommon">
+		<compc 
+			output="${APP_ROOT}/libs/sharedlib.swc"
+			defaults-css-url="${LIB_ROOT}/src/css/styles.css" 
+			debug="${DEBUG}" optimize="true"
+			fork="true" maxmemory="256m">
+			
+	        <source-path path-element="${LIB_ROOT}/src" />
+			
+			<include-file name="defaults.css" path="${LIB_ROOT}/src/css/styles.css" />
+			
+	        <include-sources dir="${LIB_ROOT}/src" includes="*">
+	        	<exclude name="ASclasses/" />
+	        	<exclude name="sharedASfiles/" />
+			</include-sources>
+			
+			<compiler.library-path dir="${LIB_ROOT}/src/external/kapit" includes="radar_chart.swc" />
+			
+			<compiler.external-library-path dir="${FLEX_HOME}/frameworks" append="true">
+				<include name="libs/" />
+			</compiler.external-library-path>
+			
+	    </compc>
+	</target>
+	
+	<target name="buildCSS">
+		<copy todir="${LIB_ROOT}/src">
+			<fileset file="${LIB_ROOT}/src/css/themes/black.css"/>
+			<fileset file="${LIB_ROOT}/src/css/themes/white.css"/>
+		</copy>
+   		<mxmlc file="${LIB_ROOT}/src/black.css" output="${APP_ROOT}/${OUTPUT_FOLDER}/assets/themes/black.swf" keep-generated-actionscript="false">
+    		<compiler.library-path dir="${LIB_ROOT}" append="true">  
+				<include name="src/" />
+    		</compiler.library-path>
+    	</mxmlc>
+    	<mxmlc file="${LIB_ROOT}/src/white.css" output="${APP_ROOT}/${OUTPUT_FOLDER}/assets/themes/white.swf" keep-generated-actionscript="false">
+    		<compiler.library-path dir="${LIB_ROOT}" append="true">  
+    			<include name="src/" />
+    		</compiler.library-path>
+    	</mxmlc>
+    	<delete file="${LIB_ROOT}/src/black.css"/>
+    	<delete file="${LIB_ROOT}/src/white.css"/>
+    </target>
+    
+	<target name="build" depends="clean, copyAssets, buildCommon, buildCSS">
+		
+		<mxmlc 
+			file="${APP_ROOT}/src/visualDashboardProvider.mxml" 
+			output="${APP_ROOT}/${OUTPUT_FOLDER}/visualDashboardProvider.swf" 
+			actionscript-file-encoding="UTF-8" locale="${LOCALE}"
+			keep-generated-actionscript="false"
+			incremental="true" swf-version="13" 
+			debug="${DEBUG}" optimize="true"
+			fork="true" maxmemory="5000m">
+
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml"/>
+
+			<source-path path-element="${FLEX_HOME}/frameworks"/> 
+			<source-path path-element="${LIB_ROOT}/src"/>
+			
+			<compiler.external-library-path dir="${FLEX_HOME}/frameworks" append="true">
+				<include name="libs" />
+				<include name="locale/${LOCALE}" />
+			</compiler.external-library-path>
+
+			<compiler.library-path dir="${LIB_ROOT}" append="true">  
+				<include name="src/" />
+			</compiler.library-path>
+			
+			<compiler.library-path dir="${APP_ROOT}/libs" includes="agslib-3.0-2012-06-06.swc" />
+			<compiler.library-path dir="${LIB_ROOT}/src/external/kapit" includes="radar_chart.swc" />
+			
+		</mxmlc>
+
+	    <html-wrapper title="TATRAC Provider Portal" file="visualDashboardProvider.html" height="100%" width="100%" application="visualDashboardProvider" swf="visualDashboardProvider" version-major="10" version-minor="2" version-revision="0" history="true" output="${APP_ROOT}/${OUTPUT_FOLDER}"/>
+	    
+	</target>
+	
+	<target name="buildDebug">
+		<property name="OUTPUT_FOLDER" value="bin-debug" />
+		<property name="DEBUG" value="true" />
+		<antcall target="build" />
+	</target>
+
+	<target name="buildRelease">
+		<property name="OUTPUT_FOLDER" value="bin-release" />
+		<property name="DEBUG" value="false" />
+		<antcall target="build" />
+	</target>
+</project>
