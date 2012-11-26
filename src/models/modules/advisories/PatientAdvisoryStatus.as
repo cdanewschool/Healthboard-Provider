@@ -3,7 +3,7 @@ package models.modules.advisories
 	public class PatientAdvisoryStatus
 	{
 		public var advisoryId:int;
-		public var riskLevel:int;
+		public var riskLevel:String;
 		
 		public function PatientAdvisoryStatus()
 		{
