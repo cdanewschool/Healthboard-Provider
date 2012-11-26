@@ -46,7 +46,7 @@ package models.modules.advisories
 		}
 		
 		public function get affectedCountNetwork():int { return affectedNetwork ? affectedNetwork.length : NaN; }
-		public function get atRiskCountNetwork():int { return atRiskNetwork ? atRisk.length : NaN; }
+		public function get atRiskCountNetwork():int { return atRiskNetwork ? atRiskNetwork.length : NaN; }
 		public function get deathCountNetwork():int { return deathsNetwork ? deathsNetwork.length : NaN; }
 		public function get hospitalizationsCountNetwork():int { return hospitalizationsNetwork ? hospitalizationsNetwork.length : NaN; }
 		
