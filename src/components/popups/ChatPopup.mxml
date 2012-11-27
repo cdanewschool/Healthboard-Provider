@@ -70,6 +70,8 @@
 			
 			private var controller:ChatController = MainController(AppProperties.getInstance().controller).chatController;
 			
+			[Bindable] private var chatModes:ArrayCollection = new ArrayCollection();
+			
 			private function onSendClick( event:MouseEvent ):void
 			{
 				relayMessage();
@@ -312,6 +314,18 @@
 				
 				updateTimer.start();
 				
+				var modes:ArrayCollection = ChatSearch.MODES;
+				var prefs:UserPreferences = AppProperties.getInstance().controller.model.preferences as UserPreferences;
+				
+				for each(var mode:Object in modes)
+				{
+					if( (mode.data == ChatSearch.MODE_VOICE && !prefs.chatEnableVoiceChat) 
+						|| (mode.data == ChatSearch.MODE_VIDEO && !prefs.chatEnableVideoChat) )
+						continue;
+					
+					chatModes.addItem( mode );
+				}
+				
 				addEventListener( KeyboardEvent.KEY_DOWN, onKeyDown );
 			}
 		]]>
@@ -348,8 +362,8 @@
 		<s:ButtonBar 
 			id="updateMode"
 			includeIn="textChat,voiceChat,videoChat"
-			width="71" height="20"
-			dataProvider="{ChatSearch.MODES}" 
+			width="71" height="20" 
+			dataProvider="{chatModes}"
 			iconField="icon"
 			change="onUpdateChatMode(event)" 
 			firstButton="skins.general.IconButtonSkin"
