@@ -28,9 +28,9 @@ package models
 		public static const MODES:ArrayCollection = new ArrayCollection
 			( 
 				[
-					{label:"Text",icon:"images/button_icons/text.png",data:MODE_TEXT},
-					{label:"Voice",icon:"images/button_icons/voice.png",data:MODE_VOICE},
-					{label:"Video",icon:"images/button_icons/video.png",data:MODE_VIDEO}
+					{label:"Text",icon:"assets/images/button_icons/text.png",data:MODE_TEXT},
+					{label:"Voice",icon:"assets/images/button_icons/voice.png",data:MODE_VOICE},
+					{label:"Video",icon:"assets/images/button_icons/video.png",data:MODE_VIDEO}
 				] 
 			);
 		
