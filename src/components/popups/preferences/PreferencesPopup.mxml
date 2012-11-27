@@ -259,17 +259,17 @@
 						<s:HGroup paddingLeft="5" gap="30">
 							
 							<s:VGroup gap="5">
-								<s:Image source="assets/images/preferences/viewModeButton.jpg" />
+								<s:Image source="assets/images/preferences/colorSchemeBlack.jpg" />
 								<s:RadioButton groupName="colorSchemeGroup" label="Black" click="preferences.colorScheme = ColorSchemeType.BLACK" selected="{preferences.colorScheme == ColorSchemeType.BLACK}" />
 							</s:VGroup>
 							
 							<s:VGroup gap="5">
-								<s:Image source="assets/images/preferences/viewModeButton.jpg" />
+								<s:Image source="assets/images/preferences/colorSchemeWhite.jpg" />
 								<s:RadioButton groupName="colorSchemeGroup" label="White" click="preferences.colorScheme = ColorSchemeType.WHITE" selected="{preferences.colorScheme == ColorSchemeType.WHITE}"/>
 							</s:VGroup>
 							
 							<s:VGroup gap="5">
-								<s:Image source="assets/images/preferences/viewModeButton.jpg" />
+								<s:Image source="assets/images/preferences/colorSchemeDeficiency.jpg" />
 								<s:RadioButton groupName="colorSchemeGroup" label="Color deficiency" click="preferences.colorScheme = ColorSchemeType.DEFICIENCY" selected="{preferences.colorScheme == ColorSchemeType.DEFICIENCY}"/>
 							</s:VGroup>
 							

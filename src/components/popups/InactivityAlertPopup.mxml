@@ -53,7 +53,9 @@
 		<s:VerticalLayout horizontalAlign="center" gap="15" />
 	</s:layout>
 	
-	<s:HGroup paddingTop="20">
+	<s:HGroup paddingTop="20" verticalAlign="middle">
+		
+		<s:Image source="@Embed('/images/redWarning2.png')" />
 		
 		<s:Label text="You will be logged off in 60 seconds due to inactivity." styleName="darkGray12" />
 		
