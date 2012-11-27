@@ -27,6 +27,7 @@
 			import models.ChatSearch;
 			import models.FileUpload;
 			import models.UserModel;
+			import models.UserPreferences;
 			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
@@ -208,7 +209,7 @@
 			
 			private function position():void
 			{
-				var align:String = AppProperties.getInstance().controller.model.preferences.chatPopupDefaultPosition;
+				var align:String = UserPreferences(AppProperties.getInstance().controller.model.preferences).chatPopupDefaultPosition;
 				
 				if( align == ControlAlign.TOP_LEFT )
 				{

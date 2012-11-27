@@ -11,7 +11,19 @@
 			import enum.ControlAlign;
 			import enum.TimeFrequencyType;
 			
+			import models.ChatSearch;
+			import models.TeamAppointmentsModel;
 			import models.UserPreferences;
+			import models.modules.AppointmentsModel;
+			import models.modules.ExerciseModel;
+			import models.modules.ImmunizationsModel;
+			import models.modules.MedicalRecordsModel;
+			import models.modules.MedicationsModel;
+			import models.modules.MessagesModel;
+			import models.modules.NutritionModel;
+			import models.modules.VitalSignsModel;
+			import models.modules.advisories.PublicHealthAdvisoriesModel;
+			import models.modules.decisionsupport.DecisionSupportModel;
 			
 			import mx.collections.ArrayCollection;
 		]]>
@@ -96,13 +108,39 @@
 			{
 				if( event.newIndex == autoLockIntervalMinutes.dataProvider.length -1 )
 				{
-					var popup:PreferencesCustomAutoLockPopup = PopUpManager.createPopUp( AppProperties.getInstance().controller.application, PreferencesCustomAutoLockPopup ) as PreferencesCustomAutoLockPopup;
-					PopUpManager.centerPopUp( popup );
+					var customAutoLockPopup:PreferencesCustomAutoLockPopup = PopUpManager.createPopUp( AppProperties.getInstance().controller.application, PreferencesCustomAutoLockPopup ) as PreferencesCustomAutoLockPopup;
+					customAutoLockPopup.preferences = preferences;
+					customAutoLockPopup.addEventListener( CloseEvent.CLOSE, onCustomAutoLockIntervalClose );
+					
+					PopUpManager.centerPopUp( customAutoLockPopup );
 				}
 				else
 				{
 					preferences.autoLockIntervalMinutes = autoLockIntervalMinutes.selectedItem;
 				}
+			}
+			
+			private function onCustomAutoLockIntervalClose(event:CloseEvent):void
+			{
+				initAutoLockInterval();
+			}
+			
+			private function initAutoLockInterval():void
+			{
+				var intervals:ArrayCollection = new ArrayCollection( [5,10,30,45,60,'Other...'] );
+				
+				autoLockIntervalMinutes.dataProvider = intervals;
+				
+				var selectedIndex:int = intervals.getItemIndex( preferences.autoLockIntervalMinutes );
+				
+				if( selectedIndex == -1 )
+				{
+					intervals.addItemAt( preferences.autoLockIntervalMinutes + ' minutes (custom)',  0 );
+					
+					selectedIndex = 0;
+				}
+				
+				autoLockIntervalMinutes.selectedIndex = selectedIndex;
 			}
 			
 			private function onAddAppointmentConfirmeeClick():void
@@ -203,12 +241,12 @@
 						
 						<s:HGroup paddingLeft="5" gap="30">
 							<s:VGroup gap="5">
-								<s:Image source="/assets/images/preferences/viewModeButton.jpg" />
+								<s:Image source="assets/images/preferences/viewModeButton.jpg" />
 								<s:RadioButton groupName="viewModeGroup" label="Button view" click="preferences.viewMode = ViewModeType.BUTTON" selected="{preferences.viewMode == ViewModeType.BUTTON}" />
 							</s:VGroup>
 							
 							<s:VGroup gap="5">
-								<s:Image source="/assets/images/preferences/viewModeWidget.jpg" />
+								<s:Image source="assets/images/preferences/viewModeWidget.jpg" />
 								<s:RadioButton groupName="viewModeGroup" label="Widget view" click="preferences.viewMode = ViewModeType.WIDGET" selected="{preferences.viewMode == ViewModeType.WIDGET}"/>
 							</s:VGroup>
 						</s:HGroup>
@@ -221,17 +259,17 @@
 						<s:HGroup paddingLeft="5" gap="30">
 							
 							<s:VGroup gap="5">
-								<s:Image source="/assets/images/preferences/viewModeButton.jpg" />
+								<s:Image source="assets/images/preferences/viewModeButton.jpg" />
 								<s:RadioButton groupName="colorSchemeGroup" label="Black" click="preferences.colorScheme = ColorSchemeType.BLACK" selected="{preferences.colorScheme == ColorSchemeType.BLACK}" />
 							</s:VGroup>
 							
 							<s:VGroup gap="5">
-								<s:Image source="/assets/images/preferences/viewModeButton.jpg" />
+								<s:Image source="assets/images/preferences/viewModeButton.jpg" />
 								<s:RadioButton groupName="colorSchemeGroup" label="White" click="preferences.colorScheme = ColorSchemeType.WHITE" selected="{preferences.colorScheme == ColorSchemeType.WHITE}"/>
 							</s:VGroup>
 							
 							<s:VGroup gap="5">
-								<s:Image source="/assets/images/preferences/viewModeButton.jpg" />
+								<s:Image source="assets/images/preferences/viewModeButton.jpg" />
 								<s:RadioButton groupName="colorSchemeGroup" label="Color deficiency" click="preferences.colorScheme = ColorSchemeType.DEFICIENCY" selected="{preferences.colorScheme == ColorSchemeType.DEFICIENCY}"/>
 							</s:VGroup>
 							
@@ -247,7 +285,7 @@
 							<s:HGroup verticalAlign="middle" gap="1">
 								<s:RadioButton groupName="fontSizeGroup" click="preferences.fontSize = 0" selected="{preferences.fontSize == 0}" />
 								<s:Spacer width="2" />
-								<s:Image source="/assets/images/preferences/fontSizeDefault.jpg" />
+								<s:Image source="assets/images/preferences/fontSizeDefault.jpg" />
 								<s:Spacer width="7" />
 								<s:Label text="Defalut point size" styleName="darkGray12" />
 							</s:HGroup>
@@ -255,14 +293,14 @@
 							<s:HGroup verticalAlign="middle" gap="1">
 								<s:RadioButton groupName="fontSizeGroup" click="preferences.fontSize = 1" selected="{preferences.fontSize == 1}" />
 								<s:Spacer width="1" />
-								<s:Image source="/assets/images/preferences/fontSizePlusOne.jpg" />
+								<s:Image source="assets/images/preferences/fontSizePlusOne.jpg" />
 								<s:Spacer width="4" />
 								<s:Label text="+1 point size" styleName="darkGray12" />
 							</s:HGroup>
 							
 							<s:HGroup verticalAlign="middle" gap="1">
 								<s:RadioButton groupName="fontSizeGroup" click="preferences.fontSize = 2" selected="{preferences.fontSize == 2}" />
-								<s:Image source="/assets/images/preferences/fontSizePlusTwo.jpg" />
+								<s:Image source="assets/images/preferences/fontSizePlusTwo.jpg" />
 								<s:Spacer width="2" />
 								<s:Label text="+2 point size" styleName="darkGray12" />
 							</s:HGroup>
@@ -442,7 +480,7 @@
 									creationComplete="medicationsShowPatientsWhoHaventTakenMedicationFrequency.dataProvider = new ArrayCollection( TimeFrequencyType.ALL ); medicationsShowPatientsWhoHaventTakenMedicationFrequency.selectedIndex = medicationsShowPatientsWhoHaventTakenMedicationFrequency.dataProvider.getItemIndex(preferences.medicationsShowPatientsWhoHaventTakenMedicationFrequency)" />
 							</s:HGroup>
 							<s:CheckBox id="medicationsShowPatientAddedMedications" label="Display patient added medications (e.g., OTC drugs)." click="preferences.medicationsShowPatientAddedMedications = medicationsShowPatientAddedMedications.selected" selected="{preferences.medicationsShowPatientAddedMedications}" />
-							<s:CheckBox id="medicationsShowNewPrescriptionsBoolean" label="Display new prescriptions." click="preferences.medicationsShowNewPrescriptionsBoolean = medicationsShowNewPrescriptionsBoolean.selected" selected="{preferences.medicationsShowNewPrescriptionsBoolean}" />
+							<s:CheckBox id="medicationsShowNewPrescriptions" label="Display new prescriptions." click="preferences.medicationsShowNewPrescriptions = medicationsShowNewPrescriptions.selected" selected="{preferences.medicationsShowNewPrescriptions}" />
 						</s:VGroup>
 						
 						<!--	messages	-->
@@ -509,24 +547,25 @@
 						<s:DropDownList 
 							id="autoLockIntervalMinutes" width="127"
 							change="onSetAutoLockInterval(event)" labelFunction="getAutoLockLabel" 
-							creationComplete="autoLockIntervalMinutes.dataProvider = new ArrayCollection( [5,10,30,45,60,'Other...'] ); autoLockIntervalMinutes.selectedIndex = autoLockIntervalMinutes.dataProvider.getItemIndex(preferences.autoLockIntervalMinutes)" />
+							creationComplete="initAutoLockInterval()" />
 						
 						<s:Spacer height="10" />
 						
 						<s:Label text="Require password to enter the following modules:" styleName="darkGray12" />
-						<s:CheckBox id="appointmentsRequirePassword" label="Appointments" click="preferences.appointmentsRequirePassword = appointmentsRequirePassword.selected" selected="{preferences.appointmentsRequirePassword}" />
-						<s:CheckBox id="chatRequirePassword" label="Chat" click="preferences.chatRequirePassword = chatRequirePassword.selected" selected="{preferences.chatRequirePassword}" />
-						<s:CheckBox id="decisonSupportRequirePassword" label="Decision Support" click="preferences.decisonSupportRequirePassword = decisonSupportRequirePassword.selected" selected="{preferences.decisonSupportRequirePassword}" />
-						<s:CheckBox id="exerciseRequirePassword" label="Exercise" click="preferences.exerciseRequirePassword = exerciseRequirePassword.selected" selected="{preferences.exerciseRequirePassword}" />
-						<s:CheckBox id="immunizationRequirePassword" label="Immunization" click="preferences.immunizationRequirePassword = immunizationRequirePassword.selected" selected="{preferences.immunizationRequirePassword}" />
-						<s:CheckBox id="medicalRecordRequirePassword" label="Medical Records" click="preferences.medicalRecordRequirePassword = medicalRecordRequirePassword.selected" selected="{preferences.medicalRecordRequirePassword}" />
-						<s:CheckBox id="medicationsRequirePassword" label="Medications" click="preferences.medicationsRequirePassword = medicationsRequirePassword.selected" selected="{preferences.medicationsRequirePassword}" />
-						<s:CheckBox id="messagesRequirePassword" label="Messages" click="preferences.messagesRequirePassword = messagesRequirePassword.selected" selected="{preferences.messagesRequirePassword}" />
-						<s:CheckBox id="nutritionRequirePassword" label="Nutrition" click="preferences.nutritionRequirePassword = nutritionRequirePassword.selected" selected="{preferences.nutritionRequirePassword}" />
-						<s:CheckBox id="patientSearchRequirePassword" label="Patient Search" click="preferences.patientSearchRequirePassword = patientSearchRequirePassword.selected" selected="{preferences.patientSearchRequirePassword}" />
-						<s:CheckBox id="publicHealthAdvisoryRequirePassword" label="Public Health Advisory" click="preferences.publicHealthAdvisoryRequirePassword = publicHealthAdvisoryRequirePassword.selected" selected="{preferences.publicHealthAdvisoryRequirePassword}" />
-						<s:CheckBox id="teamProfileRequirePassword" label="Team Profile" click="preferences.teamProfileRequirePassword = teamProfileRequirePassword.selected" selected="{preferences.teamProfileRequirePassword}" />
-						<s:CheckBox id="vitalSignsRequirePassword" label="Vital Signs" click="preferences.vitalSignsRequirePassword = vitalSignsRequirePassword.selected" selected="{preferences.vitalSignsRequirePassword}" />
+						<s:CheckBox id="appointmentsRequirePassword" label="Appointments (patient)" click="preferences.setPasswordRequiredForModule( AppointmentsModel.ID, appointmentsRequirePassword.selected)" creationComplete="appointmentsRequirePassword.selected = preferences.getPasswordRequiredForModule(AppointmentsModel.ID)" />
+						<s:CheckBox id="chatRequirePassword" label="Chat" click="preferences.setPasswordRequiredForModule( ChatSearch.ID, chatRequirePassword.selected )" creationComplete="chatRequirePassword.selected = preferences.getPasswordRequiredForModule(ChatSearch.ID)" />
+						<s:CheckBox id="decisonSupportRequirePassword" label="Decision Support" click="preferences.setPasswordRequiredForModule( DecisionSupportModel.ID, decisonSupportRequirePassword.selected)" creationComplete="decisonSupportRequirePassword.selected = preferences.getPasswordRequiredForModule(DecisionSupportModel.ID)" />
+						<s:CheckBox id="exerciseRequirePassword" label="Exercise" click="preferences.setPasswordRequiredForModule( ExerciseModel.ID, exerciseRequirePassword.selected)" creationComplete="exerciseRequirePassword.selected = preferences.getPasswordRequiredForModule(ExerciseModel.ID)" />
+						<s:CheckBox id="immunizationRequirePassword" label="Immunization" click="preferences.setPasswordRequiredForModule( ImmunizationsModel.ID, immunizationRequirePassword.selected)" creationComplete="immunizationRequirePassword.selected = preferences.getPasswordRequiredForModule(ImmunizationsModel.ID)" />
+						<s:CheckBox id="medicalRecordRequirePassword" label="Medical Records" click="preferences.setPasswordRequiredForModule( MedicalRecordsModel.ID, medicalRecordRequirePassword.selected)" creationComplete="medicalRecordRequirePassword.selected = preferences.getPasswordRequiredForModule(MedicalRecordsModel.ID)" />
+						<s:CheckBox id="medicationsRequirePassword" label="Medications" click="preferences.setPasswordRequiredForModule( MedicationsModel.ID, medicationsRequirePassword.selected)" creationComplete="medicationsRequirePassword.selected = preferences.getPasswordRequiredForModule(MedicationsModel.ID)" />
+						<s:CheckBox id="messagesRequirePassword" label="Messages" click="preferences.setPasswordRequiredForModule( MessagesModel.ID, messagesRequirePassword.selected)" creationComplete="messagesRequirePassword.selected = preferences.getPasswordRequiredForModule(MessagesModel.ID)" />
+						<s:CheckBox id="nutritionRequirePassword" label="Nutrition" click="preferences.setPasswordRequiredForModule( NutritionModel.ID, nutritionRequirePassword.selected)" creationComplete="nutritionRequirePassword.selected = preferences.getPasswordRequiredForModule(NutritionModel.ID)" />
+						<s:CheckBox id="patientSearchRequirePassword" label="Patient Search" click="preferences.setPasswordRequiredForModule( 'patients', patientSearchRequirePassword.selected)" creationComplete="patientSearchRequirePassword.selected = preferences.getPasswordRequiredForModule('patients')" />
+						<s:CheckBox id="publicHealthAdvisoryRequirePassword" label="Public Health Advisory" click="preferences.setPasswordRequiredForModule( PublicHealthAdvisoriesModel.ID, publicHealthAdvisoryRequirePassword.selected)" creationComplete="publicHealthAdvisoryRequirePassword.selected = preferences.getPasswordRequiredForModule(PublicHealthAdvisoriesModel.ID)" />
+						<s:CheckBox id="teamAppointmentsRequirePassword" label="Team Appointments" click="preferences.setPasswordRequiredForModule( TeamAppointmentsModel.ID, teamAppointmentsRequirePassword.selected)" creationComplete="teamAppointmentsRequirePassword.selected = preferences.getPasswordRequiredForModule(TeamAppointmentsModel.ID)" />
+						<s:CheckBox id="teamProfileRequirePassword" label="Team Profile" click="preferences.setPasswordRequiredForModule( 'teamprofile', teamProfileRequirePassword.selected)" creationComplete="teamProfileRequirePassword.selected = preferences.getPasswordRequiredForModule('teamprofile')" />
+						<s:CheckBox id="vitalSignsRequirePassword" label="Vital Signs" click="preferences.setPasswordRequiredForModule( VitalSignsModel.ID, vitalSignsRequirePassword.selected)" creationComplete="vitalSignsRequirePassword.selected = preferences.getPasswordRequiredForModule(VitalSignsModel.ID)" />
 				
 					</s:VGroup>
 					
@@ -583,22 +622,22 @@
 							</s:layout>
 							
 							<s:VGroup>
-								<s:Image source="/assets/images/preferences/chatTopLeft.jpg" />
+								<s:Image source="assets/images/preferences/chatTopLeft.jpg" />
 								<s:RadioButton groupName="chatPositionGroup" label="Top left" click="preferences.chatPopupDefaultPosition = ControlAlign.TOP_LEFT" selected="{preferences.chatPopupDefaultPosition == ControlAlign.TOP_LEFT}" />
 							</s:VGroup>
 							
 							<s:VGroup>
-								<s:Image source="/assets/images/preferences/chatTopRight.jpg" />
+								<s:Image source="assets/images/preferences/chatTopRight.jpg" />
 								<s:RadioButton groupName="chatPositionGroup" label="Top Right" click="preferences.chatPopupDefaultPosition = ControlAlign.TOP_RIGHT" selected="{preferences.chatPopupDefaultPosition == ControlAlign.TOP_RIGHT}" />
 							</s:VGroup>
 							
 							<s:VGroup>
-								<s:Image source="/assets/images/preferences/chatBottomLeft.jpg" />
+								<s:Image source="assets/images/preferences/chatBottomLeft.jpg" />
 								<s:RadioButton groupName="chatPositionGroup" label="Bottom left" click="preferences.chatPopupDefaultPosition = ControlAlign.BOTTOM_LEFT" selected="{preferences.chatPopupDefaultPosition == ControlAlign.BOTTOM_LEFT}" />
 							</s:VGroup>
 							
 							<s:VGroup>
-								<s:Image source="/assets/images/preferences/chatBottomRight.jpg" />
+								<s:Image source="assets/images/preferences/chatBottomRight.jpg" />
 								<s:RadioButton groupName="chatPositionGroup" label="Bottom right" click="preferences.chatPopupDefaultPosition = ControlAlign.BOTTOM_RIGHT" selected="{preferences.chatPopupDefaultPosition == ControlAlign.BOTTOM_RIGHT}" />
 							</s:VGroup>
 							

@@ -141,6 +141,8 @@
 						}
 						catch(e:Error)
 						{
+							CursorManager.removeBusyCursor();
+							
 							showModules = false;
 						}
 					}
@@ -206,9 +208,7 @@
 			
 			private function onWidgetHeaderClick(event:EnhancedTitleWindowEvent):void
 			{
-				CursorManager.setBusyCursor();
-				
-				showModule( EnhancedTitleWindow(event.currentTarget).module );
+				dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, EnhancedTitleWindow(event.currentTarget).module) );
 			}
 			
 			private function onWidgetClose(event:CloseEvent):void
@@ -242,6 +242,8 @@
 			
 			public function showModule( moduleID:String ):void
 			{
+				CursorManager.setBusyCursor();
+				
 				currentState = STATE_MODULE;
 				
 				activeModuleID = moduleID;
@@ -591,7 +593,7 @@
 					</s:HGroup>
 					
 					<s:HGroup id="recentActivitiesTrigger">
-						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_RECENT_ACTIVITIES ) : null" buttonMode="{currentState==STATE_MODULE}">
+						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_RECENT_ACTIVITIES ) ) : null" buttonMode="{currentState==STATE_MODULE}">
 							<s:Image source="@Embed('/images/widgetLibProviderRecentActivities.png')" />
 							<s:Label text="{'Recent\nActivities'}" fontSize="11" color="0xFFFFFF" textAlign="center" />
 						</s:VGroup>
@@ -602,7 +604,7 @@
 					</s:HGroup>
 					
 					<s:HGroup paddingLeft="-6" paddingRight="-6" id="appointmentsTrigger">
-						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_APPOINTMENTS ) : null" buttonMode="{currentState==STATE_MODULE}">
+						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_APPOINTMENTS ) ) : null" buttonMode="{currentState==STATE_MODULE}">
 							<s:Image source="@Embed('/images/widgetLibProviderAppointments.png')" />
 							<s:Label text="Appointments" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
@@ -613,7 +615,7 @@
 					</s:HGroup>
 					
 					<s:HGroup paddingLeft="-7" paddingRight="-7" id="immunizationsTrigger">
-						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_IMMUNIZATIONS ) : null" buttonMode="{currentState==STATE_MODULE}">
+						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_IMMUNIZATIONS ) ) : null" buttonMode="{currentState==STATE_MODULE}">
 							<s:Image source="@Embed('/images/widgetLibProviderImmunizations.png')" />
 							<s:Label text="Immunizations" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
@@ -624,7 +626,7 @@
 					</s:HGroup>
 					
 					<s:HGroup id="medicalRecordsTrigger">
-						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_MEDICAL_RECORDS ) : null" buttonMode="{currentState==STATE_MODULE}">
+						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_MEDICAL_RECORDS ) ) : null" buttonMode="{currentState==STATE_MODULE}">
 							<s:Image source="@Embed('/images/widgetLibProviderMedicalRecords.png')" />
 							<s:Label text="{'Medical\nRecords'}" fontSize="11" color="0xFFFFFF" textAlign="center" />
 						</s:VGroup>
@@ -646,7 +648,7 @@
 					</s:HGroup>
 					
 					<s:HGroup paddingRight="-1" id="medicationsTrigger">
-						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_MEDICATIONS ) : null" buttonMode="{currentState==STATE_MODULE}">
+						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_MEDICATIONS ) ) : null" buttonMode="{currentState==STATE_MODULE}">
 							<s:Image source="@Embed('/images/widgetLibProviderMedications.png')" />
 							<s:Label text="Medications" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
@@ -658,7 +660,7 @@
 					
 					<s:HGroup id="nutritionTrigger">
 						<s:VGroup horizontalAlign="center" gap="4">
-							<s:Image source="@Embed('/images/widgetLibProviderNutrition.png')" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_NUTRITION ) : null" buttonMode="{currentState==STATE_MODULE}"/>
+							<s:Image source="@Embed('/images/widgetLibProviderNutrition.png')" click="currentState==STATE_MODULE ? dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_NUTRITION ) ) : null" buttonMode="{currentState==STATE_MODULE}"/>
 							<s:Label text="Nutrition" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_NUTRITION )" buttonMode="true">
@@ -669,7 +671,7 @@
 					
 					<s:HGroup id="exerciseTrigger">
 						<s:VGroup horizontalAlign="center" gap="4">
-							<s:Image source="@Embed('/images/widgetLibProviderExercise.png')" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_EXERCISE ) : null" buttonMode="{currentState==STATE_MODULE}"/>
+							<s:Image source="@Embed('/images/widgetLibProviderExercise.png')" click="currentState==STATE_MODULE ? dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_EXERCISE ) ) : null" buttonMode="{currentState==STATE_MODULE}"/>
 							<s:Label text="Exercise" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
 						<s:VGroup horizontalAlign="center" gap="4" click="showWidget( WIDGET_EXERCISE )" buttonMode="true">
@@ -679,7 +681,7 @@
 					</s:HGroup>
 					
 					<s:HGroup id="vitalSignsTrigger">
-						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( Constants.MODULE_EXERCISE ) : null" buttonMode="{currentState==STATE_MODULE}">
+						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_EXERCISE ) ) : null" buttonMode="{currentState==STATE_MODULE}">
 							<s:Image source="@Embed('/images/widgetLibProviderVitalSigns.png')" />
 							<s:Label text="Vital Signs" fontSize="11" color="0xFFFFFF" />
 						</s:VGroup>
@@ -689,19 +691,8 @@
 						</s:VGroup>
 					</s:HGroup>
 					
-					<!--<s:HGroup>
-						<s:VGroup visible="{widgetEducationalResourcesOpen}" includeInLayout="{widgetEducationalResourcesOpen}" horizontalAlign="center" gap="4">
-							<s:Image source="@Embed('/images/widgetLibProviderEducationalResources.png')" />
-							<s:Label text="{'Educational\nResources'}" textAlign="center" lineHeight="11" fontSize="11" color="0xFFFFFF" />
-						</s:VGroup>
-						<s:VGroup visible="{!widgetEducationalResourcesOpen}" includeInLayout="{!widgetEducationalResourcesOpen}" horizontalAlign="center" gap="4" click="{widgetEducationalResourcesOpen = true}" buttonMode="true">
-							<mx:Button upSkin="@Embed('/images/widgetLibProviderEducationalResources.png')" overSkin="@Embed('/images/widgetLibProviderEducationalResourcesOver.png')" downSkin="@Embed('/images/widgetLibProviderEducationalResourcesDown.png')" />
-							<s:Label text="{'Educational\nResources'}" textAlign="center" lineHeight="11" fontSize="11" color="0x666666" fontStyle="italic" />
-						</s:VGroup>
-					</s:HGroup>-->
-					
 					<s:HGroup id="decisionSupportTrigger">
-						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? showModule( ProviderConstants.MODULE_DECISION_SUPPORT ) : null" buttonMode="{currentState==STATE_MODULE}">
+						<s:VGroup horizontalAlign="center" gap="4" click="currentState==STATE_MODULE ? dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, ProviderConstants.MODULE_DECISION_SUPPORT ) ) : null" buttonMode="{currentState==STATE_MODULE}">
 							<s:Image source="@Embed('/images/widgetLibProviderDecisionSupport.png')" />
 							<s:Label text="{'Decision\nSupport'}" fontSize="11" color="0xFFFFFF" textAlign="center" />
 						</s:VGroup>

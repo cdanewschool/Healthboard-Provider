@@ -34,6 +34,7 @@ package controllers
 	import models.ChatSearch;
 	import models.Message;
 	import models.PatientModel;
+	import models.Preferences;
 	import models.ProviderApplicationModel;
 	import models.ProviderModel;
 	import models.TeamAppointmentsModel;
@@ -109,7 +110,6 @@ package controllers
 			var lastSynced:Date = new Date( model.today.fullYear, model.today.month, model.today.date );;
 			lastSynced.time -= DateUtil.DAY * Math.random();
 			
-			model.preferences = new UserPreferences();
 			model.settings = new ArrayCollection
 				( 
 					[ 
@@ -134,11 +134,39 @@ package controllers
 			loadStyles();
 		}
 		
-		override public function set model(value:ApplicationModel):void
+		override protected function loadPreferences():void
 		{
-			super.model = value;
+			if( persistentData 
+				&& persistentData.data.hasOwnProperty('preferences') )
+			{
+				model.preferences = UserPreferences.fromObj( persistentData.data['preferences'] );
+			}
+			else
+			{
+				model.preferences = new UserPreferences();
+				savePreferences( model.preferences );
+			}
 			
 			loadStyles();
+		}
+		
+		override public function savePreferences( preferences:Preferences ):void
+		{
+			super.savePreferences(preferences);
+			
+			persistentData.data['preferences'] = preferences;
+			persistentData.flush();
+		}
+		
+		override protected function processPreferences( preferences:Preferences ):void
+		{
+			super.processPreferences( preferences );
+			
+			if( preferences.viewMode != model.preferences.viewMode )
+			{
+				model.viewMode = preferences.viewMode;
+				application.dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, model.viewMode) )
+			}
 		}
 		
 		override protected function onAuthenticated(event:AuthenticationEvent):void
@@ -162,7 +190,9 @@ package controllers
 			}
 			
 			authenticationPopup = PopUpManager.createPopUp( application, VerifyCredentialsPopup ) as VerifyCredentialsPopup;
-			authenticationPopup.onAuthenticatedCallback = event.onAuthenticatedCallback;
+			authenticationPopup.callback = event.onAuthenticatedCallback;
+			authenticationPopup.callbackArgs = event.onAuthenticatedCallbackArgs;
+			
 			authenticationPopup.user = user;
 			authenticationPopup.addEventListener( AuthenticationEvent.SUCCESS, onAuthenticationCheckSuccess );
 			PopUpManager.centerPopUp( authenticationPopup );
@@ -171,9 +201,9 @@ package controllers
 		protected function onAuthenticationCheckSuccess( event:AuthenticationEvent ):void
 		{
 			if( authenticationPopup
-				&& authenticationPopup.onAuthenticatedCallback != null )
+				&& authenticationPopup.callback != null )
 			{
-				authenticationPopup.onAuthenticatedCallback();
+				authenticationPopup.callback( authenticationPopup.callbackArgs );
 			}
 		}
 		
@@ -196,7 +226,7 @@ package controllers
 			if( item.id == "preferences" )
 			{
 				var popup:PreferencesPopup = PopUpManager.createPopUp( application, PreferencesPopup ) as PreferencesPopup;
-				popup.preferences = model.preferences.clone();
+				popup.preferences = model.preferences.clone() as UserPreferences;
 				PopUpManager.centerPopUp( popup );
 			}
 			else if( item.id == "sync" )
@@ -385,8 +415,6 @@ package controllers
 		
 		override protected function onSetState( event:ApplicationEvent ):void
 		{
-			super.onSetState( event );
-			
 			var child:DisplayObject;
 			
 			if( event.message )
@@ -395,9 +423,35 @@ package controllers
 				if( event.message.recipientType ) MessagesModel(messagesController.model).pendingRecipientType = event.message.recipientType;
 			}
 			
+			var modPrefix:String = 'mod';
+			
+			if( event.data != null && event.data.indexOf( modPrefix ) > -1 )
+			{
+				var id:String = event.data.substr( event.data.indexOf( modPrefix ) + modPrefix.length ).toLowerCase();
+				
+				if( model.preferences.getPasswordRequiredForModule( id ) )
+				{
+					var evt:AuthenticationEvent = new AuthenticationEvent( AuthenticationEvent.PROMPT, true );
+					evt.onAuthenticatedCallback = setState;
+					evt.onAuthenticatedCallbackArgs = event.data;
+					application.dispatchEvent( evt );
+					
+					return;
+				}
+			}
+			
+			super.onSetState(event);
+		}
+		
+		override protected function setState(state:String):void
+		{
+			super.setState(state);
+			
+			var child:DisplayObject;
+			
 			//	show relevant application module if valid
 			if( visualDashboardProvider(application).viewStackProviderModules
-				&& (child = visualDashboardProvider(application).viewStackProviderModules.getChildByName( event.data ) ) != null )
+				&& (child = visualDashboardProvider(application).viewStackProviderModules.getChildByName( state ) ) != null )
 			{
 				visualDashboardProvider(application).viewStackProviderModules.selectedChild = child as INavigatorContent;
 				
@@ -406,11 +460,11 @@ package controllers
 					visualDashboardProvider(application).viewStackMain.selectedIndex = 0;
 				}
 			}
+			
 			//	show relevant patient module if valid
-			else if( visualDashboardProvider(application).viewStackMain.selectedChild is ViewPatient 
-					&& ( (visualDashboardProvider(application).viewStackMain.selectedChild as ViewPatient).moduleContainer.getChildByName( event.data) != null ) )
+			else if( visualDashboardProvider(application).viewStackMain.selectedChild is ViewPatient )
 			{
-				(visualDashboardProvider(application).viewStackMain.selectedChild as ViewPatient).showModule( event.data );
+				(visualDashboardProvider(application).viewStackMain.selectedChild as ViewPatient).showModule( state );
 			}
 		}
 		
@@ -637,6 +691,11 @@ package controllers
 			}
 			
 			return super.loadData( id );
+		}
+		
+		override protected function get id():String
+		{
+			return 'visualDashboardProvider';
 		}
 	}
 }

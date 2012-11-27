@@ -21,6 +21,7 @@
 			
 			import models.ChatMessage;
 			import models.FileUpload;
+			import models.UserPreferences;
 			
 			import mx.collections.ArrayCollection;
 			import mx.controls.LinkButton;
@@ -48,7 +49,10 @@
 				var time:Date = ChatMessage(data).time;
 				var attachments:ArrayCollection = ChatMessage(data).attachments;
 				
-				var messageStart:String = "[<font color='0x999999'>" + (time.hours<10?'0'+time.hours:time.hours) + ':' + (time.minutes<10?'0'+time.minutes:time.minutes) + ':' + (time.seconds<10?'0'+time.seconds:time.seconds) + "</font>]";
+				var messageStart:String = UserPreferences(AppProperties.getInstance().controller.model.preferences).chatEnableTimeStamp ?
+											"[<font color='0x999999'>" + (time.hours<10?'0'+time.hours:time.hours) + ':' + (time.minutes<10?'0'+time.minutes:time.minutes) + ':' + (time.seconds<10?'0'+time.seconds:time.seconds) + "</font>]" :
+											null;
+				
 				var messageFrom:String =  ChatMessage(data).user.id == ProviderConstants.USER_ID ? "Me" : ChatMessage(data).user.fullName;
 				var messageBody:String = ChatMessage(data).text;
 				

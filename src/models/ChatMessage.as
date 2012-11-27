@@ -21,7 +21,15 @@ package models
 		
 		public function toString():String
 		{
-			var header:String = "[<font color='#666666'>" + DateUtil.formatTime( time.time ) + "</font>] " + (user.id == ProviderConstants.USER_ID ? "Me" : user.fullName);
+			var header:String = "";
+			
+			if( UserPreferences(AppProperties.getInstance().controller.model.preferences).chatEnableTimeStamp )
+			{
+				header += "[<font color='#666666'>" + DateUtil.formatTime( time.time ) + "</font>] ";
+			}
+			
+			header += (user.id == ProviderConstants.USER_ID ? "Me" : user.fullName);
+			
 			var message:String = text;
 			var files:Array = [];
 			

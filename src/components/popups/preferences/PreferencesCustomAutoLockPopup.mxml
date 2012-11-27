@@ -10,28 +10,31 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import controllers.MainController;
+			
 			import enum.TimeFrequencyType;
 			
 			import models.UserPreferences;
 			
 			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
 			
-			import models.ApplicationModel;
-			import controllers.MainController;
-			
 			private var controller:MainController = AppProperties.getInstance().controller as MainController;
-			[Bindable] private var model:ApplicationModel = controller.model;
+			
+			[Bindable] public var preferences:UserPreferences;
 			
 			private function onSaveClick():void
 			{
-				model.preferences.autoLockIntervalMinutes = customAutoLockInterval.value
-					
+				preferences.autoLockIntervalMinutes = customAutoLockInterval.value
+				
 				close();
 			}
 			
 			private function close():void
 			{
+				dispatchEvent( new CloseEvent( CloseEvent.CLOSE ) );
+				
 				PopUpManager.removePopUp(this);
 			}
 			
@@ -61,8 +64,8 @@
 			<s:Label text="Time:" styleName="black12" />
 			<s:NumericStepper 
 				id="customAutoLockInterval" 
-				minimum="0" maximum="120" stepSize="5" 
-				value="{model.preferences.autoLockIntervalMinutes}" />
+				minimum="1" maximum="120" stepSize="1" 
+				value="{preferences.autoLockIntervalMinutes}" />
 			<s:Label text="minutes" styleName="black12" />
 		</s:HGroup>
 		

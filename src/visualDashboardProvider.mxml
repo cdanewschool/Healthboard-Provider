@@ -145,7 +145,7 @@
 										
 										<widgets:ChatWidget id="widgetChat" width="305" title="Chat" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" />
 										
-										<widgets:TeamWidget id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" model="{ProviderApplicationModel(controller.model).providersModel}" module="modTeam" />
+										<widgets:TeamWidget id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" model="{ProviderApplicationModel(controller.model).providersModel}" module="modTeamProfile" />
 									
 										<widgets:PublicHealthAdvisoryWidget id="widgetAdvisory" width="305" title="Public Health Advisory ({widgetAdvisory.model.activeAdvisories.length})" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" module="modPublicHealthAdvisory" />
 										
@@ -272,7 +272,7 @@
 											
 										</enhancedtitlewindow:EnhancedTitleWindow>
 										
-										<widgets:AppointmentsWidget id="widgetAppointments" module="modAppointments" width="633" headerClickable="false" collapsible="true"/>
+										<widgets:AppointmentsWidget id="widgetTeamAppointments" module="modTeamAppointments" width="633" headerClickable="false" collapsible="true"/>
 
 									</s:VGroup>
 									
@@ -650,10 +650,10 @@
 							<modules1:MessagesModule id="modMessages" currentState="provider" />
 							
 							<!--	team profile	-->
-							<modules:TeamModule id="modTeam" model="{ProviderApplicationModel(controller.model).providersModel}" />
+							<modules:TeamModule id="modTeamProfile" model="{ProviderApplicationModel(controller.model).providersModel}" />
 							
 							<!--	appointments	-->
-							<modules:AppointmentModule id="modAppointments" />
+							<modules:AppointmentModule id="modTeamAppointments" />
 							
 							<!--	public health advisory	-->
 							<modules:PublicHealthAdvisoryModule id="modPublicHealthAdvisory" />

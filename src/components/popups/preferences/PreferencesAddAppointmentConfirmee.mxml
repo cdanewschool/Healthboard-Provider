@@ -13,6 +13,7 @@
 			import controllers.MainController;
 			
 			import models.ApplicationModel;
+			import models.UserPreferences;
 			
 			import mx.controls.Alert;
 			import mx.events.ValidationResultEvent;
@@ -32,7 +33,7 @@
 				
 				if( result.type != ValidationResultEvent.VALID ) error = "Please enter a valid email";
 				
-				if( model.preferences.appointmentConfirmees.getItemIndex( confirmee ) > -1 ) error = "User already exists";
+				if( UserPreferences(model.preferences).appointmentConfirmees.getItemIndex( confirmee ) > -1 ) error = "User already exists";
 				
 				if( error )
 				{
@@ -41,7 +42,7 @@
 					return;
 				}
 				
-				model.preferences.appointmentConfirmees.addItem( confirmee );
+				UserPreferences(model.preferences).appointmentConfirmees.addItem( confirmee );
 					
 				close();
 			}
