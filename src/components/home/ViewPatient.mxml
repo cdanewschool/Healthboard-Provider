@@ -8,7 +8,7 @@
 	xmlns:radarchart="fr.kapit.radarchart.*"
 	xmlns:patient="components.widgets.patient.*" 
 	xmlns:modules="modules.*"
-	xmlns:modules1="components.modules.*"
+	xmlns:modules1="components.modules.*" 
 	creationComplete="init();">
 	
 	<s:layout>
@@ -24,6 +24,7 @@
 			import controllers.Controller;
 			import controllers.MainController;
 			
+			import events.ApplicationEvent;
 			import events.EnhancedTitleWindowEvent;
 			
 			import external.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
@@ -37,8 +38,10 @@
 			import mx.core.IVisualElement;
 			import mx.core.UIComponent;
 			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
 			import mx.events.ItemClickEvent;
 			import mx.events.ListEvent;
+			import mx.managers.CursorManager;
 			import mx.rpc.events.ResultEvent;
 			
 			import spark.components.Group;
@@ -120,12 +123,25 @@
 					
 					if( currentState == STATE_MODULE )
 					{
-						var module:INavigatorContent;
+						showModules = true;
 						
-						if( (module = moduleContainer.getChildByName( activeModuleID ) as INavigatorContent ) != null )
+						if( !moduleContainer.processedDescriptors )
 						{
+							moduleContainer.createDeferredContent();
+						}
+						else
+						{
+							CursorManager.removeBusyCursor();
+						}
+						
+						try
+						{
+							var module:INavigatorContent = moduleContainer.getChildByName( activeModuleID ) as INavigatorContent;
 							moduleContainer.selectedChild = module;
-							showModules = true;
+						}
+						catch(e:Error)
+						{
+							showModules = false;
 						}
 					}
 					
@@ -142,7 +158,7 @@
 				}
 				
 				label = patient.fullName;
-				
+
 				alertsWidget.activeModule = activeModuleID;
 				
 				EnhancedTitleWindow(nutritionWidget).subtitle = DateFormatters.dateFormatterDay.format( new Date() );
@@ -190,6 +206,8 @@
 			
 			private function onWidgetHeaderClick(event:EnhancedTitleWindowEvent):void
 			{
+				CursorManager.setBusyCursor();
+				
 				showModule( EnhancedTitleWindow(event.currentTarget).module );
 			}
 			
@@ -307,6 +325,14 @@
 				}
 			}
 			
+			private function onSetState(event:ApplicationEvent):void
+			{
+				if( event.target is EnhancedTitleWindow )
+				{
+					event.stopImmediatePropagation();
+				}
+			}
+			
 			private function init():void 
 			{
 				stage.addEventListener( Event.RESIZE, onResize );
@@ -324,6 +350,8 @@
 				{
 					alertsWidget.alerts = controller.model.patientAlerts;
 				}
+				
+				widgetContainer.addEventListener( ApplicationEvent.SET_STATE, onSetState );
 			}
 		]]>
 	</fx:Script>
@@ -498,7 +526,7 @@
 				</s:VGroup>
 			</s:HGroup>
 			
-			<mx:ViewStack id="moduleContainer" visible="false" width="975" resizeToContent="true">
+			<mx:ViewStack id="moduleContainer" visible="false" width="975" resizeToContent="true" creationPolicy="none" creationComplete="CursorManager.removeBusyCursor()">
 				
 				<s:NavigatorContent id="modAppointments">
 					<modules:AppointmentsModule width="975" paddingTop="10" showHeader="false" currentState="simple" />
@@ -686,6 +714,9 @@
 				</s:BorderContainer>
 				
 			</s:VGroup>
+			
 		</s:VGroup>
+		
 	</s:Scroller>
+	
 </s:NavigatorContent>
