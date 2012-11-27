@@ -581,7 +581,7 @@
 						
 						<!--	font size	-->
 						<s:BorderContainer width="100%" height="26" backgroundFill="{headerFill}" borderAlpha="0">
-							<s:Label text="Font Size" paddingLeft="7" paddingTop="7" verticalAlign="middle" styleName="darkGray12Italic" />
+							<s:Label text="Appointments" paddingLeft="7" paddingTop="7" verticalAlign="middle" styleName="darkGray12Italic" />
 						</s:BorderContainer>
 						
 						<s:VGroup paddingLeft="5">
@@ -666,7 +666,7 @@
 						
 						<s:Label text="Vacation responder" styleName="darkGray12" />
 						
-						<s:HGroup>
+						<s:HGroup gap="40">
 							<s:RadioButton label="Off" groupName="messagesAutoResponderGroup" selected="{!preferences.autoResponderActive}" click="preferences.autoResponderActive = false" />
 							<s:RadioButton label="On" groupName="messagesAutoResponderGroup" selected="{preferences.autoResponderActive}" click="preferences.autoResponderActive = true" />
 						</s:HGroup>
@@ -687,17 +687,17 @@
 						
 						<s:HGroup enabled="{preferences.autoResponderActive}">
 							<s:Label text="Message" styleName="black12" />
-							<s:TextArea id="autoResponse" width="381" height="104" change="{preferences.autoResponse = autoResponse.text}" />
+							<s:TextArea id="autoResponse" width="381" height="104" text="{preferences.autoResponse}" change="{preferences.autoResponse = autoResponse.text}" />
 						</s:HGroup>
 						
 						<s:Label text="Signature" styleName="darkGray12" />
 						
-						<s:HGroup>
+						<s:HGroup gap="40">
 							<s:RadioButton label="Off" groupName="messagesSignatureGroup" selected="{!preferences.signatureActive}" click="preferences.signatureActive = false" />
 							<s:RadioButton label="On" groupName="messagesSignatureGroup" selected="{preferences.signatureActive}" click="preferences.signatureActive = true" />
 						</s:HGroup>
 						
-						<s:TextArea id="signature" width="430" height="104" enabled="{preferences.signatureActive}" change="{preferences.signature = signature.text}" />
+						<s:TextArea id="signature" width="430" height="104" text="{preferences.signature}" enabled="{preferences.signatureActive}" change="{preferences.signature = signature.text}" />
 						
 					</s:VGroup>
 					

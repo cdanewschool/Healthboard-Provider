@@ -147,7 +147,7 @@ package controllers
 				savePreferences( model.preferences );
 			}
 			
-			loadStyles();
+			processPreferences();
 		}
 		
 		override public function savePreferences( preferences:Preferences ):void
@@ -158,14 +158,17 @@ package controllers
 			persistentData.flush();
 		}
 		
-		override protected function processPreferences( preferences:Preferences ):void
+		override protected function processPreferences( preferences:Preferences = null ):void
 		{
+			if( preferences == null ) preferences  = model.preferences;
+			
 			super.processPreferences( preferences );
 			
-			if( preferences.viewMode != model.preferences.viewMode )
+			if( preferences 
+				&& preferences.viewMode != model.preferences.viewMode )
 			{
 				model.viewMode = preferences.viewMode;
-				application.dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, model.viewMode) )
+				application.dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, model.viewMode) );
 			}
 		}
 		
@@ -599,7 +602,11 @@ package controllers
 				provider.id = providers.length;
 				providers.addItem( provider );
 				
-				if( provider.id == ProviderConstants.USER_ID ) user = provider;
+				if( provider.id == ProviderConstants.USER_ID ) 
+				{
+					provider.available = UserPreferences(model.preferences).chatShowAsAvaiableOnLogin ? "A" : "U";	//	TODO: change to boolean
+					user = provider;
+				}
 				
 				var team:Object = {label:"Team " + provider.team, value: provider.team};
 				if( teams[provider.team] == null ) teams[provider.team] = team;
