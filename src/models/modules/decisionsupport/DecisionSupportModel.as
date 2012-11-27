@@ -7,6 +7,8 @@ package models.modules.decisionsupport
 	[Bindable]
 	public class DecisionSupportModel extends ModuleModel
 	{
+		public static const ID:String = "decisionsupport";
+		
 		public var minDate:Date;
 		public var maxDate:Date;
 		

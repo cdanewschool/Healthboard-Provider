@@ -12,6 +12,8 @@ package models
 	[Bindable]
 	public class TeamAppointmentsModel extends ModuleModel
 	{
+		public static const ID:String = "teamappointments";
+		
 		private var _appointments:ArrayCollection;
 		
 		public var selectedProviders:ArrayCollection;

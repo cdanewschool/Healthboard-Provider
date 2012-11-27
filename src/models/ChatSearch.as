@@ -14,6 +14,8 @@ package models
 	[Bindable] 
 	public class ChatSearch extends ModuleModel
 	{
+		public static const ID:String = "chat";
+		
 		public static const STATE_DEFAULT:String = "default";
 		public static const STATE_CONNECTED:String = "connected";
 		public static const STATE_CONNECTING:String = "connecting";
