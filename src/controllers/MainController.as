@@ -134,6 +134,13 @@ package controllers
 			loadStyles();
 		}
 		
+		override protected function showPreferences():void
+		{
+			var popup:PreferencesPopup = PopUpManager.createPopUp( application, PreferencesPopup ) as PreferencesPopup;
+			popup.preferences = model.preferences.clone() as UserPreferences;
+			PopUpManager.centerPopUp( popup );
+		}
+		
 		override protected function loadPreferences():void
 		{
 			if( persistentData 
@@ -206,7 +213,9 @@ package controllers
 			if( authenticationPopup
 				&& authenticationPopup.callback != null )
 			{
-				authenticationPopup.callback( authenticationPopup.callbackArgs );
+				authenticationPopup.callbackArgs ? 
+					authenticationPopup.callback( authenticationPopup.callbackArgs ) :
+					authenticationPopup.callback();
 			}
 		}
 		
@@ -228,9 +237,9 @@ package controllers
 			
 			if( item.id == "preferences" )
 			{
-				var popup:PreferencesPopup = PopUpManager.createPopUp( application, PreferencesPopup ) as PreferencesPopup;
-				popup.preferences = model.preferences.clone() as UserPreferences;
-				PopUpManager.centerPopUp( popup );
+				var evt:AuthenticationEvent = new AuthenticationEvent( AuthenticationEvent.PROMPT, true );
+				evt.onAuthenticatedCallback = showPreferences;
+				application.dispatchEvent( evt );
 			}
 			else if( item.id == "sync" )
 			{
