@@ -548,7 +548,7 @@
 											
 										</esri:extent>
 										
-										<esri:ArcGISTiledMapServiceLayer url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer"/>
+										<esri:OpenStreetMapLayer />
 										
 										<esri:GraphicsLayer id="patientsAffectedLayer" symbol="{affectedPatientMarker}"/>
 										<esri:GraphicsLayer id="hospitalizationsLayer" symbol="{hospitalizationMarker}"/>
