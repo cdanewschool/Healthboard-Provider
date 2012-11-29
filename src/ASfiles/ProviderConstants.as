@@ -9,6 +9,7 @@ package ASfiles
 		
 		public static const MODULE_DECISION_SUPPORT:String = "modDecisionSupport";
 		public static const MODULE_PUBLIC_HEALTH_ADVISORY:String = "modPublicHealthAdvisory";
-		public static const MODULE_TEAM:String = "modTeam";
+		public static const MODULE_TEAM_APPOINTMENTS:String = "modTeamAppointments";
+		public static const MODULE_TEAM_PROFILE:String = "modTeamProfile";
 	}
 }

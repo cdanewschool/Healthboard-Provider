@@ -1,5 +1,7 @@
 package models.modules.decisionsupport
 {
+	import models.Location;
+	
 	import mx.collections.ArrayCollection;
 	
 	import spark.collections.Sort;
@@ -8,6 +10,7 @@ package models.modules.decisionsupport
 	public class RiskFactor
 	{
 		public var dual:Boolean;
+		public var location:Location;
 		public var meanValue:*;
 		public var name:String;
 		public var quantifiable:Boolean;
@@ -16,6 +19,8 @@ package models.modules.decisionsupport
 		public var treatments:ArrayCollection;
 		public var types:ArrayCollection;
 		public var updates:ArrayCollection;
+		
+		public var maximized:Boolean;
 		
 		public function RiskFactor()
 		{
@@ -54,6 +59,14 @@ package models.modules.decisionsupport
 				
 				for each(obj in types) 
 					val.types.addItem( RiskFactor.fromObj( obj ) );
+			}
+			
+			if( data.location )
+			{
+				var location:Location = new Location( data.location.latitude, data.location.longitude );
+				location.country = data.location.country;
+				
+				val.location = location;
 			}
 			
 			if( data.update )

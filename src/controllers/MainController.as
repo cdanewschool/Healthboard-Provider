@@ -33,6 +33,7 @@ package controllers
 	import models.Chat;
 	import models.ChatSearch;
 	import models.Message;
+	import models.ModuleMappable;
 	import models.PatientModel;
 	import models.Preferences;
 	import models.ProviderApplicationModel;
@@ -80,7 +81,7 @@ package controllers
 		private var userContextMenu:UserContextMenu;
 		private var userContextMenuTimer:Timer;
 		
-		public var arrOpenPatients:Array = new Array();	//	TODO: move
+		public var openPatients:Array = new Array();	//	TODO: move
 		
 		private var authenticationPopup:VerifyCredentialsPopup;
 		private var inactivityAlert:InactivityAlertPopup;
@@ -335,10 +336,10 @@ package controllers
 				if( event.user is ProviderModel )
 				{
 					evt = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
-					evt.data = ProviderConstants.MODULE_TEAM;
+					evt.data = ProviderConstants.MODULE_TEAM_PROFILE;
 					application.dispatchEvent( evt );
 					
-					TeamModule( visualDashboardProvider(application).viewStackProviderModules.getChildByName( ProviderConstants.MODULE_TEAM ) ).showTeamMember( event.user );
+					TeamModule( visualDashboardProvider(application).viewStackProviderModules.getChildByName( ProviderConstants.MODULE_TEAM_PROFILE ) ).showTeamMember( event.user );
 				}
 				else
 				{
@@ -397,9 +398,9 @@ package controllers
 			var isPatientAlreadyOpen:Boolean = false;
 			var viewPatient:ViewPatient;
 			
-			for(var i:uint = 0; i < arrOpenPatients.length; i++) 
+			for(var i:uint = 0; i < openPatients.length; i++) 
 			{
-				if(arrOpenPatients[i] == patient) 
+				if(openPatients[i] == patient) 
 				{
 					isPatientAlreadyOpen = true;
 					break;
@@ -414,7 +415,8 @@ package controllers
 				viewPatient.selectedAppointment = AppointmentsModel(appointmentsController.model).appointments[ AppointmentsModel(appointmentsController.model).currentAppointmentIndex ];
 				visualDashboardProvider(application).viewStackMain.addChild(viewPatient);
 				visualDashboardProvider(application).tabsMain.selectedIndex = visualDashboardProvider(application).viewStackMain.length - 1;
-				arrOpenPatients.push(patient);	
+				
+				openPatients.push(patient);	
 			}
 			else
 			{
@@ -452,15 +454,20 @@ package controllers
 				}
 			}
 			
+			visualDashboardProvider(application).viewStackMain.verticalScrollPosition = 0;
+			visualDashboardProvider(application).viewStackProviderModules.verticalScrollPosition = 0;
+			
 			super.onSetState(event);
 		}
 		
-		override protected function setState(state:String):void
+		override protected function setState(state:String):Boolean
 		{
-			super.setState(state);
+			var stateSet:Boolean = super.setState(state);
+			
+			if( stateSet ) return true;
 			
 			var child:DisplayObject;
-			
+				
 			//	show relevant application module if valid
 			if( visualDashboardProvider(application).viewStackProviderModules
 				&& (child = visualDashboardProvider(application).viewStackProviderModules.getChildByName( state ) ) != null )
@@ -471,13 +478,19 @@ package controllers
 				{
 					visualDashboardProvider(application).viewStackMain.selectedIndex = 0;
 				}
+				
+				return true;
 			}
-			
+				
 			//	show relevant patient module if valid
 			else if( visualDashboardProvider(application).viewStackMain.selectedChild is ViewPatient )
 			{
 				(visualDashboardProvider(application).viewStackMain.selectedChild as ViewPatient).showModule( state );
+				
+				return true;
 			}
+			
+			return false;
 		}
 		
 		override protected function onTabClose( event:ListEvent ):void
@@ -496,7 +509,7 @@ package controllers
 				else if( application.currentState == model.viewMode ) 
 				{
 					if( dataProvider == visualDashboardProvider(application).viewStackMain) 
-						arrOpenPatients.splice(index-1,1);
+						openPatients.splice(index-1,1);
 				}
 			}
 			else 
@@ -537,6 +550,9 @@ package controllers
 				}
 			}
 			
+			visualDashboardProvider(application).viewStackMain.verticalScrollPosition = 0;
+			visualDashboardProvider(application).viewStackProviderModules.verticalScrollPosition = 0;
+			
 			onHideAutoComplete();
 		}
 		
@@ -547,6 +563,19 @@ package controllers
 			inactivityAlert = PopUpManager.createPopUp( application, InactivityAlertPopup, true ) as InactivityAlertPopup;
 			inactivityAlert.addEventListener( CloseEvent.CLOSE, onInactivityAlertClose );
 			PopUpManager.centerPopUp( inactivityAlert );
+		}
+		
+		override public function logout():void
+		{
+			for each(var patient:PatientModel in openPatients)
+			{
+				var viewPatient:ViewPatient =  visualDashboardProvider(application).viewStackMain.getChildByName(  "patient" + patient.id ) as ViewPatient;
+				visualDashboardProvider(application).viewStackMain.removeChild(  viewPatient );
+			}
+			
+			openPatients = [];
+			
+			super.logout();
 		}
 		
 		private function onInactivityAlertClose( event:CloseEvent ):void
@@ -689,7 +718,7 @@ package controllers
 			var title:String = super.getModuleTitle(module);
 			
 			if( module == ProviderConstants.MODULE_DECISION_SUPPORT ) return "Decision Support";
-			if( module == ProviderConstants.MODULE_TEAM ) return "Team Profile";
+			if( module == ProviderConstants.MODULE_TEAM_PROFILE ) return "Team Profile";
 			
 			return title;
 		}
@@ -707,6 +736,24 @@ package controllers
 			}
 			
 			return super.loadData( id );
+		}
+		
+		override public function processModuleMappable( item:ModuleMappable ):void
+		{
+			super.processModuleMappable(item);
+			
+			var module:String;
+			
+			if( item.area == TeamAppointmentsModel.ID )
+				module = ProviderConstants.MODULE_TEAM_APPOINTMENTS;
+			else if( item.area == "teamprofile" )
+				module = ProviderConstants.MODULE_TEAM_PROFILE;
+			
+			if( module )
+			{
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, module );
+				application.dispatchEvent( evt );
+			}
 		}
 		
 		override protected function get id():String

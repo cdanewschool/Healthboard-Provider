@@ -57,8 +57,12 @@
 				}
 				else if( selectedModule.selectedItem.data == MessagesModel.ID )
 				{
+					message.recipients = [ patient ];
+					
 					dispatchEvent( new MessageEvent( MessageEvent.ADD ) );
 				}
+				
+				PopUpManager.removePopUp(this);
 			}
 			
 			private function cancel():void

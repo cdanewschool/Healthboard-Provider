@@ -3,8 +3,10 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	xmlns:ASclasses="ASclasses.*" xmlns:general="components.general.*" 
-	width="100%" height="100%" creationPolicy="all">
+	xmlns:ASclasses="ASclasses.*" 
+	xmlns:general="components.general.*" 
+	width="100%" height="100%" creationPolicy="all" 
+	creationComplete="init()">
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
@@ -27,6 +29,7 @@
 			import models.modules.decisionsupport.RiskFactorUpdate;
 			
 			import mx.events.ListEvent;
+			import mx.formatters.DateFormatter;
 			
 			import styles.ChartStyles;
 			
@@ -42,6 +45,8 @@
 			[Bindable] private var chartStyles:ChartStyles = AppProperties.getInstance().controller.model.chartStyles;
 			
 			[Bindable] private var currentUpdate:RiskFactorUpdate;
+			
+			public var dateFormatter:DateFormatter = new DateFormatter();
 			
 			[Bindable]
 			public function get riskFactor():RiskFactor
@@ -76,17 +81,22 @@
 					var previousUpdate:RiskFactorUpdate = riskFactor.updates && riskFactor.updates.length ? riskFactor.updates.getItemAt( riskFactor.updates.length ? riskFactor.updates.length-1 : 0 ) as RiskFactorUpdate : null;
 					
 					if( currentRiskLevel ) currentRiskLevel.text = currentUpdate.value + "%";
-					if( currentRecordDate ) currentRecordDate.text = currentUpdate ? DateFormatters.monthShortDayNumberYearFull.format( currentUpdate.date ) : '';
+					if( currentRecordDate ) currentRecordDate.text = currentUpdate ? dateFormatter.format( currentUpdate.date ) : '';
 					
 					if( previousRiskLevel ) previousRiskLevel.text = previousUpdate.value + "%";
-					if( previousRecordDate ) previousRecordDate.text = previousUpdate ? DateFormatters.monthShortDayNumberYearFull.format( previousUpdate.date ) : '';
+					if( previousRecordDate ) previousRecordDate.text = previousUpdate ? dateFormatter.format( previousUpdate.date ) : '';
 					
 					var riskChange:int = (currentUpdate.value - previousUpdate.value);
 					riskIncreaseChangeArrow.visible = riskIncreaseChangeArrow.includeInLayout = riskChange > 0;
 					
 					if( riskChangeLevel ) riskChangeLevel.text = riskChange + "%";
-					if( overallRiskChangeRange ) overallRiskChangeRange.text = previousUpdate && currentUpdate ? "from " + DateFormatters.monthShortDayNumberYearFull.format( previousUpdate.date ) + " to " + DateFormatters.monthShortDayNumberYearFull.format( currentUpdate.date ) : '';
+					if( overallRiskChangeRange ) overallRiskChangeRange.text = previousUpdate && currentUpdate ? "from " + dateFormatter.format( previousUpdate.date ) + " to " + dateFormatter.format( currentUpdate.date ) : '';
 				}
+			}
+			
+			private function init():void
+			{
+				dateFormatter.formatString = "MMMM D, YYYY";
 			}
 		]]>
 	</fx:Script>
@@ -95,18 +105,21 @@
 		<s:VerticalLayout gap="0" />
 	</s:layout>
 	
-	<s:Group width="100%">
+	<!--	header	-->
+	<s:Group width="100%" >
 		
 		<s:layout>
 			<s:BasicLayout />
 		</s:layout>
 		
 		<s:Label text="{riskFactor.name} Risk" styleName="greenBoldText" left="20" top="20" />
-		<s:Image source="@Embed(source='/images/erBtnHelp.png')" buttonMode="true" right="20" top="20" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_EDUCATIONAL_RESOURCES ) )" />
-	
+		<s:Image source="@Embed(source='/images/erBtnHelp.png')" buttonMode="true" right="20" top="20" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.MODULE_EDUCATIONAL_RESOURCES ) )" enabled="false" />
+		
 	</s:Group>
 	
-	<s:HGroup width="100%" paddingLeft="20" paddingTop="20" gap="40">
+	<s:HGroup 
+		width="100%" 
+		paddingLeft="20" paddingTop="20" gap="40">
 		
 		<s:VGroup width="110" gap="5">
 			<s:Label id="currentRiskLevel" styleName="emphasizedNumber bold" fontSize="36" />
@@ -131,7 +144,18 @@
 		
 	</s:HGroup>
 	
-	<s:HGroup width="100%" color="0xFFFFFF" height="31" horizontalAlign="right" verticalAlign="middle">
+	<s:Spacer height="10" />
+	
+	<s:Line xFrom="0" xTo="822">
+		<s:stroke>
+			<s:SolidColorStroke color="#E5E5E5" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:HGroup 
+		width="100%" height="31" 
+		color="0xFFFFFF" 
+		horizontalAlign="right" verticalAlign="middle">
 		
 		<s:Line xFrom="0" xTo="24">
 			<s:stroke>
@@ -139,7 +163,7 @@
 			</s:stroke>
 		</s:Line>
 		
-		<s:Label text="Projected" />
+		<s:Label text="Safe/Goal" />
 		
 		<mx:Legend direction="horizontal" color="0xFFFFFF" fontFamily="myMyriadNoCFF" verticalAlign="bottom" paddingRight="14" paddingLeft="15" paddingTop="6">
 			<mx:LegendItem label="Patient Entry" fontSize="12" fontWeight="normal" legendMarkerRenderer="mx.charts.renderers.CircleItemRenderer" markerAspectRatio="1" markerHeight="12" markerWidth="12" fill="{chartStyles.colorVitalSignsPatient}"  stroke="{chartStyles.whiteStroke}" />
@@ -150,7 +174,7 @@
 	
 	<s:Line xFrom="0" xTo="822">
 		<s:stroke>
-			<s:SolidColorStroke color="#7C7C7C"/>
+			<s:SolidColorStroke color="#E5E5E5" weight="1"/>
 		</s:stroke>
 	</s:Line>
 	
@@ -174,13 +198,15 @@
 					<fx:Component>
 						
 						<mx:HBox 
-							verticalAlign="middle" paddingLeft="20" height="{currentState=='expanded' ? 200 : 65}"
+							verticalAlign="middle" paddingLeft="20" height="{currentState==ToggleState.EXPANDED ? 200 : 65}"
 							horizontalScrollPolicy="off" verticalScrollPolicy="off" 
 							dataChange="onDataChange(event)">
 							
 							<fx:Script>
 								<![CDATA[
 									import ASclasses.MyCustomDataTip;
+									
+									import enum.ToggleState;
 									
 									import models.modules.decisionsupport.RiskFactor;
 									import models.modules.decisionsupport.RiskFactorUpdate;
@@ -195,7 +221,6 @@
 									import mx.managers.PopUpManager;
 									
 									import util.DateUtil;
-									import util.DateFormatters;
 									
 									[Bindable] private var riskFactorSubType:RiskFactor;
 									
@@ -240,7 +265,7 @@
 												&& riskFactorSubType.updates.length )
 											{
 												//	in collapsed state, only first and last update should be shown
-												if( currentState == 'collapsed' )
+												if( currentState == ToggleState.COLLAPSED )
 													dataProvider = riskFactorSubType.updates.length > 2 ? new ArrayCollection( [ riskFactorSubType.updates.getItemAt(0), riskFactorSubType.updates.getItemAt( riskFactorSubType.updates.length -1 ) ] ) : riskFactorSubType.updates;
 												//	in expanded state, all updates should be shown
 												else 
@@ -310,7 +335,7 @@
 									label="{riskFactorSubType.name}" 
 									icon.expanded="@Embed(source='/images/smallArrow.png')" icon.collapsed="@Embed(source='/images/smallArrowCollapsed.png')" 
 									horizontalGap="10" styleName="linkButtonStyle6" fontSize="13" fontWeight="bold" toggle="true"  
-									click="{currentState = (currentState == 'expanded' ? 'collapsed' : 'expanded')}" />
+									click="{currentState = (currentState == ToggleState.EXPANDED ? ToggleState.COLLAPSED : ToggleState.EXPANDED)}" />
 								
 							</s:HGroup>
 							
@@ -318,7 +343,7 @@
 								
 								<mx:LineChart 
 									id="chart" 
-									width="445" height="{currentState == 'expanded' ? 100: 40}" dataProvider="{dataProvider}" 
+									width="445" height="{currentState == ToggleState.EXPANDED ? 100: 40}" dataProvider="{dataProvider}" 
 									backgroundElements="{bge}" seriesFilters="[]" selectionMode="single" 
 									itemRollOver="onChartRollOver(event)" itemRollOut="onChartRollOut(event)" 
 									change="chartChange(event)">
@@ -394,7 +419,7 @@
 									
 								</s:HGroup>
 								
-								<s:DataGroup dataProvider="{currentUpdate.details}" visible="{currentUpdate!=null &amp;&amp; currentState == 'expanded'}" includeInLayout="{currentUpdate!=null &amp;&amp; currentState == 'expanded'}"> 
+								<s:DataGroup dataProvider="{currentUpdate.details}" visible="{currentUpdate!=null &amp;&amp; currentState == ToggleState.EXPANDED}" includeInLayout="{currentUpdate!=null &amp;&amp; currentState == ToggleState.EXPANDED}"> 
 									
 									<s:layout>
 										<s:VerticalLayout />
@@ -417,8 +442,8 @@
 								
 								<s:Label 
 									id="measuredOnLabel" styleName="gray13Italic" 
-									visible="{currentUpdate!=null &amp;&amp; currentState == 'expanded'}" includeInLayout="{currentUpdate!=null &amp;&amp; currentState == 'expanded'}" 
-									creationComplete="measuredOnLabel.text = 'Measured on ' + DateFormatters.monthShortDayNumberYearFull.format( currentUpdate.date )" />
+									visible="{currentUpdate!=null &amp;&amp; currentState == ToggleState.EXPANDED}" includeInLayout="{currentUpdate!=null &amp;&amp; currentState == 'expanded'}" 
+									creationComplete="measuredOnLabel.text = 'Measured on ' + outerDocument.dateFormatter.format( currentUpdate.date )" />
 								
 							</s:VGroup>
 							
@@ -434,7 +459,10 @@
 		
 	</ASclasses:RowColorDataGrid>
 	
-	<s:HGroup width="784" height="372" paddingLeft="20" paddingRight="20" paddingTop="20" paddingBottom="20" contentBackgroundColor="0x5D5D5D">
+	<s:HGroup 
+		width="100%" height="372" 
+		paddingLeft="20" paddingRight="20" paddingTop="20" paddingBottom="20" 
+		contentBackgroundColor="0x5D5D5D">
 		
 		<s:BorderContainer width="50%" height="100%" backgroundColor="0x3C3C3B">
 			
@@ -443,7 +471,7 @@
 			</s:layout>
 			
 			<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
-				<s:Label text="Family Tree" styleName="greenBoldText" paddingLeft="10" />
+				<s:Label text="Family Tree" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
 			</s:BorderContainer>
 
 			<!--	placeholder	-->
@@ -499,7 +527,7 @@
 				</s:layout>
 				
 				<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
-					<s:Label text="Subject Matter Experts" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+					<s:Label text="Subject-Matter Experts" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
 				</s:BorderContainer>
 				
 				<mx:DataGrid

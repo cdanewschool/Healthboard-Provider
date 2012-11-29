@@ -2,6 +2,8 @@ package models.modules.decisionsupport
 {
 	import enum.RiskLevel;
 	
+	import models.Location;
+	
 	import mx.collections.ArrayCollection;
 
 	[Bindable]
@@ -15,6 +17,8 @@ package models.modules.decisionsupport
 		public var riskLevel:String;
 		public var value:*;
 		public var value2:*;
+		
+		public var incidences:ArrayCollection;
 		
 		public function RiskFactorUpdate()
 		{
@@ -36,7 +40,7 @@ package models.modules.decisionsupport
 			{
 				var change2:Number = value2 - compare.value2;
 				
-				return (change >= 0 ? '+' + change : '-' + change) + '/' + (change2 >= 0 ? '+' + change2 : '-' + change2)
+				return (change >= 0 ? '+' + change : '-' + change) + ' / ' + (change2 >= 0 ? '+' + change2 : '-' + change2)
 			}
 			
 			return (change >= 0 ? '+' + change : '-' + change);
@@ -64,6 +68,16 @@ package models.modules.decisionsupport
 			if( data.detail )
 			{
 				val.details = data.detail is ArrayCollection ? data.detail : new ArrayCollection( [ data.detail ] );
+			}
+			
+			if( data.incidence )
+			{
+				val.incidences = new ArrayCollection();
+				
+				var incidences:ArrayCollection = data.incidence is ArrayCollection ? data.incidence : new ArrayCollection( [data.incidence] );
+				
+				for each(var item:Object in incidences) 
+					val.incidences.addItem( new Location( item.latitude, item.longitude, item.value ) );
 			}
 			
 			return val;

@@ -17,7 +17,8 @@
 			import components.general.MainLinkButton;
 			import components.popups.decisionsupport.ManageRiskFactorsPopup;
 			import components.popups.decisionsupport.NotifyPopup;
-			import components.tabs.DecisionSupportRiskFactorDetails;
+			import components.tabs.decisionsupport.RiskFactorDetails;
+			import components.tabs.decisionsupport.RiskFactorDetailsGeographic;
 			
 			import controllers.DecisionSupportController;
 			import controllers.MainController;
@@ -30,6 +31,7 @@
 			import events.TeamAppointmentEvent;
 			
 			import models.Appointment;
+			import models.Message;
 			import models.PatientModel;
 			import models.TeamAppointmentsModel;
 			import models.modules.MessagesModel;
@@ -38,6 +40,7 @@
 			import models.modules.decisionsupport.RiskFactorUpdate;
 			
 			import mx.controls.Image;
+			import mx.formatters.DateFormatter;
 			import mx.managers.PopUpManager;
 			
 			import styles.ChartStyles;
@@ -61,6 +64,8 @@
 
 			private var managePopup:ManageRiskFactorsPopup;
 			private var notifyPopup:NotifyPopup;
+			
+			public var dateFormatter:DateFormatter = new DateFormatter();
 			
 			public function set riskFactor(value:RiskFactor):void
 			{
@@ -115,10 +120,20 @@
 						
 						riskFactorLinks.addElement( linkGroup );
 						
-						var details:DecisionSupportRiskFactorDetails = new DecisionSupportRiskFactorDetails();
-						details.patient = patient;
-						details.riskFactor = riskFactor;
-						viewStack.addChild( details );
+						if( riskFactor.quantifiable )
+						{
+							var details:RiskFactorDetails = new RiskFactorDetails();
+							details.patient = patient;
+							details.riskFactor = riskFactor;
+							viewStack.addChild( details );
+						}
+						else
+						{
+							var detailsNonQuantifiable:RiskFactorDetailsGeographic = new RiskFactorDetailsGeographic();
+							detailsNonQuantifiable.patient = patient;
+							detailsNonQuantifiable.riskFactor = riskFactor;
+							viewStack.addChild( detailsNonQuantifiable );
+						}
 					}
 					
 					dirty = false;
@@ -146,11 +161,9 @@
 				allRisks.styleName = (!this.riskFactor ? "linkButtonStyle5 bold" : "linkButtonStyle1");
 			}
 			
-			private var dateRange:String = DateRanges.MONTH_THREE;
-			
 			private function setDateRange(range:String=null):void
 			{
-				dateRange = range;
+				model.dateRange = range;
 				
 				updateDateRange();
 			}
@@ -159,23 +172,23 @@
 			{
 				var today:Date = AppProperties.getInstance().controller.model.today;
 				
-				if(dateRange == DateRanges.WEEK) 
+				if(model.dateRange == DateRanges.WEEK) 
 				{
 					model.minDate = new Date(today.getTime() - 1000*60*60*24*7);
 				}
-				else if(dateRange == DateRanges.MONTH) 
+				else if(model.dateRange == DateRanges.MONTH) 
 				{
 					model.minDate = new Date(today.getTime() - 1000*60*60*24*30);
 				}
-				else if(dateRange == DateRanges.MONTH_THREE) 
+				else if(model.dateRange == DateRanges.MONTH_THREE) 
 				{
 					model.minDate = new Date(today.getTime() - 1000*60*60*24*91);
 				}
-				else if(dateRange == DateRanges.YEAR) 
+				else if(model.dateRange == DateRanges.YEAR) 
 				{
 					model.minDate = new Date(today.getTime() - 1000*60*60*24*365.24);
 				}
-				else if(dateRange == DateRanges.YEAR_THREE) 
+				else if(model.dateRange == DateRanges.YEAR_THREE) 
 				{
 					model.minDate = new Date(today.getTime() - 1000*60*60*24*1095.73);
 				}
@@ -205,7 +218,21 @@
 			
 			private function addMessage( event:MessageEvent ):void
 			{
-				//messagesModel.addAppointment( notifyPopup.appointment );
+				var message:Message = notifyPopup.message;
+				
+				var recipientName:String = message.recipients && message.recipients.length ? message.recipients[0].fullName : 'Patient';
+				var now:Date = AppProperties.getInstance().controller.model.today;
+				
+				//	create a message object in a format messagescontroller understands
+				var messageObj:Object = 
+					{
+						status: "unread", correspondent: recipientName, prefix: "a ", date: messagesModel.dateFormatter.format( now ), subject: message.subject, isDraft: false, checkboxSelection: false,  messages: 
+						[
+							{sender: "You", date: messagesModel.dateFormatter.format( now ), text: message.body, imageAttachments: message.imageAttachments, nonImageAttachments: message.nonImageAttachments, urgency: message.urgency, status: "read"},
+						]
+					};
+				
+				messagesModel.messages.addItem( messageObj );
 				
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true );
 				evt.data = "Your message has been added";
@@ -240,7 +267,7 @@
 			
 			private function init():void
 			{
-				
+				dateFormatter.formatString = "MMMM D, YYYY";
 			}
 		]]>
 	</fx:Script>
@@ -268,7 +295,7 @@
 				</s:layout>
 				
 				<s:Button label="Notify" styleName="buttonText" height="24" click="onNotifyClick(event)" />
-				<s:Button label="Manage Risk Factors" styleName="buttonText" height="24" click="onManageClick(event)" visible="{riskFactor!=null}" includeInLayout="{riskFactor!=null}" />
+				<s:Button label="Manage Risk Factors" styleName="buttonText" height="24" click="onManageClick(event)" visible="{riskFactor!=null &amp;&amp; riskFactor.quantifiable}" includeInLayout="{riskFactor!=null &amp;&amp; riskFactor.quantifiable}" />
 				<s:Button label="Export" styleName="buttonText" height="24" click="onExportClick(event)" visible="{riskFactor!=null}" includeInLayout="{riskFactor!=null}" />
 				
 				<s:Spacer width="100%" />
@@ -334,11 +361,6 @@
 							borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}"
 							variableRowHeight="true">
 							
-							<!--
-							selectionColor="{riskFactorSubTypes.selectedItem == model.vitalSigns[6] ? 0x000000 : riskFactorSubTypes.selectedIndex % 2 == 0 ? 0x3C3C3B : 0x4A4A49}"
-							dragEnabled="true" dropEnabled="true" dragMoveEnabled="true" dragComplete="controller.updateVitalIndices()"
-							-->
-							
 							<ASclasses:columns>
 								
 								<mx:DataGridColumn dataField="name">
@@ -365,7 +387,6 @@
 														import mx.events.FlexEvent;
 														import mx.managers.PopUpManager;
 														
-														import util.DateFormatters;
 														import util.DateUtil;
 														
 														[Bindable] private var riskFactor:RiskFactor;
@@ -422,7 +443,7 @@
 															else 
 															{
 																currentRiskLevel.text = currentUpdate ? outerDocument.controller.getRiskLevelLabel( currentUpdate.riskLevel ) : '';
-																dateText.text = currentUpdate ? "on " + DateFormatters.monthShortDayNumberYearFull.format( currentUpdate.date ) : '';
+																dateText.text = currentUpdate ? "on " + outerDocument.dateFormatter.format( currentUpdate.date ) : '';
 															}
 														}	
 														
@@ -456,7 +477,7 @@
 													<general:MainLinkButton
 														label="{riskFactor.name}" 
 														icon.expanded="@Embed(source='/images/smallArrow.png')" icon.collapsed="@Embed(source='/images/smallArrowCollapsed.png')" 
-														horizontalGap="10" fontSize="13" fontWeight="bold" toggle="true" styleName="linkButtonStyle5" 
+														horizontalGap="10" fontSize="13" fontWeight="bold" toggle="true" styleName="linkButtonStyle1" 
 														click="{outerDocument.riskFactor = riskFactor}" />
 												</s:HGroup>
 												

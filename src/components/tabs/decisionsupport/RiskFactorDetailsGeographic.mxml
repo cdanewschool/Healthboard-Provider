@@ -1,0 +1,646 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:ASclasses="ASclasses.*" xmlns:general="components.general.*" 
+	width="100%" creationPolicy="all" 
+	xmlns:esri="http://www.esri.com/2008/ags" 
+	creationComplete="init()">
+	
+	<fx:Declarations>
+		<esri:Locator 
+			id="locator"
+			outSpatialReference="{spatialReference}"
+			url="http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/ESRI_Places_World/GeocodeServer"/>
+		
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.esri.ags.SpatialReference;
+			import com.esri.ags.geometry.Extent;
+			import com.esri.ags.geometry.MapPoint;
+			import com.esri.ags.tasks.supportClasses.AddressCandidate;
+			import com.esri.ags.tasks.supportClasses.AddressToLocationsParameters;
+			
+			import controllers.DecisionSupportController;
+			import controllers.MainController;
+			
+			import models.ModuleMappable;
+			import models.PatientModel;
+			import models.modules.decisionsupport.DecisionSupportModel;
+			import models.modules.decisionsupport.RiskFactor;
+			import models.modules.decisionsupport.RiskFactorRecommendedTreatment;
+			import models.modules.decisionsupport.RiskFactorUpdate;
+			
+			import mx.events.ListEvent;
+			import mx.formatters.DateFormatter;
+			import mx.rpc.AsyncResponder;
+			
+			private var _riskFactor:RiskFactor;
+			
+			public var patient:PatientModel;
+			
+			[Bindable] public var controller:DecisionSupportController = MainController(AppProperties.getInstance().controller).decisionSupportController as DecisionSupportController;
+			[Bindable] public var model:DecisionSupportModel = controller.model as DecisionSupportModel;
+			
+			[Bindable] public var currentUpdate:RiskFactorUpdate;
+			
+			[Bindable] public var spatialReference:SpatialReference = new SpatialReference( 102100 );
+			[Bindable] public var worldExtent:Extent = new Extent(-23481000, -7553000, 23481000, 7553000,spatialReference);
+			[Bindable] public var localExtent:Extent = new Extent(-13046000,4028000,-13024000,4041000,spatialReference);
+			
+			public var dateFormatter:DateFormatter = new DateFormatter();
+			
+			private var dirty:Boolean;
+			
+			[Bindable]
+			public function get riskFactor():RiskFactor
+			{
+				return _riskFactor;
+			}
+			
+			public function set riskFactor(value:RiskFactor):void
+			{
+				_riskFactor = value;
+				
+				dirty = true;
+				
+				invalidateProperties();
+			}
+			
+			private function onRecommendedTreatmentClick(event:ListEvent):void
+			{
+				var item:RiskFactorRecommendedTreatment = event.itemRenderer.data as RiskFactorRecommendedTreatment;
+				
+				if( item.area )
+				{
+					AppProperties.getInstance().controller.processModuleMappable( item as ModuleMappable );
+				}
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if( dirty 
+					&& riskFactor )
+				{
+					if( riskFactor.location )
+					{
+						mapSearch( riskFactor.location.country );
+					}
+					
+					dirty = false;
+				}
+			}
+			
+			private function mapSearch( search:String ):void
+			{
+				var parameters:AddressToLocationsParameters = new AddressToLocationsParameters();
+				parameters.address = { PlaceName: search, outSR: spatialReference.wkid };
+				
+				locator.addressToLocations( parameters, new AsyncResponder(onMapSearch, onMapSearchFault) );
+			}
+			
+			private function onMapSearch(candidates:Array, token:Object = null):void
+			{
+				if (candidates.length > 0)
+				{
+					var candidate:AddressCandidate;
+					
+					for (var i:int=0; i<candidates.length; i++) 
+					{
+						candidate = candidates[i];
+						
+						if ( candidate.score == 100 ) 
+						{
+							var mapPoint:MapPoint = candidate.location;
+							
+							var extent:Extent = new Extent( mapPoint.x, mapPoint.y, mapPoint.x, mapPoint.y, mapPoint.spatialReference );
+							extent.expand(6);
+							
+							this.localExtent = extent;
+							
+							break;
+						}
+					}
+				}
+			}
+			
+			private function onMapSearchFault(info:Object, token:Object = null):void
+			{
+			}
+			
+			public function updateDataGridHeight():void
+			{
+				riskFactorSubTypes.height = riskFactorSubTypes.measureHeightOfItems(0, riskFactorSubTypes.dataProvider.length) + riskFactorSubTypes.headerHeight;
+			}
+			
+			private function init():void
+			{
+				dateFormatter.formatString = "MMMM D, YYYY";
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" />
+	</s:layout>
+	
+	<ASclasses:RowColorDataGrid 
+		id="riskFactorSubTypes" 
+		width="100%" 
+		dataProvider="{riskFactor.types}"
+		dropIndicatorSkin="skins.general.myDropIndicatorSkin"
+		color="0xFFFFFF" alternatingItemColors="[0x3C3C3B,0x4A4A49]" verticalAlign="middle"
+		selectionDuration="2000" useRollOver="false" 
+		headerHeight="0" selectable="false"
+		borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}"
+		variableRowHeight="true" creationComplete="updateDataGridHeight()">
+		
+		<ASclasses:columns>
+			
+			<mx:DataGridColumn dataField="name">
+				
+				<mx:itemRenderer>
+					
+					<fx:Component>
+						
+						<mx:VBox 
+							width="100%" paddingLeft="20" paddingRight="20" 
+							horizontalScrollPolicy="off" verticalScrollPolicy="off" 
+							dataChange="onDataChange(event)">
+							
+							<fx:Script>
+								<![CDATA[
+									import enum.RiskLevel;
+									import enum.ToggleState;
+									
+									import models.Location;
+									import models.ModuleMappable;
+									import models.modules.decisionsupport.RiskFactor;
+									import models.modules.decisionsupport.RiskFactorRecommendedTreatment;
+									import models.modules.decisionsupport.RiskFactorUpdate;
+									
+									import mx.events.FlexEvent;
+									import mx.events.ListEvent;
+									import mx.rpc.AsyncResponder;
+									import mx.rpc.events.FaultEvent;
+									
+									[Bindable] private var riskFactorSubType:RiskFactor;
+									
+									[Bindable] private var  currentUpdate:RiskFactorUpdate;
+									[Bindable] private var  previousUpdate:RiskFactorUpdate;
+									
+									private var dirty:Boolean;
+									
+									override public function set data(value:Object):void 
+									{
+										if( data != value ) dirty = true;
+										
+										super.data = value;
+										
+										riskFactorSubType = data as RiskFactor;
+										
+										currentState = riskFactorSubType.maximized ? ToggleState.EXPANDED : ToggleState.COLLAPSED;
+										
+										invalidateProperties();
+									}
+									
+									private function onDataChange(event:FlexEvent):void
+									{
+										invalidateProperties();
+									}
+									
+									override public function set currentState(value:String):void
+									{
+										if( currentState != value ) dirty = true;
+										
+										super.currentState = value;
+										
+										if( riskFactorSubType ) riskFactorSubType.maximized = currentState == ToggleState.EXPANDED;
+										
+										invalidateProperties();
+									}
+									
+									override protected function commitProperties():void
+									{
+										super.commitProperties();
+										
+										if( dirty )
+										{
+											if( riskFactorSubType )
+											{
+												//	get current/last update
+												currentUpdate = riskFactorSubType.updates && riskFactorSubType.updates.length ? riskFactorSubType.updates.getItemAt( 0 ) as RiskFactorUpdate : null;
+												previousUpdate = riskFactorSubType.updates && riskFactorSubType.updates.length ? riskFactorSubType.updates.getItemAt( riskFactorSubType.updates.length ? riskFactorSubType.updates.length-1 : 0 ) as RiskFactorUpdate : null;
+											}
+											
+											height = currentState == ToggleState.EXPANDED ? 756 : 45;
+											
+											outerDocument.updateDataGridHeight();
+											
+											dirty = false;
+										}
+									}
+									
+									private function onRecommendedTreatmentClick(event:ListEvent):void
+									{
+										var item:RiskFactorRecommendedTreatment = event.itemRenderer.data as RiskFactorRecommendedTreatment;
+										
+										if( item.area )
+										{
+											AppProperties.getInstance().controller.processModuleMappable( item as ModuleMappable );
+										}
+									}
+									
+								]]>
+							</fx:Script>
+							
+							<mx:states>
+								<s:State name="collapsed" />
+								<s:State name="expanded" />
+							</mx:states>
+							
+							<s:HGroup width="100%" height="45" verticalAlign="middle">
+								
+								<general:MainLinkButton
+									width="200" textAlign="left"
+									label="{riskFactorSubType.name}" 
+									icon.expanded="@Embed(source='/images/smallArrow.png')" icon.collapsed="@Embed(source='/images/smallArrowCollapsed.png')" 
+									horizontalGap="10" styleName="linkButtonStyle1" fontSize="16" fontWeight="bold" toggle="true"  
+									click="{currentState = (currentState == ToggleState.EXPANDED ? ToggleState.COLLAPSED : ToggleState.EXPANDED)}" />
+								
+								<s:HGroup width="100%" visible="{currentUpdate!=null}" gap="5" horizontalAlign="center">
+									<s:Label text="{outerDocument.controller.getRiskLevelLabel( currentUpdate.riskLevel )}" styleName="italic {currentUpdate.riskLevel == RiskLevel.HIGH ? 'decisionSupportModuleRiskLevelHigh' : 'decisionSupportModuleRiskLevelLow'}" fontSize="13" />
+									<s:Label text="{'due to ' + currentUpdate.reason + '.'}" styleName="italic" fontSize="13" />
+								</s:HGroup>
+								
+								<s:Label 
+									id="measuredOnLabel" styleName="gray13Italic" textAlign="right"
+									creationComplete="measuredOnLabel.text = 'as of ' + outerDocument.dateFormatter.format( currentUpdate.date )" />
+								
+							</s:HGroup>
+							
+							<s:HGroup width="100%" height="356" visible="{currentState==ToggleState.EXPANDED}" includeInLayout="{currentState==ToggleState.EXPANDED}">
+								
+								<s:BorderContainer width="50%" height="100%" backgroundColor="0x3C3C3B">
+									
+									<s:layout>
+										<s:VerticalLayout horizontalAlign="center" gap="0"/>
+									</s:layout>
+									
+									<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
+										<s:Label text="Other Health Issues in {outerDocument.riskFactor.location.country}" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+									</s:BorderContainer>
+									
+									<mx:DataGrid
+										fontFamily="myMyriadNoCFF"
+										width="100%" height="100%"
+										color="0xFFFFFF" verticalAlign="middle"
+										headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
+										borderVisible="true" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+										rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
+										horizontalScrollPolicy="off" rowHeight="22" paddingTop="6" 
+										itemClick="onRecommendedTreatmentClick(event)">
+										
+										<mx:columns>
+											<mx:DataGridColumn dataField="disease" headerText="Diseases" width="150" />
+											<mx:DataGridColumn dataField="status" headerText="Prevention Status" />
+										</mx:columns>
+										
+									</mx:DataGrid>
+									
+								</s:BorderContainer>
+								
+								<s:VGroup width="50%" height="100%">
+									
+									<s:BorderContainer width="100%" height="50%" backgroundColor="0x3C3C3B">
+										
+										<s:layout>
+											<s:VerticalLayout horizontalAlign="center" gap="0"/>
+										</s:layout>
+										
+										<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
+											<s:Label text="Recommended Treatments" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+										</s:BorderContainer>
+										
+										<mx:DataGrid
+											dataProvider="{riskFactorSubType.treatments}"
+											fontFamily="myMyriadNoCFF"
+											width="100%" height="100%"
+											color="0xFFFFFF" verticalAlign="middle"
+											headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
+											borderVisible="true" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+											rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
+											horizontalScrollPolicy="off" rowHeight="22" paddingTop="6" 
+											itemClick="onRecommendedTreatmentClick(event)">
+											
+											<mx:columns>
+												<mx:DataGridColumn dataField="method" headerText="Method" width="115" />
+												<mx:DataGridColumn dataField="type" headerText="Type" width="115">
+													<mx:itemRenderer>
+														<fx:Component>
+															<mx:HBox>
+																<s:Label text="{data.type}" color="{data.area != null ? 0xAEDEE4 : 0xFFFFFF}" fontFamily="myMyriad" paddingLeft="5" />
+															</mx:HBox>
+														</fx:Component>
+													</mx:itemRenderer>
+												</mx:DataGridColumn>
+												<mx:DataGridColumn dataField="description" headerText="Description" />
+											</mx:columns>
+											
+										</mx:DataGrid>
+										
+									</s:BorderContainer>
+									
+									<s:BorderContainer width="100%" height="50%" backgroundColor="0x3C3C3B">
+										
+										<s:layout>
+											<s:VerticalLayout horizontalAlign="center" gap="0" />
+										</s:layout>
+										
+										<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
+											<s:Label text="Subject-Matter Experts" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+										</s:BorderContainer>
+										
+										<mx:DataGrid
+											dataProvider="{riskFactorSubType.experts}"
+											fontFamily="myMyriadNoCFF"
+											width="100%" height="100%"
+											color="0xFFFFFF" verticalAlign="middle"
+											headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
+											borderVisible="true" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+											rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
+											horizontalScrollPolicy="off" rowHeight="22" paddingTop="6">
+											
+											<mx:columns>
+												<mx:DataGridColumn dataField="name" headerText="Name" width="168" color="0xAEDEE4" />
+												<mx:DataGridColumn dataField="expertise" headerText="Expertise" width="115" />
+												<mx:DataGridColumn dataField="location" headerText="Location" width="115" />
+											</mx:columns>
+											
+										</mx:DataGrid>
+										
+									</s:BorderContainer>
+									
+								</s:VGroup>
+								
+							</s:HGroup>
+							
+							<s:BorderContainer width="100%" height="356" backgroundColor="0x4A4A49" visible="{currentState==ToggleState.EXPANDED}" includeInLayout="{currentState==ToggleState.EXPANDED}">
+								
+								<s:layout>
+									<s:HorizontalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
+								</s:layout>
+								
+								<fx:Script>
+									<![CDATA[
+										import mx.events.FlexEvent;
+										import com.esri.ags.layers.Layer;
+										import com.esri.ags.geometry.WebMercatorExtent;
+										import com.esri.ags.symbols.SimpleMarkerSymbol;
+										import models.Location;
+										import com.esri.ags.geometry.WebMercatorMapPoint;
+										import com.esri.ags.Graphic;
+										import mx.binding.utils.BindingUtils;
+										
+										[Bindable] private var viewLocalizedRisk:Boolean = true;
+										
+										private function getSizeForValue(value:int):int
+										{
+											if( value <= 50 ) return 8;
+											if( value <= 500 ) return 14;
+											if( value <= 5000 ) return 24;
+											if( value <= 20000 ) return 34;
+											return 54;
+										}
+										
+										private function setLegendMarkerSize( event:FlexEvent, value:int):void
+										{
+											var item:Box = event.target as Box;
+											item.width = item.height = getSizeForValue( value );
+										}
+										
+										private function init():void
+										{
+											//	update deaths layer
+											for each(var location:Location in currentUpdate.incidences )
+											{
+												if( !isNaN(location.longitude) 
+													&& !isNaN(location.latitude) )
+												{
+													var marker:Graphic = new Graphic
+														( 
+															new WebMercatorMapPoint( location.longitude, location.latitude ), 
+															new SimpleMarkerSymbol('circle', getSizeForValue( location.value ), 0x5D236A, .65 ) 
+														);
+													
+													incidencesLayer.add( marker );
+												}
+											}
+											
+											var extent:WebMercatorExtent = new WebMercatorExtent(NaN,NaN,NaN,NaN);
+											var validExtent:Boolean = false;
+											
+											for each(var layer:Layer in map.layers)
+											{
+												if( !layer is GraphicsLayer ) return;
+												
+												for(var i:int=0;i<layer.numChildren;i++)
+												{
+													var graphic:Graphic = layer.getChildAt(i) as Graphic;
+													
+													var point:WebMercatorMapPoint = graphic.geometry as WebMercatorMapPoint;
+													
+													extent.minlon = !isNaN(extent.minlon) ? Math.min( point.lon, extent.minlon ) : point.lon;
+													extent.maxlon = !isNaN(extent.maxlon) ? Math.max( point.lon, extent.maxlon ) : point.lon;
+													extent.minlat = !isNaN(extent.minlat) ? Math.min( point.lat, extent.minlat ) : point.lat;
+													extent.maxlat = !isNaN(extent.maxlat) ? Math.max( point.lat, extent.maxlat ) : point.lat;
+													
+													validExtent = true;
+												}
+											}
+											
+											if( validExtent )
+											{
+												outerDocument.localExtent = extent.expand( 1.5 );
+											}
+										}
+									]]>
+								</fx:Script>
+								
+								<s:Group width="575" height="100%">
+									
+									<s:layout>
+										<s:BasicLayout />
+									</s:layout>
+									
+									<esri:Map 
+										id="map" 
+										width="100%" height="100%" 
+										logoVisible="false" openHandCursorVisible="false" 
+										extent="{outerDocument.localExtent}" 
+										creationComplete="init();">
+										
+										<esri:OpenStreetMapLayer />
+										
+										<esri:GraphicsLayer id="incidencesLayer" />
+										
+									</esri:Map>
+									
+									<s:BorderContainer width="272" height="91" cornerRadius="10" backgroundColor="0x565656" backgroundAlpha=".85" borderAlpha="0" bottom="5" right="5">
+										
+										<s:layout>
+											<s:BasicLayout />
+										</s:layout>
+										
+										<s:Label text="Cases Reported*" styleName="italic white12" color="0xECECEC" top="10" left="10" />
+										
+										<s:HGroup verticalAlign="bottom" bottom="5" left="10">
+											
+											<s:VGroup horizontalAlign="center">
+												<mx:Box cornerRadius="4"  borderStyle="solid" borderColor="0x5F4C0B" backgroundColor="0x5D236A" creationComplete="setLegendMarkerSize(event,50)" />
+												<s:Label text="1-50" styleName="smallText" />
+											</s:VGroup>
+											
+											<s:VGroup horizontalAlign="center">
+												<mx:Box cornerRadius="7"  borderStyle="solid" borderColor="0x5F4C0B" backgroundColor="0x5D236A" creationComplete="setLegendMarkerSize(event,500)" />
+												<s:Label text="51-500" styleName="smallText" />
+											</s:VGroup>
+											
+											<s:VGroup horizontalAlign="center">
+												<mx:Box cornerRadius="12"  borderStyle="solid" borderColor="0x5F4C0B" backgroundColor="0x5D236A" creationComplete="setLegendMarkerSize(event,5000)" />
+												<s:Label text="500-5,000" styleName="smallText" />
+											</s:VGroup>
+											
+											<s:VGroup horizontalAlign="center">
+												<mx:Box cornerRadius="17"  borderStyle="solid" borderColor="0x5F4C0B" backgroundColor="0x5D236A" creationComplete="setLegendMarkerSize(event,20000)" />
+												<s:Label text="5,001-20,000" styleName="smallText" />
+											</s:VGroup>
+											
+											<s:VGroup horizontalAlign="center">
+												<mx:Box cornerRadius="27"  borderStyle="solid" borderColor="0x5F4C0B" backgroundColor="0x5D236A" creationComplete="setLegendMarkerSize(event,20001)" />
+												<s:Label text="≥20,000" styleName="smallText" />
+											</s:VGroup>
+											
+										</s:HGroup>
+										
+									</s:BorderContainer>
+									
+								</s:Group>
+								
+								<s:VGroup paddingLeft="10" gap="0">
+									
+									<general:MainLinkButton label="View Risk in {outerDocument.riskFactor.location.country}" styleName="{viewLocalizedRisk?'linkButtonStyle5 bold':'linkButtonStyle1'}" click="viewLocalizedRisk=true;map.extent=outerDocument.localExtent" />
+									<general:MainLinkButton label="View Risk in Other Countries" styleName="{!viewLocalizedRisk?'linkButtonStyle5 bold':'linkButtonStyle1'}" click="viewLocalizedRisk=false;map.extent=outerDocument.worldExtent" />
+									
+									<s:Spacer height="95" />
+									
+									<s:BorderContainer width="174" height="179" cornerRadius="10" backgroundColor="0x565656" borderAlpha="0">
+										
+										<s:layout>
+											<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
+										</s:layout>
+										
+										<s:Label text="Disability-Adjusted Life Year*" styleName="italic white12" color="0xECECEC" />
+										<s:Label text="*per 100,000 inhabitants" styleName="smallText" />
+										
+										<s:HGroup width="100%">
+											
+											<s:VGroup width="50%">
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xFFFF57" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="&lt;10" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xFFF400" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="10-100" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xFFDD00" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="100-500" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xFFC800" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="500-1000" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xFFB100" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="1000-1,500" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xFF9A00" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="1,500-2,000" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xB3B3B3" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="no data" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+											</s:VGroup>
+											
+											<s:VGroup width="50%">
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xFF8400" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="2,000-2.500" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xFF6E00" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="2,500-2,750" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xFF5700" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="2,750-3,000" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xFF4000" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="3,000-3,250" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xFF2900" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="3,250-3,500" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+												<s:HGroup gap="5">
+													<mx:Box backgroundColor="0xCD0000" borderColor="0xD8D8D8" borderStyle="solid" width="9" height="9" />
+													<s:Label text="≥3,500" styleName="white11" color="0xF2F2F2" />
+												</s:HGroup>
+												
+											</s:VGroup>
+											
+										</s:HGroup>
+										
+									</s:BorderContainer>
+									
+								</s:VGroup>
+								
+							</s:BorderContainer>
+							
+						</mx:VBox>
+						
+					</fx:Component>
+					
+				</mx:itemRenderer>
+				
+			</mx:DataGridColumn>
+			
+		</ASclasses:columns>
+		
+	</ASclasses:RowColorDataGrid>
+	
+</s:NavigatorContent>
