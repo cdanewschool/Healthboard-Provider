@@ -20,15 +20,15 @@
 				gridDirection="both">
 				
 				<mx:horizontalOriginStroke>
-					<mx:SolidColorStroke color="0x3C3C3B" alpha="0" />
+					<mx:SolidColorStroke color="{getStyle('backgroundColor')}" alpha="0" />
 				</mx:horizontalOriginStroke>
 				
 				<mx:verticalOriginStroke>
-					<mx:SolidColorStroke color="0x3C3C3B" alpha="0" />
+					<mx:SolidColorStroke color="{getStyle('backgroundColor')}" alpha="0" />
 				</mx:verticalOriginStroke>
 				
 				<mx:horizontalFill>
-					<mx:SolidColor color="0x3C3C3B" alpha="1"  />
+					<mx:SolidColor color="{getStyle('backgroundColor')}" alpha="1"  />
 				</mx:horizontalFill>
 				
 				<mx:horizontalAlternateFill>

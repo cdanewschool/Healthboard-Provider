@@ -37,13 +37,16 @@
 	</enhancedtitlewindow:layout>
 	
 	<mx:DataGrid 
+		styleName="standardDataGridSolid" 
+		fontFamily = "myMyriad" 
+		useRollOver="false" horizontalGridLines="false"
 		dataProvider="{model.messagesToDisplay}" buttonMode="true"
-		width="100%" itemClick="model.pendingMessage = event.itemRenderer.data; dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, false, false, Constants.MODULE_MESSAGES ) );"
-		color="0xFFFFFF" verticalAlign="middle"
+		width="100%" 
 		selectable="false"
-		headerHeight="0"
-		borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}" alternatingItemColors="[0x3C3C3B,0x3C3C3B]"
-		horizontalScrollPolicy="off" verticalScrollPolicy="off" rowCount="4" rowHeight="18">
+		headerHeight="0" 
+		horizontalScrollPolicy="off" verticalScrollPolicy="off" 
+		rowCount="4" rowHeight="18" 
+		itemClick="model.pendingMessage = event.itemRenderer.data; dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, false, false, Constants.MODULE_MESSAGES ) );">
 		
 		<mx:columns>
 			<mx:DataGridColumn dataField="correspondent">

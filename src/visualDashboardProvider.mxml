@@ -237,13 +237,11 @@
 											</s:HGroup>
 											
 											<mx:DataGrid 
-												dataProvider="{ProviderApplicationModel(controller.model).patients}" fontFamily="myMyriadNoCFF"
-												itemClick="dgPatients_itemClickHandler(event)"
 												width="100%" 
-												color="0xFFFFFF" verticalAlign="middle"
-												headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
-												borderVisible="false" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x3C3C3B,0x3C3C3B]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-												horizontalScrollPolicy="off" rowCount="8" rowHeight="22" paddingTop="6"><!--dataProvider="{acMessagesToDisplay}" creationComplete="showInboxMessages()" itemClick="openMessage(event);"-->
+												styleName="standardDataGridSolid" 
+												dataProvider="{ProviderApplicationModel(controller.model).patients}" 
+												horizontalScrollPolicy="off" rowCount="8" rowHeight="22" paddingTop="6"
+												itemClick="dgPatients_itemClickHandler(event)"><!--dataProvider="{acMessagesToDisplay}" creationComplete="showInboxMessages()" itemClick="openMessage(event);"-->
 												
 												<mx:columns>
 													<mx:DataGridColumn dataField="urgency" headerText="Urgency" width="68">
@@ -272,7 +270,7 @@
 											
 										</enhancedtitlewindow:EnhancedTitleWindow>
 										
-										<widgets:AppointmentsWidget id="widgetTeamAppointments" module="modTeamAppointments" width="633" headerClickable="false" collapsible="true"/>
+										<widgets:AppointmentsWidget id="widgetTeamAppointments" module="modTeamAppointments" width="633" headerClickable="false" collapsible="true" styleName="barChart" />
 
 									</s:VGroup>
 									
@@ -575,14 +573,13 @@
 															
 															<mx:LinkButton id="btnCustomizeTable" label="Customize Table" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnCustomizeTable.styleName='linkBtnUnderline';" rollOut="btnCustomizeTable.styleName='linkBtn';" click="customizeTable()" paddingLeft="10" />
 															<mx:DataGrid 
-																id="patientsList" dataProvider="{model.patients}" fontFamily="myMyriadNoCFF" paddingLeft="-2"
-																itemClick="dgPatients_itemClickHandler(event)"
+																id="patientsList" 
+																dataProvider="{model.patients}" styleName="standardDataGrid"  paddingLeft="-2"
 																width="989" height="{!showAdvancedSearch ? 462 : 303}"
-																selectionColor="0x31535E" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF"
-																alternatingItemColors="[0x303030,0x3c3c3b]"
-																color="0xFFFFFF" fontSize="10" verticalAlign="middle"
-																headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeaderAlternative" headerHeight="30" paddingTop="6"
-																rowHeight="27" variableRowHeight="true" horizontalGridLines="false"><!--defaultDataGridItemRenderer="mx.controls.dataGridClasses.FTEDataGridItemRenderer"-->
+																fontSize="10" verticalAlign="middle"
+																headerStyleName="dataGridHeaderAlternative" headerHeight="30" paddingTop="6"
+																rowHeight="27" variableRowHeight="true" horizontalGridLines="false" 
+																itemClick="dgPatients_itemClickHandler(event)"><!--defaultDataGridItemRenderer="mx.controls.dataGridClasses.FTEDataGridItemRenderer"-->
 																
 																<mx:columns>
 																	<mx:DataGridColumn dataField="urgency" headerText="Urgency" width="68">

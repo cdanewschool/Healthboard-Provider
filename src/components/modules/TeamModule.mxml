@@ -383,14 +383,12 @@
 						<!--	list view	-->
 						<s:NavigatorContent>
 							<mx:DataGrid 
+								styleName="standardDataGrid"
 								buttonMode="false" selectable="true" 
 								width="100%" height="588"
-								color="0xFFFFFF" fontFamily="myMyriadNoCFF" verticalAlign="middle"
 								dataProvider="{model.providers}"
 								rowHeight="25" headerHeight="25"
-								headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeaderAlternative"
-								horizontalGridLines="true" horizontalGridLineColor="0x444442" verticalGridLines="true"
-								alternatingItemColors="[0x3C3C3B,0x333333]" rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
+								headerStyleName="dataGridHeaderAlternative"
 								horizontalScrollPolicy="off" verticalScrollPolicy="off"  horizontalSeparatorSkin="{null}" 
 								itemRollOver="onTeamRollOver(event)" itemRollOut="teamRollOverRowIndex=-1" itemClick="onTeamClick(event)">
 								<mx:columns>
