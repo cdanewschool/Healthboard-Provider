@@ -495,7 +495,7 @@
 									<s:HGroup width="100%" verticalAlign="middle">
 										
 										<s:Label text="Last Update" styleName="greenBoldText" />
-										<s:Label styleName="gray13Italic" text="— {DateFormatters.monthShortDayNumberYearFull.format(advisory.update.date)}" />
+										<s:Label id="lastUpdate" styleName="gray13Italic" creationComplete="lastUpdate.text = '— ' + DateFormatters.monthShortDayNumberYearFull.format(advisory.update.date)" />
 										
 										<s:HGroup width="100%" horizontalAlign="right">
 											<mx:LinkButton id="viewAll" label="View All Updates »" styleName="linkBtnBlue" click="onViewAllUpdatesClick(event)" rollOver="viewAll.setStyle('textDecoration','underline')" rollOut="viewAll.setStyle('textDecoration','none')" />
@@ -886,7 +886,7 @@
 								
 								<s:Label text="(Last Updated:" />
 								
-								<s:Label text="{DateFormatters.dateFormatterToday.format(advisory.update.date)}" />
+								<s:Label id="lastUpdated" creationComplete="lastUpdated.text=DateFormatters.dateFormatterToday.format(advisory.update.date)" />
 								
 								<s:Label text=")" />
 								

@@ -48,12 +48,12 @@
 			
 			public var dateFormatter:DateFormatter = new DateFormatter();
 			
-			[Bindable]
 			public function get riskFactor():RiskFactor
 			{
 				return _riskFactor;
 			}
-
+			
+			[Bindable]
 			public function set riskFactor(value:RiskFactor):void
 			{
 				_riskFactor = value;

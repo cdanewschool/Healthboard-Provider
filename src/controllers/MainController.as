@@ -64,6 +64,7 @@ package controllers
 	import util.DateFormatters;
 	import util.DateUtil;
 
+	[Bindable]
 	public class MainController extends Controller
 	{
 		public var advisoryController:PublicHealthAdvisoriesController;
@@ -72,7 +73,7 @@ package controllers
 		public var teamAppointmentsController:TeamAppointmentsController;
 		
 		//	TODO: move to model
-		[Bindable] public var user:UserModel;	//	logged-in user, i.e. Dr. Berg
+		public var user:UserModel;	//	logged-in user, i.e. Dr. Berg
 		
 		private var autocompleteCallback:Function;
 		private var autocomplete:AutoComplete;

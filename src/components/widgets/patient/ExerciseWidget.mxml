@@ -144,9 +144,10 @@
 												<mx:HBox verticalAlign="middle" paddingLeft="10" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 													<fx:Script>
 														<![CDATA[
+															import ASclasses.MyCustomDataTip;
+															
 															import components.itemrenderers.chart.MyCircleItemRenderer;
 															import components.itemrenderers.chart.MyCircleItemRendererOver;
-															import ASclasses.MyCustomDataTip;
 															
 															import controllers.Controller;
 															
@@ -159,20 +160,29 @@
 															[Bindable] public var chartMinExPA:Date = new Date(2011,7,26);
 															[Bindable] public var chartMaxExPA:Date = new Date(2012,7,11);
 															
+															[Bindable] public var item:Object;
 															
-															override public function set data(value:Object):void {
+															override public function set data(value:Object):void 
+															{
 																super.data = value;
-																if (value.hasOwnProperty("chart")) {
+																
+																if ( value.hasOwnProperty("chart") ) 
+																{
 																	chart.dataProvider = value.chart[0].data;
 																}
-															}	
 															
-															private function chartRolloverEventHandler(event:ChartItemEvent):void {
+																item = data && data.chart && data.chart.length ? data.chart[0].data[data.chart[0].data.length - 1] : null;
+															}
+															
+															private function chartRolloverEventHandler(event:ChartItemEvent):void 
+															{
 																lblMinutes.text = data.chart[0].data[event.hitData.chartItem.index].value;
 																lblMiles.text = data.chart[0].data[event.hitData.chartItem.index].miles;
 																myLineSeries.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyCircleItemRendererOverWidget)); 
 															}
-															private function chartRolloutEventHandler(event:ChartItemEvent):void {
+															
+															private function chartRolloutEventHandler(event:ChartItemEvent):void 
+															{
 																lblMinutes.text = data.chart[0].data[data.chart[0].data.length - 1].value;
 																lblMiles.text = data.chart[0].data[data.chart[0].data.length - 1].miles;
 																myLineSeries.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyCircleItemRendererExercise)); 
@@ -222,11 +232,11 @@
 													
 													<s:VGroup fontSize="12" paddingLeft="10" gap="3">
 														<s:HGroup gap="3">
-															<s:Label id="lblMinutes" color="0xFBB03B" fontWeight="bold" text="{data.chart[0].data[data.chart[0].data.length - 1].value}" />
+															<s:Label id="lblMinutes" color="0xFBB03B" fontWeight="bold" text="{item.value}" />
 															<s:Label text="minutes" color="0xFFFFFF" />
 														</s:HGroup>
 														<s:HGroup visible="{data.measure == 'Run / Walk'}" includeInLayout="{data.measure == 'Run / Walk'}" gap="3">
-															<s:Label id="lblMiles" color="0xFBB03B" fontWeight="bold" text="{data.chart[0].data[data.chart[0].data.length - 1].miles}" />
+															<s:Label id="lblMiles" color="0xFBB03B" fontWeight="bold" text="{item.miles}" />
 															<s:Label text="miles" color="0xFFFFFF" />
 														</s:HGroup>
 													</s:VGroup>

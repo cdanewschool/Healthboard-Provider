@@ -63,8 +63,8 @@
 							</fx:Script>
 							
 							<mx:HBox width="11" paddingTop="6">
-								<s:Image source="@Embed('/images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.messages[data.messages.length - 1].urgency == 'Urgent'}" includeInLayout="{data.messages[data.messages.length - 1].urgency == 'Urgent'}" />
-								<s:Image source="@Embed('/images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.messages[data.messages.length - 1].urgency == 'Somewhat urgent'}" includeInLayout="{data.messages[data.messages.length - 1].urgency == 'Somewhat urgent'}" />
+								<s:Image id="urgentIcon" source="@Embed('/images/messagesUrgentSmall.png')" toolTip="Urgent" creationComplete="urgentIcon.visible=data.messages[data.messages.length - 1].urgency == 'Urgent'" includeInLayout="{urgentIcon.visible}" />
+								<s:Image id="somewhatUrgentIcon" source="@Embed('/images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" creationComplete="somewhatUrgentIcon.visible=data.messages[data.messages.length - 1].urgency == 'Somewhat urgent'" includeInLayout="{somewhatUrgentIcon.visible}" />
 							</mx:HBox>
 							
 							<s:Label text="{outerDocument.controller.displayTime(data.date, 'short')}" fontSize="12" width="62" color="0x868686" paddingTop="6" /><!--text="{outerDocument.displayTime(data.date, 'short')}" -->
