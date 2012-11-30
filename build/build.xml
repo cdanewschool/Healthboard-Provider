@@ -45,6 +45,7 @@
 	        <include-sources dir="${LIB_ROOT}/src" includes="*">
 	        	<exclude name="ASclasses/" />
 	        	<exclude name="sharedASfiles/" />
+	        	<exclude name="css/themes" />
 			</include-sources>
 			
 			<compiler.library-path dir="${LIB_ROOT}/src/external/kapit" includes="radar_chart.swc" />
