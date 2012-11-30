@@ -14,6 +14,7 @@ package controllers
 	
 	import enum.RiskLevel;
 	import enum.UrgencyType;
+	import enum.ViewModeType;
 	
 	import events.ApplicationDataEvent;
 	import events.ApplicationEvent;
@@ -29,7 +30,6 @@ package controllers
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
 	
-	import models.ApplicationModel;
 	import models.Chat;
 	import models.ChatSearch;
 	import models.Message;
@@ -51,13 +51,12 @@ package controllers
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
-	import mx.containers.TitleWindow;
 	import mx.core.INavigatorContent;
+	import mx.core.UIComponent;
 	import mx.events.CloseEvent;
 	import mx.events.ListEvent;
 	import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
-	import mx.utils.ObjectProxy;
 	
 	import spark.components.DropDownList;
 	import spark.events.IndexChangeEvent;
@@ -135,11 +134,13 @@ package controllers
 			loadStyles();
 		}
 		
-		override protected function showPreferences():void
+		override public function showPreferences():UIComponent
 		{
 			var popup:PreferencesPopup = PopUpManager.createPopUp( application, PreferencesPopup ) as PreferencesPopup;
 			popup.preferences = model.preferences.clone() as UserPreferences;
 			PopUpManager.centerPopUp( popup );
+			
+			return popup;
 		}
 		
 		override protected function loadPreferences():void
@@ -175,8 +176,10 @@ package controllers
 			if( preferences 
 				&& preferences.viewMode != model.preferences.viewMode )
 			{
-				model.viewMode = preferences.viewMode;
-				application.dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, model.viewMode) );
+				var state:String = preferences.viewMode == ViewModeType.WIDGET ? Constants.STATE_WIDGET_VIEW : Constants.STATE_LOGGED_IN;
+				state = Constants.STATE_LOGGED_IN;	//	widget view not supported yet
+				
+				application.dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, state) );
 			}
 		}
 		
@@ -190,6 +193,11 @@ package controllers
 			}
 			
 			super.onAuthenticated(event);
+		}
+		
+		override protected function showHome():void
+		{
+			setState( Constants.STATE_LOGGED_IN );
 		}
 		
 		protected function onPromptForAuthentication( event:AuthenticationEvent ):void
