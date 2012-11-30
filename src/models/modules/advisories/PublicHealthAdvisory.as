@@ -20,6 +20,9 @@ package models.modules.advisories
 		public var update:PublicHealthAdvisoryUpdate;
 		public var updates:ArrayCollection;
 		
+		public var arrStats:ArrayCollection;
+		public var arrStatsDetailed:ArrayCollection;
+		
 		public function PublicHealthAdvisory()
 		{
 		}
@@ -64,6 +67,9 @@ package models.modules.advisories
 				
 				val.update = PublicHealthAdvisoryUpdate( updates.getItemAt(0) );
 			}
+			
+			if(data.stats && data.stats.week) val.arrStats = data.stats.week is ArrayCollection ? data.stats.week : new ArrayCollection(data.stats.week);
+			if(data.stats && data.stats.half_week) val.arrStatsDetailed = data.stats.half_week is ArrayCollection ? data.stats.half_week : new ArrayCollection(data.stats.half_week);
 			
 			return val;
 		}

@@ -156,7 +156,7 @@
 										<enhancedtitlewindow:EnhancedTitleWindow id="widgetMyPatients" width="633" title="My Patients (8)" collapsible="true" headerClickable="false" module="modPatients" displayWarning="true" warningToolTip="There are patients who need attention" showCloseButton="false" titleBarHeight="30" color="0xFFFFFF"><!--creationComplete="{if(!wasMedicationDataLoaded) medicationsXMLdataForWidget.send();}"-->
 											
 											<enhancedtitlewindow:layout>
-												<s:VerticalLayout paddingLeft="11" paddingTop="12" paddingBottom="8"/>
+												<s:VerticalLayout paddingLeft="11" paddingTop="12" />
 											</enhancedtitlewindow:layout>
 											
 											<s:Label text="Patient Search" fontWeight="bold" fontSize="12" />
@@ -204,8 +204,8 @@
 														<s:dataProvider>
 															<s:ArrayList>
 																<fx:Object label="All" />
-																<fx:Object label="Male" />
-																<fx:Object label="Female" />
+																<fx:Object label="Male" data="1" />
+																<fx:Object label="Female" data="0" />
 															</s:ArrayList>							
 														</s:dataProvider>
 													</s:DropDownList>
@@ -239,8 +239,10 @@
 											<mx:DataGrid 
 												width="100%" 
 												styleName="standardDataGridSolid" 
-												dataProvider="{ProviderApplicationModel(controller.model).patients}" 
-												horizontalScrollPolicy="off" rowCount="8" rowHeight="22" paddingTop="6"
+												dataProvider="{ProviderApplicationModel(controller.model).patients}"
+												fontSize="12"
+												horizontalScrollPolicy="off" 
+												rowCount="9" rowHeight="22" paddingTop="6"
 												itemClick="dgPatients_itemClickHandler(event)"><!--dataProvider="{acMessagesToDisplay}" creationComplete="showInboxMessages()" itemClick="openMessage(event);"-->
 												
 												<mx:columns>
@@ -533,7 +535,7 @@
 																<mx:LinkButton id="btnSortLastName" label="Sort by Last Name" styleName="messageFolderSelected" click="sortPatients('lastName');" />
 																<mx:LinkButton id="btnSortFirstName" label="Sort by First Name" click="sortPatients('firstName');" />
 																<mx:LinkButton id="btnSortAge" label="Sort by Age" click="sortPatients('birthdate');" />
-																<mx:LinkButton id="btnSortRank" label="Sort by Rank" click="sortPatients('rank');" />
+																<mx:LinkButton id="btnSortRank" label="Sort by Rank" click="sortPatients('serviceRank');" />
 																<mx:LinkButton id="btnSortBranch" label="Sort by Service Branch" click="sortPatients('serviceBranch');" />
 																<mx:LinkButton id="btnSortSex" label="Sort by Sex" click="sortPatients('sex');" />
 																<mx:LinkButton id="btnSortBloodType" label="Sort by Blood Type" click="sortPatients('bloodType');" />
@@ -574,7 +576,8 @@
 															<mx:LinkButton id="btnCustomizeTable" label="Customize Table" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnCustomizeTable.styleName='linkBtnUnderline';" rollOut="btnCustomizeTable.styleName='linkBtn';" click="customizeTable()" paddingLeft="10" />
 															<mx:DataGrid 
 																id="patientsList" 
-																dataProvider="{model.patients}" styleName="standardDataGrid"  paddingLeft="-2"
+																dataProvider="{ProviderApplicationModel(controller.model).patients}" 
+																styleName="standardDataGrid"
 																width="989" height="{!showAdvancedSearch ? 462 : 303}"
 																fontSize="10" verticalAlign="middle"
 																headerStyleName="dataGridHeaderAlternative" headerHeight="30" paddingTop="6"
@@ -586,8 +589,8 @@
 																		<mx:itemRenderer>
 																			<fx:Component>
 																				<mx:HBox width="68" horizontalAlign="center">
-																					<s:Image source="@Embed('/images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 'Urgent'}" includeInLayout="{data.urgency == 'Urgent'}" />
-																					<s:Image source="@Embed('/images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 'Somewhat urgent'}" includeInLayout="{data.urgency == 'Somewhat urgent'}" />
+																					<s:Image source="@Embed('/images/messagesUrgentSmall.png')" toolTip="Urgent" visible="{data.urgency == 2}" includeInLayout="{data.urgency == 2}" />
+																					<s:Image source="@Embed('/images/messagesSomewhatUrgentSmall.png')" toolTip="Somewhat urgent" visible="{data.urgency == 1}" includeInLayout="{data.urgency == 1}" />
 																				</mx:HBox>
 																			</fx:Component>
 																		</mx:itemRenderer>
@@ -617,7 +620,7 @@
 																	<mx:DataGridColumn dataField="lastName" headerText="Last Name" width="101" visible="{colLastName}" />
 																	<mx:DataGridColumn dataField="firstName" headerText="First Name" width="100" visible="{colFirstName}" />
 																	<mx:DataGridColumn dataField="serviceBranch" headerText="Service Branch" visible="{colBranch}" />
-																	<mx:DataGridColumn dataField="rank" headerText="Rank" width="148" visible="{colRank}" />
+																	<mx:DataGridColumn dataField="serviceRank" headerText="Rank" width="148" visible="{colRank}" />
 																	<mx:DataGridColumn dataField="occupation" headerText="Occupation" visible="{colOccupation}" />
 																	<mx:DataGridColumn dataField="sexLabel" headerText="Sex" width="58" visible="{colSex}" />
 																	<mx:DataGridColumn dataField="lastVisitLabel" headerText="Last Visit" width="80" visible="{colLastVisit}" />

@@ -143,8 +143,8 @@ private function highlightSelectedSort(field:String = "none"):void {
 	else if(field == "id") btnSortID.styleName = "messageFolderSelected";
 	else if(field == "lastName") btnSortLastName.styleName = "messageFolderSelected";
 	else if(field == "firstName") btnSortFirstName.styleName = "messageFolderSelected";
-	else if(field == "dob") btnSortAge.styleName = "messageFolderSelected";
-	else if(field == "rank") btnSortRank.styleName = "messageFolderSelected";
+	else if(field == "birthdate") btnSortAge.styleName = "messageFolderSelected";
+	else if(field == "serviceRank") btnSortRank.styleName = "messageFolderSelected";
 	else if(field == "serviceBranch") btnSortBranch.styleName = "messageFolderSelected";
 	else if(field == "sex") btnSortSex.styleName = "messageFolderSelected";
 	else if(field == "bloodType") btnSortBloodType.styleName = "messageFolderSelected";
@@ -162,11 +162,11 @@ private function filterPatientsSearch(item:Object):Boolean
 	var pattern:RegExp = new RegExp("[^]*"+patientSearch.text+"[^]*", "i");
 	var searchFilter:Boolean = (patientSearch.text == 'Search' || patientSearch.text == '') ? true : (pattern.test(item.lastName) || pattern.test(item.firstName));
 	
-	var birthDayFilter:Boolean = (txtPatientBirthDay.text == 'dd' || txtPatientBirthDay.text == '') ? true : item.dob.substr(3,2) == txtPatientBirthDay.text;
-	var birthMonthFilter:Boolean = (txtPatientBirthMonth.text == 'mm' || txtPatientBirthMonth.text == '') ? true : item.dob.substr(0,2) == txtPatientBirthMonth.text;
-	var birthYearFilter:Boolean = (txtPatientBirthYear.text == 'year' || txtPatientBirthYear.text == '') ? true : item.dob.substr(6,4) == txtPatientBirthYear.text;
+	var birthDayFilter:Boolean = (txtPatientBirthDay.text == 'dd' || txtPatientBirthDay.text == '') ? true : item.birthdateLabel.substr(3,2) == txtPatientBirthDay.text;
+	var birthMonthFilter:Boolean = (txtPatientBirthMonth.text == 'mm' || txtPatientBirthMonth.text == '') ? true : item.birthdateLabel.substr(0,2) == txtPatientBirthMonth.text;
+	var birthYearFilter:Boolean = (txtPatientBirthYear.text == 'year' || txtPatientBirthYear.text == '') ? true : item.birthdateLabel.substr(6,4) == txtPatientBirthYear.text;
 	
-	var genderFilter:Boolean = dropPatientsSex.selectedIndex == 0 ? true : item.sex == dropPatientsSex.selectedItem.label;
+	var genderFilter:Boolean = dropPatientsSex.selectedIndex == 0 ? true : item.sex == dropPatientsSex.selectedItem.data;
 	
 	var notifFilter:Boolean = showPatientsAll.selected ? true : item.urgency != "Not urgent";
 	
@@ -253,5 +253,5 @@ private function filterPatientsSearchModule(item:PatientModel):Boolean
 [Bindable] private var arrModules:ArrayCollection = new ArrayCollection([{label: 'Exercise', selected: true},{label: 'Immunizations', selected: true},{label: 'Medications', selected: true},{label: 'Nutrition', selected: true},{label: 'Vital Signs', selected: true}]);
 [Bindable] private var arrTeams:ArrayCollection = new ArrayCollection([{label: 'Team 1', selected: true},{label: 'Team 2', selected: true},{label: 'Team 3', selected: true},{label: 'Team 4', selected: true},{label: 'Team 5', selected: true},{label: 'Team 6', selected: true}]);
 [Bindable] private var arrSearchParameters:ArrayCollection = new ArrayCollection([{label: 'First and/or Last Name', selected: true},{label: 'DOB', selected: true},{label: 'Sex', selected: true},{label: 'Marital Status', selected: false},{label: 'Age Range', selected: true},{label: 'Blood Type', selected: false},{label: 'Family Prefix', selected: true},{label: 'ID Number', selected: true},{label: 'Patient\'s SSN', selected: true},{label: 'Sponsor\'s SSN', selected: true},{label: 'Race', selected: false},{label: 'Address', selected: false},{label: 'Service Branch', selected: false},{label: 'Status', selected: false},{label: 'Rank', selected: false},{label: 'Occupation', selected: false},{label: 'Years of Service', selected: false},{label: 'Stationed / Deployment', selected: false},{label: 'Last Visit Range', selected: false},{label: 'Case Number', selected: false},{label: 'Special Health Conditions', selected: false}]);
-[Bindable] private var arrSexes:ArrayCollection = new ArrayCollection([{label: 'Male', data:0, selected: true},{label: 'Female', data:1, selected: true}]);
+[Bindable] private var arrSexes:ArrayCollection = new ArrayCollection([{label: 'Male', data:1, selected: true},{label: 'Female', data:0, selected: true}]);
 [Bindable] private var arrFamilyPrefixes:ArrayCollection = new ArrayCollection([{label: '01', selected: true},{label: '02', selected: true},{label: '03', selected: true},{label: '04', selected: true},{label: '05', selected: true},{label: '06', selected: true},{label: '07', selected: true},{label: '08', selected: true},{label: '09', selected: true},{label: '10', selected: true},{label: '11', selected: true},{label: '12', selected: true},{label: '13', selected: true},{label: '14', selected: true},{label: '15', selected: true},{label: '16', selected: true},{label: '17', selected: true},{label: '18', selected: true},{label: '19', selected: true},{label: '20', selected: true},{label: '22', selected: true},{label: '22', selected: true},{label: '23', selected: true},{label: '24', selected: true},{label: '25', selected: true},{label: '26', selected: true},{label: '27', selected: true},{label: '28', selected: true},{label: '29', selected: true},{label: '30', selected: true},{label: '33', selected: true},{label: '32', selected: true},{label: '33', selected: true},{label: '34', selected: true},{label: '35', selected: true},{label: '36', selected: true},{label: '37', selected: true},{label: '38', selected: true},{label: '39', selected: true}]);

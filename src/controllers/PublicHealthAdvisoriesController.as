@@ -80,9 +80,9 @@ package controllers
 						{data:PublicHealthAdvisoriesModel.SORT_MODE_AFFECTED, value:'Affected (My Patients)'},
 						{data:PublicHealthAdvisoriesModel.SORT_MODE_ATRISK, value:'At risk (My Patients)'},
 						{data:PublicHealthAdvisoriesModel.SORT_MODE_DEATHS, value:'Deaths (My Patients)'},
-						{data:PublicHealthAdvisoriesModel.SORT_MODE_AFFECTED_TOTAL, value:'Affected'},
-						{data:PublicHealthAdvisoriesModel.SORT_MODE_ATRISK_TOTAL, value:'At risk'},
-						{data:PublicHealthAdvisoriesModel.SORT_MODE_DEATHS_TOTAL, value:'Deaths'},
+						{data:PublicHealthAdvisoriesModel.SORT_MODE_AFFECTED_TOTAL, value:'Affected (Total)'},
+						{data:PublicHealthAdvisoriesModel.SORT_MODE_ATRISK_TOTAL, value:'At risk (Total)'},
+						{data:PublicHealthAdvisoriesModel.SORT_MODE_DEATHS_TOTAL, value:'Deaths (Total)'},
 					]
 				);
 			

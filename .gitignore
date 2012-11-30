@@ -3,6 +3,5 @@
 .fxpProperties
 .gitignore.swp
 .settings
-bin-debug
 bin-debug/
 bin-release/

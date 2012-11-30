@@ -2,49 +2,49 @@
 <appointments>
 	
 	<!-- 10/09/2012 -->
-	<appointment patient_id='123' provider_id='0' from='{{MONTH}}/{{DAY-3}}/{{YEAR}} 11:00:00' to='{{MONTH}}/{{DAY-3}}/{{YEAR}} 12:00:00' type='visit' reason='Appointment' room='304' />	<!-- berg -->
-	<appointment patient_id='123' provider_id='1' from='{{MONTH}}/{{DAY-3}}/{{YEAR}} 07:00:00' to='{{MONTH}}/{{DAY-3}}/{{YEAR}} 08:00:00' type='visit'  reason='Regular check-up' room='304'/>	<!-- greenfield -->
-	<appointment patient_id='123' provider_id='2' from='{{MONTH}}/{{DAY-3}}/{{YEAR}} 08:00:00' to='{{MONTH}}/{{DAY-3}}/{{YEAR}} 08:30:00' type='conferenceWeb' room='304'/>	<!-- mckinley -->
+	<appointment patient_id='123' provider_id='0' from='*/-3/* 11:00:00' to='*/-3/* 12:00:00' type='visit' reason='Appointment' room='304' />	<!-- berg -->
+	<appointment patient_id='123' provider_id='1' from='*/-3/* 07:00:00' to='*/-3/* 08:00:00' type='visit'  reason='Regular check-up' room='304'/>	<!-- greenfield -->
+	<appointment patient_id='123' provider_id='2' from='*/-3/* 08:00:00' to='*/-3/* 08:30:00' type='conferenceWeb' room='304'/>	<!-- mckinley -->
 	
 	<!-- 10/10/2012 -->
-	<appointment patient_id='123' provider_id='0' from='{{MONTH}}/{{DAY-2}}/{{YEAR}} 06:00:00' to='{{MONTH}}/{{DAY-2}}/{{YEAR}} 07:00:00' type='conferenceWeb' room='304'/>	<!-- berg -->
-	<appointment patient_id='123' provider_id='0' from='{{MONTH}}/{{DAY-2}}/{{YEAR}} 10:30:00' to='{{MONTH}}/{{DAY-2}}/{{YEAR}} 11:30:00' type='other' room='304'/>	<!-- berg -->
-	<appointment patient_id='123' provider_id='1' from='{{MONTH}}/{{DAY-2}}/{{YEAR}} 09:00:00' to='{{MONTH}}/{{DAY-2}}/{{YEAR}} 10:00:00' type='visit' room='304'/>	<!-- greenfield -->
-	<appointment patient_id='123' provider_id='1' from='{{MONTH}}/{{DAY-2}}/{{YEAR}} 10:00:00' to='{{MONTH}}/{{DAY-2}}/{{YEAR}} 11:00:00' type='conferenceWeb' room='304'/>	<!-- greenfield -->
-	<appointment patient_id='123' provider_id='2' from='{{MONTH}}/{{DAY-2}}/{{YEAR}} 06:00:00' to='{{MONTH}}/{{DAY-2}}/{{YEAR}} 07:00:00' type='visit' room='304'/>	<!-- mckinley -->
-	<appointment patient_id='123' provider_id='2' from='{{MONTH}}/{{DAY-2}}/{{YEAR}} 09:00:00' to='{{MONTH}}/{{DAY-2}}/{{YEAR}} 10:00:00' type='conferencePhone' room='304'/>	<!-- mckinley -->
+	<appointment patient_id='123' provider_id='0' from='*/-2/* 06:00:00' to='*/-2/* 07:00:00' type='conferenceWeb' room='304'/>	<!-- berg -->
+	<appointment patient_id='123' provider_id='0' from='*/-2/* 10:30:00' to='*/-2/* 11:30:00' type='other' room='304'/>	<!-- berg -->
+	<appointment patient_id='123' provider_id='1' from='*/-2/* 09:00:00' to='*/-2/* 10:00:00' type='visit' room='304'/>	<!-- greenfield -->
+	<appointment patient_id='123' provider_id='1' from='*/-2/* 10:00:00' to='*/-2/* 11:00:00' type='conferenceWeb' room='304'/>	<!-- greenfield -->
+	<appointment patient_id='123' provider_id='2' from='*/-2/* 06:00:00' to='*/-2/* 07:00:00' type='visit' room='304'/>	<!-- mckinley -->
+	<appointment patient_id='123' provider_id='2' from='*/-2/* 09:00:00' to='*/-2/* 10:00:00' type='conferencePhone' room='304'/>	<!-- mckinley -->
 	
 	<!-- 10/11/2012 -->
-	<appointment patient_id='123' provider_id='0' from='{{MONTH}}/{{DAY-1}}/{{YEAR}} 06:30:00' to='{{MONTH}}/{{DAY-1}}/{{YEAR}} 07:30:00' type='other' room='304'/>	<!-- berg -->
-	<appointment patient_id='123' provider_id='1' from='{{MONTH}}/{{DAY-1}}/{{YEAR}} 08:00:00' to='{{MONTH}}/{{DAY-1}}/{{YEAR}} 09:00:00' type='visit' room='304'/>	<!-- greenfield -->
-	<appointment patient_id='123' provider_id='1' from='{{MONTH}}/{{DAY-1}}/{{YEAR}} 09:00:00' to='{{MONTH}}/{{DAY-1}}/{{YEAR}} 10:00:00' type='conferenceWeb' room='304'/>	<!-- greenfield -->
-	<appointment patient_id='123' provider_id='1' from='{{MONTH}}/{{DAY-1}}/{{YEAR}} 11:00:00' to='{{MONTH}}/{{DAY-1}}/{{YEAR}} 12:00:00' type='visit' room='304'/>	<!-- greenfield -->
-	<appointment patient_id='123' provider_id='2' from='{{MONTH}}/{{DAY-1}}/{{YEAR}} 08:30:00' to='{{MONTH}}/{{DAY-1}}/{{YEAR}} 09:00:00' type='conferenceWeb' room='304'/>	<!-- mckinley -->
-	<appointment patient_id='123' provider_id='2' from='{{MONTH}}/{{DAY-1}}/{{YEAR}} 11:30:00' to='{{MONTH}}/{{DAY-1}}/{{YEAR}} 12:30:00' type='conferenceWeb' room='304'/>	<!-- mckinley -->
+	<appointment patient_id='123' provider_id='0' from='*/-1/* 06:30:00' to='*/-1/* 07:30:00' type='other' room='304'/>	<!-- berg -->
+	<appointment patient_id='123' provider_id='1' from='*/-1/* 08:00:00' to='*/-1/* 09:00:00' type='visit' room='304'/>	<!-- greenfield -->
+	<appointment patient_id='123' provider_id='1' from='*/-1/* 09:00:00' to='*/-1/* 10:00:00' type='conferenceWeb' room='304'/>	<!-- greenfield -->
+	<appointment patient_id='123' provider_id='1' from='*/-1/* 11:00:00' to='*/-1/* 12:00:00' type='visit' room='304'/>	<!-- greenfield -->
+	<appointment patient_id='123' provider_id='2' from='*/-1/* 08:30:00' to='*/-1/* 09:00:00' type='conferenceWeb' room='304'/>	<!-- mckinley -->
+	<appointment patient_id='123' provider_id='2' from='*/-1/* 11:30:00' to='*/-1/* 12:30:00' type='conferenceWeb' room='304'/>	<!-- mckinley -->
 	
 	<!-- 10/12/2012 -->
-	<appointment patient_id='125' provider_id='0' from='{{MONTH}}/{{DAY}}/{{YEAR}} 07:00:00' to='{{MONTH}}/{{DAY}}/{{YEAR}} 08:00:00' type='conferenceWeb' reason='Appointment' room='304'><!-- berg -->
+	<appointment patient_id='125' provider_id='0' from='*/*/* 07:00:00' to='*/*/* 08:00:00' type='conferenceWeb' reason='Appointment' room='304'><!-- berg -->
 		<prerequisites>
 			<prerequisite id='xray' title='Diagnostic Studies' date='03/06/2012 08:30:00' ordered_by_id='0' interpreted_by='Dr. Sam Huntsman' />
 		</prerequisites>
 	</appointment>	
-	<appointment patient_id='126' provider_id='0' from='{{MONTH}}/{{DAY}}/{{YEAR}} 09:30:00' to='{{MONTH}}/{{DAY}}/{{YEAR}} 10:00:00' type='visit' reason='Regular check-up' is_pending='true' room='304'>
+	<appointment patient_id='126' provider_id='0' from='*/*/* 09:30:00' to='*/*/* 10:00:00' type='visit' reason='Regular check-up' is_pending='true' room='304'>
 		<prerequisites>
 			<prerequisite id='xray' title='Diagnostic Studies' date='03/06/2012 08:30:00' ordered_by_id='0' interpreted_by='Dr. Sam Huntsman' />
 		</prerequisites>
 	</appointment>	<!-- berg -->
-	<appointment patient_id='123' provider_id='0' from='{{MONTH}}/{{DAY}}/{{YEAR}} 11:30:00' to='{{MONTH}}/{{DAY}}/{{YEAR}} 12:00:00' type='conferenceWeb' room='304'/>	<!-- berg -->
-	<appointment patient_id='127' provider_id='1' from='{{MONTH}}/{{DAY}}/{{YEAR}} 06:30:00' to='{{MONTH}}/{{DAY}}/{{YEAR}} 07:30:00' type='visit' room='304'/>	<!-- greenfield -->
-	<appointment patient_id='128' provider_id='1' from='{{MONTH}}/{{DAY}}/{{YEAR}} 09:30:00' to='{{MONTH}}/{{DAY}}/{{YEAR}} 10:00:00' type='conferenceWeb' room='304'/>	<!-- greenfield -->
-	<appointment patient_id='129' provider_id='1' from='{{MONTH}}/{{DAY}}/{{YEAR}} 10:30:00' to='{{MONTH}}/{{DAY}}/{{YEAR}} 11:30:00' type='conferencePhone' room='304'/>	<!-- greenfield -->
-	<appointment provider_id='2' from='{{MONTH}}/{{DAY}}/{{YEAR}} 07:30:00' to='10/12/2012 08:30:00' type='other' />	<!-- mckinley -->
-	<appointment patient_id='124' provider_id='2' from='{{MONTH}}/{{DAY}}/{{YEAR}} 08:30:00' to='{{MONTH}}/{{DAY}}/{{YEAR}} 09:00:00' type='visit' is_pending='true' room='304'/>	<!-- mckinley -->
-	<appointment patient_id='130' provider_id='2' from='{{MONTH}}/{{DAY}}/{{YEAR}} 10:00:00' to='{{MONTH}}/{{DAY}}/{{YEAR}} 11:00:00' type='visit' room='304'/>	<!-- mckinley -->
+	<appointment patient_id='123' provider_id='0' from='*/*/* 11:30:00' to='*/*/* 12:00:00' type='conferenceWeb' room='304'/>	<!-- berg -->
+	<appointment patient_id='127' provider_id='1' from='*/*/* 06:30:00' to='*/*/* 07:30:00' type='visit' room='304'/>	<!-- greenfield -->
+	<appointment patient_id='128' provider_id='1' from='*/*/* 09:30:00' to='*/*/* 10:00:00' type='conferenceWeb' room='304'/>	<!-- greenfield -->
+	<appointment patient_id='129' provider_id='1' from='*/*/* 10:30:00' to='*/*/* 11:30:00' type='conferencePhone' room='304'/>	<!-- greenfield -->
+	<appointment provider_id='2' from='*/*/* 07:30:00' to='10/12/2012 08:30:00' type='other' />	<!-- mckinley -->
+	<appointment patient_id='124' provider_id='2' from='*/*/* 08:30:00' to='*/*/* 09:00:00' type='visit' is_pending='true' room='304'/>	<!-- mckinley -->
+	<appointment patient_id='130' provider_id='2' from='*/*/* 10:00:00' to='*/*/* 11:00:00' type='visit' room='304'/>	<!-- mckinley -->
 	
 	<!-- 10/15/2012 -->
-	<appointment patient_id='124' provider_id='0' from='{{MONTH}}/{{DAY+3}}/{{YEAR}} 11:00:00' to='{{MONTH}}/{{DAY+3}}/{{YEAR}} 12:00:00' type='conferencePhone' is_pending='true' room='304'/>	<!-- berg -->
+	<appointment patient_id='124' provider_id='0' from='*/+3/* 11:00:00' to='*/+3/* 12:00:00' type='conferencePhone' is_pending='true' room='304'/>	<!-- berg -->
 	
 	<!-- 10/18/2012 -->
-	<appointment patient_id='124' provider_id='0' from='{{MONTH}}/{{DAY+5}}/{{YEAR}} 11:45:00' to='{{MONTH}}/{{DAY+5}}/{{YEAR}} 13:00:00' type='visit' is_pending='true' room='304'/>	<!-- berg -->
+	<appointment patient_id='124' provider_id='0' from='*/+5/* 11:45:00' to='*/+5/* 13:00:00' type='visit' is_pending='true' room='304'/>	<!-- berg -->
 	
 </appointments>

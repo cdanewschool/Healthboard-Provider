@@ -93,8 +93,8 @@
 		</s:HGroup>
 	</s:HGroup>
 	
-	<s:HGroup paddingLeft="10" paddingBottom="-4">
-		<s:Line xFrom="0" xTo="281">
+	<s:HGroup paddingBottom="-6">
+		<s:Line xFrom="0" xTo="303">
 			<s:stroke>
 				<s:SolidColorStroke color="0x676767" weight="1" />
 			</s:stroke>
@@ -103,14 +103,13 @@
 	
 	<mx:DataGrid 
 		id="providerLists"
-		width="303" height="100" 
+		width="303" rowCount="4"
 		styleName="standardDataGridSolid"
 		buttonMode="false" selectable="true" 
-		verticalAlign="middle" 
+		fontSize="12" headerHeight="30"
 		dataProvider="{model.providers}"
-		headerHeight="30" paddingTop="6"
-		rollOverColor="0x31535E" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-		horizontalScrollPolicy="off" verticalScrollPolicy="auto" rowHeight="22" horizontalSeparatorSkin="{null}" 
+		paddingTop="6"
+		horizontalScrollPolicy="off" verticalScrollPolicy="auto" rowHeight="22" 
 		itemRollOver="onTeamRollOver(event)" itemRollOut="teamRollOverRowIndex=-1" itemClick="onTeamClick(event)">
 
 		<mx:columns>

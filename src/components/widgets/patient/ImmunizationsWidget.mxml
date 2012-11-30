@@ -46,7 +46,7 @@
 								<s:Image source="@Embed('/images/messagesSomewhatUrgentSmall.png')" toolTip="Due" visible="{new Date(data.date) >= new Date()}" includeInLayout="{new Date(data.date) >= new Date()}" />
 							</mx:HBox>
 							<s:Label text="{data.name}" color="0xFFFFFF" fontSize="12" width="110" fontWeight="bold" paddingTop="6" />
-							<s:Label text="{new Date(data.date) &lt; new Date() ? 'due ' + (new Date().setHours(0,0,0,0) - new Date(data.date).getTime()) / (1000*60*60*24) + ' days ago' : 'due in ' + (new Date(data.date).getTime() - new Date().setHours(0,0,0,0)) / (1000*60*60*24) + ' days'}" fontSize="12" color="0x868686" paddingTop="6" fontStyle="italic" />
+							<s:Label text="{new Date(data.date) &lt; new Date() ? 'due ' + Math.round((new Date().setHours(0,0,0,0) - new Date(data.date).getTime()) / (1000*60*60*24)) + ' days ago' : 'due in ' + Math.round((new Date(data.date).getTime() - new Date().setHours(0,0,0,0)) / (1000*60*60*24)) + ' days'}" fontSize="12" color="0x868686" paddingTop="6" fontStyle="italic" />
 						</mx:HBox>
 					</fx:Component>
 				</mx:itemRenderer>
