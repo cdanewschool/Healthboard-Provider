@@ -142,7 +142,7 @@
 	
 	<s:Spacer height="10" />
 	
-	<s:HGroup width="100%" paddingLeft="10">
+	<s:HGroup width="100%" paddingLeft="17">
 		
 		<mx:Label text="{headerText}" styleName="headerAlternateColor1 bold" fontSize="13" />
 		
@@ -152,7 +152,9 @@
 			click="dispatchEvent( new AdvisoryEvent( AdvisoryEvent.SHOW_ALL, true ) )" styleName="linkButton linkButtonStyle1" 
 			visible="{restrictToActive}" />
 		
-		<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle" paddingRight="10">
+		<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle" paddingRight="29">
+			
+			<s:Label text="Sort by:" color="0xFFFFFF" />
 			
 			<s:DropDownList 
 				id="sortSelect" width="170" height="24" labelField="value" 
@@ -166,13 +168,13 @@
 	
 	<s:Spacer height="10" />
 	
-	<s:HGroup width="100%" paddingLeft="10" paddingRight="0">
+	<s:HGroup width="100%" paddingLeft="13">
 			
 		<mx:TileList 
 			id="advisoryList" 
-			width="100%" height="560"
-			contentBackgroundAlpha="0" borderAlpha="0"  
-			dataProvider="{dataProvider}" columnCount="4" columnWidth="230" rowHeight="280" 
+			width="965" height="560"
+			contentBackgroundAlpha="0" borderAlpha="0"
+			dataProvider="{dataProvider}" columnCount="4" columnWidth="237" rowHeight="280"	
 			itemRenderer="components.itemrenderers.PublicHealthAdvisoryItemRenderer" selectable="false" />
 		
 	</s:HGroup>

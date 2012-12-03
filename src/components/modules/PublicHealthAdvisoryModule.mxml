@@ -171,7 +171,7 @@
 	
 	<s:Spacer height="10" />
 	
-	<s:VGroup width="100%" gap="25">
+	<s:VGroup width="100%" paddingLeft="23">
 		
 		<s:Group width="100%" creationComplete="{tabs.setTabClosePolicy(0, false);}">
 			

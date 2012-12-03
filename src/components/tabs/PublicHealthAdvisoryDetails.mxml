@@ -480,17 +480,17 @@
 					<s:NavigatorContent>
 						
 						<s:layout>
-							<s:VerticalLayout gap="0" paddingLeft="20" paddingTop="20" paddingRight="20" paddingBottom="10" />
+							<s:VerticalLayout gap="0" paddingLeft="25" paddingTop="25" paddingBottom="21" />
 						</s:layout>
 						
 						<s:VGroup>
 							
 							<s:Label text="{advisory.title}" styleName="greenBoldText" />
 							
-							<s:HGroup>
+							<s:HGroup paddingBottom="10">
 								
 								<!--	column 1	-->
-								<s:VGroup width="425">
+								<s:VGroup width="425" paddingTop="4">
 									
 									<s:HGroup width="100%" verticalAlign="middle">
 										
@@ -503,39 +503,39 @@
 										
 									</s:HGroup>
 									
-									<mx:Text width="100%" text="{advisory.update.text} Source: {advisory.update.source}" color="0xE6E6E6" paddingLeft="20" />
+									<mx:Text width="100%" text="{advisory.update.text} Source: {advisory.update.source}" color="0xE6E6E6" paddingLeft="20" leading="4" />
 									
 								</s:VGroup>
 								
 								<s:Line yFrom="0" yTo="160">
 									<s:stroke>
-										<s:SolidColorStroke color="0xB3B3B3" alpha=".5" />
+										<s:SolidColorStroke color="0xB3B3B3" alpha=".35" />
 									</s:stroke>
 								</s:Line>
 								
 								<!--	column 2	-->
-								<s:VGroup width="150" paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5">
+								<s:VGroup width="150" paddingLeft="5" paddingTop="11" paddingRight="5" paddingBottom="5">
 									
-									<s:Label text="My Patients" styleName="green12Bold" />
+									<s:Label text="My Patients" styleName="green12Bold" paddingBottom="10" />
 									
 									<s:HGroup gap="15">
-										<s:Label width="50" text="{advisory.update.affectedCountNetwork>-1?numberFormatter.format(advisory.update.affectedCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label width="27" text="{advisory.update.affectedCountNetwork>-1?numberFormatter.format(advisory.update.affectedCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
 										<s:Label text="Affected" styleName="white12Bold" />
 									</s:HGroup>
 									
 									<s:HGroup gap="15">
-										<s:Label width="50" text="{advisory.update.atRiskCountNetwork>-1?numberFormatter.format(advisory.update.atRiskCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label width="27" text="{advisory.update.atRiskCountNetwork>-1?numberFormatter.format(advisory.update.atRiskCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
 										<s:Label text="At Risk" styleName="white12Bold" />
 									</s:HGroup>
 									
 									<s:HGroup gap="15">
-										<s:Label width="50" text="{advisory.update.deathCountNetwork>-1?numberFormatter.format(advisory.update.deathCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label width="27" text="{advisory.update.deathCountNetwork>-1?numberFormatter.format(advisory.update.deathCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
 										<s:Label text="Deaths" styleName="white12Bold" />
 									</s:HGroup>
 									
 									<s:HGroup gap="15">
-										<s:Label width="50" text="{advisory.update.hospitalizationsCountNetwork>-1?numberFormatter.format(advisory.update.hospitalizationsCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
-										<s:Label text="Hospitalization" styleName="white12Bold" />
+										<s:Label width="27" text="{advisory.update.hospitalizationsCountNetwork>-1?numberFormatter.format(advisory.update.hospitalizationsCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label text="Hospitalizations" styleName="white12Bold" />
 									</s:HGroup>
 									
 								</s:VGroup>
@@ -543,29 +543,29 @@
 								<s:BorderContainer width="174" height="144" cornerRadius="3" backgroundColor="0x4B4A4A" borderAlpha="0">
 									
 									<s:layout>
-										<s:VerticalLayout paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5" />
+										<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingBottom="10" />
 									</s:layout>
 									
-									<s:Label text="National" styleName="green12Bold" />
+									<s:Label text="National" styleName="green12Bold" paddingBottom="10" />
 									
 									<s:HGroup gap="15">
-										<s:Label width="50" text="{advisory.update.caseReportCount}" styleName="orange16Bold" textAlign="right" />
+										<s:Label width="45" text="{advisory.update.caseReportCount}" styleName="orange16Bold" textAlign="right" />
 										<s:Label text="Case Reports" styleName="white12Bold" />
 									</s:HGroup>
 									
 									<s:HGroup gap="15">
-										<s:Label width="50" text="{!isNaN(advisory.update.affectedStatesCount)?numberFormatter.format(advisory.update.affectedStatesCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label width="45" text="{!isNaN(advisory.update.affectedStatesCount)?numberFormatter.format(advisory.update.affectedStatesCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
 										<s:Label text="States" styleName="white12Bold" />
 									</s:HGroup>
 									
 									<s:HGroup gap="15">
-										<s:Label width="50" text="{!isNaN(advisory.update.deathCount)?numberFormatter.format(advisory.update.deathCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label width="45" text="{!isNaN(advisory.update.deathCount)?numberFormatter.format(advisory.update.deathCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
 										<s:Label text="Deaths" styleName="white12Bold" />
 									</s:HGroup>
 									
 									<s:HGroup gap="15">
-										<s:Label width="50" text="{!isNaN(advisory.update.hospitalizationsCount)?numberFormatter.format(advisory.update.hospitalizationsCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
-										<s:Label text="Hospitalization" styleName="white12Bold" />
+										<s:Label width="45" text="{!isNaN(advisory.update.hospitalizationsCount)?numberFormatter.format(advisory.update.hospitalizationsCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label text="Hospitalizations" styleName="white12Bold" />
 									</s:HGroup>
 									
 								</s:BorderContainer>
@@ -573,15 +573,15 @@
 							</s:HGroup>
 							
 							<!--	outbreak map	-->
-							<s:BorderContainer width="773" height="359" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderWeight=".5">
+							<s:BorderContainer width="773" height="359" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderAlpha=".5">
 								
 								<s:layout>
-									<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
+									<s:VerticalLayout paddingLeft="15" paddingTop="15" paddingRight="10" paddingBottom="10" />
 								</s:layout>
 								
 								<s:HGroup width="567" paddingBottom="10">
 									
-									<s:Label text="Outbreak Map" styleName="green12Bold" />
+									<s:Label text="Outbreak Map" styleName="green12Bold" paddingTop="4" />
 									
 									<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
 										
@@ -639,7 +639,7 @@
 										
 										<s:Label text="Legends" styleName="green12Bold" />
 										
-										<s:BorderContainer width="136" height="127" cornerRadius="3" backgroundColor="0x3C3C3C" borderAlpha="0">
+										<s:BorderContainer width="140" height="127" cornerRadius="3" backgroundColor="0x3C3C3C" borderAlpha="0">
 											
 											<s:layout>
 												<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
@@ -676,7 +676,7 @@
 										<s:BorderContainer width="96" height="102" cornerRadius="3" backgroundColor="0x3C3C3C" borderAlpha="0">
 											
 											<s:layout>
-												<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" gap="15" />
+												<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" gap="13" />
 											</s:layout>
 											
 											<s:Label text="Rate of Risk" styleName="blue11Bold" />
@@ -705,7 +705,7 @@
 							</s:BorderContainer>
 							
 							<!--	footer charts/graphs	-->
-							<s:HGroup gap="20">
+							<s:HGroup gap="20" paddingTop="15">
 								
 								<!--	doctor's visits	-->
 								<s:BorderContainer width="245" height="276" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderAlpha=".5">
@@ -855,7 +855,7 @@
 					</s:NavigatorContent>
 					
 					<!--	my patients	-->
-					<s:NavigatorContent>
+					<s:NavigatorContent height="600" width="840">
 						
 						<s:layout>
 							<s:VerticalLayout gap="0" paddingLeft="20" paddingTop="20" paddingRight="20" paddingBottom="10" />
@@ -869,7 +869,9 @@
 								
 								<mx:LinkButton label="View Patient Selection Criteria" styleName="linkBtnBlue" fontSize="12" click="onViewPatientSelectionCriteriaClick(event)" />
 								
-								<s:HGroup width="100%" horizontalAlign="right" paddingRight="10">
+								<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle" paddingRight="10">
+									
+									<s:Label text="Show Patients:" color="0xFFFFFF" />
 									
 									<s:DropDownList 
 										id="patientFilter" 
@@ -883,7 +885,7 @@
 								
 							</s:HGroup>
 							
-							<s:HGroup styleName="loginBoxWhiteItalicText" fontSize="14" gap="5">
+							<s:HGroup styleName="loginBoxWhiteItalicText" fontSize="14" gap="3">
 								
 								<s:Label text="There are" />
 								
@@ -965,14 +967,12 @@
 							
 							<mx:DataGrid 
 								dataProvider="{patients}" selectedItem="{patient}"
-								fontFamily="myMyriadNoCFF"
+								styleName="standardDataGrid"
 								itemClick="selectPatient(event)"
-								width="777" height="{patient!=null?375:500}"
-								color="0xFFFFFF" verticalAlign="middle"
-								headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
-								borderVisible="true" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
-								rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-								horizontalScrollPolicy="off" rowCount="8" rowHeight="22" paddingTop="6">
+								width="777" fontSize="12"
+								headerStyleName="dataGridHeader"
+								borderVisible="true" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+								horizontalScrollPolicy="off" rowCount="{patient!=null?13:18}" rowHeight="26" paddingTop="6">
 								
 								<mx:columns>
 									<mx:DataGridColumn dataField="status" headerText="Status" width="96" labelFunction="getStatusLabel" />
