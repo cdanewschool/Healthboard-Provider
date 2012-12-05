@@ -207,7 +207,7 @@
 																	<s:SolidColorStroke color="0xFAFDFF" weight="2" alpha="0.4" />
 																</mx:lineStroke>
 															</mx:LineSeries>
-															<mx:LineSeries id="myLineSeries" yField="value" xField="date" itemRenderer="components.itemrenderers.chart.MyCircleItemRendererExercise" radius="4" adjustedRadius="4" fill="{AppProperties.getInstance().controller.model.chartStyles.colorVitalSignsWidgetBlack}" selectedIndex="0"><!--form="curve" -->
+															<mx:LineSeries id="myLineSeries" yField="value" xField="date" itemRenderer="components.itemrenderers.chart.MyCircleItemRendererExercise" radius="4" adjustedRadius="4" fill="{outerDocument.outerDocument.chartStyles.colorVitalSignsWidgetBlack}" selectedIndex="0"><!--form="curve" -->
 																<mx:lineStroke>
 																	<s:SolidColorStroke color="0xFFFFFF" weight="2" />
 																</mx:lineStroke>
