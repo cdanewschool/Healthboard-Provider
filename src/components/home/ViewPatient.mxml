@@ -447,14 +447,14 @@
 						headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)"
 						includeIn="default" creationComplete="appointmentsWidget.module = Constants.MODULE_APPOINTMENTS" />
 					
-					<patient:ImmunizationsWidget
+					<widgets:PatientImmunizationsWidget
 						id="immunizationsWidget" width="305" title="Immunizations (12)" 
 						collapsible="true" headerClickable="false" displayWarning="true" 
 						warningToolTip="Immunizations overdue" titleBarHeight="30" 
 						headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)"
 						includeIn="default" creationComplete="immunizationsWidget.module = Constants.MODULE_IMMUNIZATIONS"/>	<!--title="{'Immunizations (' + immunizationsDueNumber + ')'}" (see comments on ArrayList below)-->
 					
-					<patient:MedicalRecordsWidget
+					<widgets:PatientMedicalRecordsWidget
 						id="medicalRecordsWidget" width="305" 
 						title="Medical Records" 
 						collapsible="true" headerClickable="false" close="onWidgetClose(event)"
@@ -496,7 +496,7 @@
 								headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
 								creationComplete="decisionSupportWidget.module = ProviderConstants.MODULE_DECISION_SUPPORT" />
 							
-							<patient:NutritionWidget
+							<widgets:PatientNutritionWidget
 								id="nutritionWidget" 
 								width="305" 
 								title="Nutrition"
@@ -505,8 +505,9 @@
 								headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
 								creationComplete="nutritionWidget.module = Constants.MODULE_NUTRITION"/>
 							
-							<widgets:VitalSignsWidget
-								id="vitalSignsWidget" width="305" maxHeight="441"
+							<widgets:PatientVitalSignsWidget
+								id="vitalSignsWidget" 
+								width="305" maxHeight="441"
 								title="Vital Signs" 
 								collapsible="true" headerClickable="false"
 								module="vitalSignsModule" titleBarHeight="30" 
@@ -517,7 +518,7 @@
 						
 						<widgets:PatientExerciseWidget
 							id="exerciseWidget" 
-							width="305" maxHeight="510" 
+							width="305" maxHeight="550" 
 							title="Exercise" 
 							collapsible="true" headerClickable="false"
 							titleBarHeight="30"  
