@@ -505,7 +505,7 @@
 								headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
 								creationComplete="nutritionWidget.module = Constants.MODULE_NUTRITION"/>
 							
-							<patient:VitalSignsWidget
+							<widgets:VitalSignsWidget
 								id="vitalSignsWidget" width="305" maxHeight="441"
 								title="Vital Signs" 
 								collapsible="true" headerClickable="false"
@@ -515,7 +515,7 @@
 							
 						</s:VGroup>
 						
-						<patient:ExerciseWidget
+						<widgets:PatientExerciseWidget
 							id="exerciseWidget" 
 							width="305" maxHeight="510" 
 							title="Exercise" 
