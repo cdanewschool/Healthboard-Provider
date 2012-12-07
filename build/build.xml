@@ -84,7 +84,7 @@
 			actionscript-file-encoding="UTF-8" locale="${LOCALE}"
 			keep-generated-actionscript="false"
 			incremental="true" swf-version="13" 
-			debug="${DEBUG}" optimize="true"
+			debug="${DEBUG}" optimize="true" link-report="link-report.xml"
 			fork="true" maxmemory="5000m">
 
 			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml"/>
