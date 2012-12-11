@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:popups="components.popups.*"
+	width="338" height="122"
+	controlBarVisible="true" 
+	skinClass="skins.general.myHeaderlessTitleWindow"
+	creationComplete="init()" >
+	
+	<fx:Script>
+		<![CDATA[
+			import models.SavedSearch;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			private function save():void
+			{
+				dispatchEvent( new CloseEvent( CloseEvent.CLOSE, true, false, Alert.YES ) );
+			}
+			
+			private function noSave():void
+			{
+				dispatchEvent( new CloseEvent( CloseEvent.CLOSE, true, false, Alert.NO ) );
+			}
+			
+			private function close():void
+			{
+				PopUpManager.removePopUp( this );
+			}
+			
+			private function init():void
+			{
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="15" paddingTop="15" paddingRight="15" gap="8" horizontalAlign="left" />
+	</s:layout>
+	
+	<s:Label text="Save Current Tab" styleName="darkGrayBold16" paddingBottom="5" />
+	
+	<mx:FormItem label="Tab Name:" labelWidth="65" labelStyleName="darkGrayBold12">
+		<s:TextInput id="searchName" styleName="grayText11" paddingLeft="7" paddingTop="5" width="230" height="24" />
+	</mx:FormItem>
+	
+	<s:VGroup paddingTop="0">
+		<s:Line xFrom="0" xTo="308">
+			<s:stroke>
+				<s:SolidColorStroke color="0x4D4D4D" weight="1" alpha=".25" />
+			</s:stroke>
+		</s:Line>
+	</s:VGroup>
+	
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:Button label="Save" width="50" height="24" enabled="{searchName.text!=''}" click="save();" skinClass="skins.general.IconButtonSkin" />
+		<s:Button label="Do Not Save" width="85" height="24" click="noSave();" skinClass="skins.general.IconButtonSkin" />
+		<s:Button label="Cancel" width="55" height="24" click="close();" skinClass="skins.general.IconButtonSkin" />
+	</s:HGroup>
+	
+</s:TitleWindow>

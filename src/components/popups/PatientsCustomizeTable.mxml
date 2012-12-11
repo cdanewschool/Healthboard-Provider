@@ -5,30 +5,48 @@
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	width="341" height="499"
 	controlBarVisible="true" 
-	skinClass="skins.general.myHeaderlessTitleWindow">
+	skinClass="skins.general.myHeaderlessTitleWindow" 
+	creationComplete="init()">
 	
 	<fx:Script>
 		<![CDATA[
+			import controllers.MainController;
+			import controllers.PatientsController;
+			
+			import models.PatientsModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
-			private function save():void {
-				parentApplication.colUrgency = checkUrgency.selected;
-				parentApplication.colPhoto = checkPhoto.selected;
-				parentApplication.colId = checkID.selected;
-				parentApplication.colTeam = checkTeam.selected;
-				parentApplication.colLastName = checkLastName.selected;
-				parentApplication.colFirstName = checkFirstName.selected;
-				parentApplication.colBranch = checkBranch.selected;
-				parentApplication.colRank = checkRank.selected;
-				parentApplication.colOccupation = checkOccupation.selected;
-				parentApplication.colSex = checkSex.selected;
-				parentApplication.colLastVisit = checkLastVisit.selected;
-				parentApplication.colAge = checkAge.selected;
-				parentApplication.colDob = checkDOB.selected;
-				parentApplication.colBloodType = checkBloodType.selected;
-				parentApplication.colRace = checkRace.selected;
-				parentApplication.colHealthConditions = checkHealthConditions.selected;
+			
+			[Bindable] public var controller:PatientsController = MainController(AppProperties.getInstance().controller).patientsController as PatientsController;
+			[Bindable] public var model:PatientsModel = controller.model as PatientsModel;
+
+			private function save():void 
+			{
+				for(var i:int=0;i<fields.numElements;i++)
+				{
+					var fieldName:String = CheckBox( fields.getElementAt(i) ).id;
+					
+					if( this[fieldName].selected && model.displayedFields.getItemIndex( fieldName ) == -1 )
+						model.displayedFields.addItem( fieldName )
+					else if( !this[fieldName].selected && model.displayedFields.getItemIndex( fieldName ) > -1 )
+						model.displayedFields.removeItemAt( model.displayedFields.getItemIndex( fieldName ) );
+				}
+				
+				dispatchEvent( new CloseEvent( CloseEvent.CLOSE, true ) );
 				
 				PopUpManager.removePopUp(this);
+			}
+			
+			private function init():void
+			{
+				for(var i:int=0;i<fields.numElements;i++)
+				{
+					var fieldName:String = CheckBox( fields.getElementAt(i) ).id;
+					
+					this[fieldName].selected = model.displayedFields.getItemIndex( fieldName ) > -1;
+				}
 			}
 		]]>
 	</fx:Script>
@@ -41,23 +59,23 @@
 	
 	<s:Label text="Please select the data you want displayed in the table view." styleName="darkGray12" />
 	
-	<s:VGroup paddingLeft="20" paddingTop="3">
-		<s:CheckBox id="checkUrgency" label="Urgency" selected="{parentApplication.colUrgency}" />
-		<s:CheckBox id="checkPhoto" label="Photo" selected="{parentApplication.colPhoto}" />
-		<s:CheckBox id="checkID" label="ID Number" selected="{parentApplication.colId}" />
-		<s:CheckBox id="checkTeam" label="Team" selected="{parentApplication.colTeam}" />
-		<s:CheckBox id="checkLastName" label="Last Name" selected="{parentApplication.colLastName}" />
-		<s:CheckBox id="checkFirstName" label="First Name" selected="{parentApplication.colFirstName}" />
-		<s:CheckBox id="checkBranch" label="Service Branch" selected="{parentApplication.colBranch}" />
-		<s:CheckBox id="checkRank" label="Rank" selected="{parentApplication.colRank}" />
-		<s:CheckBox id="checkOccupation" label="Occupation" selected="{parentApplication.colOccupation}" />
-		<s:CheckBox id="checkSex" label="Sex" selected="{parentApplication.colSex}" />
-		<s:CheckBox id="checkLastVisit" label="Last Visit" selected="{parentApplication.colLastVisit}" />
-		<s:CheckBox id="checkAge" label="Age" selected="{parentApplication.colAge}" />
-		<s:CheckBox id="checkDOB" label="DOB" selected="{parentApplication.colDob}" />
-		<s:CheckBox id="checkBloodType" label="Blood Type" selected="{parentApplication.colBloodType}" />
-		<s:CheckBox id="checkRace" label="Race" selected="{parentApplication.colRace}" />
-		<s:CheckBox id="checkHealthConditions" label="Health Conditions" selected="{parentApplication.colHealthConditions}" />
+	<s:VGroup id="fields" paddingLeft="20" paddingTop="3">
+		<s:CheckBox id="urgency" label="Urgency" />
+		<s:CheckBox id="photo" label="Photo"  />
+		<s:CheckBox id="idNumber" label="ID Number" />
+		<s:CheckBox id="team" label="Team" />
+		<s:CheckBox id="lastName" label="Last Name" />
+		<s:CheckBox id="firstName" label="First Name" />
+		<s:CheckBox id="serviceBranch" label="Service Branch" />
+		<s:CheckBox id="serviceRank" label="Rank" />
+		<s:CheckBox id="occupation" label="Occupation" />
+		<s:CheckBox id="sexLabel" label="Sex" />
+		<s:CheckBox id="lastVisitLabel" label="Last Visit" />
+		<s:CheckBox id="age" label="Age" />
+		<s:CheckBox id="birthdateLabel" label="DOB" />
+		<s:CheckBox id="bloodType" label="Blood Type" />
+		<s:CheckBox id="race" label="Race" />
+		<s:CheckBox id="conditions" label="Health Conditions" />
 	</s:VGroup>
 	
 	<s:VGroup paddingTop="5" paddingBottom="6">

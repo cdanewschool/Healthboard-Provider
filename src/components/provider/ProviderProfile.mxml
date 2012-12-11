@@ -34,7 +34,8 @@
 			
  			[Bindable] public var user:UserModel;
 			
-			override protected function commitProperties():void {
+			override protected function commitProperties():void 
+			{
 				super.commitProperties();
 				
 				if( user )
@@ -74,7 +75,7 @@
 			
 			private function onTargetUserImageLoadError(event:IOErrorEvent):void
 			{
-				Image(event.currentTarget).source = user.getDefaultProfilePictureURL( 'med' );
+				Image(event.currentTarget).source = user.getDefaultProfilePictureURL();
 			}
 			
 			private function init():void

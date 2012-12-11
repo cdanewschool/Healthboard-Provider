@@ -70,7 +70,6 @@ private function init():void
 	
 	model.chartStyles = chartStyles = new ChartStyles();
 	
-	ProviderApplicationModel(model).patientsDataService.send();
 	ProviderApplicationModel(model).providersDataService.send();
 }
 
@@ -79,53 +78,6 @@ private function onResize():void
 	if( !this.stage ) return;
 	
 	FlexGlobals.topLevelApplication.height = this.stage.stageHeight;
-}
-
-//THE FOLLOWING TWO ARE MONSTER FUNCTIONS THAT PREVENT THE DROPDOWN FROM CLOSING WHEN CLICKING ON THE CALENDAR
-//SEE http://www.blastanova.com/blog/2010/06/23/a-custom-multi-selection-spark-dropdownlist/ FOR REFERENCE
-protected function dropDownCalendar_openHandler(event:DropDownEvent):void 
-{
-	if( patientBirthDateChooser ) patientBirthDateChooser.addEventListener(MouseEvent.MOUSE_DOWN, stopPropagation, false, 0, true);
-	if( advBirthDateChooser ) advBirthDateChooser.addEventListener(MouseEvent.MOUSE_DOWN, stopPropagation, false, 0, true);
-}
-
-protected function stopPropagation(event:Event):void 
-{
-	event.stopImmediatePropagation();
-}
-
-protected function dateChooser_changeHandler(event:CalendarLayoutChangeEvent):void 
-{
-	txtPatientBirthDay.text = patientBirthDateChooser.selectedDate.date < 10 ? '0' + patientBirthDateChooser.selectedDate.date : String(patientBirthDateChooser.selectedDate.date);
-	txtPatientBirthMonth.text = patientBirthDateChooser.displayedMonth < 9 ? '0' + (patientBirthDateChooser.displayedMonth + 1) : String(patientBirthDateChooser.displayedMonth + 1);
-	txtPatientBirthYear.text = String(patientBirthDateChooser.displayedYear);
-	dropDownCalendar.closeDropDown(true);					
-}
-
-protected function advDateChooser_changeHandler(event:CalendarLayoutChangeEvent):void 
-{
-	txtAdvBirthDay.text = advBirthDateChooser.selectedDate.date < 10 ? '0' + advBirthDateChooser.selectedDate.date : String(advBirthDateChooser.selectedDate.date);
-	txtAdvBirthMonth.text = advBirthDateChooser.displayedMonth < 9 ? '0' + (advBirthDateChooser.displayedMonth + 1) : String(advBirthDateChooser.displayedMonth + 1);
-	txtAdvBirthYear.text = String(advBirthDateChooser.displayedYear);
-	dropDownAdvCalendar.closeDropDown(true);					
-}
-
-protected function dgPatients_itemClickHandler(event:ListEvent):void 
-{
-	var user:PatientModel = PatientModel( event.itemRenderer.data );
-	MainController(controller).showPatient( user );
-}
-
-protected function onPatientProfileClick(event:ProfileEvent):void
-{
-	var user:PatientModel = PatientModel( event.user );
-	MainController(controller).showPatient( user );
-}
-
-protected function onPatientNameClick(event:MouseEvent):void 
-{
-	var user:PatientModel = PatientModel( LinkButton(event.currentTarget).data );
-	MainController(controller).showPatient( user );
 }
 
 private function toggleAvailability(event:MouseEvent):void

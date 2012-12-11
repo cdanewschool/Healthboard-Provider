@@ -17,6 +17,7 @@
 			import events.TeamAppointmentEvent;
 			
 			import models.Appointment;
+			import models.PatientsModel;
 			import models.ProviderApplicationModel;
 			import models.UserModel;
 			
@@ -112,7 +113,7 @@
 			{
 				controlBarVisible = false;
 				
-				patients = new ArrayCollection( ProviderApplicationModel( MainController(AppProperties.getInstance().controller).model ).patients.source );
+				patients = new ArrayCollection( PatientsModel(MainController(AppProperties.getInstance().controller).patientsController.model).patients.source );
 				patients.filterFunction = filterPatients;
 				
 				patient.text = appointment.patient ? appointment.patient.fullName : PATIENT_PLACEHOLDER;

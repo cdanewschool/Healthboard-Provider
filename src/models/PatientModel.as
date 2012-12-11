@@ -19,6 +19,8 @@ package models
 		
 		public var serviceBranch:String;
 		public var serviceRank:String;
+		public var serviceStatus:String;
+		
 		public var occupation:String;
 		
 		//	medical

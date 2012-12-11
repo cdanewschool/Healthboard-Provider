@@ -29,6 +29,7 @@
 			
 			import models.Location;
 			import models.PatientModel;
+			import models.PatientsModel;
 			import models.ProviderApplicationModel;
 			import models.modules.advisories.PatientAdvisoryStatus;
 			import models.modules.advisories.PublicHealthAdvisoriesModel;
@@ -344,7 +345,8 @@
 			
 			private function init():void
 			{
-				patients = new ArrayCollection( ProviderApplicationModel( AppProperties.getInstance().controller.model ).patients.source );
+				var patientsModel:PatientsModel = ((AppProperties.getInstance().controller as MainController).patientsController.model as PatientsModel)
+				patients = new ArrayCollection( patientsModel.patients.source.slice() );
 				
 				setView( initialViewIndex );
 			}

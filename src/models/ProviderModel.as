@@ -1,6 +1,8 @@
 package models
 {
 	import flash.utils.describeType;
+	
+	import mx.collections.ArrayCollection;
 
 	[Bindable]
 	public class ProviderModel extends UserModel
@@ -27,6 +29,8 @@ package models
 		public var securityAnswer:String;
 		
 		public var selected:Boolean;
+		
+		public var savedSearches:ArrayCollection;
 		
 		public function ProviderModel()
 		{

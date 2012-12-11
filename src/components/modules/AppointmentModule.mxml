@@ -34,6 +34,7 @@
 			import controllers.MainController;
 			import controllers.TeamAppointmentsController;
 			
+			import events.ApplicationDataEvent;
 			import events.ApplicationEvent;
 			import events.AutoCompleteEvent;
 			import events.MessageEvent;
@@ -994,11 +995,29 @@
 				dirty = true;
 			}
 			
+			private function onDataLoaded(event:ApplicationDataEvent=null):void
+			{
+				model.removeEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
+				
+				model.appointments.addEventListener( CollectionEvent.COLLECTION_CHANGE, onAppointmentsChange ); 
+			}
+			
 			private function init():void
 			{
 				currentState = MODE_DAY;
 				
-				model.appointments.addEventListener( CollectionEvent.COLLECTION_CHANGE, onAppointmentsChange ); 
+				if( model.dataLoaded )
+				{
+					onDataLoaded();
+				}
+				else
+				{
+					model.addEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
+					
+					var evt:ApplicationDataEvent = new ApplicationDataEvent( ApplicationDataEvent.LOAD, true, false );
+					evt.data = TeamAppointmentsModel.ID;
+					dispatchEvent( evt );
+				}
 				
 				for each(var type:Object in Appointment.APPOINTMENT_TYPES)
 				{

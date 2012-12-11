@@ -7,10 +7,7 @@ package models
 	public class ProviderApplicationModel extends ApplicationModel
 	{
 		public var appointmentsDataService:HTTPService;
-		public var patientsDataService:HTTPService;
 		public var providersDataService:HTTPService;
-		
-		[Bindable] public var patients:ArrayCollection = new ArrayCollection();			//data provider for the Plot Chart
 		
 		[Bindable] public var providersModel:ProvidersModel;
 		
@@ -19,7 +16,6 @@ package models
 			super();
 			
 			appointmentsDataService = new HTTPService();
-			patientsDataService = new HTTPService();
 			providersDataService = new HTTPService();
 			
 			providersModel = new ProvidersModel();

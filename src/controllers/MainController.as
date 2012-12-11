@@ -35,9 +35,11 @@ package controllers
 	import models.Message;
 	import models.ModuleMappable;
 	import models.PatientModel;
+	import models.PatientsModel;
 	import models.Preferences;
 	import models.ProviderApplicationModel;
 	import models.ProviderModel;
+	import models.SavedSearch;
 	import models.TeamAppointmentsModel;
 	import models.UserModel;
 	import models.UserPreferences;
@@ -70,10 +72,8 @@ package controllers
 		public var advisoryController:PublicHealthAdvisoriesController;
 		public var chatController:ChatController;
 		public var decisionSupportController:DecisionSupportController;
+		public var patientsController:PatientsController;
 		public var teamAppointmentsController:TeamAppointmentsController;
-		
-		//	TODO: move to model
-		public var user:UserModel;	//	logged-in user, i.e. Dr. Berg
 		
 		private var autocompleteCallback:Function;
 		private var autocomplete:AutoComplete;
@@ -81,12 +81,8 @@ package controllers
 		private var userContextMenu:UserContextMenu;
 		private var userContextMenuTimer:Timer;
 		
-		public var openPatients:Array = new Array();	//	TODO: move
-		
 		private var authenticationPopup:VerifyCredentialsPopup;
 		private var inactivityAlert:InactivityAlertPopup;
-		
-		private var patientsLoaded:Boolean;
 		
 		public function MainController()
 		{
@@ -104,6 +100,8 @@ package controllers
 			immunizationsController = new ProviderImmunizationsController();
 			medicalRecordsController = new ProviderMedicalRecordsController();
 			medicationsController = new ProviderMedicationsController();
+			patientsController = new PatientsController();
+			
 			teamAppointmentsController = new TeamAppointmentsController();
 			
 			advisoryController.model.addEventListener( ApplicationDataEvent.LOADED, onAdvisoriesLoaded );
@@ -121,8 +119,7 @@ package controllers
 					] 
 				);
 			
-			ProviderApplicationModel(model).patientsDataService.url = "data/patients.xml";
-			ProviderApplicationModel(model).patientsDataService.addEventListener( ResultEvent.RESULT, patientsResultHandler );
+			patientsController.model.addEventListener( ApplicationDataEvent.LOADED, onPatientsLoaded );
 			
 			ProviderApplicationModel(model).providersDataService.url = "data/providers.xml";
 			ProviderApplicationModel(model).providersDataService.addEventListener( ResultEvent.RESULT, providersResultHandler );
@@ -190,6 +187,8 @@ package controllers
 			{
 				advisoryController.init();
 				chatController.init();
+				decisionSupportController.init();
+				patientsController.init();
 				teamAppointmentsController.init();
 			}
 			
@@ -232,7 +231,7 @@ package controllers
 		public function getUser( id:int, type:String = null ):UserModel
 		{
 			var user:UserModel;
-			var users:ArrayCollection = (type==UserModel.TYPE_PROVIDER?ProviderApplicationModel(model).providersModel.providers:ProviderApplicationModel(model).patients);
+			var users:ArrayCollection = ( type == UserModel.TYPE_PROVIDER ? ProviderApplicationModel(model).providersModel.providers : PatientsModel(patientsController.model).patients );
 			
 			for each(user in users) if( user.id == id ) return user;
 			
@@ -352,7 +351,7 @@ package controllers
 				}
 				else
 				{
-					showPatient( event.user as PatientModel );
+					patientsController.showPatient( event.user as PatientModel );
 				}
 			}
 			else if( event.type == ProfileEvent.VIEW_APPOINTMENTS )
@@ -399,40 +398,6 @@ package controllers
 					userContextMenuTimer.reset();
 					userContextMenuTimer.start();
 				}
-			}
-		}
-		
-		public function showPatient( patient:PatientModel ):void
-		{
-			var isPatientAlreadyOpen:Boolean = false;
-			var viewPatient:ViewPatient;
-			
-			for(var i:uint = 0; i < openPatients.length; i++) 
-			{
-				if(openPatients[i] == patient) 
-				{
-					isPatientAlreadyOpen = true;
-					break;
-				}
-			}
-			
-			if( !isPatientAlreadyOpen ) 
-			{
-				viewPatient = new ViewPatient();
-				viewPatient.name = "patient" + patient.id;
-				viewPatient.patient = patient;		//acMessages[event.rowIndex];
-				viewPatient.selectedAppointment = AppointmentsModel(appointmentsController.model).appointments[ AppointmentsModel(appointmentsController.model).currentAppointmentIndex ];
-				visualDashboardProvider(application).viewStackMain.addChild(viewPatient);
-				visualDashboardProvider(application).tabsMain.selectedIndex = visualDashboardProvider(application).viewStackMain.length - 1;
-				
-				openPatients.push(patient);	
-			}
-			else
-			{
-				viewPatient = visualDashboardProvider(application).viewStackMain.getChildByName(  "patient" + patient.id ) as ViewPatient;
-				viewPatient.currentState = ViewPatient.STATE_DEFAULT;
-				
-				visualDashboardProvider(application).viewStackMain.selectedIndex = visualDashboardProvider(application).viewStackMain.getChildIndex( viewPatient );
 			}
 		}
 		
@@ -517,8 +482,10 @@ package controllers
 				}
 				else if( application.currentState == model.viewMode ) 
 				{
-					if( dataProvider == visualDashboardProvider(application).viewStackMain) 
-						openPatients.splice(index-1,1);
+					if( dataProvider == visualDashboardProvider(application).viewStackMain ) 
+					{
+						PatientsModel(patientsController.model).openTabs.splice(index-1,1);
+					}
 				}
 			}
 			else 
@@ -576,13 +543,13 @@ package controllers
 		
 		override public function logout():void
 		{
-			for each(var patient:PatientModel in openPatients)
+			for each(var patient:PatientModel in PatientsModel(patientsController.model).openTabs)
 			{
 				var viewPatient:ViewPatient =  visualDashboardProvider(application).viewStackMain.getChildByName(  "patient" + patient.id ) as ViewPatient;
 				visualDashboardProvider(application).viewStackMain.removeChild(  viewPatient );
 			}
 			
-			openPatients = [];
+			PatientsModel(patientsController.model).openTabs = [];
 			
 			super.logout();
 		}
@@ -594,17 +561,12 @@ package controllers
 			PopUpManager.removePopUp( inactivityAlert );
 		}
 		
-		private function patientsResultHandler(event:ResultEvent):void 
+		private function onPatientsLoaded(event:ApplicationDataEvent):void 
 		{
-			var results:ArrayCollection = event.result.patients.patient is ArrayCollection ? event.result.patients.patient : new ArrayCollection( [event.result.patients.patient] );
+			var patients:ArrayCollection = PatientsModel(patientsController.model).patients;
 			
-			var patients:ArrayCollection = new ArrayCollection();
-			
-			for each(var result:Object in results)
+			for each(var patient:PatientModel in patients)
 			{
-				var patient:PatientModel = PatientModel.fromObj(result);
-				patients.addItem( patient );
-				
 				for each(var riskFactor:RiskFactor in patient.riskFactorGroups)
 				{
 					for each(var riskFactorSubType:RiskFactor in riskFactor.types)
@@ -627,11 +589,10 @@ package controllers
 				}
 			}
 			
-			patientsLoaded = true;
-			
-			ProviderApplicationModel(model).patients = ChatSearch( chatController.model ).patients = patients;
+			ChatSearch( chatController.model ).patients = patients;
 			
 			onAdvisoriesLoaded();
+			
 			initChatHistory();
 		}
 		
@@ -659,6 +620,21 @@ package controllers
 				if( teams[provider.team] == null ) teams[provider.team] = team;
 			}
 			
+			if( user
+				&& persistentData 
+				&& persistentData.data.hasOwnProperty('savedSearches') )
+			{
+				var savedSearches:ArrayCollection = new ArrayCollection();
+				
+				for each(var search:Object in persistentData.data.savedSearches)
+				{
+					savedSearches.addItem( SavedSearch.fromObj( search ) );
+				}
+				
+				ProviderModel( user ).savedSearches = savedSearches;
+			}
+			
+			
 			ProviderApplicationModel(model).providersModel.providers = ChatSearch( chatController.model ).providers = providers;
 			ProviderApplicationModel(model).providersModel.providerTeams = new ArrayCollection( teams );
 			
@@ -667,9 +643,9 @@ package controllers
 		
 		private function onAdvisoriesLoaded( event:ApplicationDataEvent = null ):void
 		{
-			if( !advisoryController.model.dataLoaded && patientsLoaded ) return;
+			if( !advisoryController.model.dataLoaded && patientsController.model.dataLoaded ) return;
 			
-			for each(var patient:PatientModel in ProviderApplicationModel(model).patients)
+			for each(var patient:PatientModel in PatientsModel(patientsController.model).patients)
 			{
 				for each(var advisoryStatus:PatientAdvisoryStatus in patient.advisories)
 				{
@@ -732,6 +708,8 @@ package controllers
 			return title;
 		}
 		
+		//	TODO: call a load() method on these controllers vs. calling send(), so they can defer loading
+		//	until a dependency has been loaded
 		override public function loadData( id:String ):Boolean
 		{
 			if( id == PublicHealthAdvisoriesModel.ID )
@@ -739,6 +717,15 @@ package controllers
 				if( !advisoryController.model.dataLoaded ) 
 				{
 					advisoryController.model.dataService.send();
+					
+					return true;
+				}
+			}
+			else if( id == TeamAppointmentsModel.ID )
+			{
+				if( !teamAppointmentsController.model.dataLoaded )
+				{
+					teamAppointmentsController.model.dataService.send();
 					
 					return true;
 				}

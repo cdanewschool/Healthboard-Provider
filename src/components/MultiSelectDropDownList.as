@@ -8,10 +8,13 @@ package components
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
+	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
 	import mx.collections.ItemWrapper;
 	import mx.core.IVisualElement;
+	import mx.core.UIComponent;
 	
+	import spark.components.CheckBox;
 	import spark.components.DropDownList;
 	import spark.events.DropDownEvent;
 	
@@ -22,6 +25,8 @@ package components
 		private var _placeholderText:String = "Select all";
 		private var _placeholderTextPartial:String = "{n} selected";
 		
+		private var showAll:Boolean = true;
+		
 		/** selected check boxes */
 		protected var currentlySelectedCheckBoxes:Array = new Array();
 		
@@ -31,6 +36,8 @@ package components
 		public function MultiSelectDropDownList()
 		{
 			super();
+			
+			setStyle("horizontalScrollPolicy", "off");
 			
 			this.addEventListener(DropDownEvent.OPEN, onOpen, false, 0, true);
 		}
@@ -54,6 +61,7 @@ package components
 		public function get selectedViews():Array 
 		{
 			var multiSelect:Array = selectedCheckboxes;
+			
 			if (multiSelect.length > 0) {
 				return multiSelect;
 			} else {
@@ -75,20 +83,14 @@ package components
 		 */
 		override protected function item_mouseDownHandler(event:MouseEvent):void 
 		{
-			// launch solo view mode when clicking "playback only"
-			if ( event.currentTarget.data == placeholderText ) {
-				//deselectAllCheckBoxes();
-			}
-			
+			/*
 			if (selectedCheckboxes.length == 0) 
 			{
-				super.item_mouseDownHandler(event);    
+				super.item_mouseDownHandler(event); 
+				
 				dispatchEvent(new Event("selectionChange"));
-			} 
-			else 
-			{
-				closeDropDown(false);
 			}
+			*/
 		}
 		
 		/**
@@ -103,7 +105,7 @@ package components
 		 */
 		protected override function dropDownController_closeHandler(event:DropDownEvent):void
 		{
-			if (currentlySelectedCheckBoxes.length > 0) 
+			if ( currentlySelectedCheckBoxes.length > 0 ) 
 			{
 				// if checkboxes are selected prevent the default behavior,
 				// which is to set a selection index
@@ -138,14 +140,23 @@ package components
 		/**
 		 * deselect all check boxes
 		 */
-		protected function deselectAllCheckBoxes():void 
+		protected function selectAllCheckBoxes():void 
 		{
-			currentlySelectedCheckBoxes = [];
+			for each(var item:Object in dataProvider)
+			{
+				if ( item && item && item.hasOwnProperty('selected') ) 
+				{
+					item['selected'] = true;
+				}
+			}
+			
 			for (var c:int = 0; c < dataGroup.numElements; c++) 
 			{
 				var obj:SelectableItemRenderer = dataGroup.getElementAt(c) as SelectableItemRenderer;
-				if (obj) {
-					obj.checkbox.selected = false;
+				
+				if (obj && (!showAll || (showAll && c > 0) ) ) 
+				{
+					obj.checkbox.selected = true;
 				}
 			}
 		}
@@ -157,17 +168,18 @@ package components
 		 */
 		private function get selectedCheckboxes():Array
 		{
-			var returnList:Array = new Array();
-			if( !dataGroup ) return returnList;
+			var selected:Array = new Array();
 			
-			for (var c:int = 0; c < dataGroup.numElements; c++) 
+			for each(var item:Object in dataProvider)
 			{
-				var obj:SelectableItemRenderer = dataGroup.getElementAt(c) as SelectableItemRenderer;
-				if (obj && obj.checkbox.selected) {
-					returnList.push(obj.data);
+				if ( item && item && item.hasOwnProperty('selected') && item['selected'] == true
+					&& (!showAll || dataProvider.getItemIndex( item ) > 0 ) ) 
+				{
+					selected.push( item );
 				}
 			}
-			return returnList;
+			
+			return selected;
 		}
 		
 		/**
@@ -177,7 +189,7 @@ package components
 		 */
 		protected function mouseCheckBox(event:Event):void 
 		{
-			event.stopImmediatePropagation();
+
 		}
 		
 		/**
@@ -187,16 +199,36 @@ package components
 		 */
 		protected function changeCheckBoxSelection(event:Event):void 
 		{
+			if( showAll )
+			{
+				var checkbox:CheckBox = event.currentTarget as CheckBox;
+				
+				if( dataGroup.getElementIndex( checkbox.parent as IVisualElement ) == 0 
+					&& checkbox.selected )
+				{
+					dataProvider.getItemAt(0).selected = true;
+					
+					selectAllCheckBoxes();
+				}
+				else if( selectedCheckboxes.length < dataProvider.length )
+				{
+					dataProvider.getItemAt(0).selected = false;
+					
+					if( dataGroup.getElementAt(0) )
+					{
+						(dataGroup.getElementAt(0) as SelectableItemRenderer).checkbox.selected = false;
+					}
+				}
+			}
+			
 			currentlySelectedCheckBoxes = selectedCheckboxes;
 			
-			for (var c:int = 0; c < dataGroup.numElements; c++) 
+			checkbox = (event.currentTarget as CheckBox);
+			
+			if( checkbox.parent.hasOwnProperty('data')
+				&& checkbox.parent['data'].hasOwnProperty('selected') )
 			{
-				var obj:SelectableItemRenderer = dataGroup.getElementAt(c) as SelectableItemRenderer;
-				
-				if ( obj && obj.data && obj.data.hasOwnProperty('selected') ) 
-				{
-					obj.data.selected = obj.checkbox.selected;
-				}
+				checkbox.parent['data'].selected = checkbox.selected;
 			}
 			
 			// turn on multi-view mode
@@ -207,11 +239,21 @@ package components
 			
 			updateLabel();
 			
-			dispatchEvent(new Event("selectionChange"));
+			dispatchEvent( new Event("selectionChange") );
 		}
 		
 		override public function set dataProvider(value:IList):void
 		{
+			if( value && showAll )
+			{
+				if( value is ArrayCollection )
+				{
+					value = new ArrayCollection( ArrayCollection(value).source.slice() );
+				}
+				
+				value.addItemAt( { label: 'Show All' }, 0 );
+			}
+			
 			super.dataProvider = value;
 			
 			updateLabel();
@@ -221,10 +263,11 @@ package components
 		{
 			var selected:Array = selectedCheckboxes;
 			
-			// no check box here, this playback mode only is a solo view
-			if ( selected.length == dataGroup.numElements ) 
+			var showingAll:Boolean = showAll ? selected.length == dataProvider.length - 1 : selected.length == dataProvider.length;
+			
+			if ( showingAll ) 
 			{
-				prompt = placeholderText;
+				prompt = placeholderTextPartial.replace( /%n%/, 'All' );
 			}
 			else
 			{
