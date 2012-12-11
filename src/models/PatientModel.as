@@ -102,17 +102,18 @@ package models
 			if( medical )
 			{
 				val.bloodType = medical.bloodType;
-				val.urgency = medical.urgency;
 				val.conditions = medical.conditions;
 				val.lastVisit = new Date( medical.lastVisit );
 				val.team = medical.team;
+				val.urgency = medical.urgency;
 			}
 			
 			if( occupation )
 			{
 				val.occupation = occupation.professionalTitle;
-				val.serviceRank = occupation.serviceRank;
 				val.serviceBranch = occupation.serviceBranch;
+				val.serviceStatus = occupation.serviceStatus;
+				val.serviceRank = occupation.serviceRank;
 			}
 			
 			if( advisories )

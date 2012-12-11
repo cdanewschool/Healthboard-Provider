@@ -19,7 +19,7 @@
 			
 			import ASfiles.ProviderConstants;
 			
-			import components.provider.ProviderProfile;
+			import components.UserProfileCard;
 			import components.provider.ViewProvider;
 			
 			import events.ApplicationEvent;
@@ -65,7 +65,7 @@
 				{
 					if( model.selectedProviderTeam == -1 || parseInt(item.team) == model.selectedProviderTeam ) 
 					{
-						var profile:ProviderProfile = new ProviderProfile();
+						var profile:UserProfileCard = new UserProfileCard();
 						profile.title = item.role + " Profile";
 						profile.user = item;
 						profile.setStyle('dropShadowVisible',false);
@@ -144,7 +144,7 @@
 				
 				for(var i:int=0;i<teamProfileList.numElements;i++)
 				{
-					users.push( ProviderProfile(teamProfileList.getElementAt(i)).user );
+					users.push( UserProfileCard(teamProfileList.getElementAt(i)).user );
 				}
 				
 				var alias:String = "All Teams";
@@ -369,7 +369,7 @@
 										<s:TileGroup 
 											id="teamProfileList" 
 											horizontalGap="19" verticalGap="19" 
-											requestedColumnCount="2" columnWidth="{ProviderProfile.WIDTH}" 
+											requestedColumnCount="2" columnWidth="{UserProfileCard.WIDTH}" 
 											paddingBottom="20" />
 										
 									</s:HGroup>

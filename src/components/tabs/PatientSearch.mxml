@@ -17,7 +17,7 @@
 			import components.MultiSelectDropDownList;
 			import components.general.TextInputPlaceholder;
 			import components.popups.PatientsCustomizeTable;
-			import components.provider.ProviderProfile;
+			import components.UserProfileCard;
 			
 			import controllers.MainController;
 			import controllers.PatientsController;
@@ -97,7 +97,7 @@
 			private function filterPatients(item:PatientModel):Boolean 
 			{
 				var pattern:RegExp = new RegExp( "[^]*" + patientModuleSearch.text + "[^]*", "i" );
-				var searchFilter:Boolean = (patientModuleSearch.text == 'First Name, Last Name, or ID Number' || patientModuleSearch.text == '') ? true : (pattern.test(item.lastName) || pattern.test(item.firstName));
+				var searchFilter:Boolean = (patientModuleSearch.text == patientModuleSearch.placeholder || patientModuleSearch.text == '') ? true : (pattern.test(item.lastName) || pattern.test(item.firstName));
 				
 				//	row 1 > urgency
 				var urgencyFilter:Boolean = multiSelectMatch( model.optionsUrgencies, item.urgency );
@@ -171,7 +171,7 @@
 				var row5Filter:Boolean = true;
 				var row6Filter:Boolean = healthConditionFilter;
 				
-				return row1Filter && row2Filter && row3Filter;
+				return row1Filter && row2Filter && row3Filter && row4Filter && row5Filter && row6Filter;
 			}
 			
 			private function multiSelectMatch( options:ArrayCollection, value:* ):Boolean
@@ -212,7 +212,7 @@
 				
 				for each(var item:UserModel in model.patients) 
 				{
-					var profile:ProviderProfile = new ProviderProfile();
+					var profile:UserProfileCard = new UserProfileCard();
 					profile.title = "Patient Profile";
 					profile.user = item;
 					profile.setStyle('dropShadowVisible',false);
@@ -363,7 +363,7 @@
 			private function onPatientClick(event:ListEvent):void 
 			{
 				var user:PatientModel = PatientModel( event.itemRenderer.data );
-				MainController(controller).patientsController.showPatient( user );
+				controller.showPatient( user );
 			}
 			
 			private function getPatientAge(item:PatientModel, column:DataGridColumn):String 
@@ -492,7 +492,7 @@
 			id="dropDownPatientsSearchTabs" 
 			width="150" height="24" 
 			styleName="buttonText" prompt="Open Saved Search Tab" 
-			dataProvider="{user.savedSearches}" 
+			dataProvider="{user.savedSearches}" enabled="{user.savedSearches &amp;&amp; user.savedSearches.length}"
 			labelField="name" change="openSavedSearch(event)" /> 
 		
 		<s:Spacer width="100%" />
@@ -577,7 +577,7 @@
 		
 		<components:MultiSelectDropDownList
 			id="selectAdvancedSearchParameters" 
-			width="171" height="24" placeholderText="Show 8 Search Parameters" 
+			width="171" height="24" placeholderText="Show %n% Search Parameters" 
 			placeholderTextPartial="Show %n% Search Parameters"
 			dataProvider="{model.searchParameters}" requireSelection="false"
 			itemRenderer="components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" 
@@ -956,14 +956,14 @@
 			</s:Line>
 		</s:HGroup>
 		
-	</s:VGroup>
-	
-	<s:VGroup id="searchResults" paddingTop="10" visible="false">
-		
-		<s:HGroup gap="2" paddingLeft="10">
+		<s:HGroup gap="2" paddingTop="10">
 			<s:Button label="Clear Search" click="clearPatientSearch()" />
 		</s:HGroup>
 		
+	</s:VGroup>
+	
+	<s:VGroup id="searchResults" paddingTop="10" visible="false">
+
 		<s:HGroup color="0xCCCCCC" fontStyle="italic" gap="2" paddingLeft="10">
 			<s:Label text="There are"  />
 			<s:Label text="{model.patients.length}" color="0xFF931E" fontWeight="bold" />
@@ -1016,7 +1016,7 @@
 						<s:TileGroup 
 							id="patientsProfileList" 
 							horizontalGap="19" verticalGap="19" 
-							requestedColumnCount="2" columnWidth="{ProviderProfile.WIDTH}" 
+							requestedColumnCount="2" columnWidth="{UserProfileCard.WIDTH}" 
 							paddingBottom="20" />
 						
 					</s:HGroup>
