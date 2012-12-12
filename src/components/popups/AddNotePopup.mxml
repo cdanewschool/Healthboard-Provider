@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:popups="components.popups.*"
+	width="396" height="435"
+	controlBarVisible="true" 
+	skinClass="skins.general.myHeaderlessTitleWindow"
+	creationComplete="init()" xmlns:general="components.general.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import ASclasses.Constants;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.components.CheckBox;
+			
+			private var moduleIDs:Array = 
+				[ 
+					Constants.MODULE_APPOINTMENTS, Constants.MODULE_EXERCISE, Constants.MODULE_IMMUNIZATIONS, 
+					Constants.MODULE_MEDICAL_RECORDS, Constants.MODULE_MEDICATIONS, Constants.MODULE_MESSAGES, 
+					Constants.MODULE_NUTRITION, Constants.MODULE_VITAL_SIGNS
+				];
+			
+			private var dirty:Boolean;
+			
+			private var _moduleID:String;
+			
+			public function get moduleID():String
+			{
+				return _moduleID;
+			}
+
+			public function set moduleID(value:String):void
+			{
+				_moduleID = value;
+				
+				dirty = true;
+				
+				invalidateProperties();
+			}
+
+			override protected function createChildren():void
+			{
+				super.createChildren();
+				
+				for(var i:int=0;i<moduleIDs.length;i++)
+				{
+					var moduleID:String = moduleIDs[i];
+					
+					var checkbox:CheckBox = new CheckBox();
+					checkbox.id = moduleID;
+					checkbox.label = AppProperties.getInstance().controller.getModuleTitle( moduleID );
+					checkboxes.addElement( checkbox );
+				}
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if( dirty )
+				{
+					for(var i:int=0;i<checkboxes.numElements;i++)
+					{
+						var checkbox:CheckBox = checkboxes.getElementAt(i) as CheckBox;
+						checkbox.selected = moduleIDs[i] == this.moduleID;
+					}
+					
+					dirty = false;
+				}
+			}
+			
+			private function toggleAll( select:Boolean = true ):void
+			{
+				for(var i:int=0;i<checkboxes.numElements;i++)
+				{
+					var checkbox:CheckBox = checkboxes.getElementAt(i) as CheckBox;
+					checkbox.selected = select;
+				}
+			}
+			
+			private function save():void
+			{
+				if( description.text == '' )
+				{
+					description.errorString = "Please enter a note";
+					return;
+				}
+				
+				description.errorString = '';
+				
+				dispatchEvent( new CloseEvent( CloseEvent.CLOSE, true, false, Alert.YES ) );
+			}
+			
+			private function clear():void
+			{
+				toggleAll(false);
+				
+				description.text = "";
+			}
+			
+			private function close():void
+			{
+				PopUpManager.removePopUp( this );
+			}
+			
+			private function init():void
+			{
+				
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="15" paddingTop="15" paddingRight="15" gap="12" horizontalAlign="left" />
+	</s:layout>
+	
+	<s:Label text="Add Internal Note" styleName="darkGrayBold16" paddingBottom="5" />
+	
+	<s:HGroup gap="5" verticalAlign="middle">
+		
+		<s:Label text="To Module:" width="65" textAlign="right" />
+		
+		<general:MainLinkButton label="Check All" click="toggleAll()" styleName="linkBtnDarkBlue" />
+		<general:MainLinkButton label="Clear All" click="toggleAll(false)" styleName="linkBtnDarkBlue" />
+		
+	</s:HGroup>
+	
+	<s:VGroup id="checkboxes" paddingLeft="75">
+		
+	</s:VGroup>
+	
+	<s:HGroup gap="5" verticalAlign="top">
+		
+		<s:Label text="Description:" width="65" textAlign="right" />
+		
+		<s:TextArea id="description" width="280" height="93" />
+		
+	</s:HGroup>
+	
+	<s:VGroup paddingTop="0">
+		<s:Line xFrom="0" xTo="353">
+			<s:stroke>
+				<s:SolidColorStroke color="0x4D4D4D" weight="1" alpha=".25" />
+			</s:stroke>
+		</s:Line>
+	</s:VGroup>
+	
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:Button label="Add" width="50" height="24" click="save();" skinClass="skins.general.IconButtonSkin" />
+		<s:Button label="Clear" width="85" height="24" click="clear();" skinClass="skins.general.IconButtonSkin" />
+		<s:Button label="Cancel" width="55" height="24" click="close();" skinClass="skins.general.IconButtonSkin" />
+	</s:HGroup>
+	
+</s:TitleWindow>

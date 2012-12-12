@@ -23,7 +23,6 @@
 			
 			import ASfiles.ProviderConstants;
 			
-			import controllers.Controller;
 			import controllers.MainController;
 			
 			import enum.UrgencyType;
@@ -34,16 +33,11 @@
 			import external.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
 			
 			import models.PatientModel;
-			import models.modules.ExerciseModel;
 			
 			import mx.collections.ArrayCollection;
-			import mx.core.Container;
 			import mx.core.INavigatorContent;
-			import mx.core.IVisualElement;
 			import mx.core.UIComponent;
 			import mx.events.CloseEvent;
-			import mx.events.FlexEvent;
-			import mx.events.ItemClickEvent;
 			import mx.events.ListEvent;
 			import mx.managers.CursorManager;
 			import mx.rpc.events.ResultEvent;
@@ -346,7 +340,6 @@
 				onResize();
 				
 				alertsWidget.addEventListener( ListEvent.ITEM_CLICK, onAlertSelect );
-				alertsWidget.dropDownDataProvider = new ArrayCollection(['     Add New Internal Note','     View...']);
 				
 				if( !controller.model.patientAlertsLoaded ) 
 				{
