@@ -265,6 +265,15 @@
 			
 		</riskFactors>
 		
+		<recentActivity>
+			<activity summary="Chronic pain" date="*/*/* 15:45" area="messages" />
+			<activity summary="Updated glucose levels" date="*/-1/*" area="vitalsigns" />
+			<activity summary="Recorded a meal" date="*/-1/*" area="nutrition" />
+			<activity summary="Requested renewal" date="-1/-3/*" area="medications" />
+			<activity summary="Updated personal" date="-1/-4/*" area="exercise" />
+			<activity summary="Requested renewal" date="-1/-8/*" area="medications" />
+		</recentActivity>
+		
 	</patient>
 	
 	<patient id="129" lastName="Lee" firstName="Berg" birthdate="01/01/1965" sex="1" photo="" ssn="213-42-1111" sponsorSSN="123-45-2357" race="Caucasian" available="0">

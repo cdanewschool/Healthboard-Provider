@@ -432,7 +432,7 @@
 						id="recentActivitiesWidget" 
 						width="305" title="Patient's Recent Activities" 
 						collapsible="true" headerClickable="false" 
-						titleBarHeight="30" 
+						titleBarHeight="30" patient="{patient}"
 						headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
 						includeIn="default" creationComplete="recentActivitiesWidget.module = Constants.MODULE_RECENT_ACTIVITIES" />
 						

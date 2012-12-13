@@ -6,6 +6,7 @@ package models
 	import mx.collections.ArrayCollection;
 	
 	import util.DateFormatters;
+	import util.DateUtil;
 
 	[Bindable]
 	public class PatientModel extends UserModel
@@ -33,8 +34,8 @@ package models
 		public var advisories:ArrayCollection;
 		public var advisoriesLastUpdated:Date;
 		
+		public var recentActivity:ArrayCollection;
 		public var relations:ArrayCollection;
-		
 		public var riskFactorGroups:ArrayCollection;
 		
 		public function PatientModel()
@@ -82,6 +83,7 @@ package models
 			var occupation:Object = data.occupation;
 			var relations:Object = data.relations;
 			var riskFactors:Object = data.riskFactors;
+			var recentActivity:Object = data.recentActivity;
 			
 			var obj:Object;
 			
@@ -150,6 +152,18 @@ package models
 				for each(obj in riskFactorObjects)
 				{
 					val.riskFactorGroups.addItem( RiskFactor.fromObj( obj ) );
+				}
+			}
+			
+			if( recentActivity )
+			{
+				val.recentActivity = new ArrayCollection();
+				
+				var recentActivityObjects:ArrayCollection = recentActivity.activity is ArrayCollection ? recentActivity.activity : new ArrayCollection( [ recentActivity.activity ] );
+				
+				for each(obj in recentActivityObjects)
+				{
+					val.recentActivity.addItem( RecentActivity.fromObj(obj) );
 				}
 			}
 			
