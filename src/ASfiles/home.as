@@ -1,61 +1,14 @@
-import ASclasses.Constants;
-
-import ASfiles.ProviderConstants;
-
-import components.AutoComplete;
-import components.home.ViewPatient;
-import components.modules.TeamModule;
-import components.popups.UserContextMenu;
-
-import controllers.AppointmentsController;
-import controllers.ChatController;
 import controllers.MainController;
 
-import events.ApplicationDataEvent;
-import events.ApplicationEvent;
-import events.AutoCompleteEvent;
-import events.ProfileEvent;
-
-import external.TabBarPlus.plus.TabBarPlus;
-import external.TabBarPlus.plus.TabPlus;
-
-import flash.display.DisplayObject;
-import flash.events.Event;
 import flash.events.MouseEvent;
-import flash.events.TimerEvent;
-import flash.utils.Timer;
 
-import flashx.textLayout.elements.BreakElement;
-
-import models.ApplicationModel;
-import models.Chat;
-import models.ChatSearch;
-import models.Message;
-import models.PatientModel;
 import models.ProviderApplicationModel;
-import models.ProviderModel;
-import models.ProvidersModel;
 import models.UserModel;
 
-import mx.binding.utils.BindingUtils;
-import mx.charts.chartClasses.CartesianDataCanvas;
-import mx.collections.ArrayCollection;
-import mx.collections.IList;
 import mx.controls.LinkButton;
 import mx.core.FlexGlobals;
-import mx.core.INavigatorContent;
-import mx.events.CalendarLayoutChangeEvent;
-import mx.events.ListEvent;
-import mx.graphics.SolidColorStroke;
-import mx.managers.PopUpManager;
-import mx.rpc.events.ResultEvent;
-
-import spark.events.DropDownEvent;
-import spark.events.IndexChangeEvent;
 
 import styles.ChartStyles;
-
-import utils.DateUtil;
 
 [Bindable] public var controller:MainController;
 [Bindable] public var model:ProviderApplicationModel;
