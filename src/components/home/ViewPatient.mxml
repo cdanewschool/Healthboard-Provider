@@ -27,12 +27,14 @@
 			
 			import enum.UrgencyType;
 			
+			import events.ApplicationDataEvent;
 			import events.ApplicationEvent;
 			import events.EnhancedTitleWindowEvent;
 			
 			import external.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
 			
 			import models.PatientModel;
+			import models.modules.MedicationsModel;
 			
 			import mx.collections.ArrayCollection;
 			import mx.core.INavigatorContent;
@@ -200,7 +202,6 @@
 				var alerts:ArrayCollection = event.result.alerts.alert;
 				
 				controller.model.patientAlerts = alertsWidget.alerts = new ArrayCollection( controller.model.patientAlerts.source.concat( alerts.source ) );
-				
 				controller.model.patientAlertsLoaded = true;
 			}
 			
@@ -349,6 +350,10 @@
 				{
 					alertsWidget.alerts = controller.model.patientAlerts;
 				}
+				
+				var evt:ApplicationDataEvent = new ApplicationDataEvent( ApplicationDataEvent.LOAD, true );
+				evt.data = MedicationsModel.ID;
+				dispatchEvent( evt );
 				
 				widgetContainer.addEventListener( ApplicationEvent.SET_STATE, onSetState );
 			}
@@ -529,7 +534,7 @@
 			<mx:ViewStack id="moduleContainer" visible="false" width="975" resizeToContent="true" creationPolicy="none" creationComplete="CursorManager.removeBusyCursor()">
 				
 				<s:NavigatorContent id="modAppointments">
-					<modules:AppointmentsModule width="975" paddingTop="10" showHeader="false" currentState="simple" />
+					<modules:AppointmentsModule width="975" paddingTop="10" showHeader="false" currentState="provider" />
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modExercise">

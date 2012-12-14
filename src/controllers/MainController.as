@@ -44,6 +44,7 @@ package controllers
 	import models.UserModel;
 	import models.UserPreferences;
 	import models.modules.AppointmentsModel;
+	import models.modules.MedicationsModel;
 	import models.modules.MessagesModel;
 	import models.modules.advisories.PatientAdvisoryStatus;
 	import models.modules.advisories.PublicHealthAdvisoriesModel;
@@ -119,6 +120,8 @@ package controllers
 					] 
 				);
 			
+			model.addEventListener( ApplicationDataEvent.LOADED, onAlertsLoaded );
+			medicationsController.model.addEventListener( ApplicationDataEvent.LOADED, onMedicationsLoaded );
 			patientsController.model.addEventListener( ApplicationDataEvent.LOADED, onPatientsLoaded );
 			
 			ProviderApplicationModel(model).providersDataService.url = "data/providers.xml";
@@ -559,6 +562,51 @@ package controllers
 			lastActivity = getTimer();
 			
 			PopUpManager.removePopUp( inactivityAlert );
+		}
+		
+		private function onAlertsLoaded(event:ApplicationDataEvent):void
+		{
+			model.removeEventListener( ApplicationDataEvent.LOADED, onAlertsLoaded );
+			
+			syncMeds();
+		}
+		
+		private function onMedicationsLoaded(event:ApplicationDataEvent):void
+		{
+			medicationsController.model.removeEventListener( ApplicationDataEvent.LOADED, onMedicationsLoaded );
+			
+			syncMeds();
+		}
+		
+		private function syncMeds():void
+		{
+			var model:ProviderApplicationModel = ProviderApplicationModel(model);
+			
+			if( !model.patientAlertsLoaded || !medicationsController.model.dataLoaded ) return;
+			
+			//	for all renewal requests, make sure status of corresponding medication is set to pending
+			//	should probably be the other way around?
+			for each(var alert:Object in model.patientAlerts)
+			{
+				var type:String = alert.type;
+				var alertType:String = alert.alert;
+				
+				if( type == "Medications" 
+					&& alertType == "Renewal Request" )
+				{
+					var medicationName:String = alert.description;
+					
+					var medications:ArrayCollection = MedicationsModel(AppProperties.getInstance().controller.medicationsController.model).medicationsData;
+					
+					for each(var medication:Object in medications)
+					{
+						if( medication.name == medicationName )
+						{
+							medication.renewalStatus = "Pending";
+						}
+					}
+				}
+			}
 		}
 		
 		private function onPatientsLoaded(event:ApplicationDataEvent):void 
