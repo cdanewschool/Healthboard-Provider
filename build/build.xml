@@ -11,6 +11,12 @@
 	<!--	supported locale(s)	-->
 	<property name="LOCALE" value="en_US" />
 	
+	<!--	path to link report, i.e. ${APP_ROOT}/build/link-report.xml 	-->
+	<property name="LINK_REPORT_PATH" value="" />
+	
+	<!--	path to size report, i.e. ${APP_ROOT}/build/size-report.xml 	-->
+	<property name="SIZE_REPORT_PATH" value="" />
+	
     <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
 	
 	<target name="clean">
@@ -29,32 +35,6 @@
 				<exclude name="*"/>
 			</fileset>
 		</copy>
-	</target>
-
-	<target name="buildCommon">
-		<compc 
-			output="${APP_ROOT}/libs/sharedlib.swc"
-			defaults-css-url="${LIB_ROOT}/src/css/styles.css" 
-			debug="${DEBUG}" optimize="true"
-			fork="true" maxmemory="256m">
-			
-	        <source-path path-element="${LIB_ROOT}/src" />
-			
-			<include-file name="defaults.css" path="${LIB_ROOT}/src/css/styles.css" />
-			
-	        <include-sources dir="${LIB_ROOT}/src" includes="*">
-	        	<exclude name="ASclasses/" />
-	        	<exclude name="sharedASfiles/" />
-	        	<exclude name="css/themes" />
-			</include-sources>
-			
-			<compiler.library-path dir="${LIB_ROOT}/src/external/kapit" includes="radar_chart.swc" />
-			
-			<compiler.external-library-path dir="${FLEX_HOME}/frameworks" append="true">
-				<include name="libs/" />
-			</compiler.external-library-path>
-			
-	    </compc>
 	</target>
 	
 	<target name="buildCSS">
@@ -76,49 +56,60 @@
     	<delete file="${LIB_ROOT}/src/white.css"/>
     </target>
     
-	<target name="build" depends="clean, copyAssets, buildCommon, buildCSS">
+	<target name="build" depends="clean, copyAssets, buildCSS">
+		
+		<tstamp>
+			<format property="UPDATE_TIME" pattern="MM/dd/yyyy hh:mm aa" />
+		</tstamp>
 		
 		<mxmlc 
 			file="${APP_ROOT}/src/visualDashboardProvider.mxml" 
 			output="${APP_ROOT}/${OUTPUT_FOLDER}/visualDashboardProvider.swf" 
-			actionscript-file-encoding="UTF-8" locale="${LOCALE}"
-			keep-generated-actionscript="false"
+			actionscript-file-encoding="UTF-8" locale="${LOCALE}" 
+			keep-generated-actionscript="false" 
 			incremental="true" swf-version="13" 
-			debug="${DEBUG}" optimize="true" link-report="link-report.xml"
+			debug="false" optimize="true" 
+			use-network="${USE_NETWORK}" static-link-runtime-shared-libraries="${LINK_RSLS}"
+			link-report="${LINK_REPORT_PATH}" size-report="${SIZE_REPORT_PATH}"
 			fork="true" maxmemory="5000m">
 
 			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml"/>
 
 			<source-path path-element="${FLEX_HOME}/frameworks"/> 
-			<source-path path-element="${LIB_ROOT}/src"/>
+			<source-path path-element="${LIB_ROOT}/src"/> 
 			
-			<compiler.external-library-path dir="${FLEX_HOME}/frameworks" append="true">
-				<include name="libs" />
-				<include name="locale/${LOCALE}" />
-			</compiler.external-library-path>
-
+			<runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+				<url rsl-url="framework_4.5.0.20967.swz"/>
+			 	<url rsl-url="framework_4.5.0.20967.swf"/>
+			</runtime-shared-library-path>
+			
+			<compiler.library-path dir="${APP_ROOT}/libs" includes="agslib-3.0-2012-06-06.swc" append="true" />
+			
 			<compiler.library-path dir="${LIB_ROOT}" append="true">  
 				<include name="src/" />
 			</compiler.library-path>
 			
-			<compiler.library-path dir="${APP_ROOT}/libs" includes="agslib-3.0-2012-06-06.swc" />
-			<compiler.library-path dir="${LIB_ROOT}/src/external/kapit" includes="radar_chart.swc" />
-			
 		</mxmlc>
 
-	    <html-wrapper title="TATRAC Provider Portal" file="visualDashboardProvider.html" height="100%" width="100%" application="visualDashboardProvider" swf="visualDashboardProvider" version-major="10" version-minor="2" version-revision="0" history="true" output="${APP_ROOT}/${OUTPUT_FOLDER}"/>
+		<copy todir="${APP_ROOT}/${OUTPUT_FOLDER}/" file="${FLEX_HOME}/frameworks/rsls/framework_4.5.0.20967.swz"/>
+		<copy todir="${APP_ROOT}/${OUTPUT_FOLDER}/" file="${FLEX_HOME}/frameworks/rsls/framework_4.5.0.20967.swf"/>
+					
+	    <html-wrapper title="Visual Dashboard Prototype (updated ${UPDATE_TIME})" file="index.html" height="100%" width="100%" application="visualDashboardProvider" swf="visualDashboardProvider" version-major="10" version-minor="2" version-revision="0" history="true" output="${APP_ROOT}/${OUTPUT_FOLDER}"/>
 	    
 	</target>
 	
-	<target name="buildDebug">
+	<target name="buildLocalRelease">
 		<property name="OUTPUT_FOLDER" value="bin-debug" />
-		<property name="DEBUG" value="true" />
+		<property name="LINK_RSLS" value="true" />
+		<property name="USE_NETWORK" value="false" />
 		<antcall target="build" />
 	</target>
 
-	<target name="buildRelease">
+	<target name="buildNetworkedRelease">
 		<property name="OUTPUT_FOLDER" value="bin-release" />
-		<property name="DEBUG" value="false" />
+		<property name="LINK_RSLS" value="false" />
+		<property name="USE_NETWORK" value="true" />
 		<antcall target="build" />
 	</target>
+	
 </project>
