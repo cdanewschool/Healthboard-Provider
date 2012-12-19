@@ -101,6 +101,7 @@ package controllers
 			immunizationsController = new ProviderImmunizationsController();
 			medicalRecordsController = new ProviderMedicalRecordsController();
 			medicationsController = new ProviderMedicationsController();
+			nutritionController = new ProviderNutritionController();
 			patientsController = new PatientsController();
 			
 			teamAppointmentsController = new TeamAppointmentsController();

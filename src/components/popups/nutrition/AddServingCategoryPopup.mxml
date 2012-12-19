@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:popups="components.popups.*"
+	width="384" height="191"
+	controlBarVisible="true" 
+	skinClass="skins.general.myHeaderlessTitleWindow"
+	creationComplete="init()" xmlns:general="components.general.*" >
+	
+	<fx:Script>
+		<![CDATA[
+			import models.modules.nutrition.FoodServing;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			public var serving:FoodServing;
+			
+			private function save():void
+			{
+				serving = new FoodServing( servingTitle.text, servingUnits.text, null, null, listMinMax.selected );
+				
+				var evt:CloseEvent = new CloseEvent( CloseEvent.CLOSE, true, false, Alert.YES );
+				dispatchEvent( evt );
+			}
+			
+			private function cancel():void
+			{
+				PopUpManager.removePopUp( this );
+			}
+			
+			private function init():void
+			{
+				controlBarVisible = false;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" gap="12" horizontalAlign="left" />
+	</s:layout>
+	
+	<s:Label text="Create a new serving category" styleName="darkGrayBold16" paddingBottom="5" />
+	
+	<general:TextInputPlaceholder id="servingTitle" width="165" height="24" placeholder="Serving" />
+	
+	<s:HGroup verticalAlign="middle">
+		<general:TextInputPlaceholder id="servingUnits" width="88" height="24" placeholder="Units" />
+		<s:Label text="example: milligrams" />
+	</s:HGroup>
+	
+	<s:CheckBox id="listMinMax" label="List both minimum and maximum values" />
+	
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:Button label="Add to Serving Category" width="150" height="24" click="save();" skinClass="skins.general.IconButtonSkin" />
+		<s:Button label="Cancel" width="55" height="24" click="cancel();" skinClass="skins.general.IconButtonSkin" />
+	</s:HGroup>
+	
+</s:TitleWindow>

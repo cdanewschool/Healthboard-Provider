@@ -554,7 +554,7 @@
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modNutrition">
-					<modules:NutritionModule width="975" paddingTop="10" showHeader="false" />
+					<modules1:ProviderNutritionModule width="975" paddingTop="10" showHeader="false" />
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modVitalSigns">
