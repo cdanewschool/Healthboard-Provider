@@ -55,7 +55,7 @@
 				
 				if( patient && datagrid )
 				{
-					undisplayedItemCount = patient.recentActivity.length - datagrid.rowCount;
+					undisplayedItemCount = patient.recentActivity ? patient.recentActivity.length - datagrid.rowCount : 0;
 				}
 			}
 			
