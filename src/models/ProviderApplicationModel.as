@@ -1,5 +1,7 @@
 package models
 {
+	import enum.AppContext;
+	
 	import mx.collections.ArrayCollection;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.mxml.HTTPService;
@@ -13,7 +15,7 @@ package models
 		
 		public function ProviderApplicationModel()
 		{
-			super();
+			super( AppContext.PROVIDER );
 			
 			appointmentsDataService = new HTTPService();
 			providersDataService = new HTTPService();
