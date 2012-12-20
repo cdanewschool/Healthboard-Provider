@@ -12,19 +12,12 @@
 	xmlns:widgets="components.widgets.*" 
 	xmlns:views="components.views.*" 
 	xmlns:components="components.*"
+	xmlns:modules1="modules.*" 
+	xmlns:home="components.home.*"
 	fontFamily="myMyriad"
 	minWidth="1024" minHeight="768" resize="onResize()"
-	preinitialize="onPreinitialize(event)" creationComplete="init();onResize()" xmlns:modules1="modules.*" xmlns:home="components.home.*">
-
-	<fx:Script source="ASfiles/home.as" />
-	
-	<fx:Declarations>
-		<s:SolidColor id="colorMedicalRecordsOutpatient" color="0x71B2D1" /><!--also used for Medication's "Prescription Drugs"-->
-		<s:SolidColor id="colorMedicalRecordsInpatient" color="0xDC9D00" /><!--also used for Medication's "Supplements"-->
-		<s:SolidColor id="colorMedicationsPast" color="0x646464" />		
-	</fx:Declarations>
-	
-	<fx:Style source="css/styles.css" />
+	preinitialize="onPreinitialize(event)" 
+	creationComplete="init();onResize()">
 	
 	<fx:Script>
 		<![CDATA[
@@ -53,6 +46,12 @@
 		]]>
 	</fx:Script>
 	
+	<!--	external actionscript includes 	-->
+	<fx:Script source="ASfiles/home.as" />
+	
+	<fx:Style source="css/styles.css" />
+	
+	<!--	application states	-->
 	<s:states>
 		<s:State name="default" />
 		<s:State name="forgotPassword" />
@@ -63,9 +62,6 @@
 	<s:layout>
 		<s:VerticalLayout horizontalAlign="center" />
 	</s:layout>
-	
-	<s:transitions>
-	</s:transitions>
 	
 	<views:LoginView 
 		width="1024" includeIn="default" 
