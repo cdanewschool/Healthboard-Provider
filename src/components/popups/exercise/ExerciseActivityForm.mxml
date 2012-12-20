@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Form 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	width="294" height="307" fontSize="12" color="0x000000">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import enum.UrgencyType;
+			
+			import models.modules.exercise.ExerciseActivity;
+			
+			import mx.collections.ArrayCollection;
+			
+			import util.DateFormatters;
+			
+			[Bindable] public var activity:ExerciseActivity;
+			
+			[Bindable] public var distanceUnits:ArrayCollection = new ArrayCollection( ['miles'] );
+			[Bindable] public var durationUnits:ArrayCollection = new ArrayCollection( ['minutes','hours'] );
+			[Bindable] public var frequencyUnits:ArrayCollection = new ArrayCollection( ['day','week'] );
+			
+			private function getDateLabel(item:Date):String 
+			{
+				return DateFormatters.dateOnlyBackslashDelimited.format(item);
+			}
+		]]>
+	</fx:Script>
+	
+	<mx:FormItem label="Start Date:" color="0x000000" labelWidth="75" horizontalGap="5">
+		<mx:DateField id="startDate" selectedDate="{activity.startDate}" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput" width="100" height="24" labelFunction="getDateLabel" />
+	</mx:FormItem>
+	
+	<mx:FormItem label="Acheive by:" color="0x000000" labelWidth="75" horizontalGap="5">
+		<mx:DateField id="acheiveBy" selectedDate="{activity.acheiveByDate}" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput" width="100" height="24" labelFunction="getDateLabel" />
+	</mx:FormItem>
+	
+	<mx:FormItem label="Frequency:" color="0x000000" labelWidth="75" horizontalGap="5">
+		<s:HGroup>
+			<s:TextInput id="frequency" width="34" height="24" text="{activity.frequency}"/>
+			<s:Label text="times/" />
+			<s:DropDownList id="frequencyUnit" dataProvider="{frequencyUnits}" selectedIndex="{frequencyUnits.getItemIndex(activity.frequencyUnit)}" width="81" height="24" />
+		</s:HGroup>
+	</mx:FormItem>
+	
+	<mx:FormItem label="Duration:" color="0x000000" labelWidth="75" horizontalGap="5">
+		<s:HGroup>
+			<s:TextInput id="duration" width="34" height="24" text="{activity.duration}"/>
+			<s:DropDownList id="durationUnit" dataProvider="{durationUnits}" selectedIndex="{durationUnits.getItemIndex(activity.durationUnit)}" width="81" height="24" />
+		</s:HGroup>
+	</mx:FormItem>
+	
+	<mx:FormItem label="Distance:" color="0x000000" labelWidth="75" horizontalGap="5">
+		<s:HGroup>
+			<s:TextInput id="distance" width="34" height="24" text="{activity.distance}"/>
+			<s:DropDownList id="distanceUnit" dataProvider="{distanceUnits}" selectedIndex="{distanceUnits.getItemIndex(activity.distanceUnit)}" width="81" height="24" />
+		</s:HGroup>
+	</mx:FormItem>
+	
+	<mx:FormItem label="Intensity:" color="0x000000" labelWidth="75" horizontalGap="5">
+		<s:HGroup>
+			<s:TextInput id="intensity" width="34" height="24" text="{activity.intensity}" />
+			<s:TextInput width="184" height="24" />
+		</s:HGroup>
+	</mx:FormItem>
+	
+	<mx:FormItem label="Directions:" color="0x000000" labelWidth="75" horizontalGap="5">
+		<s:TextArea id="directions" width="224" height="67" text="{activity.directions}" />
+	</mx:FormItem>
+	
+	<mx:FormItem label="Urgency:" color="0x000000" labelWidth="75" horizontalGap="5">
+		<s:DropDownList 
+			id="urgency" styleName="buttonText" 
+			width="130" height="24" 
+			skinClass="skins.messages.CustomDropdownListWithIcon" selectedIndex="{activity.urgency}">
+			<s:dataProvider>
+				<s:ArrayList>
+					<fx:Object label="{UrgencyType.getUrgencyLabel( UrgencyType.NOT_URGENT )}" />
+					<fx:Object label="{UrgencyType.getUrgencyLabel( UrgencyType.SOMEWHAT_URGENT )}" icon="{UrgencyType.iconSomewhatUrgent}" />
+					<fx:Object label="{UrgencyType.getUrgencyLabel( UrgencyType.URGENT )}" icon="{UrgencyType.iconUrgent}" />
+				</s:ArrayList>							
+			</s:dataProvider>
+		</s:DropDownList>
+	</mx:FormItem>
+	
+</mx:Form>

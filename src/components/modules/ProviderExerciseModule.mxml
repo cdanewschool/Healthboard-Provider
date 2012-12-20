@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modules:ExerciseModule 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:modules="modules.*" 
+	currentState="provider">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import components.popups.exercise.ManageActivitiesPopup;
+			
+			import mx.managers.PopUpManager;
+			
+			import spark.components.TitleWindow;
+			
+			override protected function setActivities():void
+			{
+				var popup:ManageActivitiesPopup = ManageActivitiesPopup( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, ManageActivitiesPopup) as TitleWindow );
+				popup.exerciseGroups = model.exerciseDataPhysicianAssigned2;
+				PopUpManager.centerPopUp( popup );
+			}
+		]]>
+	</fx:Script>
+	
+</modules:ExerciseModule>

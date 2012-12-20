@@ -460,7 +460,7 @@
 						id="medicalRecordsWidget" width="305" 
 						title="Medical Records" 
 						collapsible="true" headerClickable="false" close="onWidgetClose(event)"
-						module="medicalRecordsModule" titleBarHeight="30" color="0xFFFFFF" 
+						titleBarHeight="30" color="0xFFFFFF" 
 						headerClicked="onWidgetHeaderClick(event)"
 						includeIn="default" creationComplete="medicalRecordsWidget.module = Constants.MODULE_MEDICAL_RECORDS"/>
 					
@@ -481,7 +481,7 @@
 					<widgets:PatientMedicationsWidget
 						id="medicationsWidget" width="633" title="Medications" 
 						collapsible="true" headerClickable="false" 
-						module="modMedications" titleBarHeight="30" 
+						titleBarHeight="30" 
 						headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)"
 						includeIn="default" creationComplete="medicationsWidget.module = Constants.MODULE_MEDICATIONS"/>
 					
@@ -494,7 +494,7 @@
 								width="305" title="Decision Support" 
 								patient="{patient}" 
 								collapsible="true" headerClickable="false" 
-								module="decisionSupportModule" titleBarHeight="30" 
+								titleBarHeight="30" 
 								headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
 								creationComplete="decisionSupportWidget.module = ProviderConstants.MODULE_DECISION_SUPPORT" />
 							
@@ -503,7 +503,7 @@
 								width="305" 
 								title="Nutrition"
 								collapsible="true" headerClickable="false" 
-								module="nutritionModule" titleBarHeight="30" 
+								titleBarHeight="30" 
 								headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
 								creationComplete="nutritionWidget.module = Constants.MODULE_NUTRITION"/>
 							
@@ -512,7 +512,7 @@
 								width="305" maxHeight="441"
 								title="Vital Signs" 
 								collapsible="true" headerClickable="false"
-								module="vitalSignsModule" titleBarHeight="30" 
+								titleBarHeight="30" 
 								headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
 								creationComplete="vitalSignsWidget.module = Constants.MODULE_VITAL_SIGNS"/>
 							
@@ -538,7 +538,7 @@
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modExercise">
-					<modules:ExerciseModule width="975" paddingTop="10" showHeader="false" />
+					<modules1:ProviderExerciseModule width="975" paddingTop="10" showHeader="false" />
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modImmunizations">
