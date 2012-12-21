@@ -2,8 +2,8 @@ package components.itemrenderers
 {
 	import controllers.AppointmentsController;
 	
-	import events.TeamAppointmentEvent;
 	import events.MessageEvent;
+	import events.TeamAppointmentEvent;
 	
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
@@ -108,6 +108,14 @@ package components.itemrenderers
 			g.beginFill(0x4D4D4D,1);
 			g.drawRect(0,0,w,h);
 			g.endFill();
+		}
+		
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			
+			//	only show options for logged-in provider
+			button.visible = AxisLabel(data).value == AppProperties.getInstance().controller.user.lastName;
 		}
 		
 		override protected function measure():void
