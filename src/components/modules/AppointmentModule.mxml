@@ -1292,7 +1292,7 @@
 								<s:VGroup  width="180" paddingTop="20">
 									<s:Label text="Appointment Details" styleName="greenBold12" width="100%" textAlign="center" />
 									
-									<s:Label text="Select an appointment to view details" styleName="gray9Italic" width="100%" textAlign="center" visible="{selectedAppointment==null &amp;&amp; selectedProvider==null}" includeInLayout="{selectedAppointment==null &amp;&amp; selectedProvider==null}" />
+									<s:Label text="Select an appointment to view details" styleName="gray9Italic" width="100%" textAlign="center" visible="{selectedAppointment==null &amp;&amp; selectedProvider==null &amp;&amp; providerScheduleList.showOverview == false}" includeInLayout="{selectedAppointment==null &amp;&amp; selectedProvider==null &amp;&amp; providerScheduleList.showOverview == false}" />
 									
 									<s:VGroup visible="{selectedAppointment!=null}" includeInLayout="{selectedAppointment!=null}" paddingTop="15" gap="0">
 										
@@ -1392,7 +1392,7 @@
 									
 									<appointments:ProviderScheduleList 
 										id="providerScheduleList" 
-										visible="{providerScheduleList.providers!=null &amp;&amp; selectedAppointment!=null}" includeInLayout="{providerScheduleList.visible}"
+										visible="{providerScheduleList.providers!=null &amp;&amp; selectedAppointment==null}" includeInLayout="{providerScheduleList.visible}"
 										date="{selectedDate}" 
 										paddingTop="15" paddingLeft="10" 
 										showOverview="{currentState==MODE_MONTH}"

@@ -48,6 +48,7 @@
 				return _showOverview;
 			}
 
+			[Bindable]
 			public function set showOverview(value:Boolean):void
 			{
 				_showOverview = value;
