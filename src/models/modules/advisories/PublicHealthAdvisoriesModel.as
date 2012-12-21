@@ -31,6 +31,7 @@ package models.modules.advisories
 		
 		public var advisories:ArrayCollection;
 		public var activeAdvisories:ArrayCollection;
+		public var inactiveAdvisories:ArrayCollection;
 		
 		public var searchText:String;
 		public var minDate:Date;

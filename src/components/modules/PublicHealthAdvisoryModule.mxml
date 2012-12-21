@@ -87,15 +87,19 @@
 			
 			private function onShowAll(event:AdvisoryEvent):void
 			{
-				if( !viewStack.getChildByName( 'allAdvisories' ) )
+				if( !viewStack.getChildByName( 'pastAdvisories' ) )
 				{
 					var view:ViewPublicHealthAdvisories = new ViewPublicHealthAdvisories();
-					view.name = "allAdvisories";
-					view.dataProvider = model.advisories;
+					view.name = "pastAdvisories";
+					view.dataProvider = model.inactiveAdvisories;
 					
 					viewStack.addChild(view);
 					
 					tabs.selectedIndex = viewStack.length - 1;
+				}
+				else
+				{
+					viewStack.selectedIndex = viewStack.getChildIndex( viewStack.getChildByName( 'pastAdvisories' ) );
 				}
 			}
 			

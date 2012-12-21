@@ -55,6 +55,11 @@ package controllers
 			model.activeAdvisories.sort = sort;
 			model.activeAdvisories.refresh();
 			
+			model.inactiveAdvisories = new ArrayCollection( model.advisories.source );
+			model.inactiveAdvisories.filterFunction = filterByInactive;
+			model.inactiveAdvisories.sort = sort;
+			model.inactiveAdvisories.refresh();
+			
 			super.dataResultHandler(event);
 		}
 		
@@ -195,8 +200,13 @@ package controllers
 		private function filterByActive(item:PublicHealthAdvisory):Boolean
 		{
 			var valid:Boolean = filter(item);
-			
 			return valid && item.active;
+		}
+		
+		private function filterByInactive(item:PublicHealthAdvisory):Boolean
+		{
+			var valid:Boolean = filter(item);
+			return valid && !item.active;
 		}
 	}
 }

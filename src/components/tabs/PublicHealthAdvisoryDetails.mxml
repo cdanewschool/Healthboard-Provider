@@ -10,13 +10,17 @@
 	<fx:Script>
 		<![CDATA[
 			import com.esri.ags.Graphic;
+			import com.esri.ags.events.FindEvent;
 			import com.esri.ags.geometry.Geometry;
 			import com.esri.ags.geometry.Multipoint;
+			import com.esri.ags.geometry.Polygon;
 			import com.esri.ags.geometry.WebMercatorExtent;
 			import com.esri.ags.geometry.WebMercatorMapPoint;
 			import com.esri.ags.symbols.InfoSymbol;
 			import com.esri.ags.tasks.supportClasses.AddressCandidate;
 			import com.esri.ags.tasks.supportClasses.AddressToLocationsParameters;
+			import com.esri.ags.tasks.supportClasses.FindResult;
+			import com.esri.ags.utils.GraphicUtil;
 			
 			import components.popups.healthadvisory.AdvisoryUpdatesPopup;
 			
@@ -218,48 +222,6 @@
 				PopUpManager.centerPopUp( popup );
 			}
 			
-			private function mapSearch():void
-			{
-				var parameters:AddressToLocationsParameters = new AddressToLocationsParameters();
-				parameters.address = { SingleLine: search.text };
-				
-				parameters.outFields = [ "Loc_name" ];
-				
-				locator.addressToLocations( parameters, new AsyncResponder(onMapSearch, onMapSearchFault) );
-			}
-			
-			private function onMapSearch(candidates:Array, token:Object = null):void
-			{
-				if (candidates.length > 0)
-				{
-					var points:Multipoint = new Multipoint(null,map.spatialReference);
-					var candidate:AddressCandidate;
-					
-					for (var i:int=0; i<candidates.length; i++) 
-					{
-						candidate = candidates[i];
-						
-						if (candidate.score > 70) 
-						{
-							points.addPoint(candidate.location);
-						}
-					}
-					
-					if( points.points.length > 1 )
-					{
-						map.extent = points.extent.expand(.5);
-					}
-					else
-					{
-						//map.extent = candidate.location.extent;
-					}
-				}
-			}
-			
-			private function onMapSearchFault(info:Object, token:Object = null):void
-			{
-			}
-			
 			private function toggleMapLayer():void
 			{
 			}
@@ -362,6 +324,31 @@
 			public function dataTipsCaseReports(hd:HitData):String {
 				return "On <b>week " + hd.item.week + "</b>, there were <b>" + LineSeriesItem(hd.chartItem).yValue + " " + LineSeries(hd.element).displayName.toLowerCase() + "</b>";	
 			}
+			
+			private function mapSearch():void
+			{
+				findTask.execute( myFindParams );
+			}
+			
+			private function onMapSearchSuccess( event : FindEvent ) : void
+			{
+				searchLayer.clear();
+				
+				for (var i:int = 0; i < event.findResults.length; i++)
+				{
+					var graphic:Graphic = FindResult(event.findResults[i]).feature;
+					searchLayer.add(graphic);
+				}
+				
+				// zoom to extent of all features
+				var graphicProvider:ArrayCollection = searchLayer.graphicProvider as ArrayCollection;
+				var graphicsExtent:Extent = GraphicUtil.getGraphicsExtent( graphicProvider.toArray() );
+				
+				if( graphicsExtent )
+				{
+					map.extent = graphicsExtent.expand(1.1);
+				}
+			}
 		]]>
 	</fx:Script>
 	
@@ -369,10 +356,18 @@
 		
 		<s:NumberFormatter id="numberFormatter" />
 		
-		<esri:Locator 
-			id="locator"
-			outSpatialReference="{map.spatialReference}"
-			url="http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Address_NA_10/GeocodeServer"/>
+		<esri:FindTask
+			id="findTask"
+			executeComplete="onMapSearchSuccess(event)"
+			url="http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer" />
+		
+		<esri:FindParameters 
+			id="myFindParams"
+			returnGeometry="true" outSpatialReference="{map.spatialReference}"
+			contains="true"
+			searchText="{search.text}"
+			layerIds="[2]"
+			searchFields="['CITY_NAME','NAME','SYSTEM','STATE_ABBR','STATE_NAME']" />
 		
 		<esri:SimpleMarkerSymbol id="deathMarker" alpha="1" color="0x000000" size="20" style="triangle">
 			<esri:SimpleLineSymbol width="1" alpha="1" color="0xFFFFFF" style="solid" />
@@ -616,6 +611,7 @@
 											<esri:GraphicsLayer id="hospitalizationsLayer" symbol="{hospitalizationMarker}"/>
 											<esri:GraphicsLayer id="deathsLayer" symbol="{deathMarker}"/>
 											<esri:GraphicsLayer id="patientsUnaffectedLayer" symbol="{unaffectedPatientMarker}"/>
+											<esri:GraphicsLayer id="searchLayer" visible="false" />
 											
 										</esri:Map>
 										
