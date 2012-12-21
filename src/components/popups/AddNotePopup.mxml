@@ -30,6 +30,9 @@
 			
 			private var _moduleID:String;
 			
+			public var allModulesSelected:Boolean;
+			public var selectedModuleIDs:Array;
+			
 			public function get moduleID():String
 			{
 				return _moduleID;
@@ -93,6 +96,21 @@
 				}
 				
 				description.errorString = '';
+				
+				allModulesSelected = true;
+				selectedModuleIDs = [];
+				
+				for(var i:int=0;i<checkboxes.numElements;i++)
+				{
+					var checkbox:CheckBox = checkboxes.getElementAt(i) as CheckBox;
+					
+					if( !checkbox.selected ) 
+						allModulesSelected = false;
+					else
+						selectedModuleIDs.push( checkbox.id );
+				}
+				
+				if( selectedModuleIDs.length == 0 ) allModulesSelected = true;
 				
 				dispatchEvent( new CloseEvent( CloseEvent.CLOSE, true, false, Alert.YES ) );
 			}

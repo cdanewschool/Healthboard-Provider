@@ -4,7 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*" 
-	creationComplete="init()">
+	initialize="init()">
 	
 	<fx:Script>
 		<![CDATA[
@@ -17,6 +17,7 @@
 			import controllers.MainController;
 			
 			import mx.collections.ArrayCollection;
+			import mx.collections.Sort;
 			import mx.controls.Alert;
 			import mx.events.CloseEvent;
 			import mx.events.CollectionEvent;
@@ -24,9 +25,13 @@
 			import mx.formatters.DateFormatter;
 			import mx.managers.PopUpManager;
 			
+			import spark.collections.SortField;
 			import spark.components.DropDownList;
 			import spark.components.Label;
 			import spark.events.IndexChangeEvent;
+			
+			import util.DateFormatters;
+			import util.DateUtil;
 			
 			[Bindable] private var controller:MainController = MainController( AppProperties.getInstance().controller );
 			
@@ -45,6 +50,10 @@
 			private var _showInactive:Boolean = false;
 			
 			private var timeFormatter:DateFormatter;
+			
+			private var today:Date;
+			
+			private var sort:Sort;
 			
 			public function get showInactive():Boolean
 			{
@@ -70,6 +79,11 @@
 			
 			public function set alerts(value:ArrayCollection):void
 			{
+				if( _alerts )
+				{
+					alerts.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onAlertsChange );
+				}
+				
 				_alerts = value;
 				
 				if( _alerts )
@@ -100,10 +114,13 @@
 			{
 				allAlerts = new ArrayCollection( _alerts.source );
 				allAlerts.filterFunction = filter;
+				allAlerts.sort = sort;
 				
 				moduleAlerts = new ArrayCollection( _alerts.source );
 				moduleAlerts.filterFunction = filterByModule;
+				moduleAlerts.sort = sort;
 				
+				datagrid
 				dirty = true;
 				
 				invalidateProperties();
@@ -175,13 +192,31 @@
 				
 				if( event.detail == Alert.YES )
 				{
-					var alert:Object = { alert: "Internal Note", date: timeFormatter.format( new Date() ), description: popup.description.text, type: "All" };
-					controller.model.patientAlerts.addItemAt( alert, 0 );
+					var alert:Object = { alert: "Internal Note", date: new Date(), description: popup.description.text, type: "All" };
+					
+					if( popup.allModulesSelected )
+					{
+						controller.model.patientAlerts.addItemAt( alert, 0 );
+					}
+					else
+					{
+						for(var i:int=0;i<popup.selectedModuleIDs.length;i++)
+						{
+							alert = 
+							{
+								alert: "Internal Note", 
+								date: new Date(), 
+								description: popup.description.text, 
+								type: AppProperties.getInstance().controller.getModuleTitle( popup.selectedModuleIDs[i] ) 
+							};
+							
+							controller.model.patientAlerts.addItemAt( alert, 0 );
+						}
+					}
 				}
 				
 				PopUpManager.removePopUp( popup );
 			}
-			
 			
 			override protected function commitProperties():void
 			{
@@ -243,6 +278,16 @@
 				invalidateProperties();
 			}
 			
+			public function getDateLabel(item:Object,column:DataGridColumn):String
+			{
+				var diff:Number = today.time - item.date.time;
+				
+				if( diff < DateUtil.DAY || diff < 0 ) return timeFormatter.format( item.date );
+				if( diff < DateUtil.DAY * 2 ) return 'Yesterday';
+				
+				return DateFormatters.dateFormatter.format( item.date );
+			}
+			
 			private function onItemClick(event:ListEvent):void
 			{
 				dispatchEvent( event );
@@ -250,6 +295,8 @@
 			
 			private function init():void
 			{
+				today = AppProperties.getInstance().controller.model.today;
+				
 				titleDisplay.addEventListener( MouseEvent.CLICK, onTitleClick );
 				(titleDisplay as Label).buttonMode = true;
 				(subTitleDisplay as Label).buttonMode = true;
@@ -259,6 +306,9 @@
 				
 				addEventListener( IndexChangeEvent.CHANGE, onAlertsWidgetDropDownChange );
 				dropDownChangeCallback = onAlertsWidgetDropDownChange;
+				
+				sort = new Sort();
+				sort.fields = [ new SortField('date',true,true) ];
 				
 				updateDataProvider();
 			}
@@ -293,7 +343,7 @@
 					</fx:Component>
 				</mx:itemRenderer>
 			</mx:DataGridColumn>
-			<mx:DataGridColumn dataField="date" headerText="Time" width="86" itemRenderer="components.itemrenderers.datagridcolumn.CustomRowColor" fontFamily="myMyriad" paddingLeft="5" />
+			<mx:DataGridColumn dataField="date" headerText="Time" width="86" itemRenderer="components.itemrenderers.datagridcolumn.CustomRowColor" fontFamily="myMyriad" paddingLeft="5" labelFunction="getDateLabel" />
 			<mx:DataGridColumn dataField="type" headerText="Type" width="102" itemRenderer="components.itemrenderers.datagridcolumn.CustomRowColor" fontFamily="myMyriad"  paddingLeft="5" />
 			<mx:DataGridColumn dataField="alert" headerText="Alert" width="143" itemRenderer="components.itemrenderers.datagridcolumn.CustomRowColor" fontFamily="myMyriad"  paddingLeft="5" />
 			<mx:DataGridColumn dataField="description" headerText="Description" paddingLeft="5" fontFamily="myMyriad">

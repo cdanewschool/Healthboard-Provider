@@ -23,6 +23,8 @@
 			
 			import ASfiles.ProviderConstants;
 			
+			import com.esri.ags.utils.DateUtil;
+			
 			import controllers.MainController;
 			
 			import enum.UrgencyType;
@@ -47,6 +49,7 @@
 			import spark.components.Group;
 			
 			import util.DateFormatters;
+			import util.DateUtil;
 			
 			public static const STATE_DEFAULT:String = "default";
 			public static const STATE_MODULE:String = "module";
@@ -200,6 +203,11 @@
 			private function healthFocusResultHandler(event:ResultEvent):void 
 			{
 				var alerts:ArrayCollection = event.result.alerts.alert;
+				
+				for each(var alert:Object in alerts)
+				{
+					alert.date = new Date( util.DateUtil.modernizeDate( alert.date ) );
+				}
 				
 				controller.model.patientAlerts = alertsWidget.alerts = new ArrayCollection( controller.model.patientAlerts.source.concat( alerts.source ) );
 				controller.model.patientAlertsLoaded = true;
