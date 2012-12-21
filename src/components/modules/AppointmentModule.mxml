@@ -412,9 +412,12 @@
 			
 			private function onSelectDate( event:CalendarLayoutChangeEvent ):void
 			{
-				selectedDate = event.currentTarget.selectedDate;
-				
-				if( currentState != MODE_MONTH ) dirty = true;
+				if( selectedDate != event.currentTarget.selectedDate )
+				{
+					selectedDate = event.currentTarget.selectedDate;
+					
+					dirty = true;
+				}
 			}
 			
 			[Bindable]
@@ -743,7 +746,7 @@
 				}
 				
 				providers = new ArrayCollection( p );
-				model.selectedProviders = new ArrayCollection( p );
+				model.selectedProviders.source = p;
 				
 				var sort:Sort = new Sort();
 				sort.fields = [ new SortField('lastName') ];
@@ -772,7 +775,7 @@
 				for each(var provider:ProviderModel in providers) 
 					if( provider.selected ) _selectedProviders.push( provider);
 				
-				model.selectedProviders = new ArrayCollection( _selectedProviders );
+				model.selectedProviders.source = _selectedProviders;
 				
 				dirty = true;
 			}
@@ -1251,7 +1254,7 @@
 										<s:NavigatorContent>
 											<calendar:CalendarComponent 
 												id="monthView" 
-												width="662" height="470" paddingLeft="-2"
+												width="662" height="505" paddingLeft="-2"
 												itemRenderer="components.calendar.CalendarItem" 
 												selectedDate="{selectedDate}" change="onSelectDate(event)"  />
 										</s:NavigatorContent>

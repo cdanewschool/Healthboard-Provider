@@ -4,7 +4,9 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	autoDrawBackground="false" 
-	creationComplete="init()">
+	resizeMode="scale" 
+	creationComplete="init()"
+	dataChange="onDataChange(event)">
 	
 	<fx:Script>
 		<![CDATA[
@@ -18,28 +20,30 @@
 			import models.TeamAppointmentsModel;
 			
 			import mx.collections.ArrayCollection;
+			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
 			
-			private function updateState():void
+			private var dirty:Boolean;
+			
+			override public function set data(value:Object):void
 			{
-				if( dayLabel ) dayLabel.styleName = selected ? 'calendarSelectedDay' : 'lightGray11';
-				if( providerList && border ) providerList.alpha = border.alpha = selected ? 1 : .45;
+				if( !dirty ) dirty = data != value;
+				
+				super.data = value;
 			}
 			
-			override public function set selected(value:Boolean):void
+			private function onDataChange(event:FlexEvent=null):void
 			{
-				super.selected = value;
-				
-				updateState();
-			}
-			
-			private function init():void
-			{
-				var day:Date = new Date();
-				day.time = parseInt( data.toString() );
-				
-				dayLabel.text = day.date.toString();
+				if( !dirty || !data ) return;
 				
 				var providers:ArrayCollection = TeamAppointmentsModel( MainController( AppProperties.getInstance().controller ).teamAppointmentsController.model ).selectedProviders;
+				
+				var day:Date = new Date();
+				day.time = parseInt( data.toString() );
+				dayLabel.text = day.date.toString();
+				
+				providerList.removeAllElements();
+				
 				
 				for each(var provider:ProviderModel in providers)
 				{
@@ -52,11 +56,43 @@
 				}
 				
 				updateState();
+				
+				dirty = false;
+			}
+			
+			private function updateState():void
+			{
+				if( dayLabel ) dayLabel.styleName = selected ? 'calendarSelectedDay' : 'lightGray11';
+				if( providerList && border ) providerList.alpha = border.alpha = selected ? 1 : .45;
+			}
+			
+			override public function set width(value:Number):void
+			{
+				super.width = value;
+			}
+			
+			override public function set selected(value:Boolean):void
+			{
+				super.selected = value;
+				
+				updateState();
+			}
+			
+			private function onProvidersChange(event:CollectionEvent):void
+			{
+				dirty = true;
+				
+				onDataChange();
+			}
+			
+			private function init():void
+			{
+				TeamAppointmentsModel( MainController( AppProperties.getInstance().controller ).teamAppointmentsController.model ).selectedProviders.addEventListener(CollectionEvent.COLLECTION_CHANGE, onProvidersChange );
 			}
 		]]>
 	</fx:Script>
 	
-	<s:BorderContainer id="border" borderColor="0xffffff" backgroundAlpha="0" width="100%" height="100%" left="-2">
+	<s:BorderContainer id="border" borderColor="0xffffff" backgroundAlpha="0">
 		
 		<s:layout>
 			<s:BasicLayout  />

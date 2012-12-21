@@ -15,6 +15,7 @@ package components.calendar
 	import spark.components.Group;
 	import spark.components.List;
 	import spark.components.VGroup;
+	import spark.layouts.ColumnAlign;
 	import spark.layouts.RowAlign;
 	import spark.layouts.TileLayout;
 	import spark.layouts.TileOrientation;
@@ -62,7 +63,9 @@ package components.calendar
 			addElement( header );
 			
 			content = new List();
+			content.useVirtualLayout = false;
 			content.setStyle('contentBackgroundAlpha',0);
+			content.setStyle('horizontalScrollPolicy','off');
 			content.addEventListener( Event.CHANGE, onDateSelect );
 			addElement( content );
 			
@@ -73,10 +76,10 @@ package components.calendar
 			header.layout = _layout;
 			
 			_layout = new TileLayout();
-			_layout.rowAlign = RowAlign.JUSTIFY_USING_HEIGHT;
 			_layout.orientation = TileOrientation.ROWS;
-			_layout.horizontalGap = 0;
-			_layout.verticalGap = 0;
+			_layout.horizontalGap = -1;
+			_layout.verticalGap = -1;
+			_layout.requestedColumnCount = 7;
 			content.layout = _layout;
 		}
 		
@@ -124,9 +127,6 @@ package components.calendar
 					}
 					
 					content.dataProvider = data;
-					
-					(content.layout as TileLayout).requestedColumnCount = 7;
-					(content.layout as TileLayout).verticalGap = 0;
 				}
 				
 				dirty = false;
@@ -144,16 +144,23 @@ package components.calendar
 			if( mode == MODE_MONTH )
 			{
 				var _layout:TileLayout;
-				_layout = (header.layout as TileLayout);
-				_layout.columnWidth = (unscaledWidth - _layout.columnCount * _layout.horizontalGap) / _layout.columnCount;
+				
+				var width:int = unscaledWidth;
 				
 				header.height = 20;
 				
-				_layout = (content.layout as TileLayout);
+				//	header
+				_layout = (header.layout as TileLayout);
 				_layout.columnWidth = (unscaledWidth - _layout.columnCount * _layout.horizontalGap) / _layout.columnCount;
-				//_layout.rowHeight = (unscaledHeight - _layout.rowCount * _layout.verticalGap) / _layout.rowCount;
 				
+				//	content
 				content.height = unscaledHeight - header.height - gap;
+				content.width = width;
+				
+				if( content.scroller.verticalScrollBar.visible ) width -= content.scroller.verticalScrollBar.width;
+				
+				_layout = (content.layout as TileLayout);
+				_layout.columnWidth = (width - _layout.columnCount * _layout.horizontalGap) / _layout.columnCount;
 			}
 		}
 		
@@ -175,9 +182,9 @@ package components.calendar
 
 		public function set mode(value:String):void
 		{
-			_mode = value;
-			
 			dirty = true;
+			
+			_mode = value;
 			
 			invalidateProperties();
 		}
@@ -189,9 +196,9 @@ package components.calendar
 
 		public function set displayedMonth(value:int):void
 		{
+			if( !dirty ) dirty = value != _displayedMonth;
+			
 			_displayedMonth = value;
-
-			dirty = true;
 			
 			invalidateProperties();
 		}
@@ -203,12 +210,13 @@ package components.calendar
 
 		public function set displayedYear(value:int):void
 		{
-			_displayedYear = value;
+			if( !dirty ) dirty = value != _displayedYear;
 			
-			dirty = true;
+			_displayedYear = value;
 			
 			invalidateProperties();
 		}
+		
 		public function get itemRenderer():Class
 		{
 			return _itemRenderer;
@@ -237,8 +245,6 @@ package components.calendar
 			{
 				displayedMonth = selectedDate.month;
 				displayedYear = selectedDate.fullYear;
-				
-				invalidateProperties();
 			}
 		}
 

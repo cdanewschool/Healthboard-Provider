@@ -16,11 +16,13 @@ package models
 		
 		private var _appointments:ArrayCollection;
 		
-		public var selectedProviders:ArrayCollection;
+		private var _selectedProviders:ArrayCollection;
 		
 		public function TeamAppointmentsModel()
 		{
 			super();
+			
+			selectedProviders = new ArrayCollection();
 		}
 		
 		public function addAppointment( appointment:Appointment ):void
@@ -39,6 +41,17 @@ package models
 		{
 			_appointments = value;
 		}
+
+		public function get selectedProviders():ArrayCollection
+		{
+			return _selectedProviders;
+		}
+
+		public function set selectedProviders(value:ArrayCollection):void
+		{
+			_selectedProviders = value;
+		}
+
 
 	}
 }
