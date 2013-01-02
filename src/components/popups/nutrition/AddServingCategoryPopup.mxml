@@ -21,6 +21,20 @@
 			
 			private function save():void
 			{
+				if( servingTitle.text == servingTitle.placeholder ) 
+				{
+					servingTitle.errorString = "Please enter a title";
+					return;
+				}
+				else if( servingUnits.text == servingUnits.placeholder ) 
+				{
+					servingUnits.errorString = "Please enter a unit";
+					return;
+				}
+				
+				servingTitle.errorString = "";
+				servingUnits.errorString = "";
+				
 				serving = new FoodServing( servingTitle.text, servingUnits.text, null, null, listMinMax.selected );
 				
 				var evt:CloseEvent = new CloseEvent( CloseEvent.CLOSE, true, false, Alert.YES );
