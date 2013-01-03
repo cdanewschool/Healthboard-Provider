@@ -562,7 +562,7 @@
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modNutrition">
-					<modules1:ProviderNutritionModule width="975" paddingTop="10" showHeader="false" />
+					<modules1:ProviderNutritionModule width="975" paddingTop="10" showHeader="false" patient="{patient}" />
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent id="modVitalSigns">

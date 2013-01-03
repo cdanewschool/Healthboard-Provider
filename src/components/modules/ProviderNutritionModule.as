@@ -4,6 +4,8 @@ package components.modules
 	
 	import flash.events.MouseEvent;
 	
+	import models.PatientModel;
+	
 	import modules.NutritionModule;
 	
 	import mx.managers.PopUpManager;
@@ -22,6 +24,7 @@ package components.modules
 		override protected function onSetFoodPlanClick(event:MouseEvent):void
 		{
 			var popup:FoodPlanPopup = FoodPlanPopup( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, FoodPlanPopup) as TitleWindow );
+			popup.patient = patient as PatientModel;
 			PopUpManager.centerPopUp( popup );
 		}
 	}
