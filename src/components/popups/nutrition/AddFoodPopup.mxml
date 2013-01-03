@@ -89,7 +89,7 @@
 		<mx:FormItem label="Description:" color="0x000000" labelWidth="70">
 			<s:VGroup>
 				<s:TextInput text="{imageAttachment ? imageAttachment.name : ''}" editable="false" />
-				<general:MainLinkButton label="Browse From file" styleName="linkBtnDarBlue" fontSize="12" click="browseAttachment(event)" paddingLeft="-10" />
+				<general:MainLinkButton label="Browse From file" styleName="linkBtnDarkBlue" fontSize="12" click="browseAttachment(event)" paddingLeft="10" />
 			</s:VGroup>
 		</mx:FormItem>
 		
