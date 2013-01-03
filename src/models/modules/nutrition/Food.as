@@ -7,9 +7,9 @@ package models.modules.nutrition
 	{
 		public var name:String;
 		public var directions:String;
-		public var image:FileUpload;
+		public var image:*;
 		
-		public function Food( name:String, directions:String = null, image:FileUpload = null )
+		public function Food( name:String, directions:String = null, image:* = null )
 		{
 			this.name = name;
 			this.directions = directions;

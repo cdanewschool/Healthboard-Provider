@@ -32,20 +32,20 @@
 			{
 				var name:String = planName.text;
 				
-				for(var i:int=0;i<model.mealPlanTemplates.length;i++)
-				{
-					if( model.mealPlanTemplates.getItemAt(i).name.toLowerCase() == name.toLowerCase() )
-					{
-						planName.errorString = "There is already a plan by this name";
-						
-						return;
-					}
-				}
-				
 				planName.errorString = "";
 				
 				if( detail == Alert.YES )
 				{
+					for(var i:int=0;i<model.mealPlanTemplates.length;i++)
+					{
+						if( model.mealPlanTemplates.getItemAt(i).name.toLowerCase() == name.toLowerCase() )
+						{
+							planName.errorString = "There is already a plan by this name";
+							
+							return;
+						}
+					}
+					
 					plan.name = name;
 					plan.reasons = planReasons.text;
 					plan.directions = planDirections.text;

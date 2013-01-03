@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:popups="components.popups.*"
+	xmlns:general="components.general.*" 
+	xmlns:net="flash.net.*"
+	width="612" height="792"
+	backgroundColor="0x3C3C3B" 
+	borderColor="0xFFFFFF" borderVisible="true" borderWeight="7" 
+	dropShadowVisible="false"
+	creationComplete="init()">
+	
+	<fx:Script>
+		<![CDATA[
+			import models.ProviderNutritionModel;
+			import models.modules.nutrition.Food;
+			import models.modules.nutrition.FoodPlan;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			import util.DateFormatters;
+			
+ 			public var _foodPlan:FoodPlan;
+			
+			[Bindable] public var model:ProviderNutritionModel = ProviderNutritionModel(AppProperties.getInstance().controller.nutritionController.model);
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if( foodPlan )
+				{
+					startingDate.text = DateFormatters.monthShortDayNumberYearFull.format( foodPlan.startingDate );
+				}
+			}
+			
+			[Bindable]
+			public function get foodPlan():FoodPlan
+			{
+				return _foodPlan;
+			}
+
+			public function set foodPlan(value:FoodPlan):void
+			{
+				_foodPlan = value;
+				
+				invalidateProperties();
+			}
+
+			private function init():void
+			{
+			}
+		]]>
+	</fx:Script>
+	
+	<s:VGroup paddingLeft="20" paddingTop="10" paddingRight="20">
+		
+		<s:HGroup paddingLeft="20">
+			<s:Image source="@Embed('/images/healthboard.png')" width="92" />
+		</s:HGroup>
+		
+		<s:Label text="Preview of Food Plan: {foodPlan.name}" styleName="white12SemiBold" paddingBottom="20" fontSize="18" width="100%" textAlign="center" />
+		
+		<s:VGroup gap="3">
+			
+			<s:Label text="Food Plan for {foodPlan.patient.fullName}" styleName="greenBoldText" fontSize="9" />
+			
+			<s:HGroup>
+				<s:Label text="Starting Date:" styleName="grayTextBold11" fontSize="9" width="75" textAlign="right" />
+				<s:Label id="startingDate" styleName="white11" fontSize="9" />
+			</s:HGroup>
+			
+			<s:HGroup>
+				<s:Label text="Assigned by:" styleName="grayTextBold11" fontSize="9" width="75" textAlign="right" />
+				<s:Label text="{foodPlan.provider.fullName}" styleName="white11" fontSize="9" />
+			</s:HGroup>
+			
+			<s:HGroup>
+				<s:Label text="Reasons for Plan:" styleName="grayTextBold11" fontSize="9" width="75" textAlign="right" />
+				<s:Label text="{foodPlan.reasons}" styleName="white11" fontSize="9" />
+			</s:HGroup>
+			
+			<s:HGroup>
+				<s:Label text="Directions:" styleName="grayTextBold11" fontSize="9" width="75" textAlign="right" />
+				<s:Label text="{foodPlan.directions}" styleName="white11" fontSize="9" />
+			</s:HGroup>
+			
+		</s:VGroup>
+		
+		<s:BorderContainer width="556" height="239" cornerRadius="3" borderColor="0xFFFFFF" backgroundAlpha="0">
+			
+			<s:layout>
+				<s:HorizontalLayout verticalAlign="middle" />
+			</s:layout>
+			
+			<s:HGroup width="356" horizontalAlign="center" verticalAlign="middle">
+				
+				<s:Image source="@Embed(source='/images/nutritionPlateFull.png')" />
+				
+			</s:HGroup>
+			
+			<s:Line yFrom="0" yTo="191">
+				<s:stroke>
+					<s:SolidColorStroke color="0xBDBCBC" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:DataGroup dataProvider="{foodPlan.servingCategories}">
+				
+				<s:layout>
+					<s:VerticalLayout paddingLeft="8" gap="10" />
+				</s:layout>
+				
+				<s:itemRenderer>
+					
+					<fx:Component>
+						
+						<mx:HBox verticalAlign="middle" visible="{!FoodServing(data).isPrimary}" includeInLayout="{!FoodServing(data).isPrimary}">
+							<fx:Script>
+								<![CDATA[
+									import enum.DietClassQuantifier;
+									
+									import models.modules.nutrition.FoodServing;
+								]]>
+							</fx:Script>
+							
+							<s:HGroup width="23" horizontalAlign="center">
+								<s:Image source="{FoodServing(data).icon}" maxWidth="23" maxHeight="23" />
+							</s:HGroup>
+							
+							<s:VGroup gap="-1">
+								<s:Label text="{FoodServing(data).title}" styleName="greenSubtitle" fontSize="9" />
+								<s:HGroup verticalAlign="bottom" gap="4">
+									<s:Label text="{FoodServing(data).quantifier}" fontSize="9" color="0xFBB03B" visible="{FoodServing(data).quantifier != DietClassQuantifier.EXACTLY}" includeInLayout="{FoodServing(data).quantifier != DietClassQuantifier.EXACTLY}" />
+									<s:Label text="{FoodServing(data).servingSize}" styleName="orangeStandout" fontSize="22" paddingBottom="-4" />
+									<s:Label text="{FoodServing(data).unit}" styleName="white11" fontSize="11" />
+								</s:HGroup>
+							</s:VGroup>
+							
+						</mx:HBox>
+						
+					</fx:Component>
+					
+				</s:itemRenderer>
+				
+			</s:DataGroup>
+			
+		</s:BorderContainer>
+		
+		<s:BorderContainer width="556" height="76" cornerRadius="3" borderColor="0xFFFFFF" backgroundAlpha="0">
+			
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="20" paddingTop="5" paddingRight="20" gap="20" />
+			</s:layout>
+			
+			<!--	foods to increase	-->
+			<s:VGroup width="240" gap="0">
+				
+				<s:HGroup width="100%" verticalAlign="middle" paddingBottom="-1">
+					<s:Image source="@Embed('/images/iconGreenCircle.png')" width="15" />
+					<s:Label text="Food to Increase" styleName="greenBoldText" fontSize="9" />
+				</s:HGroup>
+				
+				<s:DataGroup dataProvider="{foodPlan.foodsToIncrease}">
+					
+					<s:layout>
+						<s:HorizontalLayout gap="2" />
+					</s:layout>
+					
+					<s:itemRenderer>
+						
+						<fx:Component>
+							
+							<mx:HBox>
+								
+								<s:Image 
+									source="{Food(data).image}" toolTip="{Food(data).name}" 
+									visible="{outerDocument.foodPlan.foodsToIncrease.getItemIndex(data)&lt;6}" 
+									includeInLayout="{outerDocument.foodPlan.foodsToIncrease.getItemIndex(data)&lt;6}" width="38" height="30" fillMode="clip">
+									
+									<fx:Script>
+										<![CDATA[
+											import models.modules.nutrition.Food;
+										]]>
+									</fx:Script>
+									
+								</s:Image>
+								
+							</mx:HBox>
+							
+						</fx:Component>
+						
+					</s:itemRenderer>
+					
+				</s:DataGroup>
+				
+			</s:VGroup>
+			
+			<s:Line yFrom="0" yTo="54">
+				<s:stroke>
+					<s:SolidColorStroke color="0xBDBCBC" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<!--	foods to limit	-->
+			<s:VGroup width="240" gap="0">
+				
+				<s:HGroup width="100%" verticalAlign="middle" paddingBottom="-1">
+					<s:Image source="@Embed('/images/iconRedCross.png')" width="15" />
+					<s:Label text="Food to Limit" styleName="greenBoldText" fontSize="9" />
+				</s:HGroup>
+				
+				<s:DataGroup dataProvider="{foodPlan.foodsToLimit}">
+					
+					<s:layout>
+						<s:HorizontalLayout gap="2" />
+					</s:layout>
+					
+					<s:itemRenderer>
+						
+						<fx:Component>
+							
+							<mx:HBox>
+								
+								<s:Image 
+									source="{Food(data).image}" ioError="trace(event.errorID)" toolTip="{Food(data).name}" 
+									visible="{outerDocument.foodPlan.foodsToLimit.getItemIndex(data)&lt;6}" 
+									includeInLayout="{outerDocument.foodPlan.foodsToLimit.getItemIndex(data)&lt;6}" width="38" height="30" fillMode="clip">
+									
+									<fx:Script>
+										<![CDATA[
+											import models.modules.nutrition.Food;
+										]]>
+									</fx:Script>
+									
+								</s:Image>
+							
+							</mx:HBox>
+							
+						</fx:Component>
+						
+					</s:itemRenderer>
+					
+				</s:DataGroup>
+				
+			</s:VGroup>
+			
+		</s:BorderContainer>
+		
+		<s:HGroup gap="20">
+			
+			<!--	notes	-->
+			<s:BorderContainer width="314" height="275" cornerRadius="3" borderColor="0xFFFFFF" backgroundAlpha="0">
+				
+				<s:layout>
+					<s:VerticalLayout />
+				</s:layout>
+				
+				<s:HGroup verticalAlign="middle" width="100%" paddingLeft="10" paddingTop="10" paddingRight="10">
+					
+					<s:Label text="Notes for Patient" styleName="greenBoldText" fontSize="9" />
+					
+					<mx:Button label="+ Add Food Notes" width="80" height="20" fontSize="8" paddingLeft="2" paddingRight="2" />
+					
+					<s:HGroup width="100%" horizontalAlign="right">
+						<general:MainLinkButton label="History" styleName="linkBtnBlue" fontSize="8" />
+					</s:HGroup>
+					
+				</s:HGroup>
+				
+				<s:Label text="From {foodPlan.provider.fullNameAbbreviated}" styleName="whiteBoldTitle" fontSize="8" paddingLeft="10" />			
+				
+				<s:Scroller id="notesScroller" width="{notesScroller.verticalScrollBar.visible?296:312}" maxHeight="245" horizontalScrollPolicy="off">
+					
+					<s:DataGroup dataProvider="{foodPlan.notes}" width="100%">
+						
+						<s:layout>
+							<s:VerticalLayout gap="2" />
+						</s:layout>
+						
+						<s:itemRenderer>
+							
+							<fx:Component>
+								
+								<mx:HBox width="100%"
+									horizontalGap="15" paddingLeft="10" paddingTop="4" paddingRight="4" paddingBottom="10" 
+									backgroundColor="{outerDocument.foodPlan.notes.getItemIndex(data)%2==0?0x303030:0x3C3C3B}">
+									
+									<mx:VBox width="190">
+										
+										<s:Label text="{data.note}" width="175" styleName="whiteText11" fontSize="9" />
+										
+										<mx:HBox visible="{data.recommendation != ''}" includeInLayout="{data.recommendation != ''}">
+											<s:Label text="Recommendation:" styleName="whiteText11" paddingTop="4" fontSize="9" />
+											<general:MainLinkButton label="{data.recommendation}" paddingTop="-5" paddingLeft="-7" styleName="linkBtnBlue" fontSize="9" />
+										</mx:HBox>
+										
+									</mx:VBox>
+									
+									<s:Label text="{data.completed?'Completed':'In Progress'}"  styleName="whiteText11" fontSize="9" />
+									
+								</mx:HBox>
+								
+							</fx:Component>
+							
+						</s:itemRenderer>
+						
+					</s:DataGroup>
+					
+				</s:Scroller>
+				
+			</s:BorderContainer>
+			
+			<!--	suggested meals	-->
+			<s:BorderContainer width="225" height="275" cornerRadius="3" borderColor="0xFFFFFF" backgroundAlpha="0">
+				
+				<s:layout>
+					<s:VerticalLayout paddingTop="10" />
+				</s:layout>
+				
+				<s:Label text="Suggested Meals for a Day" styleName="greenBoldText" fontSize="9" paddingLeft="10" paddingRight="10" />
+				
+				<s:Scroller id="mealsScroller" width="{mealsScroller.verticalScrollBar.visible?207:223}" maxHeight="245" horizontalScrollPolicy="off">
+					
+					<s:DataGroup dataProvider="{foodPlan.mealCategories}">
+						
+						<s:layout>
+							<s:VerticalLayout gap="2" />
+						</s:layout>
+						
+						<s:itemRenderer>
+							
+							<fx:Component>
+								
+								<mx:VBox>
+									<fx:Script>
+										<![CDATA[
+											import models.modules.nutrition.MealCategory;
+										]]>
+									</fx:Script>
+									
+									<s:Label text="{MealCategory(data).name}" styleName="whiteBoldTitle" fontSize="9" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
+									
+									<s:List 
+										width="100%" dataProvider="{MealCategory(data).meals}" borderVisible="false" contentBackgroundAlpha="0" 
+										horizontalScrollPolicy="off" visible="{MealCategory(data).meals &amp;&amp; MealCategory(data).meals.length}">
+										
+										<s:layout>
+											<s:VerticalLayout variableRowHeight="true" />
+										</s:layout>
+										
+										<s:itemRenderer>
+											
+											<fx:Component>
+												
+												<s:ItemRenderer autoDrawBackground="false">
+													
+													<mx:HBox 
+														width="100%" 
+														backgroundColor="{MealCategory(outerDocument.data).meals.getItemIndex(data)%2==0?0x303030:0x3C3C3B}" 
+														paddingLeft="8" paddingTop="8" paddingRight="8" paddingBottom="8" 
+														horizontalGap="5">
+														
+														<fx:Script>
+															<![CDATA[
+																import models.modules.nutrition.MealCategory;
+															]]>
+														</fx:Script>
+															
+														<s:Label text="{MealCategory(outerDocument.data).meals.getItemIndex(data) + 1})" styleName="whiteText11" fontSize="9" />
+														
+														<s:Label text="{data.description}" width="175" styleName="whiteText11" fontSize="9" />
+														
+													</mx:HBox>
+													
+												</s:ItemRenderer>
+												
+											</fx:Component>
+											
+										</s:itemRenderer>
+										
+									</s:List>
+									
+								</mx:VBox>
+								
+							</fx:Component>
+							
+						</s:itemRenderer>
+						
+					</s:DataGroup>
+				
+				</s:Scroller>
+				
+			</s:BorderContainer>
+			
+		</s:HGroup>
+		
+	</s:VGroup>
+	
+	<s:Button 
+		id="closeButton" skinClass="skins.general.CustomTitleWindowCloseButtonSkin"
+		width="25" height="25" right="-17" top="-17" click="PopUpManager.removePopUp(this)" />
+	
+</s:BorderContainer>

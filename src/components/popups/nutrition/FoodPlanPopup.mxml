@@ -17,9 +17,9 @@
 			
 			import events.MealEvent;
 			
+			import models.PatientModel;
 			import models.ProviderModel;
 			import models.ProviderNutritionModel;
-			import models.UserModel;
 			import models.modules.nutrition.Food;
 			import models.modules.nutrition.FoodPlan;
 			import models.modules.nutrition.FoodServing;
@@ -44,7 +44,7 @@
 			
 			[Bindable] public var model:ProviderNutritionModel = ProviderNutritionModel(AppProperties.getInstance().controller.nutritionController.model);
 			
-			[Bindable] public var user:UserModel;
+			[Bindable] public var patient:PatientModel;
 			
 			//	currently selected meal plan, if any
 			[Bindable] private var plan:FoodPlan;
@@ -77,6 +77,7 @@
 				);
 			
 			[Bindable] private var increaseFoods:ArrayCollection;
+			[Bindable] private var limitFoods:ArrayCollection;
 			
 			[Bindable] private var isNew:Boolean;
 			
@@ -92,6 +93,7 @@
 			{
 				plan = new FoodPlan();
 				plan.dirty = true;
+				plan.patient = patient;
 				plan.provider = ProviderModel(AppProperties.getInstance().controller.user);
 			}
 			
@@ -110,6 +112,9 @@
 				else
 				{
 					plan = (data as FoodPlan);
+					
+					if( !plan.patient ) plan.patient = patient;
+					if( !plan.provider ) plan.provider = ProviderModel(AppProperties.getInstance().controller.user);
 				}
 				
 				isNew = (data == addNew);
@@ -164,12 +169,12 @@
 				popup.removeEventListener( CloseEvent.CLOSE, onAddFoodServingsCategoryClose );
 			}
 			
-			private function onFoodsToIncreaseClick(event:MouseEvent):void
+			private function onFoodListClick(event:MouseEvent):void
 			{
 				if( List(event.currentTarget).selectedItem == addNew )
 				{
 					var popup:AddFoodPopup = AddFoodPopup( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, AddFoodPopup) as TitleWindow );
-					popup.addEventListener( CloseEvent.CLOSE, onFoodsToIncreaseClose );
+					popup.addEventListener( CloseEvent.CLOSE, onAddFoodClose );
 					PopUpManager.centerPopUp( popup );
 				}
 			}
@@ -199,7 +204,7 @@
 				popup.removeEventListener( CloseEvent.CLOSE, onDeleteFoodServingsCategoryClose );
 			}
 			
-			private function onFoodsToIncreaseClose(event:CloseEvent):void
+			private function onAddFoodClose(event:CloseEvent):void
 			{
 				var popup:AddFoodPopup = event.currentTarget as AddFoodPopup;
 				
@@ -213,7 +218,7 @@
 				
 				PopUpManager.removePopUp( popup );
 				
-				popup.removeEventListener( CloseEvent.CLOSE, onFoodsToIncreaseClose );
+				popup.removeEventListener( CloseEvent.CLOSE, onAddFoodClose );
 			}
 			
 			private function addFoodToLimit():void
@@ -358,7 +363,10 @@
 				{
 					for(var i:int=0;i<model.mealPlanTemplates.length;i++)
 					{
-						if( FoodPlan(model.mealPlanTemplates.getItemAt(i)).name.toLowerCase() == plan.name.toLowerCase() )
+						var template:Object = model.mealPlanTemplates.getItemAt(i);
+						
+						if( template != addNew
+							&& FoodPlan(template).name.toLowerCase() == plan.name.toLowerCase() )
 						{
 							model.mealPlanTemplates.setItemAt( plan, i );
 							
@@ -376,11 +384,15 @@
 			
 			private function onPreviewClick():void
 			{
-				//	TODO: implement popup preview
+				var popup:FoodPlanPreviewPopup = FoodPlanPreviewPopup( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, FoodPlanPreviewPopup, true) as BorderContainer );
+				popup.foodPlan = plan;
+				PopUpManager.centerPopUp( popup );
 			}
 			
 			private function onFinishClick():void
 			{
+				if( !plan ) return close();
+				
 				var popup:DeleteConfirmation = DeleteConfirmation( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, DeleteConfirmation) as TitleWindow );
 				popup.confirmationText = "Are you sure you want to exit this Food Plan?";
 				popup.yesText = "Exit Food Plan";
@@ -419,10 +431,13 @@
 				increaseFoods = new ArrayCollection( foods.source.slice() );
 				increaseFoods.addItemAt( addNew, 0 );
 				
-				foods.sort = alphabeticSort;
+				limitFoods = new ArrayCollection( foods.source.slice() );
+				limitFoods.addItemAt( addNew, 0 );
+				
+				limitFoods.sort = alphabeticSort;
 				increaseFoods.sort = alphabeticSort;
 				
-				foods.refresh();
+				limitFoods.refresh();
 				increaseFoods.refresh();
 			}
 			
@@ -447,7 +462,10 @@
 				if( model.mealPlanTemplates 
 					&& model.mealPlanTemplates.length )
 				{
-					model.mealPlanTemplates.addItemAt( addNew, 0 );
+					if( model.mealPlanTemplates.getItemAt( 0 ).name != addNew.name )
+					{
+						model.mealPlanTemplates.addItemAt( addNew, 0 );
+					}
 				}
 				else
 				{
@@ -486,7 +504,57 @@
 			<s:Spacer width="101" />
 			
 			<s:BorderContainer width="364" height="340" left="101" backgroundColor="0xECECEC" visible="{plan==null}" includeInLayout="{plan==null}">
-			
+				
+				<s:layout>
+					<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" gap="15" />
+				</s:layout>
+				
+				<s:Label text="Welcome! Here are the steps to set a Food Plan." styleName="darkGrayBold16" fontSize="14" />
+				
+				<s:Line xFrom="0" xTo="323">
+					<s:stroke>
+						<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:VGroup gap="5">
+					<s:Label text="Step 1: Select a Food Plan" styleName="darkGrayBold12" />
+					<s:Label text="Set a new plan or modify reasons for plan, description, and starting date." styleName="darkGray12" paddingLeft="25" width="350" />
+				</s:VGroup>
+				
+				<s:Line xFrom="0" xTo="323">
+					<s:stroke>
+						<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:VGroup gap="5">
+					<s:Label text="Step 2: Review Food Groups &amp; Servings" styleName="darkGrayBold12" />
+					<s:Label text="Set serving values for patient." styleName="darkGray12" paddingLeft="25" width="350" />
+				</s:VGroup>
+				
+				<s:Line xFrom="0" xTo="323">
+					<s:stroke>
+						<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:VGroup gap="5">
+					<s:Label text="Step 3: Food List" styleName="darkGrayBold12" />
+					<s:Label text="Set foods to eat and avoid for patient." styleName="darkGray12" paddingLeft="25" width="350" />
+				</s:VGroup>
+				
+				<s:Line xFrom="0" xTo="323">
+					<s:stroke>
+						<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:VGroup gap="5">
+					<s:Label text="Step 4: Choose Meals" styleName="darkGrayBold12" />
+					<s:Label text="Set suggested meals for patient." styleName="darkGray12" paddingLeft="25" width="350" />
+				</s:VGroup>
+				
 			</s:BorderContainer>
 			
 		</s:HGroup>
@@ -558,7 +626,7 @@
 									<s:DataGroup dataProvider="{plan.servingCategories}">
 										
 										<s:layout>
-											<s:VerticalLayout paddingLeft="8" gap="3" />
+											<s:VerticalLayout paddingLeft="4" gap="3" />
 										</s:layout>
 										
 										<s:itemRenderer>
@@ -568,7 +636,7 @@
 												<mx:HBox verticalAlign="middle">
 													<s:Label text="{data.title}" width="57" textAlign="right" />
 													<s:DropDownList id="quantifier" dataProvider="{outerDocument.quantifiers}" selectedIndex="{outerDocument.quantifiers.getItemIndex(data.quantifier)}" width="113" height="24" change="data.quantifier = quantifier.selectedItem" />
-													<s:TextInput id="servingSize" text="{data.servingSize}" width="71" height="24" change="data.servingSize = servingSize.text" />
+													<s:TextInput id="servingSize" text="{data.servingSize}" width="60" height="24" change="data.servingSize = servingSize.text" textAlign="right" />
 													<s:Label text="{data.unit}" color="0x666666" fontSize="12" />
 												</mx:HBox>
 												
@@ -590,7 +658,7 @@
 								
 								<mx:LinkButton styleName="linkBtnDarkBlue" label="+ Add more Food Servings Category" click="onAddFoodServingsCategoryClick(event)" />
 								
-								<s:Scroller width="100%" maxHeight="220" horizontalScrollPolicy="off">
+								<s:Scroller id="servingList" width="100%" maxHeight="220" horizontalScrollPolicy="off">
 									
 									<s:DataGroup width="100%" dataProvider="{foodServingCategoriesCopy}">
 										
@@ -608,7 +676,7 @@
 															import models.modules.nutrition.FoodServing;
 														]]>
 													</fx:Script>
-													<s:CheckBox label="{data.title + (data.unit ? '(' + data.unit + ')' : null)}" width="265" selected="true" />
+													<s:CheckBox label="{data.title + (data.unit ? ' (' + data.unit + ')' : null)}" width="{outerDocument.servingList.verticalScrollBar.visible?245:265}" selected="true" />
 													<mx:LinkButton styleName="linkBtnGray" label="Delete" click="outerDocument.onDeleteFoodServingsCategoryClick(event, data as FoodServing)" />
 												</mx:HBox>
 												
@@ -639,7 +707,7 @@
 							<s:VGroup>
 								<s:Label text="Food Library" color="0x4D4D4D" fontSize="12" fontWeight="bold" />
 								<s:Label text="{foodsToIncreaseLibrary.dataProvider.length} total" color="0x4D4D4D" fontSize="12" />
-								<s:List id="foodsToIncreaseLibrary" width="148" height="262" dataProvider="{increaseFoods}" click="onFoodsToIncreaseClick(event)" labelField="name"/>
+								<s:List id="foodsToIncreaseLibrary" width="148" height="262" dataProvider="{increaseFoods}" click="onFoodListClick(event)" labelField="name"/>
 							</s:VGroup>
 							
 							<s:VGroup height="100%" verticalAlign="middle">
@@ -670,7 +738,7 @@
 							<s:VGroup>
 								<s:Label text="Food Library" color="0x4D4D4D" fontSize="12" fontWeight="bold" />
 								<s:Label text="{foodsToLimitLibrary.dataProvider.length} total" color="0x4D4D4D" fontSize="12" />
-								<s:List id="foodsToLimitLibrary" width="148" height="262" dataProvider="{foods}" labelField="name" />
+								<s:List id="foodsToLimitLibrary" width="148" height="262" dataProvider="{limitFoods}" click="onFoodListClick(event)" labelField="name" />
 							</s:VGroup>
 							
 							<s:VGroup height="100%" verticalAlign="middle">
@@ -702,7 +770,7 @@
 						
 						<s:HGroup width="100%">
 							
-							<s:HGroup gap="-1" verticalAlign="middle" visible="{mealLibraryViews.selectedIndex==0}">
+							<s:HGroup gap="-10" verticalAlign="middle" visible="{mealLibraryViews.selectedIndex==0}">
 								<general:TextInputPlaceholder placeholder="Search food recipes" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="166" height="24" />
 								<s:Button styleName="searchButtonIcon" width="24" height="24" />
 							</s:HGroup>
