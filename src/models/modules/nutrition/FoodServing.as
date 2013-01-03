@@ -1,7 +1,10 @@
 package models.modules.nutrition
 {
 	import enum.DietClassQuantifier;
+	
+	import models.modules.NutritionModel;
 
+	[Bindable]
 	public class FoodServing
 	{
 		public static const ALCOHOL:FoodServing = new FoodServing( 'Alochol', 'drinks' );
@@ -20,14 +23,29 @@ package models.modules.nutrition
 		public var servingSize:String;
 		public var title:String;
 		public var unit:String;
+		public var isPrimary:Boolean;
 		
-		public function FoodServing( title:String, unit:String = 'servings', quantifier:String = null, servingSize:String = '1', listMinMax:Boolean = false )
+		public function FoodServing( title:String, unit:String = 'servings', quantifier:String = null, servingSize:String = '1', listMinMax:Boolean = false, isPrimary:Boolean = false )
 		{
 			this.title = title;
 			this.unit = unit;
 			this.quantifier = quantifier ? quantifier : DietClassQuantifier.EXACTLY;
 			this.servingSize = servingSize;
 			this.listMinMax = listMinMax;
+			this.isPrimary = isPrimary;
+		}
+		
+		public function get icon():Class
+		{
+			var model:NutritionModel = AppProperties.getInstance().controller.nutritionController.model as NutritionModel;
+			
+			if( title.toLowerCase() == "sodium" ) return model.iconSodium;
+			if( title.toLowerCase() == "fats & oils" ) return model.iconFatsAndOils;
+			if( title.toLowerCase() == "sugars" ) return model.iconSugars;
+			if( title.toLowerCase() == "alcohol" ) return model.iconAlcohol;
+			if( title.toLowerCase() == "water" ) return model.iconWater;
+			
+			return null;
 		}
 	}
 }
