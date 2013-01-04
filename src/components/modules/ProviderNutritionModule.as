@@ -6,6 +6,7 @@ package components.modules
 	import flash.events.MouseEvent;
 	
 	import models.PatientModel;
+	import models.modules.nutrition.FoodPlan;
 	
 	import modules.NutritionModule;
 	
@@ -18,6 +19,8 @@ package components.modules
 	
 	public class ProviderNutritionModule extends NutritionModule
 	{
+		private var _patient:PatientModel;
+		
 		public function ProviderNutritionModule()
 		{
 			super();
@@ -51,5 +54,21 @@ package components.modules
 			
 			PopUpManager.removePopUp( popup );
 		}
+
+		
+		public function get patient():PatientModel
+		{
+			return _patient;
+		}
+		
+		public function set patient(value:PatientModel):void
+		{
+			_patient = value;
+			
+			if( _patient 
+				&& _patient.hasOwnProperty('foodPlan') )
+				foodPlan = _patient['foodPlan'] as FoodPlan;
+		}
+
 	}
 }
