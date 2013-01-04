@@ -959,7 +959,15 @@
 									
 									<s:VGroup>
 										<s:Label text="Relations:" styleName="white12SemiBold" />
-										<s:List width="214" height="62" dataProvider="{patient.relations}" color="0xffffff" />
+										<s:List width="214" height="62" dataProvider="{patient.relations}" color="0xffffff">
+											<s:itemRenderer>
+												<fx:Component>
+													<mx:HBox toolTip="{data.type ? data.type.charAt(0).toUpperCase() + data.type.substr(1).toLowerCase() : ''}">
+														<s:Label text="{data.lastName + ', ' + data.firstName}" paddingLeft="4" paddingTop="4" paddingRight="4" paddingBottom="4" />
+													</mx:HBox>
+												</fx:Component>
+											</s:itemRenderer>
+										</s:List>
 									</s:VGroup>
 									
 									<s:Line yFrom="0" yTo="80">

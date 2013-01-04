@@ -5,6 +5,8 @@ package models.modules.advisories
 	import mx.utils.ObjectProxy;
 	
 	import spark.collections.SortField;
+	
+	import util.DateUtil;
 
 	[Bindable]
 	public class PublicHealthAdvisory
@@ -43,7 +45,11 @@ package models.modules.advisories
 				}
 			}
 			
-			val.startDate = new Date( data.startDate );
+			if( data.startDate )
+			{
+				val.startDate = new Date( DateUtil.modernizeDate(data.startDate) );
+			}
+			
 			
 			var results:ArrayCollection = data.updates.update is ArrayCollection ? data.updates.update : new ArrayCollection( [data.updates.update] );
 			var updates:ArrayCollection = new ArrayCollection();
@@ -65,7 +71,7 @@ package models.modules.advisories
 				val.updates.sort = sort;
 				val.updates.refresh();
 				
-				val.update = PublicHealthAdvisoryUpdate( updates.getItemAt(0) );
+				val.update = PublicHealthAdvisoryUpdate( val.updates.getItemAt(0) );
 			}
 			
 			if(data.stats && data.stats.week) val.arrStats = data.stats.week is ArrayCollection ? data.stats.week : new ArrayCollection(data.stats.week);
