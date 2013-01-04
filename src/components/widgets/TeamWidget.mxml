@@ -106,10 +106,10 @@
 		width="303" rowCount="4"
 		styleName="standardDataGridSolid"
 		buttonMode="false" selectable="true" 
-		fontSize="12" headerHeight="30"
+		fontSize="12" headerHeight="24"
 		dataProvider="{model.providers}"
-		paddingTop="6"
-		horizontalScrollPolicy="off" verticalScrollPolicy="auto" rowHeight="22" 
+		paddingTop="4"
+		horizontalScrollPolicy="off" verticalScrollPolicy="auto" rowHeight="22"
 		itemRollOver="onTeamRollOver(event)" itemRollOut="teamRollOverRowIndex=-1" itemClick="onTeamClick(event)">
 
 		<mx:columns>

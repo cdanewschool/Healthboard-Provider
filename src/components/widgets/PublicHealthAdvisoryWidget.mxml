@@ -122,9 +122,9 @@
 		width="303" rowCount="4"
 		fontSize="12" 
 		dataProvider="{model.activeAdvisories}"
-		sortableColumns="false" paddingTop="6"
+		paddingTop="6"
 		horizontalScrollPolicy="off" verticalScrollPolicy="auto" 
-		rowHeight="22" 
+		headerHeight="25" rowHeight="22" 
 		itemClick="onItemClick(event)">
 
 		<mx:columns>
