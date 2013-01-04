@@ -5,7 +5,9 @@
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:esri="http://www.esri.com/2008/ags"
 	xmlns:os="http://openscales.org"
-	creationComplete="init();" xmlns:general="components.general.*">
+	xmlns:general="components.general.*"
+	initialize="onInitialize()" 
+	creationComplete="creationComplete();">
 	
 	<fx:Script>
 		<![CDATA[
@@ -55,6 +57,8 @@
 			
 			[Bindable] private var controller:PublicHealthAdvisoriesController = MainController(AppProperties.getInstance().controller).advisoryController as PublicHealthAdvisoriesController;
 			[Bindable] public var model:PublicHealthAdvisoriesModel = controller.model as PublicHealthAdvisoriesModel;
+			
+			private var dateFormatter:DateFormatter;
 			
 			private var advisoryDirty:Boolean;
 			private var patientsDirty:Boolean;
@@ -266,7 +270,7 @@
 			
 			private function getUpdated(item:PatientModel,column:DataGridColumn=null):String
 			{
-				return DateFormatters.monthShortDayNumberYearFull.format( item.advisoriesLastUpdated );
+				return dateFormatter.format( item.advisoriesLastUpdated );
 			}
 			
 			private function setView( index:int ):void
@@ -295,22 +299,14 @@
 				
 				if( sortField == PublicHealthAdvisoriesModel.PATIENT_FITLER_MODE_ATRISK )
 				{
-					valid = advisoryStatus != null && advisoryStatus.riskLevel >= RiskLevel.ROUTINE;
+					valid = advisoryStatus != null && (advisoryStatus.riskLevel == RiskLevel.LOW || advisoryStatus.riskLevel == RiskLevel.HIGH);
 				}
 				else if( sortField == PublicHealthAdvisoriesModel.PATIENT_FITLER_MODE_AFFECTED )
 				{
-					valid = advisoryStatus != null && advisoryStatus.riskLevel >= RiskLevel.AFFECTED;
+					valid = advisoryStatus != null && advisoryStatus.riskLevel == RiskLevel.AFFECTED;
 				}
 				
 				return valid;
-			}
-			
-			private function init():void
-			{
-				var patientsModel:PatientsModel = ((AppProperties.getInstance().controller as MainController).patientsController.model as PatientsModel)
-				patients = new ArrayCollection( patientsModel.patients.source.slice() );
-				
-				setView( initialViewIndex );
 			}
 			
 			public function dataTipsDoctorVisits(hd:HitData):String {
@@ -348,6 +344,20 @@
 				{
 					map.extent = graphicsExtent.expand(1.1);
 				}
+			}
+			
+			private function onInitialize():void
+			{
+				dateFormatter = new DateFormatter();
+				dateFormatter.formatString = "MMMM DD, YYYY";
+			}
+			
+			private function creationComplete():void
+			{
+				var patientsModel:PatientsModel = ((AppProperties.getInstance().controller as MainController).patientsController.model as PatientsModel)
+				patients = new ArrayCollection( patientsModel.patients.source.slice() );
+				
+				setView( initialViewIndex );
 			}
 		]]>
 	</fx:Script>
@@ -492,7 +502,7 @@
 									<s:HGroup width="100%" verticalAlign="middle">
 										
 										<s:Label text="Last Update" styleName="greenBoldText" />
-										<s:Label id="lastUpdate" styleName="gray13Italic" creationComplete="lastUpdate.text = '— ' + DateFormatters.monthShortDayNumberYearFull.format(advisory.update.date)" />
+										<s:Label id="lastUpdate" styleName="gray13Italic" creationComplete="lastUpdate.text = '— ' + dateFormatter.format(advisory.update.date)" />
 										
 										<s:HGroup width="100%" horizontalAlign="right">
 											<mx:LinkButton id="viewAll" label="View All Updates »" styleName="linkBtnBlue" click="onViewAllUpdatesClick(event)" rollOver="viewAll.setStyle('textDecoration','underline')" rollOut="viewAll.setStyle('textDecoration','none')" />
@@ -876,11 +886,11 @@
 								
 								<s:Label text="There are" />
 								
-								<s:Label text="{advisory.update.affectedCount}" styleName="bold emphasizedNumber" />
+								<s:Label text="{advisory.update.affectedCountNetwork}" styleName="bold emphasizedNumber" />
 								
 								<s:Label text="patients affected; there are" />
 								
-								<s:Label text="{advisory.update.atRiskCount}" styleName="bold emphasizedNumber" />
+								<s:Label text="{advisory.update.atRiskCountNetwork}" styleName="bold emphasizedNumber" />
 								
 								<s:Label text="patients at risk." />
 								

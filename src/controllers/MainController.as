@@ -702,13 +702,13 @@ package controllers
 					
 					if( advisory )
 					{
-						if( advisoryStatus.riskLevel > RiskLevel.NONE )
-						{
-							advisory.update.addAffectedInNetwork( patient );
-						}
-						else if( advisoryStatus.riskLevel > RiskLevel.AFFECTED )
+						if( advisoryStatus.riskLevel == RiskLevel.LOW || advisoryStatus.riskLevel == RiskLevel.HIGH )
 						{
 							advisory.update.addAtRiskInNetwork( patient );
+						}
+						else if( advisoryStatus.riskLevel == RiskLevel.AFFECTED )
+						{
+							advisory.update.addAffectedInNetwork( patient );
 						}
 					}
 				}
