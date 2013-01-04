@@ -5,7 +5,7 @@
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	width="496" height="524"
 	styleName="headerlessPopup"
-	creationComplete="init()">
+	initialize="onInitialize()" xmlns:general="components.general.*">
 	
 	<fx:Declarations>
 		<s:NumberFormatter id="numberFormatter" />
@@ -13,7 +13,10 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import com.esri.ags.utils.DateUtil;
+			
 			import models.modules.advisories.PublicHealthAdvisory;
+			import models.modules.advisories.PublicHealthAdvisoryUpdate;
 			
 			import mx.collections.ArrayCollection;
 			import mx.collections.SortField;
@@ -23,14 +26,26 @@
 			import spark.collections.Sort;
 			
 			import util.DateFormatters;
+			import util.DateUtil;
 			
  			private var _advisory:PublicHealthAdvisory;
 			
 			private var sort:Sort;
+			[Bindable] public var dateFormatter:DateFormatter;
 			
 			[Bindable] private var dataProvider:ArrayCollection;
 			
-			[Bindable] public var dateFormatter:DateFormatter = new DateFormatter();
+			[Bindable] private var timeRanges:ArrayCollection = new ArrayCollection
+				(
+					[
+						{label:"Past Week",data:"week"},
+						{label:"Past Month",data:"month"},
+						{label:"Past Year",data:"year"}
+					]
+				);
+			
+			private var startDate:Date;
+			private var endDate:Date;
 			
 			public function get advisory():PublicHealthAdvisory
 			{
@@ -45,7 +60,9 @@
 				{
 					dataProvider = new ArrayCollection( advisory.updates.source );
 					dataProvider.sort = sort;
-					dataProvider.refresh();
+					dataProvider.filterFunction = filter;
+					
+					update()
 				}
 				
 				invalidateProperties();
@@ -59,8 +76,27 @@
 				{
 					header.text = advisory.title;
 					
-					intitialDate.text = "Initial Date of Oubreak: " + DateFormatters.dateFormatter.format( advisory.startDate );
+					intitialDate.text = "Initial Date of Oubreak: " + dateFormatter.format( advisory.startDate );
 				}
+			}
+			
+			private function update():void
+			{
+				startDate = new Date();
+				startDate.time = endDate.time;
+				
+				var range:String = timeRange.selectedItem.data;
+				
+				if( range == 'week' ) startDate.time -= util.DateUtil.WEEK;
+				else if( range == 'month' ) startDate.time -= util.DateUtil.MONTH;
+				else if( range == 'year' ) startDate.time -= util.DateUtil.YEAR;
+				
+				dataProvider.refresh();
+			}
+			
+			private function filter(item:PublicHealthAdvisoryUpdate):Boolean
+			{
+				return item.date.time >= startDate.time && item.date.time <= endDate.time;
 			}
 			
 			private function close():void
@@ -68,10 +104,15 @@
 				PopUpManager.removePopUp( this );
 			}
 			
-			private function init():void
+			private function onInitialize():void
 			{
+				endDate = AppProperties.getInstance().controller.model.today;
+				
+				dateFormatter = new DateFormatter();
+				dateFormatter.formatString = "MMMM DD, YYYY";
+				
 				sort = new Sort();
-				sort.fields = [ new SortField( 'date', false, false, true ) ];
+				sort.fields = [ new SortField('date',true,true,true) ];
 			}
 		]]>
 	</fx:Script>
@@ -86,10 +127,11 @@
 		
 		<s:Label id="intitialDate" styleName="italic subheadText" fontSize="16" />
 		
-		<s:HGroup paddingLeft="10" width="100%" textAlign="right">
+		<s:HGroup paddingLeft="10" width="100%" horizontalAlign="right" verticalAlign="middle">
 			
 			<s:Label text="Time Range:" styleName="dropdownLabelText" fontSize="12" />
-			
+			<s:DropDownList id="timeRange" dataProvider="{timeRanges}" labelField="label" selectedIndex="{timeRanges.length-1}" change="update()" creationComplete="update()" />
+		
 		</s:HGroup>
 		
 	</s:HGroup>
@@ -108,83 +150,107 @@
 					
 					<s:ItemRenderer width="100%" autoDrawBackground="false">
 						
-						<s:VGroup width="100%" gap="20">
+						<fx:Script>
+							<![CDATA[
+								import flash.net.navigateToURL;
+							]]>
+						</fx:Script>
+						
+						<s:VGroup width="100%" gap="20" paddingBottom="20">
 							
-							<s:BorderContainer width="100%" height="24" styleName="headerlessPopupModuleHeaderBackground">
+							<fx:Script>
+								<![CDATA[
+									import models.modules.advisories.PublicHealthAdvisoryUpdate;
+									
+									[Bindable] private var update:PublicHealthAdvisoryUpdate;
+									
+									override public function set data(value:Object):void
+									{
+										super.data = value;
+										
+										update = value as PublicHealthAdvisoryUpdate;
+									}
+								]]>
+							</fx:Script>
+							
+							<s:BorderContainer width="100%" height="24" styleName="headerlessPopupModuleHeaderBackground" borderVisible="false">
 								
 								<s:layout>
 									<s:HorizontalLayout paddingLeft="5" paddingRight="5" verticalAlign="middle" />
 								</s:layout>
 								
-								<s:Label text="{outerDocument.dateFormatter.format(data.date)}" fontSize="13" />
-								<s:Label width="100%" textAlign="right" text="Source:" fontSize="12" paddingTop="3" />
-								<mx:LinkButton label="{data.source}" styleName="linkButtonStyle2" fontSize="12" />
+								<s:Label text="{outerDocument.dateFormatter.format(update.date)}" fontSize="13" />
+								
+								<s:HGroup width="100%" gap="-5" horizontalAlign="right" verticalAlign="middle">
+									<s:Label width="100%" textAlign="right" text="Source:" fontSize="12" paddingTop="3" />
+									<general:MainLinkButton label="{update.source}" styleName="linkButtonStyle2" fontSize="12" click="navigateToURL(new URLRequest('http://'+update.source),'_blank')" />
+								</s:HGroup>
 								
 							</s:BorderContainer>
 							
-							<s:HGroup width="100%">
+							<s:HGroup width="100%" gap="20">
 								
-								<s:VGroup width="40%" paddingLeft="20">
+								<s:VGroup width="165" paddingLeft="20">
 									
-									<s:VGroup paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5" styleName="bold" fontSize="12">
+									<s:VGroup width="100%" paddingLeft="5" paddingRight="5" paddingBottom="5" styleName="bold" fontSize="12">
 										
-										<s:Label text="My Patients" />
+										<s:Label text="My Patients" color="0x595959"/>
 										
-										<s:HGroup gap="15">
-											<s:Label width="35" text="{data.affectedCount>-1?outerDocument.numberFormatter.format(data.affectedCount):'N/A'}" fontSize="12" textAlign="right" />
-											<s:Label text="Affected" />
+										<s:HGroup gap="10" verticalAlign="middle">
+											<s:Label width="50" text="{update.affectedCount>-1?outerDocument.numberFormatter.format(update.affectedCount):'N/A'}" color="0x595959" fontSize="16" fontWeight="bold" textAlign="right" />
+											<s:Label text="Affected" color="0x595959" fontWeight="bold" />
 										</s:HGroup>
 										
-										<s:HGroup gap="15">
-											<s:Label width="35" text="{data.atRiskCount>-1?outerDocument.numberFormatter.format(data.atRiskCount):'N/A'}" fontSize="12" textAlign="right" />
-											<s:Label text="At Risk" />
+										<s:HGroup gap="10" verticalAlign="middle">
+											<s:Label width="50" text="{update.atRiskCount>-1?outerDocument.numberFormatter.format(update.atRiskCount):'N/A'}" color="0x595959" fontSize="16" fontWeight="bold" textAlign="right" />
+											<s:Label text="At Risk" color="0x595959" fontWeight="bold" />
 										</s:HGroup>
 										
-										<s:HGroup gap="15">
-											<s:Label width="35" text="{data.deathCount>-1?outerDocument.numberFormatter.format(data.deathCount):'N/A'}" fontSize="12" textAlign="right" />
-											<s:Label text="Deaths" />
+										<s:HGroup gap="10" verticalAlign="middle">
+											<s:Label width="50" text="{update.deathCount>-1?outerDocument.numberFormatter.format(update.deathCount):'N/A'}" color="0x595959" fontSize="16" fontWeight="bold" textAlign="right" />
+											<s:Label text="Deaths" color="0x595959" fontWeight="bold" />
 										</s:HGroup>
 										
-										<s:HGroup gap="15">
-											<s:Label width="35" text="{data.deathCount>-1?outerDocument.numberFormatter.format(data.deathCount):'N/A'}" fontSize="12" textAlign="right" />
-											<s:Label text="Hospitalization" />
+										<s:HGroup gap="10" verticalAlign="middle">
+											<s:Label width="50" text="{update.hospitalizationsCount>-1?outerDocument.numberFormatter.format(update.hospitalizationsCount):'N/A'}" color="0x595959" fontSize="16" fontWeight="bold" textAlign="right" />
+											<s:Label text="Hospitalizations" color="0x595959" fontWeight="bold" fontSize="10" />
 										</s:HGroup>
 										
 									</s:VGroup>
 									
-									<s:BorderContainer styleName="headerlessPopupInset">
+									<s:BorderContainer styleName="headerlessPopupInset" width="100%">
 										
 										<s:layout>
 											<s:VerticalLayout paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5" />
 										</s:layout>
 										
-										<s:Label text="National" />
+										<s:Label text="National" color="0x595959" />
 										
-										<s:HGroup gap="15">
-											<s:Label width="35" text="{data.affectedCountTotal>-1?outerDocument.numberFormatter.format(data.affectedCountTotal):'N/A'}" fontSize="12"  textAlign="right" />
-											<s:Label text="Case Reports" />
+										<s:HGroup gap="10" verticalAlign="middle">
+											<s:Label width="50" text="{update.caseReportCount>-1?outerDocument.numberFormatter.format(update.caseReportCount):'N/A'}" color="0x595959" fontSize="16" fontWeight="bold" textAlign="right" />
+											<s:Label text="Case Reports" color="0x595959" fontWeight="bold" />
 										</s:HGroup>
 										
-										<s:HGroup gap="15">
-											<s:Label width="35" text="{data.atRiskCountTotal>-1?outerDocument.numberFormatter.format(data.atRiskCountTotal):'N/A'}" fontSize="12" textAlign="right" />
-											<s:Label text="States" />
+										<s:HGroup gap="10" verticalAlign="middle">
+											<s:Label width="50" text="{update.affectedStatesCount>-1?outerDocument.numberFormatter.format(update.affectedStatesCount):'N/A'}" color="0x595959" fontSize="16" fontWeight="bold" textAlign="right" />
+											<s:Label text="States" color="0x595959" fontWeight="bold" />
 										</s:HGroup>
 										
-										<s:HGroup gap="15">
-											<s:Label width="35" text="{data.deathCountTotal>-1?outerDocument.numberFormatter.format(data.deathCountTotal):'N/A'}" fontSize="12" textAlign="right" />
-											<s:Label text="Deaths" />
+										<s:HGroup gap="10" verticalAlign="middle">
+											<s:Label width="50" text="{update.deathCountNetwork>-1?outerDocument.numberFormatter.format(update.deathCountNetwork):'N/A'}" color="0x595959" fontSize="16" fontWeight="bold" textAlign="right" />
+											<s:Label text="Deaths" color="0x595959" fontWeight="bold" />
 										</s:HGroup>
 										
-										<s:HGroup gap="15">
-											<s:Label width="35" text="{data.deathCountTotal>-1?outerDocument.numberFormatter.format(data.deathCountTotal):'N/A'}" fontSize="12" textAlign="right" />
-											<s:Label text="Hospitalization"  />
+										<s:HGroup gap="10" verticalAlign="middle">
+											<s:Label width="50" text="{update.hospitalizationsCountNetwork>-1?outerDocument.numberFormatter.format(update.hospitalizationsCountNetwork):'N/A'}" color="0x595959" fontSize="16" fontWeight="bold" textAlign="right" />
+											<s:Label text="Hospitalizations" color="0x595959" fontWeight="bold" fontSize="10" />
 										</s:HGroup>
 										
 									</s:BorderContainer>
 									
 								</s:VGroup>
 								
-								<mx:Text width="60%" text="— {data.text}" color="0x000000" paddingLeft="10" />
+								<mx:Text width="217" text="— {update.text}" color="0x000000" paddingLeft="0" fontSize="12" />
 								
 							</s:HGroup>
 							
