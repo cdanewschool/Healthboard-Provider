@@ -7,17 +7,18 @@ package models.modules.nutrition
 	[Bindable]
 	public class FoodServing
 	{
-		public static const ALCOHOL:FoodServing = new FoodServing( 'Alochol', 'drinks' );
-		public static const DAIRY:FoodServing = new FoodServing( 'Dairy' );
-		public static const FATS_AND_OILS:FoodServing = new FoodServing( 'Fats & Oils' );
-		public static const FRUITS:FoodServing = new FoodServing( 'Fruits' );
-		public static const GRAINS:FoodServing = new FoodServing( 'Grains' );
-		public static const PROTEINS:FoodServing = new FoodServing( 'Fruits' );
-		public static const SODIUM:FoodServing = new FoodServing( 'Sodium', 'milligrams' );
-		public static const SUGARS:FoodServing = new FoodServing( 'Sugars' );
-		public static const VEGETABLES:FoodServing = new FoodServing( 'Vegetables' );
-		public static const WATER:FoodServing = new FoodServing( 'Water', 'cups' );
+		public static const ALCOHOL:String = "alochol";
+		public static const DAIRY:String = "dairy";
+		public static const FATS_AND_OILS:String = "fatsoils";
+		public static const FRUITS:String = "fruits";
+		public static const GRAINS:String = "grains";
+		public static const PROTEINS:String = "proteins";
+		public static const SODIUM:String = "sodium";
+		public static const SUGARS:String = "sugars";
+		public static const VEGETABLES:String = "vegetables";
+		public static const WATER:String = "water";
 		
+		public var id:String;
 		public var listMinMax:Boolean;
 		public var quantifier:String;
 		public var servingSize:String;
@@ -25,9 +26,10 @@ package models.modules.nutrition
 		public var unit:String;
 		public var isPrimary:Boolean;
 		
-		public function FoodServing( title:String, unit:String = 'servings', quantifier:String = null, servingSize:String = '1', listMinMax:Boolean = false, isPrimary:Boolean = false )
+		public function FoodServing( title:String, id:String = null, unit:String = 'servings', quantifier:String = null, servingSize:String = '1', listMinMax:Boolean = false, isPrimary:Boolean = false )
 		{
 			this.title = title;
+			this.id = id;
 			this.unit = unit;
 			this.quantifier = quantifier ? quantifier : DietClassQuantifier.EXACTLY;
 			this.servingSize = servingSize;
@@ -39,11 +41,24 @@ package models.modules.nutrition
 		{
 			var model:NutritionModel = AppProperties.getInstance().controller.nutritionController.model as NutritionModel;
 			
-			if( title.toLowerCase() == "sodium" ) return model.iconSodium;
-			if( title.toLowerCase() == "fats & oils" ) return model.iconFatsAndOils;
-			if( title.toLowerCase() == "sugars" ) return model.iconSugars;
-			if( title.toLowerCase() == "alcohol" ) return model.iconAlcohol;
-			if( title.toLowerCase() == "water" ) return model.iconWater;
+			if( id == SODIUM ) return model.iconSodium;
+			if( id == FATS_AND_OILS ) return model.iconFatsAndOils;
+			if( id == SUGARS ) return model.iconSugars;
+			if( id == ALCOHOL ) return model.iconAlcohol;
+			if( id == WATER ) return model.iconWater;
+			
+			return null;
+		}
+		
+		public function get iconBig():Class
+		{
+			var model:NutritionModel = AppProperties.getInstance().controller.nutritionController.model as NutritionModel;
+			
+			if( id == SODIUM ) return model.sodiumEmpty;
+			if( id == FATS_AND_OILS ) return model.fatsOilsEmpty;
+			if( id == SUGARS ) return model.sugarsEmpty;
+			if( id == ALCOHOL ) return model.alcoholEmpty;
+			if( id == WATER ) return model.waterEmpty;
 			
 			return null;
 		}
