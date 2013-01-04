@@ -2,6 +2,7 @@ package models
 {
 	import models.modules.advisories.PatientAdvisoryStatus;
 	import models.modules.decisionsupport.RiskFactor;
+	import models.modules.nutrition.FoodPlan;
 	
 	import mx.collections.ArrayCollection;
 	
@@ -37,6 +38,8 @@ package models
 		public var recentActivity:ArrayCollection;
 		public var relations:ArrayCollection;
 		public var riskFactorGroups:ArrayCollection;
+		
+		public var foodPlan:FoodPlan = FoodPlan.AVERAGE;
 		
 		public function PatientModel()
 		{

@@ -2,13 +2,15 @@ package models.modules.nutrition
 {
 	import enum.DietClassQuantifier;
 	
+	import flash.events.EventDispatcher;
+	
 	import models.PatientModel;
 	import models.ProviderModel;
 	
 	import mx.collections.ArrayCollection;
 
 	[Bindable]
-	public class FoodPlan
+	public class FoodPlan extends EventDispatcher
 	{
 		public static const AVERAGE:FoodPlan = new FoodPlan
 			(
@@ -66,16 +68,16 @@ package models.modules.nutrition
 				new ArrayCollection
 				(
 					[
-						new FoodServing( 'Fruits', 'servings', DietClassQuantifier.EXACTLY, '5-6', false, true ),
-						new FoodServing( 'Grains', 'servings', DietClassQuantifier.EXACTLY, '5-6', false, true ),
-						new FoodServing( 'Vegetables', 'servings', DietClassQuantifier.EXACTLY, '5-6', false, true ),
-						new FoodServing( 'Proteins', 'servings', DietClassQuantifier.MAXIMUM, '3', false, true ),
-						new FoodServing( 'Dairy', 'servings', DietClassQuantifier.MAXIMUM, '3', false, true ),
-						new FoodServing( 'Sodium', 'milligrams', DietClassQuantifier.EXACTLY, '2,000' ),
-						new FoodServing( 'Fats & Oils', 'servings', DietClassQuantifier.EXACTLY, '2-3' ),
-						new FoodServing( 'Sugars', 'servings', DietClassQuantifier.LESS_THAN, '1' ),
-						new FoodServing( 'Alcohol', 'drinks', DietClassQuantifier.LESS_THAN, '2' ),
-						new FoodServing( 'Water', 'cups', DietClassQuantifier.MINIMUM, '8' )
+						new FoodServing( 'Fruits', FoodServing.FRUITS, 'servings', DietClassQuantifier.EXACTLY, '5-6', false, true ),
+						new FoodServing( 'Grains', FoodServing.GRAINS, 'servings', DietClassQuantifier.EXACTLY, '5-6', false, true ),
+						new FoodServing( 'Vegetables', FoodServing.VEGETABLES, 'servings', DietClassQuantifier.EXACTLY, '5-6', false, true ),
+						new FoodServing( 'Proteins', FoodServing.PROTEINS, 'servings', DietClassQuantifier.MAXIMUM, '3', false, true ),
+						new FoodServing( 'Dairy', FoodServing.DAIRY, 'servings', DietClassQuantifier.MAXIMUM, '3', false, true ),
+						new FoodServing( 'Sodium', FoodServing.SODIUM, 'milligrams', DietClassQuantifier.EXACTLY, '2,000' ),
+						new FoodServing( 'Fats & Oils', FoodServing.FATS_AND_OILS, 'servings', DietClassQuantifier.EXACTLY, '2-3' ),
+						new FoodServing( 'Sugars', FoodServing.SUGARS, 'servings', DietClassQuantifier.LESS_THAN, '1' ),
+						new FoodServing( 'Alcohol', FoodServing.ALCOHOL, 'drinks', DietClassQuantifier.LESS_THAN, '2' ),
+						new FoodServing( 'Water', FoodServing.WATER, 'cups', DietClassQuantifier.MINIMUM, '8' )
 					]
 				),
 				new ArrayCollection
@@ -106,7 +108,8 @@ package models.modules.nutrition
 						{note: "Try to avoid any salty food to decrease sodium.", completed:false, removed:false, recommendation:"Nutrition Workshop"},
 						{note: "Start the day with a whole grain cereal – wheat flakes, toasted O’s, or oatmeal are some examples.", completed:false, removed:false, recommendation:"Set a Reminder"}
 					]
-				)
+				),
+				2000
 			);
 		
 		private var _directions:String;
@@ -123,12 +126,14 @@ package models.modules.nutrition
 		private var _mealCategories:ArrayCollection;
 		private var _notes:ArrayCollection;
 		
+		public var calorieBudget:int;
+		
 		public var dirty:Boolean;
 		
 		public function FoodPlan( name:String = "", reasons:String = "", directions:String = "", startingDate:Date = null, 
 								  mealCategories:ArrayCollection = null, servingCategories:ArrayCollection = null, 
 								  foodsToLimit:ArrayCollection = null, foodsToIncrease:ArrayCollection = null, 
-								  notes:ArrayCollection = null,
+								  notes:ArrayCollection = null, calorieBudget:int = 0,
 								  patient:PatientModel = null, provider:ProviderModel = null )
 		{
 			this.name = name;
@@ -141,12 +146,26 @@ package models.modules.nutrition
 			this.foodsToLimit = foodsToLimit ? foodsToLimit : new ArrayCollection();
 			this.foodsToIncrease = foodsToIncrease ? foodsToIncrease : new ArrayCollection();
 			this.notes = notes;
+			this.calorieBudget = calorieBudget;
 			
 			this.provider = provider;
 			
 			dirty = false;
 		}
 
+		public function getFoodGroupById(id:String):FoodServing
+		{
+			for each(var foodGroup:FoodServing in servingCategories)
+			{
+				if( foodGroup.title.toLowerCase() == id )
+				{
+					return foodGroup;
+				}
+			}
+			
+			return null;
+		}
+		
 		public function get directions():String
 		{
 			return _directions;
@@ -179,8 +198,6 @@ package models.modules.nutrition
 		public function set patient(value:PatientModel):void
 		{
 			_patient = value;
-			
-			dirty = true;
 		}
 		
 		public function get provider():ProviderModel
@@ -191,8 +208,6 @@ package models.modules.nutrition
 		public function set provider(value:ProviderModel):void
 		{
 			_provider = value;
-			
-			dirty = true;
 		}
 
 		public function get reasons():String
