@@ -408,6 +408,9 @@
 				popup.removeEventListener( CloseEvent.CLOSE, onSaveMealPlanClose );
 				PopUpManager.removePopUp( popup );
 				
+				patient.foodPlan = plan;
+				patient.foodPlan.dispatchEvent( new Event(Event.CHANGE,true) );
+				
 				if( event.detail == Alert.YES )
 				{
 					if( plan.dirty )
