@@ -11,6 +11,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import ASclasses.Constants;
+			
 			import com.esri.ags.Graphic;
 			import com.esri.ags.events.FindEvent;
 			import com.esri.ags.geometry.Geometry;
@@ -34,6 +36,7 @@
 			import events.ApplicationEvent;
 			
 			import models.Location;
+			import models.Message;
 			import models.PatientModel;
 			import models.PatientsModel;
 			import models.ProviderApplicationModel;
@@ -233,6 +236,18 @@
 			/*	my patients	*/
 			
 			[Bindable] private var patient:PatientModel;
+			
+			private function onMessageClick(patient:PatientModel):void
+			{
+				var message:Message = new Message();
+				message.recipients = [patient];
+				message.urgency = Message.URGENCY_SOMEWHAT_URGENT;
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
+				evt.data = Constants.MODULE_MESSAGES;
+				evt.message = message;
+				dispatchEvent( evt );
+			}
 			
 			private function onViewPatientSelectionCriteriaClick(event:MouseEvent):void
 			{
@@ -910,7 +925,7 @@
 								
 								<s:HGroup verticalAlign="middle">
 									<s:Label text="{patient.fullName}" styleName="blue13Bold" fontSize="14" />
-									<s:Image source="@Embed('/images/grayEnvelope.png')" />
+									<s:Image source="@Embed('/images/grayEnvelope.png')" buttonMode="true" click="onMessageClick(patient)" />
 								</s:HGroup>
 								
 								<s:HGroup gap="15">
