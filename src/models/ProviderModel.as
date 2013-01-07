@@ -97,6 +97,8 @@ package models
 				}
 			}
 			
+			val.birthdate = new Date( data.birthdate );
+			
 			return val;
 		}
 	}

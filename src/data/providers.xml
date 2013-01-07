@@ -4,7 +4,7 @@
 	<!-- logged-in provider -->
 	<provider 
 		firstName="Gregory" lastName="Berg" 
-		age="49"  birthday="01/01/1963" sex="Male"
+		birthdate="01/01/1963" sex="1"
 		email="berggre123@nnmc.com" phone="2122921227"
 		street1="123 Woodeld Road" street2="" city="Besthesda" state="MD" zip="20889"
 		education="M.D., Howard University College of Medicine, Washington, DC, 1990&#10;B.S., Duke University, Durham, NC, 1984"
