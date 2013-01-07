@@ -77,7 +77,7 @@
 					save = true;
 					
 					//	see if it exists
-					var savedSearches:ArrayCollection = ProviderModel(AppProperties.getInstance().controller.user).savedSearches;
+					var savedSearches:ArrayCollection = ProviderModel(AppProperties.getInstance().controller.model.user).savedSearches;
 					if( !savedSearches ) savedSearches = new ArrayCollection( [] );
 					
 					var searchName:String = popup.searchName.text;
@@ -151,7 +151,7 @@
 			
 			private function init():void
 			{
-				user = AppProperties.getInstance().controller.user as ProviderModel;
+				user = AppProperties.getInstance().controller.model.user as ProviderModel;
 				
 				addEventListener( PatientSearchEvent.NEW_TAB, onOpenNewTab );
 				addEventListener( PatientSearchEvent.SAVE_TAB, onSaveTab );

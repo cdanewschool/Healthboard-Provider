@@ -15,7 +15,7 @@
 			import ASfiles.ProviderConstants;
 			
 			import controllers.MainController;
-			import controllers.PatientsController;
+			import controllers.ProviderPatientsController;
 			
 			import enum.UrgencyType;
 			
@@ -34,7 +34,7 @@
 			
 			import spark.events.DropDownEvent;
 			
-			[Bindable] public var controller:PatientsController = MainController( AppProperties.getInstance().controller ).patientsController as PatientsController;
+			[Bindable] public var controller:ProviderPatientsController = MainController( AppProperties.getInstance().controller ).patientsController as ProviderPatientsController;
 			[Bindable] public var model:PatientsModel = controller.model as PatientsModel;
 			
 			[Bindable] private var user:ProviderModel;
@@ -117,7 +117,7 @@
 			
 			private function init():void
 			{
-				user = AppProperties.getInstance().controller.user as ProviderModel;
+				user = AppProperties.getInstance().controller.model.user as ProviderModel;
 				
 				for each(var patient:PatientModel in model.patients)
 				{

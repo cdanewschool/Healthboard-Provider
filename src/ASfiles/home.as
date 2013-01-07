@@ -22,8 +22,6 @@ private function init():void
 	model = controller.model as ProviderApplicationModel;
 	
 	model.chartStyles = chartStyles = new ChartStyles();
-	
-	ProviderApplicationModel(model).providersDataService.send();
 }
 
 private function onResize():void
@@ -37,7 +35,7 @@ private function toggleAvailability(event:MouseEvent):void
 {
 	var button:LinkButton = LinkButton(event.currentTarget);
 	
-	var user:UserModel = controller.user;
+	var user:UserModel = controller.model.user;
 	
 	user.available = user.available == UserModel.STATE_AVAILABLE ? UserModel.STATE_UNAVAILABLE : UserModel.STATE_AVAILABLE;
 	

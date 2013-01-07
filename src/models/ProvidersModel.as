@@ -19,6 +19,8 @@ package models
 		private var _searchText:String;
 		private var _sortField:String;
 		
+		public var dataLoaded:Boolean;
+		
 		public function ProvidersModel()
 		{
 			reset();

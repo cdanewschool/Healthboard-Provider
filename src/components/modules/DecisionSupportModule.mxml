@@ -242,7 +242,7 @@
 			private function addAppointment( event:TeamAppointmentEvent ):void
 			{
 				var appointment:Appointment = notifyPopup.appointment;
-				appointment.provider = MainController(AppProperties.getInstance().controller).user;
+				appointment.provider = MainController(AppProperties.getInstance().controller).model.user;
 				
 				appointmentsModel.addAppointment( appointment );
 				

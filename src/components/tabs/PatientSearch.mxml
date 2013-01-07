@@ -20,7 +20,7 @@
 			import components.UserProfileCard;
 			
 			import controllers.MainController;
-			import controllers.PatientsController;
+			import controllers.ProviderPatientsController;
 			
 			import events.PatientSearchEvent;
 			import events.ProfileEvent;
@@ -44,7 +44,7 @@
 			import spark.events.DropDownEvent;
 			import spark.events.IndexChangeEvent;
 			
-			[Bindable] public var controller:PatientsController = MainController(AppProperties.getInstance().controller).patientsController as PatientsController;
+			[Bindable] public var controller:ProviderPatientsController = MainController(AppProperties.getInstance().controller).patientsController as ProviderPatientsController;
 			[Bindable] public var model:PatientsModel = controller.model as PatientsModel;
 			
 			[Bindable] private var user:ProviderModel;
@@ -464,7 +464,7 @@
 			
 			private function init():void
 			{
-				user = AppProperties.getInstance().controller.user as ProviderModel;
+				user = AppProperties.getInstance().controller.model.user as ProviderModel;
 				
 				showAdvancedSearch = model.showAdvancedSearch;
 				

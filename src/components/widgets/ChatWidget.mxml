@@ -71,7 +71,7 @@
 				
 				model.mode = ButtonBar(event.currentTarget).selectedItem.data;
 				
-				controller.chat( MainController(AppProperties.getInstance().controller).user, targetUser );
+				controller.chat( MainController(AppProperties.getInstance().controller).model.user, targetUser );
 			}
 			
 			private function viewHistory(event:MouseEvent):void
@@ -80,7 +80,7 @@
 				if( popup) PopUpManager.removePopUp( popup );
 				
 				popup = new ChatHistoryPopup();
-				ChatHistoryPopup(popup).user = MainController(AppProperties.getInstance().controller).user;
+				ChatHistoryPopup(popup).user = MainController(AppProperties.getInstance().controller).model.user;
 				ChatHistoryPopup(popup).chat = model;
 				
 				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );

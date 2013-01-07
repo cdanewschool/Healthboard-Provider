@@ -11,7 +11,7 @@
 	<fx:Script>
 		<![CDATA[
 			import controllers.MainController;
-			import controllers.PatientsController;
+			import controllers.ProviderPatientsController;
 			
 			import models.PatientsModel;
 			
@@ -19,7 +19,7 @@
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
 			
-			[Bindable] public var controller:PatientsController = MainController(AppProperties.getInstance().controller).patientsController as PatientsController;
+			[Bindable] public var controller:ProviderPatientsController = MainController(AppProperties.getInstance().controller).patientsController as ProviderPatientsController;
 			[Bindable] public var model:PatientsModel = controller.model as PatientsModel;
 
 			private function save():void 

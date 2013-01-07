@@ -9,6 +9,7 @@ package controllers
 	import models.ChatSearch;
 	import models.PatientModel;
 	import models.PatientsModel;
+	import models.UserModel;
 	import models.modules.AppointmentsModel;
 	import models.modules.decisionsupport.RiskFactor;
 	import models.modules.decisionsupport.RiskFactorUpdate;
@@ -20,20 +21,17 @@ package controllers
 	import spark.collections.SortField;
 	import spark.components.Application;
 
-	public class PatientsController extends BaseModuleController
+	public class ProviderPatientsController extends PatientsController
 	{
-		public function PatientsController()
+		public function ProviderPatientsController()
 		{
 			super();
-			
-			model = new PatientsModel();
-			
-			model.dataService.url = "data/patients.xml";
-			model.dataService.addEventListener( ResultEvent.RESULT, dataResultHandler );
 		}
 		
 		override public function init():void
 		{
+			super.init();
+			
 			var model:PatientsModel = model as PatientsModel;
 			
 			model.searchParameters = new ArrayCollection
@@ -241,29 +239,22 @@ package controllers
 		
 		override public function dataResultHandler(event:ResultEvent):void 
 		{
+			super.dataResultHandler(event);
+			
 			var model:PatientsModel = model as PatientsModel;
-			
-			var results:ArrayCollection = event.result.patients.patient is ArrayCollection ? event.result.patients.patient : new ArrayCollection( [event.result.patients.patient] );
-			
-			var patients:ArrayCollection = new ArrayCollection();
-			
-			for each(var result:Object in results)
-			{
-				var patient:PatientModel = PatientModel.fromObj(result);
-				patients.addItem( patient );
-			}
 			
 			var sort:Sort = new Sort();
 			sort.fields = [ new SortField( 'urgency', true, true ) ];
 			
-			patients.sort = sort;
-			patients.refresh();
-			
-			model.patients = patients;
+			model.patients.sort = sort;
+			model.patients.refresh();
 			
 			updateUrgency();
-			
-			super.dataResultHandler(event);
+		}
+		
+		override protected function parsePatient( data:Object):UserModel
+		{
+			return PatientModel.fromObj(data);
 		}
 		
 		private function updateUrgency():void

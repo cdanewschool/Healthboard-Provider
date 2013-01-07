@@ -44,7 +44,7 @@
 					] 
 				);
 			
-			[Bindable] private var user:ProviderModel = MainController(AppProperties.getInstance().controller).user as ProviderModel;
+			[Bindable] private var user:ProviderModel = MainController(AppProperties.getInstance().controller).model.user as ProviderModel;
 			
 			override protected function commitProperties():void
 			{

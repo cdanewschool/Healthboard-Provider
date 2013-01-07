@@ -115,7 +115,7 @@ package components.itemrenderers
 			super.commitProperties();
 			
 			//	only show options for logged-in provider
-			button.visible = AxisLabel(data).value == AppProperties.getInstance().controller.user.lastName;
+			button.visible = AxisLabel(data).value == AppProperties.getInstance().controller.model.user.lastName;
 		}
 		
 		override protected function measure():void

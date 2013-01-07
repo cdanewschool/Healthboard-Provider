@@ -73,7 +73,6 @@ package controllers
 		public var advisoryController:PublicHealthAdvisoriesController;
 		public var chatController:ChatController;
 		public var decisionSupportController:DecisionSupportController;
-		public var patientsController:PatientsController;
 		public var teamAppointmentsController:TeamAppointmentsController;
 		
 		private var autocompleteCallback:Function;
@@ -102,7 +101,7 @@ package controllers
 			medicalRecordsController = new ProviderMedicalRecordsController();
 			medicationsController = new ProviderMedicationsController();
 			nutritionController = new ProviderNutritionController();
-			patientsController = new PatientsController();
+			patientsController = new ProviderPatientsController();
 			
 			teamAppointmentsController = new TeamAppointmentsController();
 			
@@ -123,7 +122,6 @@ package controllers
 			
 			model.addEventListener( ApplicationDataEvent.LOADED, onAlertsLoaded );
 			medicationsController.model.addEventListener( ApplicationDataEvent.LOADED, onMedicationsLoaded );
-			patientsController.model.addEventListener( ApplicationDataEvent.LOADED, onPatientsLoaded );
 			
 			ProviderApplicationModel(model).providersDataService.url = "data/providers.xml";
 			ProviderApplicationModel(model).providersDataService.addEventListener( ResultEvent.RESULT, providersResultHandler );
@@ -133,7 +131,45 @@ package controllers
 			application.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
 			application.addEventListener( ProfileEvent.SHOW_CONTEXT_MENU, onShowContextMenu );
 			
+			patientsController.model.addEventListener( ApplicationDataEvent.LOADED, onPatientsLoaded );
+			
 			loadStyles();
+		}
+		
+		override protected function init():void
+		{
+			super.init();
+			
+			ProviderApplicationModel(model).providersDataService.send();
+		}
+		
+		override protected function get initialized():Boolean
+		{
+			var initialized:Boolean = super.initialized;
+			
+			return initialized && ProviderApplicationModel(model).providersModel.dataLoaded;
+		}
+		
+		override protected function onInitialized():void
+		{
+			if( !initialized ) return;
+			
+			if( Constants.DEBUG ) 
+			{
+				for each(var provider:UserModel in ProviderApplicationModel(model).providersModel.providers)
+				{
+					if( provider.id == ProviderConstants.USER_ID ) 
+					{
+						provider.available = UserPreferences(model.preferences).chatShowAsAvaiableOnLogin ? "A" : "U";	//	TODO: change to boolean
+						
+						model.user = provider;
+						
+						application.dispatchEvent( new AuthenticationEvent( AuthenticationEvent.SUCCESS, true ) );
+						
+						break;
+					}
+				}
+			}
 		}
 		
 		override public function showPreferences():UIComponent
@@ -187,12 +223,11 @@ package controllers
 		
 		override protected function onAuthenticated(event:AuthenticationEvent):void
 		{
-			if( !initialized )
+			if( !controllersInitialized )
 			{
 				advisoryController.init();
 				chatController.init();
 				decisionSupportController.init();
-				patientsController.init();
 				teamAppointmentsController.init();
 			}
 			
@@ -216,7 +251,7 @@ package controllers
 			authenticationPopup.callback = event.onAuthenticatedCallback;
 			authenticationPopup.callbackArgs = event.onAuthenticatedCallbackArgs;
 			
-			authenticationPopup.user = user;
+			authenticationPopup.user = model.user;
 			authenticationPopup.addEventListener( AuthenticationEvent.SUCCESS, onAuthenticationCheckSuccess );
 			PopUpManager.centerPopUp( authenticationPopup );
 		}
@@ -230,6 +265,20 @@ package controllers
 					authenticationPopup.callback( authenticationPopup.callbackArgs ) :
 					authenticationPopup.callback();
 			}
+		}
+		
+		override public function validate(username:String, password:String):UserModel
+		{
+			
+			/*
+			if( provider.id == ProviderConstants.USER_ID ) 
+			{
+				provider.available = UserPreferences(model.preferences).chatShowAsAvaiableOnLogin ? "A" : "U";	//	TODO: change to boolean
+				user = provider;
+			}
+			*/
+			
+			return super.validate(username,password);
 		}
 		
 		public function getUser( id:int, type:String = null ):UserModel
@@ -355,7 +404,7 @@ package controllers
 				}
 				else
 				{
-					patientsController.showPatient( event.user as PatientModel );
+					ProviderPatientsController(patientsController).showPatient( event.user as PatientModel );
 				}
 			}
 			else if( event.type == ProfileEvent.VIEW_APPOINTMENTS )
@@ -381,7 +430,7 @@ package controllers
 			}
 			else if( event.type == ProfileEvent.START_CHAT )
 			{
-				chatController.chat( user, event.user );
+				chatController.chat( model.user, event.user );
 			}
 			
 			hideContextMenu();
@@ -610,8 +659,10 @@ package controllers
 			}
 		}
 		
-		private function onPatientsLoaded(event:ApplicationDataEvent):void 
+		override protected function onPatientsLoaded(event:ApplicationDataEvent):void 
 		{
+			super.onPatientsLoaded(event);
+			
 			var patients:ArrayCollection = PatientsModel(patientsController.model).patients;
 			
 			for each(var patient:PatientModel in patients)
@@ -645,8 +696,8 @@ package controllers
 			initChatHistory();
 		}
 		
-		private function providersResultHandler(event:ResultEvent):void {
-			
+		private function providersResultHandler(event:ResultEvent):void 
+		{
 			var results:ArrayCollection = event.result.providers.provider;
 			
 			var teams:Array = [ {label:"All",value:-1} ];
@@ -659,17 +710,11 @@ package controllers
 				provider.id = providers.length;
 				providers.addItem( provider );
 				
-				if( provider.id == ProviderConstants.USER_ID ) 
-				{
-					provider.available = UserPreferences(model.preferences).chatShowAsAvaiableOnLogin ? "A" : "U";	//	TODO: change to boolean
-					user = provider;
-				}
-				
 				var team:Object = {label:"Team " + provider.team, value: provider.team};
 				if( teams[provider.team] == null ) teams[provider.team] = team;
 			}
 			
-			if( user
+			if( model.user
 				&& persistentData 
 				&& persistentData.data.hasOwnProperty('savedSearches') )
 			{
@@ -680,12 +725,14 @@ package controllers
 					savedSearches.addItem( SavedSearch.fromObj( search ) );
 				}
 				
-				ProviderModel( user ).savedSearches = savedSearches;
+				ProviderModel( model.user ).savedSearches = savedSearches;
 			}
 			
-			
 			ProviderApplicationModel(model).providersModel.providers = ChatSearch( chatController.model ).providers = providers;
+			ProviderApplicationModel(model).providersModel.dataLoaded = true;
 			ProviderApplicationModel(model).providersModel.providerTeams = new ArrayCollection( teams );
+			
+			onInitialized();
 			
 			initChatHistory();
 		}

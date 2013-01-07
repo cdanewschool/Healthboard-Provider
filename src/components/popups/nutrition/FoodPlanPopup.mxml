@@ -94,7 +94,7 @@
 				plan = new FoodPlan();
 				plan.dirty = true;
 				plan.patient = patient;
-				plan.provider = ProviderModel(AppProperties.getInstance().controller.user);
+				plan.provider = ProviderModel(AppProperties.getInstance().controller.model.user);
 			}
 			
 			private function onManageFoodServingsClick(event:MouseEvent):void
@@ -114,7 +114,7 @@
 					plan = (data as FoodPlan);
 					
 					if( !plan.patient ) plan.patient = patient;
-					if( !plan.provider ) plan.provider = ProviderModel(AppProperties.getInstance().controller.user);
+					if( !plan.provider ) plan.provider = ProviderModel(AppProperties.getInstance().controller.model.user);
 				}
 				
 				isNew = (data == addNew);
