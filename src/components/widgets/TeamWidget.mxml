@@ -15,10 +15,13 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import controllers.MainController;
+			
 			import events.ApplicationEvent;
 			import events.EnhancedTitleWindowEvent;
 			import events.ProfileEvent;
 			
+			import models.ProviderApplicationModel;
 			import models.ProvidersModel;
 			import models.UserModel;
 			
@@ -30,7 +33,7 @@
 			
 			private const SEARCH_PLACEHOLDER:String = "Search";
 			
-			[Bindable] public var model:ProvidersModel;
+			[Bindable] public var model:ProvidersModel = ProviderApplicationModel(AppProperties.getInstance().controller.model).providersModel;
 			
 			[Bindable] public var providerSortFields:ArrayCollection = new ArrayCollection( [{label:"Team",value:"team"},{label:"Role",value:"role"},{label:"First Name",value:"firstName"},{label:"Last Name",value:"lastName"} ] );
 			

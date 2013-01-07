@@ -15,7 +15,8 @@
 	xmlns:modules1="modules.*" 
 	xmlns:home="components.home.*"
 	fontFamily="myMyriad"
-	minWidth="1024" minHeight="768" resize="onResize()"
+	minWidth="1024" minHeight="768" 
+	resize="onResize()"
 	preinitialize="onPreinitialize(event)" 
 	creationComplete="init();onResize()">
 	
@@ -87,30 +88,28 @@
 					</s:LinearGradient>
 				</s:backgroundFill>
 				
-				<!--<s:VGroup paddingLeft="27" click="{currentState='widgetView'}" buttonMode="{currentState!='widgetView'}">
-					<fxg:healthBoardLogoGray />
-				</s:VGroup>-->
-				
 				<mx:Spacer width="100%" />
 				
 				<s:HGroup paddingRight="14">
 					
 					<general:MainLinkButton label="{controller.model.user.available == UserModel.STATE_AVAILABLE ? 'Available' : 'Unavailable'}" styleName="linkBtnYellow" fontSize="12" click="toggleAvailability(event)" toolTip="{controller.model.user.available == UserModel.STATE_AVAILABLE ? 'Change status to unavailable' : 'Change status to available'}" />
 					<general:MainLinkButton id="btnProfile" label="{controller.model.user.fullName}" styleName="linkButtonStyle1" fontSize="12" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, ProviderConstants.STATE_PROFILE) )"  />
-					<general:MainLinkButton id="btnLogout" label="Logout" styleName="linkButtonStyle3" fontSize="12"  paddingLeft="1" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.STATE_DEFAULT) )" />
 					
-					<s:HGroup paddingTop="-6" paddingLeft="-9">
+					<s:HGroup paddingTop="-12" paddingLeft="-2">
 						
 						<s:DropDownList 
 							id="dropDownView" 
-							dataProvider="{model.settings}" labelField="label" 
+							dataProvider="{model.settings}" labelField="label" prompt="Settings" 
 							change="controller.selectSetting(event)" 
 							dropShadowVisible="false" horizontalScrollPolicy="off"
-							skinClass="skins.general.MyOptionsDropDownListSkin" itemRenderer="components.itemrenderers.EnabledListItemRenderer"
-							color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" contentBackgroundColor="0xFFFFFF" 
-							width="35" fontSize="12" /><!--change="dropDownView_changeHandler(event)"--> 
+							skinClass="skins.general.MySettingsDropDownListSkin" itemRenderer="components.itemrenderers.EnabledListItemRenderer"
+							color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" 
+							fontSize="12" />
 						
 					</s:HGroup>
+					
+					<general:MainLinkButton id="btnLogout" label="Logout" styleName="linkButtonStyle3" fontSize="12"  paddingLeft="1" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, Constants.STATE_DEFAULT) )" />
+					
 				</s:HGroup>
 			</s:BorderContainer>
 		</s:Group>
@@ -149,7 +148,7 @@
 										
 										<widgets:ChatWidget id="widgetChat" width="305" title="Chat" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" />
 										
-										<widgets:TeamWidget id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" model="{ProviderApplicationModel(controller.model).providersModel}" module="modTeamProfile" />
+										<widgets:TeamWidget id="widgetTeam" width="305" title="Team Profile" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" module="modTeamProfile" />
 									
 										<widgets:PublicHealthAdvisoryWidget id="widgetAdvisory" width="305" title="Public Health Advisory ({widgetAdvisory.model.activeAdvisories.length})" collapsible="true" headerClickable="false" showCloseButton="false" titleBarHeight="30" module="modPublicHealthAdvisory" />
 										

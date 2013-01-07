@@ -11,6 +11,7 @@ package controllers
 	import components.popups.UserContextMenu;
 	import components.popups.VerifyCredentialsPopup;
 	import components.popups.preferences.PreferencesPopup;
+	import components.provider.EditProvider;
 	
 	import enum.RiskLevel;
 	import enum.UrgencyType;
@@ -82,6 +83,7 @@ package controllers
 		
 		private var authenticationPopup:VerifyCredentialsPopup;
 		private var inactivityAlert:InactivityAlertPopup;
+		private var editProfilePopup:EditProvider;
 		
 		public function MainController()
 		{
@@ -112,6 +114,7 @@ package controllers
 			model.settings = new ArrayCollection
 				( 
 					[ 
+						{id:"user_profile", label:"User Profile", tooltip:"Set and modify personal information."}, 
 						{id:"preferences", label:"Preferences", tooltip:"Set preferences for general settings, notifications and modules."}, 
 						{id:"",label: "---------------------------------------------------", enabled:false }, 
 						{id:"sync_status", label: "Last synced " + DateFormatters.syncTime.format( lastSynced ), enabled:false }, 
@@ -311,10 +314,17 @@ package controllers
 			super.selectSetting(event);
 			
 			var item:Object = model.settings.getItemAt( event.newIndex );
+			var evt:AuthenticationEvent;
 			
-			if( item.id == "preferences" )
+			if( item.id == "user_profile" )
 			{
-				var evt:AuthenticationEvent = new AuthenticationEvent( AuthenticationEvent.PROMPT, true );
+				evt = new AuthenticationEvent( AuthenticationEvent.PROMPT, true );
+				evt.onAuthenticatedCallback = editProfile;
+				application.dispatchEvent( evt );
+			}
+			else if( item.id == "preferences" )
+			{
+				evt = new AuthenticationEvent( AuthenticationEvent.PROMPT, true );
 				evt.onAuthenticatedCallback = showPreferences;
 				application.dispatchEvent( evt );
 			}
@@ -332,6 +342,22 @@ package controllers
 			}
 			
 			DropDownList(event.currentTarget).selectedItem = null;
+		}
+		
+		private function editProfile():void
+		{
+			editProfilePopup = PopUpManager.createPopUp( application, EditProvider, true ) as EditProvider;
+			editProfilePopup.provider = ProviderModel(model.user).clone();
+			editProfilePopup.addEventListener( ProfileEvent.SAVE, onEditProfileSave );
+			
+			PopUpManager.centerPopUp( editProfilePopup );
+		}
+		
+		private function onEditProfileSave( event:ProfileEvent ):void
+		{
+			ProviderModel(model.user).copy( event.user as ProviderModel );
+			
+			PopUpManager.removePopUp(editProfilePopup);
 		}
 		
 		/**
