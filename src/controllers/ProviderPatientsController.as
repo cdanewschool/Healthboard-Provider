@@ -195,8 +195,6 @@ package controllers
 				( 
 					['urgency', 'idNumber', 'team', 'lastName', 'firstName', 'serviceRank', 'sexLabel', 'lastVisitLabel', 'age', 'birthdateLabel', 'conditions'] 
 				);
-			
-			model.dataService.send();
 		}
 		
 		public function showPatient( patient:PatientModel ):void
