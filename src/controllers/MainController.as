@@ -43,7 +43,6 @@ package controllers
 	import models.TeamAppointmentsModel;
 	import models.UserModel;
 	import models.UserPreferences;
-	import models.modules.AppointmentsModel;
 	import models.modules.MedicationsModel;
 	import models.modules.MessagesModel;
 	import models.modules.advisories.PatientAdvisoryStatus;
@@ -172,6 +171,32 @@ package controllers
 			}
 		}
 		
+		override public function validateUser( username:String, password:String ):UserModel
+		{
+			for each(var provider:UserModel in ProviderApplicationModel(model).providersModel.providers)
+			{
+				if( provider.username == username && provider.password == password ) 
+				{
+					return provider;
+				}
+			}
+			
+			return null;
+		}
+		
+		override public function getDefaultUser():UserModel
+		{
+			for each(var provider:UserModel in ProviderApplicationModel(model).providersModel.providers)
+			{
+				if( provider.id == ProviderConstants.DEBUG_USER_ID ) 
+				{
+					return provider;
+				}
+			}
+			
+			return null;
+		}
+		
 		override public function showPreferences():UIComponent
 		{
 			var popup:PreferencesPopup = PopUpManager.createPopUp( application, PreferencesPopup ) as PreferencesPopup;
@@ -229,6 +254,10 @@ package controllers
 				chatController.init();
 				decisionSupportController.init();
 				teamAppointmentsController.init();
+				
+				onAdvisoriesLoaded();
+				
+				initChatHistory();
 			}
 			
 			super.onAuthenticated(event);
@@ -265,20 +294,6 @@ package controllers
 					authenticationPopup.callback( authenticationPopup.callbackArgs ) :
 					authenticationPopup.callback();
 			}
-		}
-		
-		override public function validate(username:String, password:String):UserModel
-		{
-			
-			/*
-			if( provider.id == ProviderConstants.USER_ID ) 
-			{
-				provider.available = UserPreferences(model.preferences).chatShowAsAvaiableOnLogin ? "A" : "U";	//	TODO: change to boolean
-				user = provider;
-			}
-			*/
-			
-			return super.validate(username,password);
 		}
 		
 		public function getUser( id:int, type:String = null ):UserModel
@@ -481,8 +496,8 @@ package controllers
 				}
 			}
 			
-			visualDashboardProvider(application).viewStackMain.verticalScrollPosition = 0;
-			visualDashboardProvider(application).viewStackProviderModules.verticalScrollPosition = 0;
+			if( visualDashboardProvider(application).viewStackMain ) visualDashboardProvider(application).viewStackMain.verticalScrollPosition = 0;
+			if( visualDashboardProvider(application).viewStackProviderModules ) visualDashboardProvider(application).viewStackProviderModules.verticalScrollPosition = 0;
 			
 			super.onSetState(event);
 		}
@@ -690,10 +705,6 @@ package controllers
 			}
 			
 			ChatSearch( chatController.model ).patients = patients;
-			
-			onAdvisoriesLoaded();
-			
-			initChatHistory();
 		}
 		
 		private function providersResultHandler(event:ResultEvent):void 
@@ -767,7 +778,7 @@ package controllers
 			if( !ChatSearch( chatController.model ).providers 
 				|| !ChatSearch( chatController.model ).patients ) return;
 			
-			var user:UserModel = ChatSearch(chatController.model).getUser( ProviderConstants.USER_ID, UserModel.TYPE_PROVIDER );
+			var user:UserModel = ChatSearch(chatController.model).getUser( AppProperties.getInstance().controller.model.user.id, UserModel.TYPE_PROVIDER );
 			
 			var today:Date = model.today;
 			var time:Number = today.getTime();

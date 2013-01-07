@@ -28,7 +28,7 @@ package models
 				header += "[<font color='#666666'>" + DateUtil.formatTime( time.time ) + "</font>] ";
 			}
 			
-			header += (user.id == ProviderConstants.USER_ID ? "Me" : user.fullName);
+			header += (user.id == AppProperties.getInstance().controller.model.user.id ? "Me" : user.fullName);
 			
 			var message:String = text;
 			var files:Array = [];

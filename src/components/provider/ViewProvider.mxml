@@ -10,12 +10,16 @@
 		<![CDATA[
 			import ASfiles.ProviderConstants;
 			
+			import controllers.MainController;
+			
 			import events.ProfileEvent;
 			
 			import models.ProviderModel;
 			
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
+			
+			[Bindable] private var controller:MainController = AppProperties.getInstance().controller as MainController;
 			
 			[Bindable] public var provider:ProviderModel;
 			
@@ -181,7 +185,7 @@
 		<s:layout>
 			<s:BasicLayout />
 		</s:layout>
-		<s:Button label="Edit" click="editProfile(event)" horizontalCenter="0" visible="{provider.id == ProviderConstants.USER_ID}" />
+		<s:Button label="Edit" click="editProfile(event)" horizontalCenter="0" visible="{provider.id == controller.model.user.id}" />
 	</s:Group>
 	
 </s:NavigatorContent>
