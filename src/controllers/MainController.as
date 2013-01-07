@@ -158,7 +158,7 @@ package controllers
 			{
 				for each(var provider:UserModel in ProviderApplicationModel(model).providersModel.providers)
 				{
-					if( provider.id == ProviderConstants.USER_ID ) 
+					if( provider.id == ProviderConstants.DEBUG_USER_ID ) 
 					{
 						provider.available = UserPreferences(model.preferences).chatShowAsAvaiableOnLogin ? "A" : "U";	//	TODO: change to boolean
 						

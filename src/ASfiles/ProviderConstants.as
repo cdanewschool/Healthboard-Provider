@@ -4,8 +4,7 @@ package ASfiles
 	{
 		public static const STATE_PROFILE:String = "profile";
 		
-		/*	corresponds to index of desired user in providers.xml	*/
-		public static const USER_ID:int = 0;
+		public static const DEBUG_USER_ID:int = 0;
 		
 		public static const MODULE_DECISION_SUPPORT:String = "modDecisionSupport";
 		public static const MODULE_PATIENTS:String = "modPatients";
