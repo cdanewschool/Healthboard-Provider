@@ -25,6 +25,8 @@ package models.modules.advisories
 		public var arrStats:ArrayCollection;
 		public var arrStatsDetailed:ArrayCollection;
 		
+		public var selectionCriteria:ArrayCollection;
+		
 		public function PublicHealthAdvisory()
 		{
 		}
@@ -50,6 +52,16 @@ package models.modules.advisories
 				val.startDate = new Date( DateUtil.modernizeDate(data.startDate) );
 			}
 			
+			if( data.hasOwnProperty('selection_criteria') 
+				&& data.selection_criteria.criterion )
+			{
+				val.selectionCriteria = new ArrayCollection();
+				
+				var items:ArrayCollection = data.selection_criteria.criterion is ArrayCollection ? data.selection_criteria.criterion : new ArrayCollection( [data.selection_criteria.criterion] );
+				
+				for each(var item:Object in items) 
+					val.selectionCriteria.addItem( PublicHealthAdvisorySelectionCriteria.fromObj(item) );
+			}
 			
 			var results:ArrayCollection = data.updates.update is ArrayCollection ? data.updates.update : new ArrayCollection( [data.updates.update] );
 			var updates:ArrayCollection = new ArrayCollection();

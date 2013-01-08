@@ -84,7 +84,6 @@ package models.modules.advisories
 				for each(item in items) 
 					val.deaths.addItem( new Location( item.latitude, item.longitude ) );
 			}
-				
 			
 			if( data.hasOwnProperty('hospitalizations') 
 				&& data.hospitalizations.hospitalization )

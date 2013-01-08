@@ -27,6 +27,7 @@
 			import com.esri.ags.utils.GraphicUtil;
 			
 			import components.popups.healthadvisory.AdvisoryUpdatesPopup;
+			import components.popups.publichealthadvisory.PatientSelectionCriteriaPopup;
 			
 			import controllers.MainController;
 			import controllers.PublicHealthAdvisoriesController;
@@ -251,7 +252,9 @@
 			
 			private function onViewPatientSelectionCriteriaClick(event:MouseEvent):void
 			{
-				//	open popup	
+				var popup:PatientSelectionCriteriaPopup = PopUpManager.createPopUp( AppProperties.getInstance().controller.application, PatientSelectionCriteriaPopup ) as PatientSelectionCriteriaPopup;
+				popup.advisory = advisory;
+				PopUpManager.centerPopUp( popup );
 			}
 			
 			private function selectPatient(event:ListEvent):void

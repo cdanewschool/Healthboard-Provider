@@ -3,11 +3,14 @@
 	
 	<!-- 	active -->
 	<advisory id="1" title="Influenza  A" active="true" startDate="-5/25/*">
+		
 		<updates>
+		
 			<update 
 				date="*/*/*" source="CDC.org" 
 				affectedStatesCount="50" caseReportCount="10108"
 				text="Positive test results have been reported from all 50 states. Influenza activity slowly began to increase in March 2012. Although influenza activity is monitored in many ways, influenza season is considered to have begun when >10% of respiratory specimens tested by participating laboratories are positive for influenza. The weekly percentage of specimens testing positive for influenza did not exceed 10% until the week ending May 1, 2012. During the week ending April 28, 2012, 15% of specimens tested positive for influenza.">
+					
 					<deaths>
 						<death latitude="38.87997" longitude="-77.0977" />
 						<death latitude="38.8657397" longitude="-77.34677" />
@@ -38,6 +41,7 @@
 						<death latitude="38.67997" longitude="-77.30894" />
 						<death latitude="38.8797" longitude="-77.2347" />
 					</deaths>
+					
 					<hospitalizations>
 						<hospitalization latitude="38.87997" longitude="-77.1456" />
 						<hospitalization latitude="38.832497" longitude="-77.0234" />
@@ -46,10 +50,13 @@
 						<hospitalization latitude="38.234997" longitude="-77.12" />
 						<hospitalization latitude="38.677997" longitude="-77.0977" />
 					</hospitalizations>
+					
 				</update>
+				
 			<update date="-3/23/*" source="CDC.org" text="The percent of respiratory specimens testing positive for influenza has surpassed 10 %, a general marker..."
 				affectedCount="0" atRiskCount="0" deathCount="0" affectedCountTotal="10108" deathCountTotal="53">
 			</update>
+			
 		</updates>
 		
 		<stats>
@@ -185,6 +192,39 @@
 			    <visits_national>1.25</visits_national>
 			</half_week>
 		</stats>
+		
+		<selection_criteria>
+			
+			<criterion title="Age">
+				<values>
+					<value>0-5 years</value>
+					<value>65+ years</value>
+				</values>
+			</criterion>
+			
+			<criterion title="Location">
+				<values>
+					<value>20810</value>
+					<value>20811</value>
+					<value>20813</value>
+					<value>20814</value>
+					<value>20815</value>
+				</values>
+			</criterion>
+			
+			<criterion title="Existing Conditions">
+				<values>
+					<value>Asthma</value>
+					<value>Obesity</value>
+					<value>Neurological conditions</value>
+					<value>Chronic lung disease</value>
+					<value>Heart disease</value>
+					<value>Whooping cough</value>
+				</values>
+			</criterion>
+			
+		</selection_criteria>
+		
 	</advisory>
 	
 	<advisory id="2" title="Escherichia Coli 0145" active="true">
