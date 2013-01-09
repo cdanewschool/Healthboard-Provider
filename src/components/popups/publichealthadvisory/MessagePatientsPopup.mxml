@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:general="components.general.*"
+	xmlns:popups="components.popups.*"
+	width="371" height="360"
+	backgroundFill="{fill}" backgroundAlpha="1"
+	skinClass="skins.general.myHeaderlessTitleWindow"
+	creationComplete="init()">
+	
+	<fx:Declarations>
+		
+		<s:LinearGradient id="fill" rotation="90">
+			<s:GradientEntry color="0xF7F7F7" alpha="1" ratio="0" />
+			<s:GradientEntry color="0xB3B3B3" alpha="1" ratio="1" />
+		</s:LinearGradient>
+		
+		<s:RadioButtonGroup id="recipientGroup" />
+		
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import controllers.MainController;
+			import controllers.PublicHealthAdvisoriesController;
+			
+			import models.modules.advisories.PublicHealthAdvisoriesModel;
+			import models.modules.advisories.PublicHealthAdvisory;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			import util.DateFormatters;
+			
+			[Bindable] private var controller:PublicHealthAdvisoriesController = MainController(AppProperties.getInstance().controller).advisoryController as PublicHealthAdvisoriesController;
+			[Bindable] public var model:PublicHealthAdvisoriesModel = controller.model as PublicHealthAdvisoriesModel;
+			
+			[Bindable] public var advisory:PublicHealthAdvisory;
+			
+			[Bindable] private var advisories:ArrayCollection;
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+			}
+			
+			private function send():void
+			{
+				dispatchEvent( new CloseEvent( CloseEvent.CLOSE, true, false, Alert.YES ) );
+			}
+			
+			private function close():void
+			{
+				dispatchEvent( new Event( Event.CANCEL ) );
+				
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function init():void
+			{
+				advisories = new ArrayCollection( model.advisories.source );
+				
+				advisorySelect.selectedItem = advisory;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="20" paddingTop="15" paddingRight="20" gap="15" horizontalAlign="left" />
+	</s:layout>
+	
+	<s:Label text="Message" styleName="darkGrayBold16" paddingBottom="5" />
+	
+	<mx:Form paddingTop="0" paddingBottom="0" verticalGap="15">
+		
+		<mx:FormItem label="Advisory:" labelWidth="75" labelStyleName="mediumTextBlackBold">
+			<s:DropDownList id="advisorySelect" width="214" dataProvider="{advisories}" labelField="title" change="advisory = advisorySelect.selectedItem as PublicHealthAdvisory" />
+		</mx:FormItem>
+		
+		<mx:FormItem label="Recipient:" labelWidth="75" labelStyleName="mediumTextBlackBold" verticalGap="10">
+			<s:RadioButton label="All patients" groupName="recipientGroup" value="all" selected="true" />
+			<s:RadioButton label="Affected patients" groupName="recipientGroup" value="affected" />
+			<s:RadioButton label="At risk patients" groupName="recipientGroup" value="at_risk" />
+			<s:RadioButton label="Selected patients" groupName="recipientGroup" value="selected" />
+		</mx:FormItem>
+		
+		<mx:FormItem label="Insert:" labelWidth="75" labelStyleName="mediumTextBlackBold" verticalGap="10">
+			<s:CheckBox id="symptoms" label="Symptoms" />
+			<s:CheckBox id="prevention" label="Prevention and Treatments" />
+			<s:CheckBox id="progression" label="Progression (location/timeline)" />
+		</mx:FormItem>
+		
+	</mx:Form>
+	
+	<s:Line xFrom="0" xTo="328">
+		<s:stroke>
+			<s:SolidColorStroke color="#4D4D4D"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:Button label="Submit" height="24" click="send();" skinClass="skins.general.IconButtonSkin" />
+		<s:Button label="Close" height="24" click="close();" skinClass="skins.general.IconButtonSkin" />
+	</s:HGroup>
+	
+</s:BorderContainer>

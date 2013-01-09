@@ -503,6 +503,8 @@ package controllers
 			{
 				if( event.message.recipients ) MessagesModel(messagesController.model).pendingRecipients = event.message.recipients;
 				if( event.message.recipientType ) MessagesModel(messagesController.model).pendingRecipientType = event.message.recipientType;
+				if( event.message.subject ) MessagesModel(messagesController.model).pendingSubject = event.message.subject;
+				if( event.message.body ) MessagesModel(messagesController.model).pendingBody = event.message.body;
 			}
 			
 			var modPrefix:String = 'mod';
@@ -770,8 +772,6 @@ package controllers
 			ProviderApplicationModel(model).providersModel.providerTeams = new ArrayCollection( teams );
 			
 			onInitialized();
-			
-			initChatHistory();
 		}
 		
 		private function onAdvisoriesLoaded( event:ApplicationDataEvent = null ):void

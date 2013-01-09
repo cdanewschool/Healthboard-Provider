@@ -27,6 +27,7 @@
 			import com.esri.ags.utils.GraphicUtil;
 			
 			import components.popups.healthadvisory.AdvisoryUpdatesPopup;
+			import components.popups.publichealthadvisory.MessagePatientsPopup;
 			import components.popups.publichealthadvisory.PatientSelectionCriteriaPopup;
 			
 			import controllers.MainController;
@@ -44,12 +45,15 @@
 			import models.modules.advisories.PatientAdvisoryStatus;
 			import models.modules.advisories.PublicHealthAdvisoriesModel;
 			import models.modules.advisories.PublicHealthAdvisory;
+			import models.modules.advisories.PublicHealthAdvisorySelectionCriteria;
 			
 			import mx.charts.HitData;
 			import mx.charts.series.items.ColumnSeriesItem;
 			import mx.charts.series.items.LineSeriesItem;
 			import mx.collections.ArrayCollection;
 			import mx.collections.Sort;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
 			import mx.events.ListEvent;
 			import mx.formatters.DateFormatter;
 			import mx.managers.PopUpManager;
@@ -230,6 +234,55 @@
 				PopUpManager.centerPopUp( popup );
 			}
 			
+			private function onMessageClick(event:MouseEvent):void
+			{
+				var popup:MessagePatientsPopup = PopUpManager.createPopUp( AppProperties.getInstance().controller.application, MessagePatientsPopup ) as MessagePatientsPopup;
+				popup.advisory = advisory;
+				popup.addEventListener(CloseEvent.CLOSE,onMessagePatientsClose);
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function onMessagePatientsClose(event:CloseEvent):void
+			{
+				var popup:MessagePatientsPopup = event.currentTarget as MessagePatientsPopup;
+				
+				if( event.detail == Alert.YES )
+				{
+					var advisory:PublicHealthAdvisory = popup.advisory;
+					
+					var body:String = "If you are receiving this email, please be aware of the following conditions from:\n";
+					body += advisory.title + "\n\n";
+					
+					var recipients:ArrayCollection;
+					
+					if( popup.recipientGroup.selectedValue == 'affected' ) recipients = advisory.update.affected;
+					else if( popup.recipientGroup.selectedValue == 'at_risk' ) recipients = advisory.update.atRisk;
+					else if( popup.recipientGroup.selectedValue == 'selected' ) recipients = new ArrayCollection( patientList.selectedItems );
+					else if( popup.recipientGroup.selectedValue == 'all' ) recipients = patients;
+					
+					if( popup.symptoms.selected ) 
+					{
+						body += "Symptoms could include:\n";
+						body += PublicHealthAdvisorySelectionCriteria( advisory.selectionCriteria.getItemAt( advisory.selectionCriteria.length - 1) ).values.source.join( ", ");
+					}
+					
+					var message:Message = new Message();
+					message.subject = "Attention: All Patients affected by " + advisory.title;
+					message.recipients = recipients ? recipients.source : null;
+					message.body = body;
+					message.urgency = Message.URGENCY_SOMEWHAT_URGENT;
+					
+					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
+					evt.data = Constants.MODULE_MESSAGES;
+					evt.message = message;
+					dispatchEvent( evt );
+				}
+				
+				popup.removeEventListener(CloseEvent.CLOSE,onMessagePatientsClose);
+				
+				PopUpManager.removePopUp( popup );
+			}
+			
 			private function toggleMapLayer():void
 			{
 			}
@@ -238,7 +291,7 @@
 			
 			[Bindable] private var patient:PatientModel;
 			
-			private function onMessageClick(patient:PatientModel):void
+			private function onMessagePatientClick(patient:PatientModel):void
 			{
 				var message:Message = new Message();
 				message.recipients = [patient];
@@ -471,7 +524,7 @@
 		<s:Button label="Case Report" height="24" styleName="buttonText" click="onCaseReportClick(event)" />
 		<s:Button label="Print" height="24" styleName="buttonText" />
 		<s:Button label="Export" height="24" styleName="buttonText" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true, false, 'Your file has been exported') )" />
-		<s:Button label="Message" height="24" styleName="buttonText" />
+		<s:Button label="Message" height="24" styleName="buttonText" click="onMessageClick(event)" />
 		
 		<s:Spacer width="100%" />
 		
@@ -928,7 +981,7 @@
 								
 								<s:HGroup verticalAlign="middle">
 									<s:Label text="{patient.fullName}" styleName="blue13Bold" fontSize="14" />
-									<s:Image source="@Embed('/images/grayEnvelope.png')" buttonMode="true" click="onMessageClick(patient)" />
+									<s:Image source="@Embed('/images/grayEnvelope.png')" buttonMode="true" click="onMessagePatientClick(patient)" />
 								</s:HGroup>
 								
 								<s:HGroup gap="15">
@@ -989,6 +1042,8 @@
 							</s:BorderContainer>
 							
 							<mx:DataGrid 
+								id="patientList" 
+								allowMultipleSelection="true"
 								dataProvider="{patients}" selectedItem="{patient}"
 								styleName="standardDataGrid"
 								itemClick="selectPatient(event)"
