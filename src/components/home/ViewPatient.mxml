@@ -479,7 +479,7 @@
 					
 					<patient:AlertsWidget 
 						id="alertsWidget" 
-						width="633" maxHeight="157" 
+						width="633"
 						collapsible="true" headerClickable="false" showCloseButton="false" displayWarning="true" 
 						warningToolTip="Patient needs attention" 
 						titleBarHeight="30" 
@@ -517,7 +517,7 @@
 							
 							<widgets:PatientVitalSignsWidget
 								id="vitalSignsWidget" 
-								width="305" maxHeight="441"
+								width="305"
 								title="Vital Signs" 
 								collapsible="true" headerClickable="false"
 								titleBarHeight="30" 
@@ -528,7 +528,7 @@
 						
 						<widgets:PatientExerciseWidget
 							id="exerciseWidget" 
-							width="305" maxHeight="550" 
+							width="305"
 							title="Exercise" 
 							collapsible="true" headerClickable="false"
 							titleBarHeight="30"  
