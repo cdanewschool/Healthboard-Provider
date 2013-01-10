@@ -317,19 +317,9 @@
 				
 			</s:BorderContainer>
 			
-			<s:Line xFrom="0" xTo="822">
-				<s:stroke>
-					<s:SolidColorStroke color="#3F3E3D"/>
-				</s:stroke>
-			</s:Line>
-			
-			<mx:ViewStack 
-				id="viewStack" 
-				width="825" 
-				backgroundColor="0x4A4A49" borderVisible="false" borderStyle="solid" cornerRadius="2" 
-				x="0" y="22" resizeToContent="true">
+			<mx:ViewStack id="viewStack" width="100%" backgroundColor="0x4A4A49" cornerRadius="2"><!--x="0" y="22" resizeToContent="true"-->
 				
-				<s:NavigatorContent>
+				<s:NavigatorContent width="100%">
 					
 					<s:VGroup width="100%">
 						
@@ -359,7 +349,7 @@
 							selectionDuration="2000" useRollOver="false" 
 							headerHeight="0" selectable="false"
 							borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}"
-							variableRowHeight="true">
+							variableRowHeight="true" rowCount="2">
 							
 							<ASclasses:columns>
 								
@@ -369,10 +359,11 @@
 										
 										<fx:Component>
 											
-											<mx:HBox verticalAlign="middle" paddingLeft="20" horizontalGap="20" height="161" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+											<mx:HBox verticalAlign="middle" paddingLeft="20" horizontalGap="20" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 												
 												<fx:Script>
 													<![CDATA[
+														import ASclasses.Constants;
 														import ASclasses.MyCustomDataTip;
 														
 														import components.itemrenderers.chart.MyCircleItemRenderer;
@@ -430,6 +421,14 @@
 																}
 															}
 															
+															chartMin -= 3;	//to ensure data points are displayed in their entirety.
+															chartMax += 3;
+															minDate = new Date(minDate.getTime() - DateUtil.DAY*2);
+															maxDate = new Date(maxDate.getTime() + DateUtil.DAY*2);
+																
+															/* minDate.setTime(minDate.time - DateUtil.DAY);
+															maxDate.setTime(maxDate.time + DateUtil.DAY); */
+															
 															//	get current/last update
 															currentUpdate = riskFactor.updates && riskFactor.updates.length ? riskFactor.updates.getItemAt( 0 ) as RiskFactorUpdate : null;
 															firstUpdate = riskFactor.updates && riskFactor.updates.length ? riskFactor.updates.getItemAt( riskFactor.updates.length -1 ) as RiskFactorUpdate : null;		
@@ -438,7 +437,7 @@
 																&& currentUpdate != firstUpdate )
 															{
 																currentRiskLevel.text = currentUpdate.value + "%";
-																dateText.text = "Increase of " + Math.ceil( (currentUpdate.date.time - firstUpdate.date.time ) / DateUtil.MONTH ) + " months";
+																//dateText.text = "Increase of " + Math.ceil( (currentUpdate.date.time - firstUpdate.date.time ) / DateUtil.MONTH ) + " months";
 															}
 															else 
 															{
@@ -449,10 +448,26 @@
 														
 														private function onChartRollOver(event:ChartItemEvent):void 
 														{
+															/* lblWeight.text = lblBloodPressure1.text = lblHeartRate.text = lblRespiratory.text = lblTemperature.text = data.chart.getItemAt(0).data[event.hitData.chartItem.index].value;
+															lblBMI.text = String(int(((data.chart.getItemAt(0).data[event.hitData.chartItem.index].value * 703) / Math.pow(outerDocument.model.vitalSigns[outerDocument.model.vitalIndices.indexOf('Height')].chart.getItemAt(0).data[outerDocument.model.vitalSigns[outerDocument.model.vitalIndices.indexOf('Height')].chart.getItemAt(0).data.length - 1].value, 2))*10)/10);
+															lblBloodPressure2.text = data.chart.getItemAt(0).data[event.hitData.chartItem.index].value2;
+															lblHeightFeet.text = String(Math.floor(data.chart.getItemAt(0).data[event.hitData.chartItem.index].value / 12));
+															lblHeightInches.text = String(data.chart.getItemAt(0).data[event.hitData.chartItem.index].value % 12);
+															lblDate.text = DateUtil.formatDateFromString(data.chart.getItemAt(0).data[event.hitData.chartItem.index].date); */
+															currentRiskLevel.text = data.updates[event.hitData.chartItem.index].value + "%";
+															myLineSeries.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyBoxItemRendererOver));
 														}
 														
 														private function onChartRollOut(event:ChartItemEvent):void 
 														{
+															/* lblWeight.text = lblBloodPressure1.text = lblHeartRate.text = lblRespiratory.text = lblTemperature.text = currentItem.value;
+															lblBMI.text = String(int(((currentItem.value * 703) / Math.pow( outerDocument.model.vitalSigns.getItemAt( outerDocument.model.vitalIndices.indexOf('Height') ).chart.getItemAt(0).data.getItemAt( outerDocument.model.vitalSigns.getItemAt( outerDocument.model.vitalIndices.indexOf('Height') ).chart.getItemAt(0).data.length - 1 ).value, 2))*10)/10);
+															lblBloodPressure2.text = currentItem.value2;
+															lblHeightFeet.text = String(Math.floor(currentItem.value / 12));
+															lblHeightInches.text = String(currentItem.value % 12);
+															lblDate.text = DateUtil.formatDateFromString(currentItem.date); */
+															currentRiskLevel.text = currentUpdate.value + "%";
+															myLineSeries.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyBoxItemRenderer));
 														}
 														
 														private function chartChange(event:Event):void
@@ -473,19 +488,16 @@
 												</mx:states>
 												
 												<!--	risk factor name	-->
-												<s:HGroup width="140">
-													<general:MainLinkButton
-														label="{riskFactor.name}" 
-														icon.expanded="@Embed(source='/images/smallArrow.png')" icon.collapsed="@Embed(source='/images/smallArrowCollapsed.png')" 
-														horizontalGap="10" fontSize="13" fontWeight="bold" toggle="true" styleName="linkButtonStyle1" 
-														click="{outerDocument.riskFactor = riskFactor}" />
+												<s:HGroup width="125" verticalAlign="middle" paddingLeft="7" gap="3">
+													<s:Image buttonMode="true" source.expanded="@Embed(source='/images/smallArrow2.png')" source.collapsed="@Embed(source='/images/smallArrowCollapsed2.png')" click="{this.currentState=='expanded' ? this.currentState = 'collapsed' : this.currentState = 'expanded'}" />
+													<general:MainLinkButton label="{riskFactor.name}" fontSize="13" fontWeight="bold" toggle="true" styleName="linkButtonStyle1" click="{outerDocument.riskFactor = riskFactor}" />
 												</s:HGroup>
 												
-												<s:VGroup width="430" visible="{riskFactor.quantifiable}" includeInLayout="{riskFactor.quantifiable}">
+												<s:VGroup width="445" height="161" visible="{this.currentState == 'expanded' &amp;&amp; riskFactor.quantifiable}" includeInLayout="{this.currentState == 'expanded' &amp;&amp; riskFactor.quantifiable}" verticalAlign="middle">
 													
 													<mx:LineChart 
 														id="chart" 
-														width="430" height="100" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" 
+														width="430" height="100" 
 														backgroundElements="{bge}" seriesFilters="[]" selectionMode="single" 
 														itemRollOver="onChartRollOver(event)" itemRollOut="onChartRollOut(event)" 
 														change="chartChange(event)" >
@@ -498,7 +510,7 @@
 																</mx:lineStroke>
 															</mx:LineSeries>
 															
-															<mx:LineSeries id="myLineSeries" yField="value" xField="date" itemRenderer="mx.charts.renderers.BoxItemRenderer" radius="8" adjustedRadius="8" fillFunction="{outerDocument.controller.fillFunction}" selectedIndex="0">
+															<mx:LineSeries id="myLineSeries" yField="value" xField="date" itemRenderer="components.itemrenderers.chart.MyBoxItemRenderer" radius="8" adjustedRadius="8" fillFunction="{outerDocument.controller.fillFunction}" selectedIndex="0">
 																<mx:lineStroke>
 																	<s:SolidColorStroke color="0xFFFFFF" weight="3" />
 																</mx:lineStroke>
@@ -529,10 +541,10 @@
 													
 												</s:VGroup>
 												
-												<s:DataGroup width="430" dataProvider="{riskFactor.types}" visible="{!riskFactor.quantifiable}" includeInLayout="{!riskFactor.quantifiable}"> 
+												<s:DataGroup width="445" height="161" dataProvider="{riskFactor.types}" visible="{this.currentState == 'expanded' &amp;&amp; !riskFactor.quantifiable}" includeInLayout="{this.currentState == 'expanded' &amp;&amp; !riskFactor.quantifiable}"> 
 													
 													<s:layout>
-														<s:VerticalLayout />
+														<s:VerticalLayout verticalAlign="middle" />
 													</s:layout> 
 													
 													<s:itemRenderer>
@@ -564,7 +576,7 @@
 																
 																<s:Label text="{riskFactor.name}" width="150" styleName="italic" fontSize="13" />
 																
-																<s:HGroup width="100%" visible="{update!=null}" gap="5" horizontalAlign="right">
+																<s:HGroup width="100%" visible="{update!=null}" gap="5" horizontalAlign="right" paddingRight="16">
 																	<s:Label text="{outerDocument.outerDocument.controller.getRiskLevelLabel( update.riskLevel )}" styleName="italic {update.riskLevel == RiskLevel.HIGH ? 'decisionSupportModuleRiskLevelHigh' : 'decisionSupportModuleRiskLevelLow'}" fontSize="13" />
 																	<s:Label text="{'due to ' + update.reason + '.'}" styleName="italic" fontSize="13" />
 																</s:HGroup>
@@ -577,16 +589,21 @@
 													
 												</s:DataGroup>
 												
+												<s:VGroup includeInLayout="{this.currentState == 'collapsed'}" visible="{this.currentState == 'collapsed'}" width="430" height="30" verticalAlign="middle">
+													<s:Label text="{riskFactor.types.length} Risk factors" fontSize="13" styleName="decisionSupportModuleRiskLevelStatText italic" />
+												</s:VGroup>
+												
 												<s:VGroup width="110">
 													
-													<s:HGroup verticalAlign="bottom">
-														<s:Label id="currentRiskLevel" styleName="emphasizedNumber bold" fontSize="36" />
-														<s:Label text="risk" fontSize="13" styleName="decisionSupportModuleRiskLevelStatText italic" paddingBottom="5" />
+													<s:HGroup verticalAlign.expanded="bottom" verticalAlign.collapsed="middle">
+														<s:Label id="currentRiskLevel" color="0xFBB03B" fontWeight="bold" fontSize.expanded="36" fontSize.collapsed="13" />
+														<s:Label text="risk" fontSize="13" color="0xFFFFFF" paddingBottom.expanded="6" />
 													</s:HGroup>
 													
-													<s:Label text="{riskFactor.types.length} Risk factors" fontSize="13" styleName="decisionSupportModuleRiskLevelStatText italic" />
-													<s:Label id="dateText" fontSize="13" styleName="decisionSupportModuleRiskLevelStatText italic" />
-													
+													<s:VGroup includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}">
+														<s:Label text="{riskFactor.types.length} Risk factors" fontSize="13" styleName="decisionSupportModuleRiskLevelStatText italic" />
+														<s:Label id="dateText" fontSize="13" styleName="decisionSupportModuleRiskLevelStatText italic" />
+													</s:VGroup>
 												</s:VGroup>
 												
 											</mx:HBox>
