@@ -28,6 +28,18 @@ package components.modules
 			currentState = "provider";
 		}
 		
+		override protected function init():void {
+			super.init();
+			
+			hgNutrition.removeElement(vgRecordIntake);
+			hgNutrition.removeElement(vLine1);
+			hgNutrition.addElementAt(vgTotalCaloriesTaken,0);
+			hgFoodPlate.removeElement(vLine2);
+			vgTotalCaloriesTaken.addElementAt(nutJournalDate,0);
+			vgMealList.paddingTop = 46;
+			hgFoodPlate.addElement(vgFoodPlateDetails);
+		}
+		
 		override protected function onSetFoodPlanClick(event:MouseEvent):void
 		{
 			var popup:FoodPlanPopup = FoodPlanPopup( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, FoodPlanPopup) as TitleWindow );
