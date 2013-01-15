@@ -16,6 +16,8 @@
 			
 			import controllers.MainController;
 			
+			import models.PatientAlert;
+			
 			import mx.collections.ArrayCollection;
 			import mx.collections.Sort;
 			import mx.controls.Alert;
@@ -134,7 +136,7 @@
 				return true;
 			}
 			
-			private function filterByModule( item:Object ):Boolean
+			private function filterByModule( item:PatientAlert ):Boolean
 			{
 				if( !filter(item) ) return false;
 				
@@ -192,7 +194,7 @@
 				
 				if( event.detail == Alert.YES )
 				{
-					var alert:Object = { alert: "Internal Note", date: new Date(), description: popup.description.text, type: "All" };
+					var alert:PatientAlert = new PatientAlert( "Internal Note", new Date(), popup.description.text, "All" );
 					
 					if( popup.allModulesSelected )
 					{
@@ -202,15 +204,7 @@
 					{
 						for(var i:int=0;i<popup.selectedModuleIDs.length;i++)
 						{
-							alert = 
-							{
-								alert: "Internal Note", 
-								date: new Date(), 
-								description: popup.description.text, 
-								type: AppProperties.getInstance().controller.getModuleTitle( popup.selectedModuleIDs[i] ) 
-							};
-							
-							controller.model.patientAlerts.addItemAt( alert, 0 );
+							controller.model.patientAlerts.addItemAt( new PatientAlert("Internal Note", new Date(), popup.description.text, AppProperties.getInstance().controller.getModuleTitle( popup.selectedModuleIDs[i] ) ) , 0 );
 						}
 					}
 				}
@@ -355,7 +349,7 @@
 									import components.itemrenderers.datagridcolumn.CustomRowColor;
 								]]>
 							</fx:Script>
-							<mx:Label text="{data.description}" color="{data.status=='inactive' ? CustomRowColor.INACTIVE_COLOR : CustomRowColor.ACTIVE_COLOR}" />
+							<mx:Label text="{data.description}" color="{data.status=='inactive' ? CustomRowColor.INACTIVE_COLOR : CustomRowColor.ACTIVE_COLOR}" truncateToFit="true" width="175" />
 							<s:Spacer width="100%" />
 							<s:HGroup paddingTop="7" paddingLeft="-7" paddingRight="7" alpha=".6">
 								<s:Image source="@Embed('/images/btnHealthFocusMsg.png')" toolTip="Click to send message" buttonMode="true" /><!--click="nutDeleteHandler(event)"-->
