@@ -35,6 +35,7 @@ package controllers
 	import models.ChatSearch;
 	import models.Message;
 	import models.ModuleMappable;
+	import models.PatientAlert;
 	import models.PatientModel;
 	import models.PatientsModel;
 	import models.Preferences;
@@ -721,8 +722,7 @@ package controllers
 							
 							if( update.riskLevel == RiskLevel.HIGH )
 							{
-								var alert:Object = { urgency: UrgencyType.URGENT, date: update.date, type: "Decision Support", alert: "High Risk", description: riskFactor.name };
-								
+								var alert:PatientAlert = new PatientAlert( "High Risk", update.date, riskFactor.name, "Decision Support", UrgencyType.URGENT );
 								model.patientAlerts.addItem( alert );
 								
 								break;

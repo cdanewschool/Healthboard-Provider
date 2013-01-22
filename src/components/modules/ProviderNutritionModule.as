@@ -61,7 +61,8 @@ package components.modules
 			if( event.detail == Alert.YES )
 			{
 				var note:Object = { note: popup.message.text, recommendation: popup.recommendation.selectedItem.label, urgency: popup.urgency.selectedItem.data, completed:false, removed:false };
-				foodPlan.notes && foodPlan.notes.length ? foodPlan.notes.addItem( note ) : foodPlan.notes = new ArrayCollection( [ note ] );
+				
+				foodPlan.addNote( note );
 			}
 			
 			PopUpManager.removePopUp( popup );

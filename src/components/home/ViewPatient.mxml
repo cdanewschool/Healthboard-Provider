@@ -35,6 +35,7 @@
 			
 			import external.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
 			
+			import models.PatientAlert;
 			import models.PatientModel;
 			import models.modules.MedicationsModel;
 			
@@ -202,11 +203,12 @@
 			
 			private function healthFocusResultHandler(event:ResultEvent):void 
 			{
-				var alerts:ArrayCollection = event.result.alerts.alert;
+				var _alerts:ArrayCollection = event.result.alerts.alert;
+				var alerts:ArrayCollection = new ArrayCollection();
 				
-				for each(var alert:Object in alerts)
+				for each(var alert:Object in _alerts)
 				{
-					alert.date = new Date( util.DateUtil.modernizeDate( alert.date ) );
+					alerts.addItem( PatientAlert.fromObj( alert ) );
 				}
 				
 				controller.model.patientAlerts = alertsWidget.alerts = new ArrayCollection( controller.model.patientAlerts.source.concat( alerts.source ) );
@@ -314,7 +316,19 @@
 			
 			public function set patient(value:PatientModel):void
 			{
+				if( _patient )
+				{
+					_patient.foodPlan.removeEventListener( Event.CHANGE, onPatientFoodPlanNotesChange );
+				}
+				
 				_patient = value;
+				
+				if( _patient )
+				{
+					_patient.foodPlan.addEventListener( Event.CHANGE, onPatientFoodPlanNotesChange );
+					
+					onPatientFoodPlanNotesChange();
+				}
 				
 				invalidateProperties();
 			}
@@ -324,6 +338,23 @@
 				_selectedAppointment = value;
 				
 				invalidateProperties();
+			}
+			
+			private function onPatientFoodPlanNotesChange( event:Event = null ):void
+			{
+				for each(var note:Object in patient.foodPlan.notes)
+				{
+					var added:Boolean = false;
+					
+					for each(var a:Object in controller.model.patientAlerts)
+						if( a.alert == note.recommendation ) 
+							added = true;
+					
+					if( !added )
+					{
+						controller.model.patientAlerts.addItem( new PatientAlert(  note.recommendation, new Date(), note.note, "Nutrition", note.urgency ) );
+					}
+				}
 			}
 			
 			private function onAlertSelect(event:ListEvent ):void
