@@ -135,7 +135,7 @@
 			
 			public function updateDataGridHeight():void
 			{
-				riskFactorSubTypes.height = riskFactorSubTypes.measureHeightOfItems(0, riskFactorSubTypes.dataProvider.length) + riskFactorSubTypes.headerHeight;
+				riskFactorSubTypes.height = riskFactorSubTypes.measureHeightOfItems(0, riskFactorSubTypes.dataProvider.length) + riskFactorSubTypes.headerHeight;	//REVISE, there seems to be an issue when opening the last item under "Deployment".
 			}
 			
 			private function init():void
@@ -238,7 +238,7 @@
 												previousUpdate = riskFactorSubType.updates && riskFactorSubType.updates.length ? riskFactorSubType.updates.getItemAt( riskFactorSubType.updates.length ? riskFactorSubType.updates.length-1 : 0 ) as RiskFactorUpdate : null;
 											}
 											
-											height = currentState == ToggleState.EXPANDED ? 756 : 45;
+											height = currentState == ToggleState.EXPANDED ? 790 : 45;
 											
 											outerDocument.updateDataGridHeight();
 											
@@ -267,13 +267,13 @@
 							<s:HGroup width="100%" height="45" verticalAlign="middle">
 								
 								<general:MainLinkButton
-									width="200" textAlign="left"
-									label="{riskFactorSubType.name}" 
+									width="250" textAlign="left"
+									label="{riskFactorSubType.name + ': ' + (viewLocalizedRisk ? outerDocument.riskFactor.location.country : 'Other Countries')}" 
 									icon.expanded="@Embed(source='/images/smallArrow.png')" icon.collapsed="@Embed(source='/images/smallArrowCollapsed.png')" 
 									horizontalGap="10" styleName="linkButtonStyle1" fontSize="16" fontWeight="bold" toggle="true"  
 									click="{currentState = (currentState == ToggleState.EXPANDED ? ToggleState.COLLAPSED : ToggleState.EXPANDED)}" />
 								
-								<s:HGroup width="100%" visible="{currentUpdate!=null}" gap="5" horizontalAlign="center">
+								<s:HGroup width="100%" visible="{currentUpdate!=null}" gap="5" paddingTop="3">
 									<s:Label text="{outerDocument.controller.getRiskLevelLabel( currentUpdate.riskLevel )}" styleName="italic {currentUpdate.riskLevel == RiskLevel.HIGH ? 'decisionSupportModuleRiskLevelHigh' : 'decisionSupportModuleRiskLevelLow'}" fontSize="13" />
 									<s:Label text="{'due to ' + currentUpdate.reason + '.'}" styleName="italic" fontSize="13" />
 								</s:HGroup>
@@ -284,26 +284,24 @@
 								
 							</s:HGroup>
 							
-							<s:HGroup width="100%" height="356" visible="{currentState==ToggleState.EXPANDED}" includeInLayout="{currentState==ToggleState.EXPANDED}">
+							<s:HGroup visible="{currentState==ToggleState.EXPANDED}" includeInLayout="{currentState==ToggleState.EXPANDED}" gap="7" paddingBottom="2">
 								
-								<s:BorderContainer width="50%" height="100%" backgroundColor="0x3C3C3B">
+								<s:BorderContainer width="360" height="356" backgroundColor="0x3C3C3B" borderWeight="1" borderColor="0xBDBCBC" cornerRadius="4">
 									
 									<s:layout>
 										<s:VerticalLayout horizontalAlign="center" gap="0"/>
 									</s:layout>
 									
 									<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
-										<s:Label text="Other Health Issues in {outerDocument.riskFactor.location.country}" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+										<s:Label text="Other Health Issues in {outerDocument.riskFactor.location.country}" styleName="greenBoldText" paddingLeft="10" paddingTop="7" />
 									</s:BorderContainer>
 									
 									<mx:DataGrid
-										fontFamily="myMyriadNoCFF"
+										dataProvider="{riskFactorSubType.issues}"
+										styleName="standardDataGrid" headerStyleName="dataGridHeaderAlternative"
 										width="100%" height="100%"
-										color="0xFFFFFF" verticalAlign="middle"
-										headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
-										borderVisible="true" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
-										rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-										horizontalScrollPolicy="off" rowHeight="22" paddingTop="6" 
+										alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+										horizontalScrollPolicy="off" rowHeight="22" headerHeight="24"
 										itemClick="onRecommendedTreatmentClick(event)">
 										
 										<mx:columns>
@@ -315,27 +313,24 @@
 									
 								</s:BorderContainer>
 								
-								<s:VGroup width="50%" height="100%">
+								<s:VGroup gap="8">
 									
-									<s:BorderContainer width="100%" height="50%" backgroundColor="0x3C3C3B">
+									<s:BorderContainer width="414" height="174" backgroundColor="0x3C3C3B" borderWeight="1" borderColor="0xBDBCBC" cornerRadius="4">
 										
 										<s:layout>
 											<s:VerticalLayout horizontalAlign="center" gap="0"/>
 										</s:layout>
 										
 										<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
-											<s:Label text="Recommended Treatments" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+											<s:Label text="Recommended Treatments" styleName="greenBoldText" paddingLeft="10" paddingTop="7" />
 										</s:BorderContainer>
 										
 										<mx:DataGrid
 											dataProvider="{riskFactorSubType.treatments}"
-											fontFamily="myMyriadNoCFF"
+											styleName="standardDataGrid" headerStyleName="dataGridHeaderAlternative"
 											width="100%" height="100%"
-											color="0xFFFFFF" verticalAlign="middle"
-											headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
-											borderVisible="true" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
-											rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-											horizontalScrollPolicy="off" rowHeight="22" paddingTop="6" 
+											alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+											horizontalScrollPolicy="off" rowHeight="22" headerHeight="24"
 											itemClick="onRecommendedTreatmentClick(event)">
 											
 											<mx:columns>
@@ -356,25 +351,22 @@
 										
 									</s:BorderContainer>
 									
-									<s:BorderContainer width="100%" height="50%" backgroundColor="0x3C3C3B">
+									<s:BorderContainer width="414" height="174" backgroundColor="0x3C3C3B" borderWeight="1" borderColor="0xBDBCBC" cornerRadius="4">
 										
 										<s:layout>
 											<s:VerticalLayout horizontalAlign="center" gap="0" />
 										</s:layout>
 										
 										<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
-											<s:Label text="Subject-Matter Experts" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+											<s:Label text="Subject-Matter Experts" styleName="greenBoldText" paddingLeft="10" paddingTop="7" />
 										</s:BorderContainer>
 										
 										<mx:DataGrid
 											dataProvider="{riskFactorSubType.experts}"
-											fontFamily="myMyriadNoCFF"
+											styleName="standardDataGrid" headerStyleName="dataGridHeaderAlternative"
 											width="100%" height="100%"
-											color="0xFFFFFF" verticalAlign="middle"
-											headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
-											borderVisible="true" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
-											rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-											horizontalScrollPolicy="off" rowHeight="22" paddingTop="6">
+											alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+											horizontalScrollPolicy="off" rowHeight="22" headerHeight="24">
 											
 											<mx:columns>
 												<mx:DataGridColumn dataField="name" headerText="Name" width="168" color="0xAEDEE4" />
@@ -390,7 +382,7 @@
 								
 							</s:HGroup>
 							
-							<s:BorderContainer width="100%" height="356" backgroundColor="0x4A4A49" visible="{currentState==ToggleState.EXPANDED}" includeInLayout="{currentState==ToggleState.EXPANDED}">
+							<s:BorderContainer width="100%" height="356" backgroundColor="0x4A4A49" visible="{currentState==ToggleState.EXPANDED}" includeInLayout="{currentState==ToggleState.EXPANDED}" borderWeight="1" borderColor="0xBDBCBC" cornerRadius="4">
 								
 								<s:layout>
 									<s:HorizontalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
@@ -532,12 +524,12 @@
 									
 								</s:Group>
 								
-								<s:VGroup paddingLeft="10" gap="0">
+								<s:VGroup paddingLeft="4" gap="0" height="100%">
 									
-									<general:MainLinkButton label="View Risk in {outerDocument.riskFactor.location.country}" styleName="{viewLocalizedRisk?'linkButtonStyle5 bold':'linkButtonStyle1'}" click="viewLocalizedRisk=true;map.extent=outerDocument.localExtent" />
-									<general:MainLinkButton label="View Risk in Other Countries" styleName="{!viewLocalizedRisk?'linkButtonStyle5 bold':'linkButtonStyle1'}" click="viewLocalizedRisk=false;map.extent=outerDocument.worldExtent" />
+									<general:MainLinkButton label="View Risk in {outerDocument.riskFactor.location.country}" styleName="{viewLocalizedRisk?'linkButtonStyle5 bold':'linkButtonStyle1'}" click="viewLocalizedRisk=true;map.extent=outerDocument.localExtent" paddingLeft="0" />
+									<general:MainLinkButton label="View Risk in Other Countries" styleName="{!viewLocalizedRisk?'linkButtonStyle5 bold':'linkButtonStyle1'}" click="viewLocalizedRisk=false;map.extent=outerDocument.worldExtent" paddingLeft="0"/>
 									
-									<s:Spacer height="95" />
+									<s:Spacer height="100%" />
 									
 									<s:BorderContainer width="174" height="179" cornerRadius="10" backgroundColor="0x565656" borderAlpha="0">
 										
