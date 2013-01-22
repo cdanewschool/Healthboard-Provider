@@ -1,7 +1,7 @@
 .DS_Store
-.flexProperties
-.fxpProperties
 .gitignore.swp
-.settings
+.settings/
 bin-debug/
 bin-release/
+html-template/
+libs/sharedlib.swc
