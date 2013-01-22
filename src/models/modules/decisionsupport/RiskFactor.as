@@ -15,6 +15,7 @@ package models.modules.decisionsupport
 		public var name:String;
 		public var quantifiable:Boolean;
 		
+		public var issues:ArrayCollection;
 		public var experts:ArrayCollection;
 		public var treatments:ArrayCollection;
 		public var types:ArrayCollection;
@@ -34,6 +35,7 @@ package models.modules.decisionsupport
 		public static function fromObj( data:Object ):RiskFactor
 		{
 			var val:RiskFactor = new RiskFactor();
+			val.issues = new ArrayCollection();
 			val.experts = new ArrayCollection();
 			val.treatments = new ArrayCollection();
 			val.types = new ArrayCollection();
@@ -91,6 +93,12 @@ package models.modules.decisionsupport
 				
 				val.updates.sort = sort;
 				val.updates.refresh();
+			}
+			
+			if( data.issues
+				&& data.issues.issue )
+			{
+				val.issues = data.issues.issue is ArrayCollection ? data.issues.issue : new ArrayCollection( [ data.issues.issue ] );
 			}
 			
 			if( data.experts

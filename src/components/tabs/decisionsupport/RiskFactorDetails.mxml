@@ -4,6 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:ASclasses="ASclasses.*" 
+	xmlns:components="components.*" 
 	xmlns:general="components.general.*" 
 	width="100%" height="100%" creationPolicy="all" 
 	creationComplete="init()">
@@ -15,6 +16,9 @@
 	<fx:Script>
 		<![CDATA[
 			import ASclasses.Constants;
+			
+			import components.tooltips.decisionSupport.FamilyTree;
+			import components.tooltips.nutrition.FoodPlanToolTip;
 			
 			import controllers.DecisionSupportController;
 			import controllers.MainController;
@@ -29,6 +33,7 @@
 			import models.modules.decisionsupport.RiskFactorUpdate;
 			
 			import mx.events.ListEvent;
+			import mx.events.ToolTipEvent;
 			import mx.formatters.DateFormatter;
 			
 			import styles.ChartStyles;
@@ -98,6 +103,12 @@
 			{
 				dateFormatter.formatString = "MMMM D, YYYY";
 			}
+			
+			private function createCustomTip(title:String, body:String, event:ToolTipEvent):void 
+			{
+				var myToolTip:FamilyTree = new FamilyTree();
+				event.toolTip = myToolTip;
+			}
 		]]>
 	</fx:Script>
 	
@@ -119,24 +130,26 @@
 	
 	<s:HGroup 
 		width="100%" 
-		paddingLeft="20" paddingTop="20" gap="40">
+		paddingLeft="20" paddingTop="11" gap="40">
 		
 		<s:VGroup width="110" gap="5">
-			<s:Label id="currentRiskLevel" styleName="emphasizedNumber bold" fontSize="36" />
+			<s:Label id="currentRiskLevel" styleName="orangeStandout" />
 			<s:Label text="Most recent record:" fontSize="13" styleName="emphasizedNumberSubtext italic" />
 			<s:Label id="currentRecordDate" fontSize="13" styleName="emphasizedNumberSubtext italic" />
 		</s:VGroup>
 		
 		<s:VGroup width="110" gap="5">
-			<s:Label id="previousRiskLevel" styleName="emphasizedNumber bold" color="0xFBB03B" fontSize="36" />
+			<s:Label id="previousRiskLevel" styleName="orangeStandout" />
 			<s:Label text="Previous record:" fontSize="13" styleName="emphasizedNumberSubtext italic" />
 			<s:Label id="previousRecordDate" fontSize="13" styleName="emphasizedNumberSubtext italic" />
 		</s:VGroup>
 		
 		<s:HGroup>
-			<s:Image id="riskIncreaseChangeArrow" source="@Embed(source='/images/decisionsupport/highRiskArrow.png')" top="10" />
+			<s:VGroup paddingTop="4">
+				<s:Image id="riskIncreaseChangeArrow" source="@Embed(source='/images/decisionsupport/highRiskArrow.png')" />
+			</s:VGroup>
 			<s:VGroup width="110" gap="5">
-				<s:Label id="riskChangeLevel" styleName="emphasizedNumber bold" color="0xFBB03B" fontSize="36" />
+				<s:Label id="riskChangeLevel" styleName="orangeStandout" />
 				<s:Label text="Overall risk change:" fontSize="13" styleName="emphasizedNumberSubtext italic" />
 				<s:Label id="overallRiskChangeRange" fontSize="13" styleName="emphasizedNumberSubtext italic" />
 			</s:VGroup>
@@ -146,7 +159,7 @@
 	
 	<s:Spacer height="10" />
 	
-	<s:Line xFrom="0" xTo="822">
+	<s:Line xFrom="0" xTo="821">
 		<s:stroke>
 			<s:SolidColorStroke color="#E5E5E5" weight="1"/>
 		</s:stroke>
@@ -165,14 +178,14 @@
 		
 		<s:Label text="Safe/Goal" />
 		
-		<mx:Legend direction="horizontal" color="0xFFFFFF" fontFamily="myMyriadNoCFF" verticalAlign="bottom" paddingRight="14" paddingLeft="15" paddingTop="6">
+		<mx:Legend direction="horizontal" color="0xFFFFFF" fontFamily="myMyriadNoCFF" verticalAlign="bottom" paddingRight="14" paddingLeft="15" paddingTop="6" width="235">
 			<mx:LegendItem label="Patient Entry" fontSize="12" fontWeight="normal" legendMarkerRenderer="mx.charts.renderers.CircleItemRenderer" markerAspectRatio="1" markerHeight="12" markerWidth="12" fill="{chartStyles.colorVitalSignsPatient}"  stroke="{chartStyles.whiteStroke}" />
 			<mx:LegendItem label="Provider Entry" fontSize="12" fontWeight="normal" legendMarkerRenderer="mx.charts.renderers.BoxItemRenderer" markerAspectRatio="1" markerHeight="12" markerWidth="12" fill="{chartStyles.colorVitalSignsProvider}" stroke="{chartStyles.whiteStroke}" />
 		</mx:Legend>
 		
 	</s:HGroup>
 	
-	<s:Line xFrom="0" xTo="822">
+	<s:Line xFrom="0" xTo="821">
 		<s:stroke>
 			<s:SolidColorStroke color="#E5E5E5" weight="1"/>
 		</s:stroke>
@@ -198,7 +211,7 @@
 					<fx:Component>
 						
 						<mx:HBox 
-							verticalAlign="middle" paddingLeft="20" height="{currentState==ToggleState.EXPANDED ? 200 : 65}"
+							verticalAlign="middle" paddingLeft="20"
 							horizontalScrollPolicy="off" verticalScrollPolicy="off" 
 							dataChange="onDataChange(event)">
 							
@@ -292,6 +305,9 @@
 											}
 										}
 										
+										minDate = new Date(minDate.getTime() - DateUtil.DAY*2);	//to ensure data points are displayed in their entirety.
+										maxDate = new Date(maxDate.getTime() + DateUtil.DAY*2);
+										
 										//	get current/last update
 										currentUpdate = dataProvider && dataProvider.length ? dataProvider.getItemAt( 0 ) as RiskFactorUpdate : null;
 										previousUpdate = dataProvider && dataProvider.length ? dataProvider.getItemAt( dataProvider.length ? dataProvider.length-1 : 0 ) as RiskFactorUpdate : null;		
@@ -304,12 +320,14 @@
 									
 									private function onChartRollOver(event:ChartItemEvent):void 
 									{
-										
+										series.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyMixedItemRendererOver));
+										seriesDual.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyMixedItemRendererOver));
 									}
 									
 									private function onChartRollOut(event:ChartItemEvent=null):void 
 									{
-										
+										series.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyMixedItemRenderer));
+										seriesDual.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyMixedItemRenderer));
 									}
 									
 									private function chartChange(event:Event):void
@@ -343,13 +361,12 @@
 								
 								<mx:LineChart 
 									id="chart" 
-									width="445" height="{currentState == ToggleState.EXPANDED ? 100: 40}" dataProvider="{dataProvider}" 
+									width="445" height="{currentState == ToggleState.EXPANDED ? 130: 62}" dataProvider="{dataProvider}" 
 									backgroundElements="{bge}" seriesFilters="[]" selectionMode="single" 
 									itemRollOver="onChartRollOver(event)" itemRollOut="onChartRollOut(event)" 
 									change="chartChange(event)">
 									
 									<mx:series>
-										
 										<mx:LineSeries yField="meanValue" xField="date" interactive="false">
 											<mx:lineStroke>
 												<s:SolidColorStroke color="0xFAFDFF" weight="2" alpha=".5" />
@@ -362,7 +379,7 @@
 											</mx:lineStroke>
 										</mx:LineSeries>
 										
-										<mx:LineSeries id="series" yField="value" xField="date" radius="8" adjustedRadius="8" itemRenderer="components.itemrenderers.chart.MyMixedItemRenderer" fillFunction="{outerDocument.controller.fillFunction}" selectedIndex="0">
+										<mx:LineSeries id="series" yField="value" xField="date" radius="8" adjustedRadius="8" itemRenderer="components.itemrenderers.chart.MyMixedItemRenderer" fillFunction="{outerDocument.controller.fillFunction}">
 											<mx:lineStroke>
 												<s:SolidColorStroke color="0xFFFFFF" weight="3" />
 											</mx:lineStroke>
@@ -377,7 +394,7 @@
 											</mx:lineStroke>
 										</mx:LineSeries>
 										
-										<mx:LineSeries yField="value2" xField="date" includeInLayout="{riskFactorSubType.dual}" visible="{riskFactorSubType.dual}" radius="8" adjustedRadius="8" itemRenderer="components.itemrenderers.chart.MyMixedItemRenderer" fillFunction="{outerDocument.controller.fillFunction}">
+										<mx:LineSeries id="seriesDual" yField="value2" xField="date" includeInLayout="{riskFactorSubType.dual}" visible="{riskFactorSubType.dual}" radius="8" adjustedRadius="8" itemRenderer="components.itemrenderers.chart.MyMixedItemRenderer" fillFunction="{outerDocument.controller.fillFunction}">
 											<mx:lineStroke>
 												<s:SolidColorStroke color="0xFFFFFF" weight="3" />
 											</mx:lineStroke>
@@ -410,13 +427,12 @@
 
 							<s:VGroup>
 								
-								<s:HGroup>
+								<s:HGroup paddingTop="15" paddingBottom="14">
 									<s:Label text="Current" fontSize="13" />
 									<s:VGroup>
 										<s:Label id="valueLabel" color="0xE84E1B" fontSize="13" />
 										<s:Label id="changeLabel" color="0xE84E1B" fontSize="13" />
 									</s:VGroup>
-									
 								</s:HGroup>
 								
 								<s:DataGroup dataProvider="{currentUpdate.details}" visible="{currentUpdate!=null &amp;&amp; currentState == ToggleState.EXPANDED}" includeInLayout="{currentUpdate!=null &amp;&amp; currentState == ToggleState.EXPANDED}"> 
@@ -441,8 +457,8 @@
 								</s:DataGroup>
 								
 								<s:Label 
-									id="measuredOnLabel" styleName="gray13Italic" 
-									visible="{currentUpdate!=null &amp;&amp; currentState == ToggleState.EXPANDED}" includeInLayout="{currentUpdate!=null &amp;&amp; currentState == 'expanded'}" 
+									id="measuredOnLabel" styleName="gray13Italic" paddingTop="4" paddingBottom="10"
+									visible="{currentUpdate!=null &amp;&amp; currentState == ToggleState.EXPANDED}" includeInLayout="{currentUpdate!=null &amp;&amp; currentState == ToggleState.EXPANDED}" 
 									creationComplete="measuredOnLabel.text = 'Measured on ' + outerDocument.dateFormatter.format( currentUpdate.date )" />
 								
 							</s:VGroup>
@@ -459,47 +475,53 @@
 		
 	</ASclasses:RowColorDataGrid>
 	
-	<s:HGroup 
-		width="100%" height="372" 
-		paddingLeft="20" paddingRight="20" paddingTop="20" paddingBottom="20" 
-		contentBackgroundColor="0x5D5D5D">
+	<s:Line xFrom="0" xTo="821">
+		<s:stroke>
+			<s:SolidColorStroke color="#E5E5E5" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:HGroup width="100%" paddingLeft="20" paddingRight="20" paddingTop="20" paddingBottom="20" gap="10" contentBackgroundColor="0x5D5D5D">
 		
-		<s:BorderContainer width="50%" height="100%" backgroundColor="0x3C3C3B">
+		<s:BorderContainer width="360" height="356" backgroundColor="0x3C3C3B" borderWeight="1" borderColor="0xBDBCBC" cornerRadius="4">
 			
 			<s:layout>
 				<s:VerticalLayout horizontalAlign="center" />
 			</s:layout>
 			
 			<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
-				<s:Label text="Family Tree" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+				<s:Label text="Family Tree" styleName="greenBoldText" paddingLeft="10" paddingTop="7" />
 			</s:BorderContainer>
 
 			<!--	placeholder	-->
-			<s:Image source="@Embed(source='/images/decisionsupport/placeholders/familytree.png')" />
+			<s:Group>
+				<s:layout>
+					<s:BasicLayout />
+				</s:layout>
+				<s:Image source="@Embed(source='/images/decisionsupport/placeholders/familytree.png')" y="8" />
+				<s:BorderContainer x="0" y="34" width="90" height="72" borderVisible="false" backgroundAlpha="0" toolTip=" " toolTipCreate="createCustomTip('','', event)" buttonMode="true" />
+			</s:Group>
 			
 		</s:BorderContainer>
 		
-		<s:VGroup width="50%" height="100%">
+		<s:VGroup gap="10">
 			
-			<s:BorderContainer width="100%" height="50%" backgroundColor="0x3C3C3B">
+			<s:BorderContainer width="414" height="173" backgroundColor="0x3C3C3B" borderWeight="1" borderColor="0xBDBCBC" cornerRadius="4">
 				
 				<s:layout>
-					<s:VerticalLayout horizontalAlign="center" />
+					<s:VerticalLayout gap="0" />
 				</s:layout>
 				
 				<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
-					<s:Label text="Recommended Treatments" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+					<s:Label text="Recommended Treatments" styleName="greenBoldText" paddingLeft="10" paddingTop="7" />
 				</s:BorderContainer>
 				
 				<mx:DataGrid
 					dataProvider="{riskFactor.treatments}"
-					fontFamily="myMyriadNoCFF"
+					styleName="standardDataGrid"
 					width="100%" height="100%"
-					color="0xFFFFFF" verticalAlign="middle"
-					headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
-					borderVisible="true" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
-					rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-					horizontalScrollPolicy="off" rowHeight="22" paddingTop="6" 
+					alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+					horizontalScrollPolicy="off" rowHeight="22" headerHeight="24"
 					itemClick="onRecommendedTreatmentClick(event)">
 					
 					<mx:columns>
@@ -520,25 +542,22 @@
 				
 			</s:BorderContainer>
 			
-			<s:BorderContainer width="100%" height="50%" backgroundColor="0x3C3C3B">
+			<s:BorderContainer width="414" height="173" backgroundColor="0x3C3C3B" borderWeight="1" borderColor="0xBDBCBC" cornerRadius="4">
 				
 				<s:layout>
-					<s:VerticalLayout horizontalAlign="center" />
+					<s:VerticalLayout gap="0" />
 				</s:layout>
 				
 				<s:BorderContainer width="100%" height="28" backgroundColor="0x706F6F">
-					<s:Label text="Subject-Matter Experts" styleName="greenBoldText" paddingLeft="10" paddingTop="5" />
+					<s:Label text="Subject-Matter Experts" styleName="greenBoldText" paddingLeft="10" paddingTop="7" />
 				</s:BorderContainer>
 				
 				<mx:DataGrid
 					dataProvider="{riskFactor.experts}"
-					fontFamily="myMyriadNoCFF"
+					styleName="standardDataGrid"
 					width="100%" height="100%"
-					color="0xFFFFFF" verticalAlign="middle"
-					headerBackgroundSkin="skins.general.CustomDataGridHeaderBackgroundSkin" headerSeparatorSkin="mx.skins.ProgrammaticSkin" headerStyleName="dataGridHeader"
-					borderVisible="true" horizontalGridLines="true" horizontalGridLineColor="0x444442" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
-					rollOverColor="0x31535E" textRollOverColor="0xFFFFFF" selectionColor="0x31535E" textSelectedColor="0xFFFFFF"
-					horizontalScrollPolicy="off" rowHeight="22" paddingTop="6">
+					alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+					horizontalScrollPolicy="off" rowHeight="22" headerHeight="24">
 					
 					<mx:columns>
 						<mx:DataGridColumn dataField="name" headerText="Name" width="168" color="0xAEDEE4" />
