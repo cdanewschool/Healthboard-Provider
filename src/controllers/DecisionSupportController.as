@@ -31,11 +31,11 @@ package controllers
 		{
 			var range:Array = [];
 			
-			if( riskFactor.id == 'blood_pressure' ) return [10,200];
+			if( riskFactor.id == 'blood_pressure' ) return [60,180];
 			if( riskFactor.id == 'blood_sugar' ) return [75,150];
 			if( riskFactor.id == 'cholesterol' ) return [100,300];
-			if( riskFactor.id == 'smoking' ) return [0,20];
-			if( riskFactor.id == 'weight' ) return [100,200];
+			if( riskFactor.id == 'smoking' ) return [-4,20];
+			if( riskFactor.id == 'weight' ) return [160,210];
 			
 			return [0,0];
 		}
