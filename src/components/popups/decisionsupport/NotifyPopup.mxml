@@ -4,7 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:popups="components.popups.*"
-	width="413" height="550"
+	width="413" height="350"
 	controlBarVisible="true" 
 	skinClass="skins.general.myHeaderlessTitleWindow"
 	creationComplete="init()">
@@ -20,11 +20,9 @@
 	<fx:Script>
 		<![CDATA[
 			import events.MessageEvent;
-			import events.TeamAppointmentEvent;
 			
 			import flash.filters.DropShadowFilter;
 			
-			import models.Appointment;
 			import models.Message;
 			import models.UserModel;
 			import models.modules.AppointmentsModel;
@@ -35,32 +33,14 @@
 			
 			import spark.events.IndexChangeEvent;
 			
-			[Bindable] public var appointment:Appointment;
 			[Bindable] public var message:Message;
 			[Bindable] public var patient:UserModel;
 			
-			[Bindable] private var modes:ArrayCollection = new ArrayCollection
-				(
-					[
-						{label:"Appointments",data:AppointmentsModel.ID},
-						{label:"Messages",data:MessagesModel.ID}
-					]
-				);
-			
 			private function save():void
 			{
-				if( selectedModule.selectedItem.data == AppointmentsModel.ID )
-				{
-					appointment.patient = patient;
+				message.recipients = [ patient ];
 					
-					dispatchEvent( new TeamAppointmentEvent( TeamAppointmentEvent.ADD ) );
-				}
-				else if( selectedModule.selectedItem.data == MessagesModel.ID )
-				{
-					message.recipients = [ patient ];
-					
-					dispatchEvent( new MessageEvent( MessageEvent.ADD ) );
-				}
+				dispatchEvent( new MessageEvent( MessageEvent.ADD ) );
 				
 				PopUpManager.removePopUp(this);
 			}
@@ -72,69 +52,52 @@
 				PopUpManager.removePopUp(this);
 			}
 			
-			private function onModuleSelect(event:IndexChangeEvent):void
-			{
-				views.selectedIndex = selectedModule.selectedItem.data == MessagesModel.ID ? 1 : 0;
-			}
-			
 			private function init():void
 			{
 				controlBarVisible = false;
 				
-				appointment = new Appointment();
 				message = new Message();
 			}
 		]]>
 	</fx:Script>
 	
 	<s:layout>
-		<s:VerticalLayout paddingLeft="20" paddingTop="15" paddingRight="20" gap="10" horizontalAlign="left" />
+		<s:VerticalLayout paddingLeft="15" paddingTop="15" paddingRight="20" gap="10" horizontalAlign="left" />
 	</s:layout>
 	
-	<s:Label text="Notify" styleName="darkGrayBold16" paddingBottom="5" />
+	<s:Label text="Notify Patient" styleName="darkGrayBold16" paddingBottom="5" paddingLeft="4" />
+	
+	<s:HGroup paddingLeft="4">
+		<s:Label text="Patient:" fontWeight="bold" />
+		<s:Label text="{patient.fullName}" />
+	</s:HGroup>
+	<!--
 	
 	<mx:FormItem label="Patient:" labelWidth="50" labelStyleName="darkGrayBold12">
 		<s:TextInput text="{patient.fullName}" paddingLeft="7" paddingTop="5" width="215" height="24" editable="false" />
 	</mx:FormItem>
 	
 	<mx:FormItem label="Module:" labelWidth="50" labelStyleName="darkGrayBold12">
-		<s:DropDownList id="selectedModule" dataProvider="{modes}" width="317" height="24" labelField="label" creationComplete="{selectedModule.selectedIndex = 0}" change="onModuleSelect(event)" />
-	</mx:FormItem>
+		<s:DropDownList id="selectedModule" dataProvider="{modes}" width="312" height="24" labelField="label" prompt="Please select one" change="onModuleSelect(event)" />
+	</mx:FormItem>-->
 	
 	<s:HGroup paddingLeft="5">
-		
-		<!--	filters="{[new DropShadowFilter(0,90,0,.5,2,2)]}" 	-->
-		<s:BorderContainer width="368" height="381" backgroundFill="{views.selectedIndex==1?fill:null}" backgroundAlpha="{views.selectedIndex==1?1:0}">
-			
-			<mx:ViewStack id="views" >
-				
-				<s:NavigatorContent>
-					<popups:AddAppointmentForm width="100%" appointment="{appointment}" paddingTop="10" />
-				</s:NavigatorContent>
-				
-				<s:NavigatorContent>
-					<popups:SendMessageForm width="100%" message="{message}" />
-				</s:NavigatorContent>
-				
-			</mx:ViewStack>
-			
+		<s:BorderContainer width="371" height="236" backgroundAlpha="0">
+			<s:layout>
+				<s:VerticalLayout paddingTop="11" />
+			</s:layout>
+			<s:HGroup width="350" paddingLeft="17" color="0x4D4D4D">
+				<s:CheckBox id="checkMessage" label="Send as Message" selected="true" />
+				<s:Spacer width="100%" />
+				<s:CheckBox id="checkNextSteps" label="Send as Next Steps notification" selected="true" />
+			</s:HGroup>
+			<popups:SendMessageForm width="100%" message="{message}" />
 		</s:BorderContainer>
-		
 	</s:HGroup>
 
-	<s:VGroup>
-		
-		<s:Line xFrom="0" xTo="383">
-			<s:stroke>
-				<s:SolidColorStroke color="0x4D4D4D" weight="1" alpha=".25" />
-			</s:stroke>
-		</s:Line>
-		
-	</s:VGroup>
-	
 	<s:HGroup width="100%" horizontalAlign="right">
 		
-		<s:Button label="Submit" height="24" click="save();" skinClass="skins.general.IconButtonSkin" />
+		<s:Button label="Submit" height="24" click="save();" skinClass="skins.general.IconButtonSkin" enabled="{checkMessage.selected || checkNextSteps.selected}" />
 		<s:Button label="Cancel" height="24" click="cancel();" skinClass="skins.general.IconButtonSkin" />
 		
 	</s:HGroup>
