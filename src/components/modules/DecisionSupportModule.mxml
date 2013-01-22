@@ -210,7 +210,6 @@
 				notifyPopup = new NotifyPopup();
 				notifyPopup.patient = patient;
 				notifyPopup.addEventListener( MessageEvent.ADD, addMessage );
-				notifyPopup.addEventListener( TeamAppointmentEvent.ADD, addAppointment );
 				
 				PopUpManager.addPopUp( notifyPopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
 				PopUpManager.centerPopUp( notifyPopup );
@@ -236,18 +235,6 @@
 				
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true );
 				evt.data = "Your message has been added";
-				dispatchEvent( evt );
-			}
-			
-			private function addAppointment( event:TeamAppointmentEvent ):void
-			{
-				var appointment:Appointment = notifyPopup.appointment;
-				appointment.provider = MainController(AppProperties.getInstance().controller).model.user;
-				
-				appointmentsModel.addAppointment( appointment );
-				
-				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true );
-				evt.data = "Your appointment has been added";
 				dispatchEvent( evt );
 			}
 			
@@ -282,13 +269,13 @@
 			
 		</s:VGroup>
 		
-		<s:BorderContainer width="823" borderColor="0xBDBCBC" backgroundAlpha="0">
+		<s:BorderContainer width="823" borderColor="0xBDBCBC" backgroundAlpha="0" height="{viewStack.height + dsHeader + 1}">
 			
 			<s:layout>
 				<s:VerticalLayout gap="0" />
 			</s:layout>
 			
-			<s:BorderContainer height="37" width="100%" backgroundColor="0x706F6F" borderAlpha="0">
+			<s:BorderContainer id="dsHeader" height="37" width="100%" backgroundColor="0x706F6F" borderAlpha="0">
 				
 				<s:layout>
 					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="9"/>
@@ -317,7 +304,7 @@
 				
 			</s:BorderContainer>
 			
-			<mx:ViewStack id="viewStack" width="100%" backgroundColor="0x4A4A49" cornerRadius="2"><!--x="0" y="22" resizeToContent="true"-->
+			<mx:ViewStack id="viewStack" width="100%" backgroundColor="0x4A4A49" cornerRadius="2" resizeToContent="true"><!--x="0" y="22"-->
 				
 				<s:NavigatorContent width="100%">
 					
@@ -426,9 +413,6 @@
 															minDate = new Date(minDate.getTime() - DateUtil.DAY*2);
 															maxDate = new Date(maxDate.getTime() + DateUtil.DAY*2);
 																
-															/* minDate.setTime(minDate.time - DateUtil.DAY);
-															maxDate.setTime(maxDate.time + DateUtil.DAY); */
-															
 															//	get current/last update
 															currentUpdate = riskFactor.updates && riskFactor.updates.length ? riskFactor.updates.getItemAt( 0 ) as RiskFactorUpdate : null;
 															firstUpdate = riskFactor.updates && riskFactor.updates.length ? riskFactor.updates.getItemAt( riskFactor.updates.length -1 ) as RiskFactorUpdate : null;		
@@ -448,24 +432,12 @@
 														
 														private function onChartRollOver(event:ChartItemEvent):void 
 														{
-															/* lblWeight.text = lblBloodPressure1.text = lblHeartRate.text = lblRespiratory.text = lblTemperature.text = data.chart.getItemAt(0).data[event.hitData.chartItem.index].value;
-															lblBMI.text = String(int(((data.chart.getItemAt(0).data[event.hitData.chartItem.index].value * 703) / Math.pow(outerDocument.model.vitalSigns[outerDocument.model.vitalIndices.indexOf('Height')].chart.getItemAt(0).data[outerDocument.model.vitalSigns[outerDocument.model.vitalIndices.indexOf('Height')].chart.getItemAt(0).data.length - 1].value, 2))*10)/10);
-															lblBloodPressure2.text = data.chart.getItemAt(0).data[event.hitData.chartItem.index].value2;
-															lblHeightFeet.text = String(Math.floor(data.chart.getItemAt(0).data[event.hitData.chartItem.index].value / 12));
-															lblHeightInches.text = String(data.chart.getItemAt(0).data[event.hitData.chartItem.index].value % 12);
-															lblDate.text = DateUtil.formatDateFromString(data.chart.getItemAt(0).data[event.hitData.chartItem.index].date); */
 															currentRiskLevel.text = data.updates[event.hitData.chartItem.index].value + "%";
 															myLineSeries.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyBoxItemRendererOver));
 														}
 														
 														private function onChartRollOut(event:ChartItemEvent):void 
 														{
-															/* lblWeight.text = lblBloodPressure1.text = lblHeartRate.text = lblRespiratory.text = lblTemperature.text = currentItem.value;
-															lblBMI.text = String(int(((currentItem.value * 703) / Math.pow( outerDocument.model.vitalSigns.getItemAt( outerDocument.model.vitalIndices.indexOf('Height') ).chart.getItemAt(0).data.getItemAt( outerDocument.model.vitalSigns.getItemAt( outerDocument.model.vitalIndices.indexOf('Height') ).chart.getItemAt(0).data.length - 1 ).value, 2))*10)/10);
-															lblBloodPressure2.text = currentItem.value2;
-															lblHeightFeet.text = String(Math.floor(currentItem.value / 12));
-															lblHeightInches.text = String(currentItem.value % 12);
-															lblDate.text = DateUtil.formatDateFromString(currentItem.date); */
 															currentRiskLevel.text = currentUpdate.value + "%";
 															myLineSeries.setStyle("itemRenderer",new ClassFactory(components.itemrenderers.chart.MyBoxItemRenderer));
 														}
