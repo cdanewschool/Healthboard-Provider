@@ -4,7 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:popups="components.popups.*"
-	width="374" height="550"
+	width="374" height="526"
 	controlBarVisible="true" 
 	skinClass="skins.general.myHeaderlessTitleWindow"
 	creationComplete="init()" xmlns:general="components.general.*">
@@ -245,13 +245,13 @@
 				<s:DropDownList id="categorySelect" dataProvider="{categories}" width="305" height="24" labelField="label" includeInLayout="{categories!=null}" change="onModuleCategorySelect(event)" />
 			</s:VGroup>
 			
-			<s:HGroup paddingLeft="10" visible="{categorySelect.selectedIndex>0}">
+			<s:HGroup visible="{categorySelect.selectedIndex>0}" paddingLeft="18">
 				
-				<mx:FormItem label="From:" labelWidth="40" labelStyleName="darkGrayBold12">
+				<mx:FormItem label="From:" labelStyleName="darkGrayBold12">
 					<mx:DateField id="fromDateSelect" change="fromDate = fromDateSelect.selectedDate" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput" width="100" height="24" dateChooserStyleName="dateChooserDark"/>
 				</mx:FormItem>
 				
-				<mx:FormItem label="To:" labelWidth="30" labelStyleName="darkGrayBold12">
+				<mx:FormItem label="To:" labelStyleName="darkGrayBold12">
 					<mx:DateField id="toDateSelect" change="{toDate = toDateSelect.selectedDate}" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput" width="100" height="24" dateChooserStyleName="dateChooserDark"/>
 				</mx:FormItem>
 				
@@ -264,7 +264,7 @@
 			
 		</s:BorderContainer>
 		
-		<s:BorderContainer width="100%" height="200" backgroundColor="0xECECEC">
+		<s:BorderContainer width="100%" height="100%" backgroundColor="0xECECEC">
 			
 			<s:Scroller width="100%" height="100%">
 				
@@ -321,16 +321,6 @@
 		
 	</s:VGroup>
 
-	<s:VGroup>
-		
-		<s:Line xFrom="0" xTo="354">
-			<s:stroke>
-				<s:SolidColorStroke color="0x4D4D4D" weight="1" alpha=".25" />
-			</s:stroke>
-		</s:Line>
-		
-	</s:VGroup>
-	
 	<s:HGroup width="100%" horizontalAlign="right">
 		
 		<s:Button label="Submit" height="24" click="save();" skinClass="skins.general.IconButtonSkin" />
