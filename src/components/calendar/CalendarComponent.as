@@ -15,6 +15,7 @@ package components.calendar
 	import spark.components.Group;
 	import spark.components.List;
 	import spark.components.VGroup;
+	import spark.components.VScrollBar;
 	import spark.layouts.ColumnAlign;
 	import spark.layouts.RowAlign;
 	import spark.layouts.TileLayout;
@@ -157,7 +158,7 @@ package components.calendar
 				content.height = unscaledHeight - header.height - gap;
 				content.width = width;
 				
-				if( content.scroller.verticalScrollBar.visible ) width -= content.scroller.verticalScrollBar.width;
+				if( VScrollBar(content.scroller.verticalScrollBar).visible ) width -= content.scroller.verticalScrollBar.width;
 				
 				_layout = (content.layout as TileLayout);
 				_layout.columnWidth = (width - _layout.columnCount * _layout.horizontalGap) / _layout.columnCount;
