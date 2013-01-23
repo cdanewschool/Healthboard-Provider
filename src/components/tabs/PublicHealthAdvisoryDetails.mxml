@@ -381,15 +381,15 @@
 			}
 			
 			public function dataTipsDoctorVisits(hd:HitData):String {
-				return "On <b>week " + hd.item.week + "</b>, there were <b>" + LineSeriesItem(hd.chartItem).yValue + "%</b> doctor visits for ILI on the <b>" + LineSeries(hd.element).displayName + "</b>";	
+				return "<font size='11'>On <b>week " + hd.item.week + "</b>, there were <b>" + LineSeriesItem(hd.chartItem).yValue + "%</b> doctor visits for ILI on the <b>" + LineSeries(hd.element).displayName + "</b></font>";	
 			}
 			
 			public function dataTipsPositiveTests(hd:HitData):String {
-				return "On <b>week " + hd.item.week + "</b>, there were <b>" + ColumnSeriesItem(hd.chartItem).yValue + "%</b> positive test results on the <b>" + ColumnSeries(hd.element).displayName.toLowerCase() + " scale</b>";	
+				return "<font size='11'>On <b>week " + hd.item.week + "</b>, there were <b>" + ColumnSeriesItem(hd.chartItem).yValue + "%</b> positive test results on the <b>" + ColumnSeries(hd.element).displayName.toLowerCase() + " scale</b></font>";	
 			}
 			
 			public function dataTipsCaseReports(hd:HitData):String {
-				return "On <b>week " + hd.item.week + "</b>, there were <b>" + LineSeriesItem(hd.chartItem).yValue + " " + LineSeries(hd.element).displayName.toLowerCase() + "</b>";	
+				return "<font size='11'>On <b>week " + hd.item.week + "</b>, there were <b>" + LineSeriesItem(hd.chartItem).yValue + " " + LineSeries(hd.element).displayName.toLowerCase() + "</b></font>";	
 			}
 			
 			private function mapSearch():void
@@ -538,13 +538,13 @@
 	
 	<s:HGroup width="100%" contentBackgroundColor="0x4A4A49">
 		
-		<s:VGroup width="100%" paddingTop="15" paddingLeft="15" gap="7" styleName="whiteText13">
+		<s:VGroup width="150" paddingTop="15" paddingLeft="15" gap="7" styleName="whiteText13">
 			<mx:LinkButton label="Event Detail" click="setView(0)" styleName="{views.selectedIndex==0?'linkBtnOrange':'linkBtnWhite'}" fontSize="13" fontWeight="{views.selectedIndex==0?'bold':'normal'}" />
 			<mx:LinkButton label="My Patients" click="setView(1)" styleName="{views.selectedIndex==1?'linkBtnOrange':'linkBtnWhite'}" fontSize="13" fontWeight="{views.selectedIndex==1?'bold':'normal'}" />
 			<mx:LinkButton label="References" click="setView(2)" styleName="{views.selectedIndex==2?'linkBtnOrange':'linkBtnWhite'}" fontSize="13" fontWeight="{views.selectedIndex==2?'bold':'normal'}" />
 		</s:VGroup>
 		
-		<s:Scroller id="scroller" height="600">
+		<s:Scroller id="scroller" height="600" width="825" horizontalScrollPolicy="off">
 				
 			<s:Group>
 				
@@ -1067,7 +1067,105 @@
 					</s:NavigatorContent>
 					
 					<!--	references	-->
-					<s:NavigatorContent>
+					<s:NavigatorContent backgroundColor="0xF6F6F6" color="0x3C3C3B">
+						<s:layout>
+							<s:VerticalLayout paddingLeft="25" paddingTop="20" paddingBottom="20" />
+						</s:layout>
+						
+						<s:Label text="References for {advisory.title}" fontSize="18" fontWeight="bold" paddingBottom="-1" />
+						<s:Label text="Last Updated: May 1, 2012" fontSize="13" fontStyle="italic" />
+						
+						<s:HGroup paddingTop="20" gap="34">
+							<s:VGroup width="271" horizontalAlign="right" gap="43">
+								<mx:Text fontSize="14" width="271" leading="4"
+										 text="Seasonal influenza, commonly called “the flu,” is caused by influenza viruses, which infect the respiratory tract (i.e., the nose, throat, lungs). Unlike many other viral respiratory infections, such as the common cold, the flu can cause severe illness and life-threatening complications in many people. In the United States, on average 5% to 20% of the population gets the flu and more than 200,000 people are hospitalized from seasonal flu-related complications. Flu seasons are unpredictable and can be severe. Over a period of 30 years, between 1976 and 2006, estimates of flu-associated deaths in the United States range from a low of about 3,000 to a high of about 49,000 people." />
+								<s:VGroup fontStyle="italic" fontSize="14" gap="7" horizontalAlign="right">
+									<general:MainLinkButton label="Treatments »" styleName="linkButtonStyle7" paddingRight="0" />
+									<general:MainLinkButton label="Detailed Prevention »" styleName="linkButtonStyle7" paddingRight="0" />
+									<general:MainLinkButton label="Antiviral Drugs »" styleName="linkButtonStyle7" paddingRight="0" />
+									<general:MainLinkButton label="Health Professionals »" styleName="linkButtonStyle7" paddingRight="0" />
+								</s:VGroup>
+							</s:VGroup>
+							
+							<s:VGroup color="0x3C3C3B" fontSize="14" gap="12">
+								<s:BorderContainer width="462" backgroundColor="0xFFFFFF" borderColor="0xBDBCBC" cornerRadius="5">
+									<s:layout>
+										<s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="15" paddingBottom="8" />
+									</s:layout>
+									<s:Label text="Preventions" fontWeight="bold" fontSize="18" color="0xF29222" />
+									<s:Label lineHeight="18" width="414" paddingBottom="3"
+											 text="Everyday preventive actions may slow the spread of germs that cause respiratory (nose, throat, and lungs) illnesses, like flu." />
+									<s:Line xFrom="0" xTo="423">
+										<s:stroke>
+											<s:SolidColorStroke color="0xBDBCBC"/>
+										</s:stroke>
+									</s:Line>
+									<s:HGroup paddingTop="4">
+										<s:Image source="@Embed('images/phaRef1.png')" />
+										<mx:Text leading="4" fontStyle="italic" paddingTop="-3"
+												 text="{'• Get vaccination shot.\n• Cover your nose and mouth when you cough or sneeze.\n• Wash your hands often with soap and water.\n• Avoid touching your eyes, nose, and mouth.\n• Avoid close contact with sick people.'}" />
+										
+									</s:HGroup>
+									<s:HGroup width="100%" horizontalAlign="right" gap="1">
+										<s:Label text="Source:" paddingTop="6" />
+										<general:MainLinkButton label="CDC" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+										<s:Label text="|" paddingTop="6" />
+										<general:MainLinkButton label="View more »" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+									</s:HGroup>
+								</s:BorderContainer>
+								
+								<s:BorderContainer width="462" backgroundColor="0xFFFFFF" borderColor="0xBDBCBC" cornerRadius="5">
+									<s:layout>
+										<s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="15" paddingBottom="8" />
+									</s:layout>
+									<s:Label text="Symptoms" fontWeight="bold" fontSize="18" color="0xF29222" />
+									<s:Label paddingBottom="3"
+											 text="People who have the flu often feel some or all of these symptoms:" />
+									<s:Line xFrom="0" xTo="423">
+										<s:stroke>
+											<s:SolidColorStroke color="0xBDBCBC"/>
+										</s:stroke>
+									</s:Line>
+									<s:HGroup paddingTop="4">
+										<s:Image source="@Embed('images/phaRef2.png')" />
+										<mx:Text leading="4" fontStyle="italic" paddingTop="-3"
+												 text="{'• Fever* or feeling feverish/chills\n• Cough\n• Sore throat\n• Runny or stuffy nose\n• Muscle or body aches\n• Headaches\n• Fatigue (tiredness)\n• Some may have vomiting and diarrhea\n(more common in children than adults)'}" />		
+									</s:HGroup>
+									<s:HGroup width="100%" horizontalAlign="right" gap="1">
+										<s:Label text="Source:" paddingTop="6" />
+										<general:MainLinkButton label="CDC" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+										<s:Label text="|" paddingTop="6" />
+										<general:MainLinkButton label="View more »" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+									</s:HGroup>
+								</s:BorderContainer>
+								
+								<s:BorderContainer width="462" backgroundColor="0xFFFFFF" borderColor="0xBDBCBC" cornerRadius="5">
+									<s:layout>
+										<s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="15" paddingBottom="8" />
+									</s:layout>
+									<s:Label text="People at High Risk" fontWeight="bold" fontSize="18" color="0xF29222" />
+									<s:Label lineHeight="18" width="414" paddingBottom="3"
+											 text="Most people who get the flu will have mild illness, will not need medical care or antiviral drugs, and will recover in less than 2 weeks. Some people, however, are more severely affected." />
+									<s:Line xFrom="0" xTo="423">
+										<s:stroke>
+											<s:SolidColorStroke color="0xBDBCBC"/>
+										</s:stroke>
+									</s:Line>
+									<s:HGroup paddingTop="4">
+										<s:Image source="@Embed('images/phaRef3.png')" />
+										<mx:Text leading="4" fontStyle="italic" paddingTop="-3"
+												 text="{'• Children younger than 5\n(especially younger than 2)\n• Adults 65 years of age and older\n• Pregnant women\n• American Indians\n• Alaskan Natives\n• Medical conditions'}" />
+										
+									</s:HGroup>
+									<s:HGroup width="100%" horizontalAlign="right" gap="1">
+										<s:Label text="Source:" paddingTop="6" />
+										<general:MainLinkButton label="CDC" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+										<s:Label text="|" paddingTop="6" />
+										<general:MainLinkButton label="View more »" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+									</s:HGroup>
+								</s:BorderContainer>
+							</s:VGroup>
+						</s:HGroup>
 					</s:NavigatorContent>
 					
 				</mx:ViewStack>
