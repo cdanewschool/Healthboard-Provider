@@ -1101,7 +1101,7 @@
 										</s:stroke>
 									</s:Line>
 									<s:HGroup paddingTop="4">
-										<s:Image source="@Embed('images/phaRef1.png')" />
+										<s:Image source="@Embed('/images/phaRef1.png')" />
 										<mx:Text leading="4" fontStyle="italic" paddingTop="-3"
 												 text="{'• Get vaccination shot.\n• Cover your nose and mouth when you cough or sneeze.\n• Wash your hands often with soap and water.\n• Avoid touching your eyes, nose, and mouth.\n• Avoid close contact with sick people.'}" />
 										
@@ -1127,7 +1127,7 @@
 										</s:stroke>
 									</s:Line>
 									<s:HGroup paddingTop="4">
-										<s:Image source="@Embed('images/phaRef2.png')" />
+										<s:Image source="@Embed('/images/phaRef2.png')" />
 										<mx:Text leading="4" fontStyle="italic" paddingTop="-3"
 												 text="{'• Fever* or feeling feverish/chills\n• Cough\n• Sore throat\n• Runny or stuffy nose\n• Muscle or body aches\n• Headaches\n• Fatigue (tiredness)\n• Some may have vomiting and diarrhea\n(more common in children than adults)'}" />		
 									</s:HGroup>
@@ -1152,7 +1152,7 @@
 										</s:stroke>
 									</s:Line>
 									<s:HGroup paddingTop="4">
-										<s:Image source="@Embed('images/phaRef3.png')" />
+										<s:Image source="@Embed('/images/phaRef3.png')" />
 										<mx:Text leading="4" fontStyle="italic" paddingTop="-3"
 												 text="{'• Children younger than 5\n(especially younger than 2)\n• Adults 65 years of age and older\n• Pregnant women\n• American Indians\n• Alaskan Natives\n• Medical conditions'}" />
 										
