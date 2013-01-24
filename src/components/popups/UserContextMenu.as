@@ -48,6 +48,7 @@ package components.popups
 		private var statusLabel:Label;
 		public var chatModes:ButtonBar;
 		private var anchor:PopUpAnchor;
+		private var chatBtnsContainer:BorderContainer;
 		
 		public function UserContextMenu()
 		{
@@ -178,9 +179,18 @@ package components.popups
 			chatModes.iconField = "icon";
 			chatModes.dataProvider = ChatSearch.MODES;
 			chatModes.addEventListener( IndexChangeEvent.CHANGE, onSelectChatMode );
+			chatModes.x = 5;
+			chatModes.y = 5;
+			
+			chatBtnsContainer = new BorderContainer();
+			chatBtnsContainer.width = 84;
+			chatBtnsContainer.height = 34;
+			chatBtnsContainer.setStyle('backgroundColor', 0x4D4D4D);
+			chatBtnsContainer.setStyle('borderVisible',false);
+			chatBtnsContainer.addElement(chatModes);
 			
 			anchor = new PopUpAnchor();
-			anchor.popUp = chatModes;
+			anchor.popUp = chatBtnsContainer;
 			anchor.popUpPosition = "below";
 			anchor.height = 20;
 			row.addElement( anchor );	
