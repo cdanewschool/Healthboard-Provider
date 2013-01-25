@@ -260,7 +260,7 @@
 					else if( popup.recipientGroup.selectedValue == 'selected' ) recipients = new ArrayCollection( patientList.selectedItems );
 					else if( popup.recipientGroup.selectedValue == 'all' ) recipients = patients;
 					
-					if( popup.symptoms.selected ) 
+					if( popup.symptoms.selected && advisory.selectionCriteria ) 
 					{
 						body += "Symptoms could include:\n";
 						body += PublicHealthAdvisorySelectionCriteria( advisory.selectionCriteria.getItemAt( advisory.selectionCriteria.length - 1) ).values.source.join( ", ");
@@ -933,9 +933,9 @@
 							
 							<s:HGroup width="100%" verticalAlign="middle">
 								
-								<s:Label text="My Patients — {advisory.title}" styleName="greenBoldText" />
+								<s:Label text="My Patients — {advisory.title}" styleName="greenBoldText" paddingTop="1" />
 								
-								<mx:LinkButton label="View Patient Selection Criteria" styleName="linkBtnBlue" fontSize="12" click="onViewPatientSelectionCriteriaClick(event)" />
+								<general:MainLinkButton label="View Patient Selection Criteria" styleName="linkButtonStyle1" fontSize="12" click="onViewPatientSelectionCriteriaClick(event)" />
 								
 								<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle" paddingRight="10">
 									
