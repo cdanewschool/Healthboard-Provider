@@ -71,13 +71,13 @@
 	
 	<s:Label text="Patient Selection Criteria" styleName="darkGrayBold16" paddingBottom="5" />
 	
-	<mx:Form paddingTop="0" paddingBottom="0">
+	<mx:Form paddingTop="4" paddingBottom="0" verticalGap="0">
 		
-		<mx:FormItem label="Name of Advisory:" labelWidth="110" labelStyleName="mediumTextBlackBold">
+		<mx:FormItem label="Name of Advisory:" labelWidth="120" labelStyleName="mediumTextBlackBold">
 			<s:Label id="advisoryTitle" text="{advisory.title}" styleName="mediumTextBlack" />
 		</mx:FormItem>
 		
-		<mx:FormItem label="Initial Date:" labelWidth="100" labelStyleName="mediumTextBlackBold">
+		<mx:FormItem label="Initial Date:" labelWidth="120" labelStyleName="mediumTextBlackBold">
 			<s:Label id="advisoryDate" text="{advisory.startDate}" styleName="mediumTextBlack" />
 		</mx:FormItem>
 		
@@ -92,7 +92,7 @@
 		<s:BorderContainer width="100%" height="100%" backgroundFill="{fill}" backgroundAlpha="1">
 			
 			<s:layout>
-				<s:VerticalLayout paddingTop="10"/>
+				<s:VerticalLayout paddingTop="3" />
 			</s:layout>
 			
 			<s:DataGroup width="100%" dataProvider="{advisory.selectionCriteria}">
