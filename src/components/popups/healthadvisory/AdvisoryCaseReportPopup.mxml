@@ -3,7 +3,7 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
-	width="537" height="485"
+	width="537" height="475"
 	styleName="headerlessPopup"
 	creationComplete="init()">
 	
@@ -40,7 +40,7 @@
 			[Bindable] private var reasons:ArrayCollection = new ArrayCollection
 				( 
 					[ 
-						{ label: "Select One" }, { value: CaseReport.REASON_MANDATORY, label: "Mandatory"}, { value: CaseReport.REASON_VOLUNTARY, label: "Voluntary" }
+						{ value: CaseReport.REASON_MANDATORY, label: "Mandatory"}, { value: CaseReport.REASON_VOLUNTARY, label: "Voluntary" }
 					] 
 				);
 			
@@ -53,7 +53,7 @@
 			
 			private function onSubmitClick():void
 			{
-				if( reason.selectedIndex == 0 )
+				if( reason.selectedIndex < 0 )
 				{
 					reason.errorString = "Please select one of the following options.";
 					
@@ -94,7 +94,7 @@
 	</fx:Script>
 	
 	<s:layout>
-		<s:VerticalLayout paddingLeft="20" paddingTop="20" paddingRight="15" gap="5" />
+		<s:VerticalLayout paddingLeft="20" paddingTop="20" paddingRight="22" gap="5" />
 	</s:layout>
 	
 	<s:HGroup verticalAlign="middle">
@@ -102,51 +102,53 @@
 		<s:Label text="— ALL fields have to be selected and filled out" styleName="italic subheadText" fontSize="12" />
 	</s:HGroup>
 	
-	<mx:Form paddingLeft="0" paddingTop="10" paddingRight="0" paddingBottom="0" width="100%" defaultButton="{submit}" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	<mx:Form paddingLeft="0" paddingTop="10" paddingRight="0" paddingBottom="5" width="100%" defaultButton="{submit}" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 		
 		<s:VGroup gap="5">
 			
-			<mx:FormItem labelWidth="110" label="Report Sender:" labelStyleName="headerlessPopupFormLabel">
-				<s:TextInput styleName="formTextField" width="376" height="24" editable="false" text="{user.fullName}" />
+			<mx:FormItem labelWidth="113" label="Report Sender:" labelStyleName="headerlessPopupFormLabel">
+				<s:TextInput styleName="formTextField" width="366" height="24" editable="false" text="{user.fullName}" />
 			</mx:FormItem>
 			
-			<mx:FormItem labelWidth="110" label="Case:" labelStyleName="headerlessPopupFormLabel">
+			<mx:FormItem labelWidth="113" label="Case:" labelStyleName="headerlessPopupFormLabel">
 				<s:HGroup>
-					<s:TextInput id="caseTitle" styleName="formTextField" width="282" height="24" />
+					<s:TextInput id="caseTitle" styleName="formTextField" width="272" height="24" />
 					<s:DropDownList id="caseStatus" width="88" height="24" dataProvider="{statuses}" selectedIndex="0" labelField="label" />
 				</s:HGroup>
 			</mx:FormItem>
 			
-			<mx:FormItem labelWidth="110" label="Reason for Report:" labelStyleName="headerlessPopupFormLabel">
+			<mx:FormItem labelWidth="113" label="Reason for Report:" labelStyleName="headerlessPopupFormLabel">
 				<s:HGroup>
-					<s:DropDownList id="reason" width="88" height="24" dataProvider="{reasons}" selectedIndex="0" labelField="label" change="reason.errorString=''" />
-					<s:Image source="@Embed('/images/redWarning2.png')" visible="{reason.errorString!=''}" />
+					<s:DropDownList id="reason" width="88" height="24" dataProvider="{reasons}" prompt="Select one" labelField="label" change="reason.errorString=''" />
+					<s:VGroup paddingTop="4">
+						<s:Image source="@Embed('/images/redWarning2.png')" visible="{reason.errorString!=''}" />
+					</s:VGroup>
 				</s:HGroup>
 			</mx:FormItem>
 			
-			<mx:FormItem labelWidth="110" label="Case Details:" labelStyleName="headerlessPopupFormLabel">
-				<s:TextArea id="details" styleName="formTextField" width="376" height="84" />
+			<mx:FormItem labelWidth="113" label="Case Details:" labelStyleName="headerlessPopupFormLabel">
+				<s:TextArea id="details" styleName="formTextField" width="366" height="84" />
 			</mx:FormItem>
 			
-			<mx:FormItem labelWidth="110" label="Location:" labelStyleName="headerlessPopupFormLabel" >
-				<s:TextInput id="location" styleName="formTextField" width="376" height="24" />
+			<mx:FormItem labelWidth="113" label="Location:" labelStyleName="headerlessPopupFormLabel" >
+				<s:TextInput id="location" styleName="formTextField" width="366" height="24" />
 			</mx:FormItem>
 			
-			<mx:FormItem labelWidth="110" label="Witness:" labelStyleName="headerlessPopupFormLabel">
-				<s:TextInput id="witness" styleName="formTextField" width="376" height="24" />
+			<mx:FormItem labelWidth="113" label="Witness:" labelStyleName="headerlessPopupFormLabel">
+				<s:TextInput id="witness" styleName="formTextField" width="366" height="24" />
 			</mx:FormItem>
 			
-			<mx:FormItem labelWidth="110" label="Date of assessment:" labelStyleName="headerlessPopupFormLabel">
+			<mx:FormItem labelWidth="113" label="Date of assessment:" labelStyleName="headerlessPopupFormLabel">
 				<mx:DateField id="assessmentDate" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput" dateChooserStyleName="dateChooserDark" />
 			</mx:FormItem>
 			
 			<s:Spacer height="20" />
 			
-			<mx:FormItem labelWidth="110" label="Current case status:" labelStyleName="headerlessPopupFormLabel">
-				<s:TextArea id="caseDescription" styleName="formTextField" width="376" height="54" />
+			<mx:FormItem labelWidth="113" label="Current case status:" labelStyleName="headerlessPopupFormLabel">
+				<s:TextArea id="caseDescription" styleName="formTextField" width="366" height="54" />
 			</mx:FormItem>
 			
-			<mx:FormItem labelWidth="110" label="Last assessed:" labelStyleName="headerlessPopupFormLabel">
+			<mx:FormItem labelWidth="113" label="Last assessed:" labelStyleName="headerlessPopupFormLabel">
 				<mx:DateField id="lastAssessmentDate" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput" dateChooserStyleName="dateChooserDark" />
 			</mx:FormItem>
 			
@@ -155,14 +157,14 @@
 	</mx:Form>
 	
 	<s:Group>
-		<s:Line xFrom="0" xTo="500">
+		<s:Line xFrom="0" xTo="493">
 			<s:stroke>
 				<s:SolidColorStroke color="#4D4D4D" />
 			</s:stroke>
 		</s:Line>
 	</s:Group>
 	
-	<s:HGroup horizontalAlign="right" width="100%" paddingTop="20">
+	<s:HGroup horizontalAlign="right" width="100%" paddingTop="5">
 		
 		<s:Button id="submit" label="Submit Report" styleName="button" height="24" click="onSubmitClick()" />
 		
