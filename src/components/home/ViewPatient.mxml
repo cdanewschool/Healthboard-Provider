@@ -14,7 +14,7 @@
 	creationComplete="init();">
 	
 	<components:layout>
-		<s:VerticalLayout paddingTop="15"/>
+		<s:VerticalLayout paddingTop="15" gap="0"/>
 	</components:layout>
 
 	<fx:Script>
@@ -114,7 +114,7 @@
 						
 						widget.showCloseButton = widgetID != WIDGET_ALERTS && currentState == STATE_DEFAULT ? widgetLibrary.visible : false;
 						
-						var showTrigger:Boolean = currentState == STATE_MODULE ? widget.module != null : true;
+						var showTrigger:Boolean = currentState == STATE_MODULE ? (widget.module != null && widget.module != activeModuleID) : true;
 						var widgetVisible:Boolean = widget.visible || currentState == STATE_MODULE;
 						
 						trigger.visible = trigger.includeInLayout = showTrigger;
@@ -267,17 +267,22 @@
 				{
 					if( widgetLibrary.parent != content )
 					{
-						if( widgetLibrary.parent )
+						if( widgetLibrary.parent ) 
 							Group(widgetLibrary.parent).removeElement( widgetLibrary );
 						
 						content.addElementAt( widgetLibrary, 0 );
+						content.addElementAt( hgWidgetLibraryArrow, 0 );
+						
+						/* wipe.play();
+						resize.play(); 
+						wipeIn.play();*/
 					}
 				}
 				else
 				{
 					if( widgetLibrary.parent != triggerContainer )
 					{
-						if( widgetLibrary.parent )
+						if( widgetLibrary.parent ) 
 							Group(widgetLibrary.parent).removeElement( widgetLibrary );
 						
 						triggerContainer.addElementAt( widgetLibrary, 1 );
@@ -285,6 +290,7 @@
 				}
 				
 				widgetLibrary.visible = widgetLibrary.includeInLayout = !visible;
+				hgWidgetLibraryArrow.visible = hgWidgetLibraryArrow.includeInLayout = (!visible) && currentState == STATE_MODULE;
 				
 				if( currentState == STATE_DEFAULT )
 				{
@@ -308,6 +314,8 @@
 				
 				if( widgetLibrary )
 					widgetLibrary.visible = widgetLibrary.includeInLayout = false;
+				if( hgWidgetLibraryArrow )
+					hgWidgetLibraryArrow.visible = hgWidgetLibraryArrow.includeInLayout = false;
 				
 				stateDirty = true;
 				
@@ -410,6 +418,10 @@
 			id="healthFocusXMLdata"
 			url="data/healthFocus.xml"
 			result="healthFocusResultHandler(event)" />
+		
+		<!--<s:Wipe id="wipe" direction="down" duration="2500" target="{triggerContainer}" />
+		<s:Resize id="resize" target="{widgetLibrary}" widthBy="100" heightBy="100" duration="5000" />
+		<mx:WipeDown id="wipeIn" duration="1000" target="{widgetLibrary}"/>-->
 	</fx:Declarations>
 	
 	<s:BorderContainer height="40" width="100%">
@@ -460,7 +472,7 @@
 	
 	<s:Scroller id="scroller" width="1024" horizontalScrollPolicy="off">
 		
-		<s:VGroup id="content">
+		<s:VGroup id="content" paddingTop="8">
 			
 			<s:HGroup id="widgetContainer" gap="22" paddingTop="11" minHeight="591">
 				
@@ -477,8 +489,8 @@
 						width="305" title="Patient's Recent Activities" 
 						collapsible="true" headerClickable="false" 
 						titleBarHeight="30" patient="{patient}"
-						headerClicked="onWidgetHeaderClick(event)" close="onWidgetClose(event)" 
-						includeIn="default" creationComplete="recentActivitiesWidget.module = Constants.MODULE_RECENT_ACTIVITIES" />
+						close="onWidgetClose(event)" 
+						includeIn="default" />
 						
 					<widgets:PatientAppointmentsWidget 
 						id="appointmentsWidget" 
@@ -610,16 +622,20 @@
 				
 				<mx:LinkButton id="btnWidgetTrigger" label="Widgets" labelPlacement="left" paddingRight="34" fontSize="12" color="0xFFFFFF" textRollOverColor="0xFFFFFF" textSelectedColor="0xFFFFFF" skin="{null}" rollOver="{btnWidgetTrigger.styleName='linkBtnUnderline';}" rollOut="btnWidgetTrigger.styleName='linkBtn';" click="toggleLibrary()" />
 				
-				<s:BorderContainer id="widgetLibrary" width="1024" height="100" visible="false" includeInLayout="false" borderAlpha=".2" borderColor="0xF2F2F2">
+				<s:HGroup id="hgWidgetLibraryArrow" visible="false" includeInLayout="false" paddingLeft="285" paddingBottom="-6" paddingTop="-8">
+					<s:Image source="@Embed('/images/widgetTriggerArrow.png')" />
+				</s:HGroup>
+				
+				<s:BorderContainer id="widgetLibrary" width="1024" height="{currentState == STATE_MODULE ? 111 : 100}" visible="false" includeInLayout="false" borderVisible="{currentState == STATE_MODULE ? false : true}" borderAlpha="{currentState == STATE_MODULE ? 0 : .2}" borderColor="0xF2F2F2">
 					
 					<s:layout>
-						<s:HorizontalLayout paddingTop="5" paddingLeft="47" gap="34" />
+						<s:HorizontalLayout paddingTop="{currentState == STATE_MODULE ? 15 : 5}" paddingLeft="47" gap="{currentState == STATE_MODULE ? 50 : 34}" />
 					</s:layout>
 					
 					<s:backgroundFill>
 						<s:LinearGradient rotation="270">
-							<s:GradientEntry color="0x000000" alpha="1" ratio="0" />
-							<s:GradientEntry color="0x515151" alpha="1" ratio="1" /> <!--ratio="0.8834"-->
+							<s:GradientEntry color="{currentState == STATE_MODULE ? 0x141414 : 0x000000}" alpha="1" ratio="0" />
+							<s:GradientEntry color="{currentState == STATE_MODULE ? 0x141414 : 0x515151}" alpha="1" ratio="1" /> <!--ratio="0.8834"-->
 						</s:LinearGradient>
 					</s:backgroundFill>
 					
