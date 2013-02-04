@@ -137,70 +137,74 @@ package components.popups
 			button.addEventListener(MouseEvent.CLICK,onViewAppointmentsClick);
 			row.addElement( button );
 			
-			row = new HGroup();	
-			row.gap = 1;
-			row.verticalAlign = "middle";
-			rows.addElement( row );
+			if(AppProperties.getInstance().controller.model.user.id != user.id) {		//this IF block prevents the user from sending a message or starting a chat with himself/herself
 			
-			icon = new Image();
-			icon.source = new messageIcon();
-			row.addElement( icon );
+				row = new HGroup();	
+				row.gap = 1;
+				row.verticalAlign = "middle";
+				rows.addElement( row );
+				
+				icon = new Image();
+				icon.source = new messageIcon();
+				row.addElement( icon );
+				
+				button = new LinkButton();
+				button.label = "Send a message";
+				button.styleName = "linkBtnYellow";
+				button.setStyle("fontSize",11);
+				button.addEventListener(MouseEvent.CLICK,onSendMessageClick);
+				row.addElement( button );
+				
+				row = new HGroup();
+				row.gap = 1;
+				row.verticalAlign = "middle";
+				rows.addElement( row );
 			
-			button = new LinkButton();
-			button.label = "Send a message";
-			button.styleName = "linkBtnYellow";
-			button.setStyle("fontSize",11);
-			button.addEventListener(MouseEvent.CLICK,onSendMessageClick);
-			row.addElement( button );
-			
-			row = new HGroup();
-			row.gap = 1;
-			row.verticalAlign = "middle";
-			rows.addElement( row );
-			
-			pad = new Spacer();
-			pad.width = 1;
-			row.addElement( pad );
-			
-			icon = new Image();
-			icon.source = new chatIcon();
-			icon.setStyle('paddingLeft',3);
-			row.addElement( icon );
-			
-			var layout:ButtonBarHorizontalLayout = new ButtonBarHorizontalLayout();
-			layout.gap = 5;
-			
-			chatModes = new ButtonBar();
-			chatModes.layout = layout;
-			chatModes.styleName = "chatModes";	//for some reason this does not affect style at all
-			chatModes.setStyle('paddingLeft',10);
-			chatModes.width = 73;
-			chatModes.height = 24;
-			chatModes.iconField = "icon";
-			chatModes.dataProvider = ChatSearch.MODES;
-			chatModes.addEventListener( IndexChangeEvent.CHANGE, onSelectChatMode );
-			chatModes.x = 5;
-			chatModes.y = 5;
-			
-			chatBtnsContainer = new BorderContainer();
-			chatBtnsContainer.width = 84;
-			chatBtnsContainer.height = 34;
-			chatBtnsContainer.setStyle('backgroundColor', 0x4D4D4D);
-			chatBtnsContainer.setStyle('borderVisible',false);
-			chatBtnsContainer.addElement(chatModes);
-			
-			anchor = new PopUpAnchor();
-			anchor.popUp = chatBtnsContainer;
-			anchor.popUpPosition = "below";
-			anchor.height = 20;
-			row.addElement( anchor );	
-			
-			button = new LinkButton();
-			button.label = "Start chat";
-			button.styleName = "linkBtnYellow";
-			button.setStyle("fontSize",11);
-			button.addEventListener(MouseEvent.CLICK,onStartChatClick);
-			row.addElement( button );	
+				pad = new Spacer();
+				pad.width = 1;
+				row.addElement( pad );
+				
+				icon = new Image();
+				icon.source = new chatIcon();
+				icon.setStyle('paddingLeft',3);
+				row.addElement( icon );
+				
+				var layout:ButtonBarHorizontalLayout = new ButtonBarHorizontalLayout();
+				layout.gap = 5;
+				
+				chatModes = new ButtonBar();
+				chatModes.layout = layout;
+				chatModes.styleName = "chatModes";	//for some reason this does not affect style at all
+				chatModes.setStyle('paddingLeft',10);
+				chatModes.width = 73;
+				chatModes.height = 24;
+				chatModes.iconField = "icon";
+				chatModes.dataProvider = ChatSearch.MODES;
+				chatModes.addEventListener( IndexChangeEvent.CHANGE, onSelectChatMode );
+				chatModes.x = 5;
+				chatModes.y = 5;
+				
+				chatBtnsContainer = new BorderContainer();
+				chatBtnsContainer.width = 84;
+				chatBtnsContainer.height = 34;
+				chatBtnsContainer.setStyle('backgroundColor', 0x4D4D4D);
+				chatBtnsContainer.setStyle('borderVisible',false);
+				chatBtnsContainer.addElement(chatModes);
+				
+				anchor = new PopUpAnchor();
+				anchor.popUp = chatBtnsContainer;
+				anchor.popUpPosition = "below";
+				anchor.height = 20;
+				row.addElement( anchor );	
+				
+				button = new LinkButton();
+				button.label = "Start chat";
+				button.styleName = "linkBtnYellow";
+				button.setStyle("fontSize",11);
+				button.addEventListener(MouseEvent.CLICK,onStartChatClick);
+				row.addElement( button );	
+				
+			}
 		}
 		
 		override protected function commitProperties():void
@@ -227,7 +231,7 @@ package components.popups
 		override protected function measure():void
 		{
 			measuredWidth = 130;
-			measuredHeight = 121;
+			measuredHeight = AppProperties.getInstance().controller.model.user.id != user.id ? 121 : 77;
 		}
 
 		private function onSelectChatMode(event:IndexChangeEvent):void
