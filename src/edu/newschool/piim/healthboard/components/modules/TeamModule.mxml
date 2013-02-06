@@ -4,7 +4,10 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:plus="net.flexwiz.blog.tabbar.plus.*" 
-	width="100%" height="100%" xmlns:components="edu.newschool.piim.healthboard.view.components.*" creationComplete="init()">
+	width="100%" height="100%" xmlns:components="edu.newschool.piim.healthboard.view.components.*" 
+	creationPolicy="all"
+	creationComplete="init()">
+	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
@@ -16,15 +19,11 @@
 	<fx:Script>
 		<![CDATA[
 			import edu.newschool.piim.healthboard.Constants;
-			
 			import edu.newschool.piim.healthboard.ProviderConstants;
-			
 			import edu.newschool.piim.healthboard.components.UserProfileCard;
 			import edu.newschool.piim.healthboard.components.provider.ViewProvider;
-			
 			import edu.newschool.piim.healthboard.events.ApplicationEvent;
 			import edu.newschool.piim.healthboard.events.ProfileEvent;
-			
 			import edu.newschool.piim.healthboard.model.Message;
 			import edu.newschool.piim.healthboard.model.ProviderModel;
 			import edu.newschool.piim.healthboard.model.ProvidersModel;
@@ -34,9 +33,12 @@
 			
 			[Bindable] public var model:ProvidersModel;
 			[Bindable] public var teamRollOverRowIndex:int;
+			
 			public var link:LinkButton;
 			
 			private const SEARCH_PLACEHOLDER:String = 'Search Patients';
+			
+			private var pendingData:UserModel;
 			
 			private function selectTeam(event:MouseEvent):void
 			{
@@ -180,7 +182,13 @@
 			}
 			
 			public function showTeamMember( data:UserModel ):void
-			{	
+			{
+				if( !viewStackTeamMembers ) 
+				{
+					pendingData = data;
+					return;
+				}
+				
 				var viewTeamMember:ViewProvider = new ViewProvider();
 				viewTeamMember.provider = data as ProviderModel;
 				viewStackTeamMembers.addChild(viewTeamMember);
@@ -222,6 +230,12 @@
 			
 			private function init():void
 			{
+				if( pendingData ) 
+				{
+					showTeamMember( pendingData );
+					
+					pendingData = null;
+				}
 			}
 			
 		]]>

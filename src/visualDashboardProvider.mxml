@@ -16,18 +16,16 @@
 	xmlns:home="edu.newschool.piim.healthboard.components.home.*"
 	fontFamily="myMyriad"
 	minWidth="1024" minHeight="768" 
-	resize="onResize()"
+	resize="onResize()" 
 	preinitialize="onPreinitialize(event)" 
 	creationComplete="init();onResize()">
 	
 	<fx:Script>
 		<![CDATA[
 			import edu.newschool.piim.healthboard.Constants;
-			
 			import edu.newschool.piim.healthboard.ProviderConstants;
-			
 			import edu.newschool.piim.healthboard.events.ApplicationEvent;
-			
+			import edu.newschool.piim.healthboard.events.AuthenticationEvent;
 			import edu.newschool.piim.healthboard.model.PatientsModel;
 			import edu.newschool.piim.healthboard.model.ProvidersModel;
 			
@@ -94,7 +92,7 @@
 				<s:HGroup paddingRight="14">
 					
 					<general:MainLinkButton label="{controller.model.user.available == UserModel.STATE_AVAILABLE ? 'Available' : 'Unavailable'}" styleName="linkBtnYellow" fontSize="12" click="toggleAvailability(event)" toolTip="{controller.model.user.available == UserModel.STATE_AVAILABLE ? 'Change status to unavailable' : 'Change status to available'}" />
-					<general:MainLinkButton id="btnProfile" label="{controller.model.user.fullName}" styleName="linkButtonStyle1" fontSize="12" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, ProviderConstants.STATE_PROFILE) )"  />
+					<general:MainLinkButton id="btnProfile" label="{controller.model.user.fullName}" styleName="linkButtonStyle1" fontSize="12" click="controller.showEditProfile()"  />
 					
 					<s:HGroup paddingTop="-12" paddingLeft="-2">
 						

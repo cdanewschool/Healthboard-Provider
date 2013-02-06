@@ -19,25 +19,21 @@
 
 	<fx:Script>
 		<![CDATA[
-			import edu.newschool.piim.healthboard.Constants;
-			
-			import edu.newschool.piim.healthboard.ProviderConstants;
-			
 			import com.esri.ags.utils.DateUtil;
+			import com.ninemmedia.code.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
 			
+			import edu.newschool.piim.healthboard.Constants;
+			import edu.newschool.piim.healthboard.ProviderConstants;
 			import edu.newschool.piim.healthboard.controller.MainController;
-			
 			import edu.newschool.piim.healthboard.enum.UrgencyType;
-			
 			import edu.newschool.piim.healthboard.events.ApplicationDataEvent;
 			import edu.newschool.piim.healthboard.events.ApplicationEvent;
 			import edu.newschool.piim.healthboard.events.EnhancedTitleWindowEvent;
-			
-			import com.ninemmedia.code.collapsibleTitleWindow.components.enhancedtitlewindow.EnhancedTitleWindow;
-			
 			import edu.newschool.piim.healthboard.model.PatientAlert;
 			import edu.newschool.piim.healthboard.model.PatientModel;
 			import edu.newschool.piim.healthboard.model.module.MedicationsModel;
+			import edu.newschool.piim.healthboard.util.DateFormatters;
+			import edu.newschool.piim.healthboard.util.DateUtil;
 			
 			import mx.collections.ArrayCollection;
 			import mx.core.INavigatorContent;
@@ -48,9 +44,6 @@
 			import mx.rpc.events.ResultEvent;
 			
 			import spark.components.Group;
-			
-			import edu.newschool.piim.healthboard.util.DateFormatters;
-			import edu.newschool.piim.healthboard.util.DateUtil;
 			
 			public static const STATE_DEFAULT:String = "default";
 			public static const STATE_MODULE:String = "module";
@@ -251,11 +244,26 @@
 			
 			public function showModule( moduleID:String ):void
 			{
+				if( !moduleIsValid(moduleID) ) return;
+				
 				CursorManager.setBusyCursor();
 				
 				currentState = STATE_MODULE;
 				
 				activeModuleID = moduleID;
+			}
+			
+			private function moduleIsValid( moduleID:String ):Boolean
+			{
+				for(var i:int=0;i<WIDGET_IDS.length;i++)
+				{
+					var widget:EnhancedTitleWindow = getWidgetByID( WIDGET_IDS[i] );
+					
+					if( widget && widget.module == moduleID ) 
+						return true;
+				}
+				
+				return false;
 			}
 			
 			private function toggleLibrary():void

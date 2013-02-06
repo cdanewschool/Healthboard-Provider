@@ -1,7 +1,7 @@
 package edu.newschool.piim.healthboard.controller
 {
+	import edu.newschool.piim.healthboard.Constants;
 	import edu.newschool.piim.healthboard.ProviderConstants;
-	
 	import edu.newschool.piim.healthboard.components.AutoComplete;
 	import edu.newschool.piim.healthboard.components.home.ViewPatient;
 	import edu.newschool.piim.healthboard.components.modules.TeamModule;
@@ -10,49 +10,44 @@ package edu.newschool.piim.healthboard.controller
 	import edu.newschool.piim.healthboard.components.popups.VerifyCredentialsPopup;
 	import edu.newschool.piim.healthboard.components.popups.preferences.PreferencesPopup;
 	import edu.newschool.piim.healthboard.components.provider.EditProvider;
-	
-	import edu.newschool.piim.healthboard.Constants;
+	import edu.newschool.piim.healthboard.enum.RiskLevel;
 	import edu.newschool.piim.healthboard.enum.UrgencyType;
 	import edu.newschool.piim.healthboard.enum.ViewModeType;
 	import edu.newschool.piim.healthboard.events.ApplicationDataEvent;
 	import edu.newschool.piim.healthboard.events.ApplicationEvent;
 	import edu.newschool.piim.healthboard.events.AuthenticationEvent;
-	import edu.newschool.piim.healthboard.model.Message;
-	import edu.newschool.piim.healthboard.model.ModuleMappable;
-	import edu.newschool.piim.healthboard.model.PatientsModel;
-	import edu.newschool.piim.healthboard.model.Preferences;
-	import edu.newschool.piim.healthboard.model.ProviderModel;
-	import edu.newschool.piim.healthboard.model.ProvidersModel;
-	import edu.newschool.piim.healthboard.model.UserModel;
-	import edu.newschool.piim.healthboard.model.module.MedicationsModel;
-	import edu.newschool.piim.healthboard.model.module.MessagesModel;
-	import edu.newschool.piim.healthboard.util.DateFormatters;
-	import edu.newschool.piim.healthboard.util.DateUtil;
-	
-	import edu.newschool.piim.healthboard.enum.RiskLevel;
-	
 	import edu.newschool.piim.healthboard.events.AutoCompleteEvent;
 	import edu.newschool.piim.healthboard.events.ProfileEvent;
+	import edu.newschool.piim.healthboard.model.Chat;
+	import edu.newschool.piim.healthboard.model.ChatSearch;
+	import edu.newschool.piim.healthboard.model.Message;
+	import edu.newschool.piim.healthboard.model.ModuleMappable;
+	import edu.newschool.piim.healthboard.model.PatientAlert;
+	import edu.newschool.piim.healthboard.model.PatientModel;
+	import edu.newschool.piim.healthboard.model.PatientsModel;
+	import edu.newschool.piim.healthboard.model.Preferences;
+	import edu.newschool.piim.healthboard.model.ProviderApplicationModel;
+	import edu.newschool.piim.healthboard.model.ProviderModel;
+	import edu.newschool.piim.healthboard.model.ProvidersModel;
+	import edu.newschool.piim.healthboard.model.SavedSearch;
+	import edu.newschool.piim.healthboard.model.TeamAppointmentsModel;
+	import edu.newschool.piim.healthboard.model.UserModel;
+	import edu.newschool.piim.healthboard.model.UserPreferences;
+	import edu.newschool.piim.healthboard.model.module.MedicationsModel;
+	import edu.newschool.piim.healthboard.model.module.MessagesModel;
+	import edu.newschool.piim.healthboard.model.modules.advisories.PatientAdvisoryStatus;
+	import edu.newschool.piim.healthboard.model.modules.advisories.PublicHealthAdvisoriesModel;
+	import edu.newschool.piim.healthboard.model.modules.advisories.PublicHealthAdvisory;
+	import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactor;
+	import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactorUpdate;
+	import edu.newschool.piim.healthboard.util.DateFormatters;
+	import edu.newschool.piim.healthboard.util.DateUtil;
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
-	
-	import edu.newschool.piim.healthboard.model.Chat;
-	import edu.newschool.piim.healthboard.model.ChatSearch;
-	import edu.newschool.piim.healthboard.model.PatientAlert;
-	import edu.newschool.piim.healthboard.model.PatientModel;
-	import edu.newschool.piim.healthboard.model.ProviderApplicationModel;
-	import edu.newschool.piim.healthboard.model.SavedSearch;
-	import edu.newschool.piim.healthboard.model.TeamAppointmentsModel;
-	import edu.newschool.piim.healthboard.model.UserPreferences;
-	import edu.newschool.piim.healthboard.model.modules.advisories.PatientAdvisoryStatus;
-	import edu.newschool.piim.healthboard.model.modules.advisories.PublicHealthAdvisoriesModel;
-	import edu.newschool.piim.healthboard.model.modules.advisories.PublicHealthAdvisory;
-	import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactor;
-	import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactorUpdate;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
@@ -304,9 +299,7 @@ package edu.newschool.piim.healthboard.controller
 			
 			if( item.id == "user_profile" )
 			{
-				evt = new AuthenticationEvent( AuthenticationEvent.PROMPT, true );
-				evt.onAuthenticatedCallback = editProfile;
-				application.dispatchEvent( evt );
+				showEditProfile();
 			}
 			else if( item.id == "preferences" )
 			{
@@ -328,6 +321,13 @@ package edu.newschool.piim.healthboard.controller
 			}
 			
 			DropDownList(event.currentTarget).selectedItem = null;
+		}
+		
+		public function showEditProfile():void
+		{
+			var evt:AuthenticationEvent = new AuthenticationEvent( AuthenticationEvent.PROMPT, true );
+			evt.onAuthenticatedCallback = editProfile;
+			application.dispatchEvent( evt );
 		}
 		
 		private function editProfile():void
@@ -442,7 +442,7 @@ package edu.newschool.piim.healthboard.controller
 				}
 				
 				evt = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
-				evt.data = Constants.MODULE_APPOINTMENTS;
+				evt.data = ProviderConstants.MODULE_TEAM_APPOINTMENTS;
 				application.dispatchEvent( evt );
 			}
 			else if( event.type == ProfileEvent.SEND_MESSAGE )
