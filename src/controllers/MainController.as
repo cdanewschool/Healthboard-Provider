@@ -471,7 +471,7 @@ package controllers
 				&& userContextMenu.parent )
 			{
 				if( !userContextMenu.hitTestPoint( application.stage.mouseX, application.stage.mouseY )
-					&& !userContextMenu.chatModes.hitTestPoint( application.stage.mouseX, application.stage.mouseY ) )
+					&& (!userContextMenu.chatModes || !userContextMenu.chatModes.hitTestPoint( application.stage.mouseX, application.stage.mouseY )) )
 				{
 					hideContextMenu();
 				}

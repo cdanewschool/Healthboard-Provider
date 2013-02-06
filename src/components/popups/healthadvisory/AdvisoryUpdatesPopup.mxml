@@ -76,7 +76,7 @@
 				{
 					header.text = advisory.title;
 					
-					intitialDate.text = "Initial Date of Oubreak: " + dateFormatter.format( advisory.startDate );
+					initialDate.text = "Initial Date of Outbreak: " + dateFormatter.format( advisory.startDate );
 				}
 			}
 			
@@ -125,7 +125,7 @@
 	
 	<s:HGroup width="100%" verticalAlign="middle">
 		
-		<s:Label id="intitialDate" styleName="italic subheadText" fontSize="16" />
+		<s:Label id="initialDate" styleName="italic subheadText" fontSize="13" />
 		
 		<s:HGroup paddingLeft="10" width="100%" horizontalAlign="right" verticalAlign="middle">
 			
@@ -266,7 +266,7 @@
 		
 	</s:Scroller>
 	
-	<s:HGroup width="100%" horizontalAlign="right">
+	<s:HGroup width="100%" horizontalAlign="right" paddingTop="-2">
 		<s:Button label="Close" click="close()" styleName="button" fontSize="11" />
 	</s:HGroup>
 	

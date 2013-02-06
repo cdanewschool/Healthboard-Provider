@@ -14,14 +14,14 @@ package models
 		public var type:String;
 		public var urgency:int;
 		
-		public function PatientAlert( alert:String = null, date:Date = null, description:String = null, type:String = null, urgency:int = UrgencyType.NOT_URGENT, status:String = "active", completed:Boolean = false )
+		public function PatientAlert( alert:String = null, date:Date = null, description:String = null, type:String = null, urgency:int = -1, status:String = "active", completed:Boolean = false )
 		{
 			this.alert = alert;
 			this.date = date;
 			this.description = description;
 			this.status = status;
 			this.type = type;
-			this.urgency = urgency;
+			this.urgency = urgency > -1 ? urgency : UrgencyType.NOT_URGENT;
 			this.completed = completed;
 		}
 		

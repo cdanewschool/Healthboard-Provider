@@ -172,7 +172,7 @@
 			
 		<mx:TileList 
 			id="advisoryList" 
-			width="965" height="560"
+			width="965" height="562"
 			contentBackgroundAlpha="0" borderAlpha="0"
 			dataProvider="{dataProvider}" columnCount="4" columnWidth="237" rowHeight="280"	
 			itemRenderer="components.itemrenderers.PublicHealthAdvisoryItemRenderer" selectable="false" />

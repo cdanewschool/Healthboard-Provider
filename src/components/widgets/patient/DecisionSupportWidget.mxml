@@ -70,7 +70,7 @@
 			
 			private function updateDataGrid():void
 			{
-				datagrid.height = datagrid.measureHeightOfItems(0, datagrid.dataProvider.length) + datagrid.headerHeight;
+				datagrid.height = datagrid.measureHeightOfItems(0, datagrid.dataProvider.length) + datagrid.headerHeight - 3;
 			}
 			
 		]]>
