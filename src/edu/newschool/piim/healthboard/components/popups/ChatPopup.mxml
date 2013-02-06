@@ -72,6 +72,13 @@
 			
 			[Bindable] private var chatModes:ArrayCollection = new ArrayCollection();
 			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth,unscaledHeight);
+				
+				position();
+			}
+			
 			private function onSendClick( event:MouseEvent ):void
 			{
 				relayMessage();
@@ -309,8 +316,6 @@
 				simulateResponse();
 				
 				controlBarVisible=false;
-				
-				position();
 				
 				updateTimer.start();
 				

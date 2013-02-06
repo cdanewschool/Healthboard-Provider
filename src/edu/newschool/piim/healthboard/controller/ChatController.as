@@ -4,27 +4,25 @@ package edu.newschool.piim.healthboard.controller
 	import edu.newschool.piim.healthboard.components.popups.ChatRequestDeniedPopup;
 	import edu.newschool.piim.healthboard.components.popups.VerifyCredentialsPopup;
 	import edu.newschool.piim.healthboard.components.popups.ViewAttachmentPopup;
-	
 	import edu.newschool.piim.healthboard.events.ApplicationEvent;
 	import edu.newschool.piim.healthboard.events.AuthenticationEvent;
 	import edu.newschool.piim.healthboard.events.ChatEvent;
+	import edu.newschool.piim.healthboard.model.Chat;
+	import edu.newschool.piim.healthboard.model.ChatSearch;
+	import edu.newschool.piim.healthboard.model.FileUpload;
+	import edu.newschool.piim.healthboard.model.UserModel;
+	import edu.newschool.piim.healthboard.util.DateUtil;
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	
-	import edu.newschool.piim.healthboard.model.Chat;
-	import edu.newschool.piim.healthboard.model.ChatSearch;
-	import edu.newschool.piim.healthboard.model.FileUpload;
-	import edu.newschool.piim.healthboard.model.UserModel;
-	
 	import mx.collections.ArrayCollection;
 	import mx.core.IFlexDisplayObject;
 	import mx.events.CloseEvent;
+	import mx.events.FlexEvent;
 	import mx.managers.PopUpManager;
-	
-	import edu.newschool.piim.healthboard.util.DateUtil;
 
 	public class ChatController extends BaseModuleController
 	{
@@ -63,6 +61,8 @@ package edu.newschool.piim.healthboard.controller
 		{
 			if( !ChatSearch(model).targetUser ) return;
 			
+			var application:visualDashboardProvider = AppProperties.getInstance().controller.application as visualDashboardProvider;
+			
 			if( ChatSearch(model).targetUser.available == UserModel.STATE_AVAILABLE )
 			{
 				ChatSearch(model).state = ChatSearch.STATE_CONNECTED;
@@ -75,7 +75,9 @@ package edu.newschool.piim.healthboard.controller
 				popup.addEventListener( ApplicationEvent.VIEW_FILE, onViewAttachment );
 				popup.addEventListener( CloseEvent.CLOSE, onPopupClose );
 				
-				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), false );
+				application.stage.addEventListener( Event.RESIZE, onResize );
+				
+				PopUpManager.addPopUp( popup, application, false );
 			}
 			else
 			{
@@ -88,6 +90,15 @@ package edu.newschool.piim.healthboard.controller
 				
 				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication), true );
 				PopUpManager.centerPopUp( popup );
+			}
+		}
+		
+		private function onResize(event:Event):void
+		{
+			if( popup 
+				&& popup is ChatPopup )
+			{
+				ChatPopup(popup).invalidateDisplayList();
 			}
 		}
 		
@@ -128,6 +139,9 @@ package edu.newschool.piim.healthboard.controller
 		
 		private function onPopupClose( event:CloseEvent ):void
 		{
+			var application:visualDashboardProvider = AppProperties.getInstance().controller.application as visualDashboardProvider;
+			application.stage.removeEventListener( Event.RESIZE, onResize );
+			
 			reset();
 		}
 		
