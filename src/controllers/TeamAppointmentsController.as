@@ -32,7 +32,7 @@ package controllers
 			
 			model = new TeamAppointmentsModel();
 		
-			model.dataService.url = "data/appointments.xml";
+			model.dataService.url = "data/teamAppointments.xml";
 			model.dataService.addEventListener( ResultEvent.RESULT, dataResultHandler );
 				
 			fillCache = new Dictionary();
@@ -76,7 +76,7 @@ package controllers
 			for each(var pre:AppointmentPrerequisite in appointment.prerequisites)
 			{
 				var image:ImageReference = new ImageReference();
-				image.filePath = pre.path;
+				image.url = pre.path;
 				image.caption = pre.toString();
 				images.push( image );
 			}

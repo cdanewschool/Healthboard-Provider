@@ -11,16 +11,12 @@ package models
 		public var appointmentsDataService:HTTPService;
 		public var providersDataService:HTTPService;
 		
-		[Bindable] public var providersModel:ProvidersModel;
-		
 		public function ProviderApplicationModel()
 		{
 			super( AppContext.PROVIDER );
 			
 			appointmentsDataService = new HTTPService();
 			providersDataService = new HTTPService();
-			
-			providersModel = new ProvidersModel();
 			
 			preferences = new UserPreferences();
 		}

@@ -41,6 +41,7 @@ package controllers
 	import models.Preferences;
 	import models.ProviderApplicationModel;
 	import models.ProviderModel;
+	import models.ProvidersModel;
 	import models.SavedSearch;
 	import models.TeamAppointmentsModel;
 	import models.UserModel;
@@ -125,9 +126,9 @@ package controllers
 			
 			model.addEventListener( ApplicationDataEvent.LOADED, onAlertsLoaded );
 			medicationsController.model.addEventListener( ApplicationDataEvent.LOADED, onMedicationsLoaded );
-			
-			ProviderApplicationModel(model).providersDataService.url = "data/providers.xml";
-			ProviderApplicationModel(model).providersDataService.addEventListener( ResultEvent.RESULT, providersResultHandler );
+		
+			patientsController.model.addEventListener( ApplicationDataEvent.LOADED, onPatientsLoaded );
+			providersController.model.addEventListener( ApplicationDataEvent.LOADED, onProvidersLoaded );
 			
 			application.addEventListener( AuthenticationEvent.PROMPT, onPromptForAuthentication );
 			application.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
@@ -139,27 +140,13 @@ package controllers
 			loadStyles();
 		}
 		
-		override protected function init():void
-		{
-			super.init();
-			
-			ProviderApplicationModel(model).providersDataService.send();
-		}
-		
-		override protected function get initialized():Boolean
-		{
-			var initialized:Boolean = super.initialized;
-			
-			return initialized && ProviderApplicationModel(model).providersModel.dataLoaded;
-		}
-		
 		override protected function onInitialized():void
 		{
 			if( !initialized ) return;
 			
 			if( Constants.DEBUG ) 
 			{
-				for each(var provider:UserModel in ProviderApplicationModel(model).providersModel.providers)
+				for each(var provider:UserModel in ProvidersModel(providersController.model).providers)
 				{
 					if( provider.id == ProviderConstants.DEBUG_USER_ID ) 
 					{
@@ -177,7 +164,7 @@ package controllers
 		
 		override public function validateUser( username:String, password:String ):UserModel
 		{
-			for each(var provider:UserModel in ProviderApplicationModel(model).providersModel.providers)
+			for each(var provider:UserModel in ProvidersModel(providersController.model).providers)
 			{
 				if( provider.username == username && provider.password == password ) 
 				{
@@ -190,7 +177,7 @@ package controllers
 		
 		override public function getDefaultUser():UserModel
 		{
-			for each(var provider:UserModel in ProviderApplicationModel(model).providersModel.providers)
+			for each(var provider:UserModel in ProvidersModel(providersController.model).providers)
 			{
 				if( provider.id == ProviderConstants.DEBUG_USER_ID ) 
 				{
@@ -303,7 +290,7 @@ package controllers
 		public function getUser( id:int, type:String = null ):UserModel
 		{
 			var user:UserModel;
-			var users:ArrayCollection = ( type == UserModel.TYPE_PROVIDER ? ProviderApplicationModel(model).providersModel.providers : PatientsModel(patientsController.model).patients );
+			var users:ArrayCollection = ( type == UserModel.TYPE_PROVIDER ? ProvidersModel(providersController.model).providers : PatientsModel(patientsController.model).patients );
 			
 			for each(user in users) if( user.id == id ) return user;
 			
@@ -735,23 +722,9 @@ package controllers
 			ChatSearch( chatController.model ).patients = patients;
 		}
 		
-		private function providersResultHandler(event:ResultEvent):void 
+		override protected function onProvidersLoaded(event:ApplicationDataEvent):void 
 		{
-			var results:ArrayCollection = event.result.providers.provider;
-			
-			var teams:Array = [ {label:"All",value:-1} ];
-			
-			var providers:ArrayCollection = new ArrayCollection();
-			
-			for each(var result:Object in results)
-			{
-				var provider:ProviderModel = ProviderModel.fromObj(result);
-				provider.id = providers.length;
-				providers.addItem( provider );
-				
-				var team:Object = {label:"Team " + provider.team, value: provider.team};
-				if( teams[provider.team] == null ) teams[provider.team] = team;
-			}
+			super.onProvidersLoaded(event);
 			
 			if( model.user
 				&& persistentData 
@@ -767,9 +740,7 @@ package controllers
 				ProviderModel( model.user ).savedSearches = savedSearches;
 			}
 			
-			ProviderApplicationModel(model).providersModel.providers = ChatSearch( chatController.model ).providers = providers;
-			ProviderApplicationModel(model).providersModel.dataLoaded = true;
-			ProviderApplicationModel(model).providersModel.providerTeams = new ArrayCollection( teams );
+			ChatSearch( chatController.model ).providers = ProvidersModel(providersController.model).providers;
 			
 			onInitialized();
 		}

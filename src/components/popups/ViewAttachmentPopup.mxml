@@ -31,7 +31,7 @@
 			private function showImage( id:int = 0 ):void
 			{
 				var image:ImageReference = fileReferences[0];
-				attachment.source = image.filePath;
+				attachment.source = image.url;
 				
 				currentFileID = id;
 				caption.text = image.caption + '\n' + ((currentFileID+1) + ' of ' + fileReferences.length);

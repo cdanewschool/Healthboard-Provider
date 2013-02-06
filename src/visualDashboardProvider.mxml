@@ -29,6 +29,7 @@
 			import events.ApplicationEvent;
 			
 			import models.PatientsModel;
+			import models.ProvidersModel;
 			
 			import mx.events.FlexEvent;
 			
@@ -172,7 +173,7 @@
 							<modules1:MessagesModule id="modMessages" currentState="provider" />
 							
 							<!--	team profile	-->
-							<modules:TeamModule id="modTeamProfile" model="{ProviderApplicationModel(controller.model).providersModel}" />
+							<modules:TeamModule id="modTeamProfile" model="{ProvidersModel(controller.providersController.model)}" />
 							
 							<!--	appointments	-->
 							<modules:AppointmentModule id="modTeamAppointments" />
