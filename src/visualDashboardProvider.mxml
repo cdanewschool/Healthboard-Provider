@@ -3,17 +3,17 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
-	xmlns:fxg="components.fxg.*"
-	xmlns:plus="external.TabBarPlus.plus.*"
-	xmlns:enhancedtitlewindow="external.collapsibleTitleWindow.components.enhancedtitlewindow.*"
-	xmlns:general="components.general.*"
+	xmlns:fxg="edu.newschool.piim.healthboard.view.components.fxg.*"
+	xmlns:plus="net.flexwiz.blog.tabbar.plus.*"
+	xmlns:enhancedtitlewindow="com.ninemmedia.code.collapsibleTitleWindow.components.enhancedtitlewindow.*"
+	xmlns:general="edu.newschool.piim.healthboard.view.components.general.*"
 	xmlns:ASclasses="ASclasses.*"
-	xmlns:modules="components.modules.*" 
-	xmlns:widgets="components.widgets.*" 
-	xmlns:views="components.views.*" 
-	xmlns:components="components.*"
-	xmlns:modules1="modules.*" 
-	xmlns:home="components.home.*"
+	xmlns:modules="edu.newschool.piim.healthboard.components.modules.*" 
+	xmlns:widgets="edu.newschool.piim.healthboard.components.widgets.*" 
+	xmlns:views="edu.newschool.piim.healthboard.view.components.views.*" 
+	xmlns:components="edu.newschool.piim.healthboard.view.components.*"
+	xmlns:modules1="edu.newschool.piim.healthboard.view.modules.*" 
+	xmlns:home="edu.newschool.piim.healthboard.components.home.*"
 	fontFamily="myMyriad"
 	minWidth="1024" minHeight="768" 
 	resize="onResize()"
@@ -22,14 +22,14 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import ASclasses.Constants;
+			import edu.newschool.piim.healthboard.Constants;
 			
-			import ASfiles.ProviderConstants;
+			import edu.newschool.piim.healthboard.ProviderConstants;
 			
-			import events.ApplicationEvent;
+			import edu.newschool.piim.healthboard.events.ApplicationEvent;
 			
-			import models.PatientsModel;
-			import models.ProvidersModel;
+			import edu.newschool.piim.healthboard.model.PatientsModel;
+			import edu.newschool.piim.healthboard.model.ProvidersModel;
 			
 			import mx.events.FlexEvent;
 			
@@ -49,7 +49,7 @@
 	</fx:Script>
 	
 	<!--	external actionscript includes 	-->
-	<fx:Script source="ASfiles/home.as" />
+	<fx:Script source="visualDashboardProvider.as" />
 	
 	<fx:Style source="css/styles.css" />
 	
@@ -103,7 +103,7 @@
 							dataProvider="{model.settings}" labelField="label" prompt="Settings" 
 							change="controller.selectSetting(event)" 
 							dropShadowVisible="false" horizontalScrollPolicy="off"
-							skinClass="skins.general.MySettingsDropDownListSkin" itemRenderer="components.itemrenderers.EnabledListItemRenderer"
+							skinClass="edu.newschool.piim.healthboard.view.skins.general.MySettingsDropDownListSkin" itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.EnabledListItemRenderer"
 							color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" 
 							fontSize="12" />
 						

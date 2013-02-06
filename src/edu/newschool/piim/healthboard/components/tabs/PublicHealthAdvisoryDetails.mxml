@@ -1,0 +1,1179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:esri="http://www.esri.com/2008/ags"
+	xmlns:os="http://openscales.org"
+	xmlns:general="edu.newschool.piim.healthboard.view.components.general.*"
+	initialize="onInitialize()" 
+	creationComplete="creationComplete();">
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.Constants;
+			
+			import com.esri.ags.Graphic;
+			import com.esri.ags.events.FindEvent;
+			import com.esri.ags.geometry.Geometry;
+			import com.esri.ags.geometry.Multipoint;
+			import com.esri.ags.geometry.Polygon;
+			import com.esri.ags.geometry.WebMercatorExtent;
+			import com.esri.ags.geometry.WebMercatorMapPoint;
+			import com.esri.ags.symbols.InfoSymbol;
+			import com.esri.ags.tasks.supportClasses.AddressCandidate;
+			import com.esri.ags.tasks.supportClasses.AddressToLocationsParameters;
+			import com.esri.ags.tasks.supportClasses.FindResult;
+			import com.esri.ags.utils.GraphicUtil;
+			
+			import edu.newschool.piim.healthboard.components.popups.healthadvisory.AdvisoryUpdatesPopup;
+			import edu.newschool.piim.healthboard.components.popups.publichealthadvisory.MessagePatientsPopup;
+			import edu.newschool.piim.healthboard.components.popups.publichealthadvisory.PatientSelectionCriteriaPopup;
+			
+			import edu.newschool.piim.healthboard.controller.MainController;
+			import edu.newschool.piim.healthboard.controller.PublicHealthAdvisoriesController;
+			
+			import edu.newschool.piim.healthboard.enum.RiskLevel;
+			
+			import edu.newschool.piim.healthboard.events.ApplicationEvent;
+			
+			import edu.newschool.piim.healthboard.model.Location;
+			import edu.newschool.piim.healthboard.model.Message;
+			import edu.newschool.piim.healthboard.model.PatientModel;
+			import edu.newschool.piim.healthboard.model.PatientsModel;
+			import edu.newschool.piim.healthboard.model.ProviderApplicationModel;
+			import edu.newschool.piim.healthboard.model.modules.advisories.PatientAdvisoryStatus;
+			import edu.newschool.piim.healthboard.model.modules.advisories.PublicHealthAdvisoriesModel;
+			import edu.newschool.piim.healthboard.model.modules.advisories.PublicHealthAdvisory;
+			import edu.newschool.piim.healthboard.model.modules.advisories.PublicHealthAdvisorySelectionCriteria;
+			
+			import mx.charts.HitData;
+			import mx.charts.series.items.ColumnSeriesItem;
+			import mx.charts.series.items.LineSeriesItem;
+			import mx.collections.ArrayCollection;
+			import mx.collections.Sort;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.ListEvent;
+			import mx.formatters.DateFormatter;
+			import mx.managers.PopUpManager;
+			import mx.rpc.AsyncResponder;
+			
+			import edu.newschool.piim.healthboard.util.DateFormatters;
+			
+			private static const SEARCH_PLACEHOLDER:String = "State, City, or Zip code";
+			
+			[Bindable] private var controller:PublicHealthAdvisoriesController = MainController(AppProperties.getInstance().controller).advisoryController as PublicHealthAdvisoriesController;
+			[Bindable] public var model:PublicHealthAdvisoriesModel = controller.model as PublicHealthAdvisoriesModel;
+			
+			private var dateFormatter:DateFormatter;
+			
+			private var advisoryDirty:Boolean;
+			private var patientsDirty:Boolean;
+			
+ 			private var _advisory:PublicHealthAdvisory;
+			
+			[Bindable]
+			public function get advisory():PublicHealthAdvisory { return _advisory; }
+			
+			public function set advisory(value:PublicHealthAdvisory):void
+			{
+				_advisory = value;
+				
+				advisoryDirty = true;
+				
+				invalidateProperties();
+			}
+			
+			public var initialViewIndex:int = 0;
+			
+			private var _patients:ArrayCollection;
+			
+			[Bindable] 
+			public function get patients():ArrayCollection { return _patients; }
+			
+			public function set patients(value:ArrayCollection):void
+			{
+				_patients = value;
+				
+				patientsDirty = true;
+					
+				invalidateProperties();
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				var shouldUpdateExtent:Boolean = false;
+				
+				var marker:Graphic;
+				
+				if( !map ) return;
+				
+				if( advisoryDirty )
+				{
+					//	clear hospitalizations/deaths layers
+					while( deathsLayer.numChildren ) deathsLayer.removeChildAt(0);
+					while( hospitalizationsLayer.numChildren ) hospitalizationsLayer.removeChildAt(0);
+					
+					if( advisory 
+						&& advisory.update )
+					{
+						var location:Location;
+						
+						//	update deaths layer
+						for each(location in advisory.update.deaths )
+						{
+							if( !isNaN(location.longitude) 
+								&& !isNaN(location.latitude) )
+							{
+								marker = new Graphic( new WebMercatorMapPoint( location.longitude, location.latitude ) );
+								deathsLayer.add( marker );
+							}
+						}
+						
+						//	update hospitalizations layer
+						for each(location in advisory.update.hospitalizations )
+						{
+							if( !isNaN(location.longitude) 
+								&& !isNaN(location.latitude) )
+							{
+								marker = new Graphic( new WebMercatorMapPoint( location.longitude, location.latitude ) );
+								hospitalizationsLayer.add( marker );
+							}
+						}
+					}
+					
+					shouldUpdateExtent = true;
+					
+					advisoryDirty = false;
+				}
+				
+				if( patientsDirty )
+				{
+					//	clear affected/unaffectd patients layers
+					while( patientsAffectedLayer.numChildren ) patientsAffectedLayer.removeChildAt(0);
+					while( patientsUnaffectedLayer.numChildren ) patientsAffectedLayer.removeChildAt(0);
+					
+					if( patients ) 
+					{
+						patients.filterFunction = filterByAffected;
+						patients.refresh();
+						
+						var patientIsAffected:Boolean;
+						
+						//	update affected/unaffectd patients layers
+						for each(var patient:PatientModel in patients)
+						{
+							if( !isNaN(patient.longitude) 
+								&& !isNaN(patient.latitude) )
+							{
+								marker = new Graphic( new WebMercatorMapPoint( patient.longitude, patient.latitude ) );
+								
+								patientIsAffected = false;
+								
+								for each(var advisoryStatus:PatientAdvisoryStatus in patient.advisories )
+								if( advisoryStatus.advisoryId == advisory.id )
+									patientIsAffected = true;
+								
+								if( patientIsAffected )
+									patientsAffectedLayer.add( marker );
+								else
+									patientsUnaffectedLayer.add( marker );
+							}
+						}
+					}
+					
+					shouldUpdateExtent = true;
+					
+					patientsDirty = false;
+				}
+				
+				if( shouldUpdateExtent )
+				{
+					updateExtent();
+				}
+			}
+			
+			private function updateExtent():void
+			{
+				var extent:WebMercatorExtent = new WebMercatorExtent(NaN,NaN,NaN,NaN);
+				
+				var layers:Array = [patientsAffectedLayer, patientsUnaffectedLayer, deathsLayer, hospitalizationsLayer];
+				
+				for each(var layer:GraphicsLayer in layers)
+				{
+					for(var i:int=0;i<layer.numChildren;i++)
+					{
+						var graphic:Graphic = layer.getChildAt(i) as Graphic;
+						
+						var point:WebMercatorMapPoint = graphic.geometry as WebMercatorMapPoint;
+						
+						extent.minlon = !isNaN(extent.minlon) ? Math.min( point.lon, extent.minlon ) : point.lon;
+						extent.maxlon = !isNaN(extent.maxlon) ? Math.max( point.lon, extent.maxlon ) : point.lon;
+						extent.minlat = !isNaN(extent.minlat) ? Math.min( point.lat, extent.minlat ) : point.lat;
+						extent.maxlat = !isNaN(extent.maxlat) ? Math.max( point.lat, extent.maxlat ) : point.lat;
+					}
+				}
+				
+				extent.expand(.5)
+				
+				map.extent = extent;
+			}
+			
+			private function onCaseReportClick(event:MouseEvent):void
+			{
+				controller.showCaseReport();
+			}
+			
+			private function onViewAllUpdatesClick(event:MouseEvent):void
+			{
+				var popup:AdvisoryUpdatesPopup = PopUpManager.createPopUp( AppProperties.getInstance().controller.application, AdvisoryUpdatesPopup ) as AdvisoryUpdatesPopup;
+				popup.advisory = advisory;
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function onMessageClick(event:MouseEvent):void
+			{
+				var popup:MessagePatientsPopup = PopUpManager.createPopUp( AppProperties.getInstance().controller.application, MessagePatientsPopup ) as MessagePatientsPopup;
+				popup.advisory = advisory;
+				popup.addEventListener(CloseEvent.CLOSE,onMessagePatientsClose);
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function onMessagePatientsClose(event:CloseEvent):void
+			{
+				var popup:MessagePatientsPopup = event.currentTarget as MessagePatientsPopup;
+				
+				if( event.detail == Alert.YES )
+				{
+					var advisory:PublicHealthAdvisory = popup.advisory;
+					
+					var body:String = "If you are receiving this email, please be aware of the following conditions from:\n";
+					body += advisory.title + "\n\n";
+					
+					var recipients:ArrayCollection;
+					
+					if( popup.recipientGroup.selectedValue == 'affected' ) recipients = advisory.update.affected;
+					else if( popup.recipientGroup.selectedValue == 'at_risk' ) recipients = advisory.update.atRisk;
+					else if( popup.recipientGroup.selectedValue == 'selected' ) recipients = new ArrayCollection( patientList.selectedItems );
+					else if( popup.recipientGroup.selectedValue == 'all' ) recipients = patients;
+					
+					if( popup.symptoms.selected && advisory.selectionCriteria ) 
+					{
+						body += "Symptoms could include:\n";
+						body += PublicHealthAdvisorySelectionCriteria( advisory.selectionCriteria.getItemAt( advisory.selectionCriteria.length - 1) ).values.source.join( ", ");
+					}
+					
+					var message:Message = new Message();
+					message.subject = "Attention: All Patients affected by " + advisory.title;
+					message.recipients = recipients ? recipients.source : null;
+					message.body = body;
+					message.urgency = Message.URGENCY_SOMEWHAT_URGENT;
+					
+					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
+					evt.data = Constants.MODULE_MESSAGES;
+					evt.message = message;
+					dispatchEvent( evt );
+				}
+				
+				popup.removeEventListener(CloseEvent.CLOSE,onMessagePatientsClose);
+				
+				PopUpManager.removePopUp( popup );
+			}
+			
+			private function toggleMapLayer():void
+			{
+			}
+			
+			/*	my patients	*/
+			
+			[Bindable] private var patient:PatientModel;
+			
+			private function onMessagePatientClick(patient:PatientModel):void
+			{
+				var message:Message = new Message();
+				message.recipients = [patient];
+				message.urgency = Message.URGENCY_SOMEWHAT_URGENT;
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
+				evt.data = Constants.MODULE_MESSAGES;
+				evt.message = message;
+				dispatchEvent( evt );
+			}
+			
+			private function onViewPatientSelectionCriteriaClick(event:MouseEvent):void
+			{
+				var popup:PatientSelectionCriteriaPopup = PopUpManager.createPopUp( AppProperties.getInstance().controller.application, PatientSelectionCriteriaPopup ) as PatientSelectionCriteriaPopup;
+				popup.advisory = advisory;
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function selectPatient(event:ListEvent):void
+			{
+				patient = PatientModel( event.itemRenderer.data );
+			}
+			
+			private function getName(item:PatientModel,column:DataGridColumn=null):String
+			{
+				return item.lastName + ', ' + item.firstName;
+			}
+			
+			private function getBirthdateAndAge(item:PatientModel,column:DataGridColumn=null):String
+			{
+				return item.birthdateLabel + ' (' + item.age + ' yrs)';
+			}
+			
+			private function getStatusLabel(item:PatientModel,column:DataGridColumn=null):String
+			{
+				var advisoryStatus:PatientAdvisoryStatus = item.getAdvisoryStatusById( advisory.id );
+				
+				if( !advisoryStatus ) return 'Not Affected';
+				
+				if( advisoryStatus.riskLevel == RiskLevel.NONE ) return "Not Affected";
+				if( advisoryStatus.riskLevel == RiskLevel.AFFECTED ) return "Affected";
+				if( advisoryStatus.riskLevel == RiskLevel.ROUTINE ) return "Routine Risk";
+				if( advisoryStatus.riskLevel == RiskLevel.HIGH ) return "High Risk";
+				
+				return 'Not Affected';
+			}
+			
+			private function getUpdated(item:PatientModel,column:DataGridColumn=null):String
+			{
+				return dateFormatter.format( item.advisoriesLastUpdated );
+			}
+			
+			private function setView( index:int ):void
+			{
+				if( index == 0 )
+					label = "Event Detail";
+				else if( index == 1 )
+					label = "My Patients";
+				else if( index == 2 )
+					label = "References";
+				
+				label += ": " + advisory.title;
+				
+				views.selectedIndex = index;
+				
+				scroller.viewport.verticalScrollPosition = 0;
+			}
+			
+			private function filterByAffected( item:PatientModel ):Boolean
+			{
+				var advisoryStatus:PatientAdvisoryStatus = item.getAdvisoryStatusById( advisory.id );
+				
+				var sortField:String = model.patientFilter.data;
+				
+				var valid:Boolean = true;
+				
+				if( sortField == PublicHealthAdvisoriesModel.PATIENT_FITLER_MODE_ATRISK )
+				{
+					valid = advisoryStatus != null && (advisoryStatus.riskLevel == RiskLevel.LOW || advisoryStatus.riskLevel == RiskLevel.HIGH);
+				}
+				else if( sortField == PublicHealthAdvisoriesModel.PATIENT_FITLER_MODE_AFFECTED )
+				{
+					valid = advisoryStatus != null && advisoryStatus.riskLevel == RiskLevel.AFFECTED;
+				}
+				
+				return valid;
+			}
+			
+			public function dataTipsDoctorVisits(hd:HitData):String {
+				return "<font size='11'>On <b>week " + hd.item.week + "</b>, there were <b>" + LineSeriesItem(hd.chartItem).yValue + "%</b> doctor visits for ILI on the <b>" + LineSeries(hd.element).displayName + "</b></font>";	
+			}
+			
+			public function dataTipsPositiveTests(hd:HitData):String {
+				return "<font size='11'>On <b>week " + hd.item.week + "</b>, there were <b>" + ColumnSeriesItem(hd.chartItem).yValue + "%</b> positive test results on the <b>" + ColumnSeries(hd.element).displayName.toLowerCase() + " scale</b></font>";	
+			}
+			
+			public function dataTipsCaseReports(hd:HitData):String {
+				return "<font size='11'>On <b>week " + hd.item.week + "</b>, there were <b>" + LineSeriesItem(hd.chartItem).yValue + " " + LineSeries(hd.element).displayName.toLowerCase() + "</b></font>";	
+			}
+			
+			private function mapSearch():void
+			{
+				findTask.execute( myFindParams );
+			}
+			
+			private function onMapSearchSuccess( event : FindEvent ) : void
+			{
+				searchLayer.clear();
+				
+				for (var i:int = 0; i < event.findResults.length; i++)
+				{
+					var graphic:Graphic = FindResult(event.findResults[i]).feature;
+					searchLayer.add(graphic);
+				}
+				
+				// zoom to extent of all features
+				var graphicProvider:ArrayCollection = searchLayer.graphicProvider as ArrayCollection;
+				var graphicsExtent:Extent = GraphicUtil.getGraphicsExtent( graphicProvider.toArray() );
+				
+				if( graphicsExtent )
+				{
+					map.extent = graphicsExtent.expand(1.1);
+				}
+			}
+			
+			private function onInitialize():void
+			{
+				dateFormatter = new DateFormatter();
+				dateFormatter.formatString = "MMMM DD, YYYY";
+			}
+			
+			private function creationComplete():void
+			{
+				var patientsModel:PatientsModel = ((AppProperties.getInstance().controller as MainController).patientsController.model as PatientsModel)
+				patients = new ArrayCollection( patientsModel.patients.source.slice() );
+				
+				setView( initialViewIndex );
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+		<s:NumberFormatter id="numberFormatter" />
+		
+		<esri:FindTask
+			id="findTask"
+			executeComplete="onMapSearchSuccess(event)"
+			url="http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer" />
+		
+		<esri:FindParameters 
+			id="myFindParams"
+			returnGeometry="true" outSpatialReference="{map.spatialReference}"
+			contains="true"
+			searchText="{search.text}"
+			layerIds="[2]"
+			searchFields="['CITY_NAME','NAME','SYSTEM','STATE_ABBR','STATE_NAME']" />
+		
+		<esri:SimpleMarkerSymbol id="deathMarker" alpha="1" color="0x000000" size="20" style="triangle">
+			<esri:SimpleLineSymbol width="1" alpha="1" color="0xFFFFFF" style="solid" />
+		</esri:SimpleMarkerSymbol>
+		
+		<esri:SimpleMarkerSymbol id="hospitalizationMarker" alpha="1" color="0xF73FC2" size="20" style="triangle">
+			<esri:SimpleLineSymbol width="1" alpha="1" color="0xFFFFFF" style="solid" />
+		</esri:SimpleMarkerSymbol>
+		
+		<esri:SimpleMarkerSymbol id="affectedPatientMarker" alpha="1" color="0xF73FC2" size="20" style="triangle">
+			<esri:SimpleLineSymbol width="1" alpha="1" color="0xFFFFFF" style="solid" />
+		</esri:SimpleMarkerSymbol>
+		
+		<esri:SimpleMarkerSymbol id="unaffectedPatientMarker" alpha="1" color="0x666666" size="20" style="triangle">
+			<esri:SimpleLineSymbol width="1" alpha="1" color="0x74FF8B" style="solid" />
+		</esri:SimpleMarkerSymbol>
+		
+		<!--CHECK IF WE CAN REUSE THE SAME ARRAY SOMEHOW, INSTEAD OF DECLARING THE SAME THING 3 TIMES... IF CALLING THE SAME ARRAY FROM THE 3 DIFFERENT CHARTS, IT ONLY WORKS FOR ONE...-->		
+		<fx:Array id="bge">
+			<mx:GridLines gridDirection="vertical">
+				<mx:verticalStroke>
+					<mx:SolidColorStroke alpha="0"/>
+				</mx:verticalStroke>
+				<mx:verticalFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalFill>
+				<mx:verticalAlternateFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalAlternateFill>
+			</mx:GridLines>
+		</fx:Array>
+		
+		<fx:Array id="bge2">
+			<mx:GridLines gridDirection="vertical">
+				<mx:verticalStroke>
+					<mx:SolidColorStroke alpha="0"/>
+				</mx:verticalStroke>
+				<mx:verticalFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalFill>
+				<mx:verticalAlternateFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalAlternateFill>
+			</mx:GridLines>
+		</fx:Array>
+		
+		<fx:Array id="bge3">
+			<mx:GridLines gridDirection="vertical">
+				<mx:verticalStroke>
+					<mx:SolidColorStroke alpha="0"/>
+				</mx:verticalStroke>
+				<mx:verticalFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalFill>
+				<mx:verticalAlternateFill>
+					<s:SolidColor color="0x3C3C3C" />
+				</mx:verticalAlternateFill>
+			</mx:GridLines>
+		</fx:Array>
+		
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" />
+	</s:layout>
+	
+	<s:BorderContainer width="100%" height="37" backgroundColor="0x706F6F">
+		
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingRight="6" paddingLeft="8"/>
+		</s:layout>
+		
+		<s:Button label="Case Report" height="24" styleName="buttonText" click="onCaseReportClick(event)" />
+		<s:Button label="Print" height="24" styleName="buttonText" />
+		<s:Button label="Export" height="24" styleName="buttonText" click="dispatchEvent( new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true, false, 'Your file has been exported') )" />
+		<s:Button label="Message" height="24" styleName="buttonText" click="onMessageClick(event)" />
+		
+		<s:Spacer width="100%" />
+		
+	</s:BorderContainer>
+	
+	<s:Line xFrom="0" xTo="974">
+		<s:stroke>
+			<s:SolidColorStroke color="#3F3E3D"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:HGroup width="100%" contentBackgroundColor="0x4A4A49">
+		
+		<s:VGroup width="150" paddingTop="15" paddingLeft="15" gap="7" styleName="whiteText13">
+			<mx:LinkButton label="Event Detail" click="setView(0)" styleName="{views.selectedIndex==0?'linkBtnOrange':'linkBtnWhite'}" fontSize="13" fontWeight="{views.selectedIndex==0?'bold':'normal'}" />
+			<mx:LinkButton label="My Patients" click="setView(1)" styleName="{views.selectedIndex==1?'linkBtnOrange':'linkBtnWhite'}" fontSize="13" fontWeight="{views.selectedIndex==1?'bold':'normal'}" />
+			<mx:LinkButton label="References" click="setView(2)" styleName="{views.selectedIndex==2?'linkBtnOrange':'linkBtnWhite'}" fontSize="13" fontWeight="{views.selectedIndex==2?'bold':'normal'}" />
+		</s:VGroup>
+		
+		<s:Scroller id="scroller" height="600" width="825" horizontalScrollPolicy="off">
+				
+			<s:Group>
+				
+				<mx:ViewStack 
+					id="views"
+					width="825"
+					cornerRadius="2" backgroundColor="0x3C3C3C" 
+					resizeToContent="true">
+					
+					<!--	event detail	-->
+					<s:NavigatorContent>
+						
+						<s:layout>
+							<s:VerticalLayout gap="0" paddingLeft="25" paddingTop="25" paddingBottom="21" />
+						</s:layout>
+						
+						<s:VGroup>
+							
+							<s:Label text="{advisory.title}" styleName="greenBoldText" />
+							
+							<s:HGroup paddingBottom="10">
+								
+								<!--	column 1	-->
+								<s:VGroup width="425" paddingTop="4">
+									
+									<s:HGroup width="100%" verticalAlign="middle">
+										
+										<s:Label text="Last Update" styleName="greenBoldText" />
+										<s:Label id="lastUpdate" styleName="gray13Italic" creationComplete="lastUpdate.text = '— ' + dateFormatter.format(advisory.update.date)" />
+										
+										<s:HGroup width="100%" horizontalAlign="right">
+											<mx:LinkButton id="viewAll" label="View All Updates »" styleName="linkBtnBlue" click="onViewAllUpdatesClick(event)" rollOver="viewAll.setStyle('textDecoration','underline')" rollOut="viewAll.setStyle('textDecoration','none')" />
+										</s:HGroup>
+										
+									</s:HGroup>
+									
+									<mx:Text width="100%" text="{advisory.update.text} Source: {advisory.update.source}" color="0xE6E6E6" paddingLeft="20" leading="4" />
+									
+								</s:VGroup>
+								
+								<s:Line yFrom="0" yTo="160">
+									<s:stroke>
+										<s:SolidColorStroke color="0xB3B3B3" alpha=".35" />
+									</s:stroke>
+								</s:Line>
+								
+								<!--	column 2	-->
+								<s:VGroup width="150" paddingLeft="5" paddingTop="11" paddingRight="5" paddingBottom="5">
+									
+									<s:Label text="My Patients" styleName="green12Bold" paddingBottom="10" />
+									
+									<s:HGroup gap="15">
+										<s:Label width="27" text="{advisory.update.affectedCountNetwork>-1?numberFormatter.format(advisory.update.affectedCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label text="Affected" styleName="white12Bold" />
+									</s:HGroup>
+									
+									<s:HGroup gap="15">
+										<s:Label width="27" text="{advisory.update.atRiskCountNetwork>-1?numberFormatter.format(advisory.update.atRiskCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label text="At Risk" styleName="white12Bold" />
+									</s:HGroup>
+									
+									<s:HGroup gap="15">
+										<s:Label width="27" text="{advisory.update.deathCountNetwork>-1?numberFormatter.format(advisory.update.deathCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label text="Deaths" styleName="white12Bold" />
+									</s:HGroup>
+									
+									<s:HGroup gap="15">
+										<s:Label width="27" text="{advisory.update.hospitalizationsCountNetwork>-1?numberFormatter.format(advisory.update.hospitalizationsCountNetwork):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label text="Hospitalizations" styleName="white12Bold" />
+									</s:HGroup>
+									
+								</s:VGroup>
+								
+								<s:BorderContainer width="174" height="144" cornerRadius="3" backgroundColor="0x4B4A4A" borderAlpha="0">
+									
+									<s:layout>
+										<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingBottom="10" />
+									</s:layout>
+									
+									<s:Label text="National" styleName="green12Bold" paddingBottom="10" />
+									
+									<s:HGroup gap="15">
+										<s:Label width="45" text="{advisory.update.caseReportCount}" styleName="orange16Bold" textAlign="right" />
+										<s:Label text="Case Reports" styleName="white12Bold" />
+									</s:HGroup>
+									
+									<s:HGroup gap="15">
+										<s:Label width="45" text="{!isNaN(advisory.update.affectedStatesCount)?numberFormatter.format(advisory.update.affectedStatesCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label text="States" styleName="white12Bold" />
+									</s:HGroup>
+									
+									<s:HGroup gap="15">
+										<s:Label width="45" text="{!isNaN(advisory.update.deathCount)?numberFormatter.format(advisory.update.deathCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label text="Deaths" styleName="white12Bold" />
+									</s:HGroup>
+									
+									<s:HGroup gap="15">
+										<s:Label width="45" text="{!isNaN(advisory.update.hospitalizationsCount)?numberFormatter.format(advisory.update.hospitalizationsCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label text="Hospitalizations" styleName="white12Bold" />
+									</s:HGroup>
+									
+								</s:BorderContainer>
+								
+							</s:HGroup>
+							
+							<!--	outbreak map	-->
+							<s:BorderContainer width="773" height="359" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderAlpha=".5">
+								
+								<s:layout>
+									<s:VerticalLayout paddingLeft="15" paddingTop="15" paddingRight="10" paddingBottom="10" />
+								</s:layout>
+								
+								<s:HGroup width="567" paddingBottom="10">
+									
+									<s:Label text="Outbreak Map" styleName="green12Bold" paddingTop="4" />
+									
+									<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
+										
+										<s:HGroup gap="-1" paddingLeft="4">
+											<s:TextInput id="search" text="{SEARCH_PLACEHOLDER}" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundColor="0xFFFFFF" contentBackgroundAlpha="1"  paddingLeft="7" paddingTop="5" width="166" height="24" click="{if(search.text == SEARCH_PLACEHOLDER) search.text=''}" enter="mapSearch()" />
+											<s:Button styleName="searchButtonIcon" width="24" height="24" click="mapSearch()" />
+										</s:HGroup>
+										
+									</s:HGroup>
+									
+								</s:HGroup>
+								
+								<s:HGroup>
+									
+									<s:VGroup horizontalAlign="right" gap="3">
+
+										<esri:Map id="map" width="567" height="268" logoVisible="false" openHandCursorVisible="false" creationComplete="invalidateProperties()">
+											
+											<esri:extent>
+												
+												<esri:Extent xmin="-14298000" ymin="2748000" xmax="-6815000" ymax="7117000">
+													<esri:SpatialReference wkid="102100"/>
+												</esri:Extent>
+												
+											</esri:extent>
+											
+											<esri:OpenStreetMapLayer />
+											
+											<esri:GraphicsLayer id="patientsAffectedLayer" symbol="{affectedPatientMarker}"/>
+											<esri:GraphicsLayer id="hospitalizationsLayer" symbol="{hospitalizationMarker}"/>
+											<esri:GraphicsLayer id="deathsLayer" symbol="{deathMarker}"/>
+											<esri:GraphicsLayer id="patientsUnaffectedLayer" symbol="{unaffectedPatientMarker}"/>
+											<esri:GraphicsLayer id="searchLayer" visible="false" />
+											
+										</esri:Map>
+										
+										<s:HGroup fontSize="12" fontStyle="italic" verticalAlign="middle">
+											<s:Label text="Source:" color="0xE6E6E6" paddingTop="2" />
+											<general:MainLinkButton id="btnMapSource" label="CDC.org" styleName="linkButton linkButtonStyle1" paddingLeft="-6" paddingRight="0" />
+										</s:HGroup>
+										
+									</s:VGroup>
+									
+									<s:VGroup paddingLeft="20" gap="15">
+										
+										<s:Label text="Legends" styleName="green12Bold" />
+										
+										<s:BorderContainer width="140" height="127" cornerRadius="3" backgroundColor="0x3C3C3C" borderAlpha="0">
+											
+											<s:layout>
+												<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
+											</s:layout>
+											
+											<s:Label text="Population" styleName="blue11Bold" />
+											
+											<s:HGroup verticalAlign="middle">
+												<s:CheckBox id="showAffectedPatients" selected="true" click="patientsAffectedLayer.visible = showAffectedPatients.selected" />
+												<s:Image source="@Embed('/images/advisory/markers/affected.png')" />
+												<s:Label text="Affected Patients" styleName="white11" color="0xF2F2F2" />
+											</s:HGroup>
+											
+											<s:HGroup verticalAlign="middle">
+												<s:CheckBox id="showHospitalized" selected="true" click="hospitalizationsLayer.visible = showHospitalized.selected" />
+												<s:Image source="@Embed('/images/advisory/markers/hospitalized.png')" />
+												<s:Label text="Hospitalized" styleName="white11" color="0xF2F2F2" />
+											</s:HGroup>
+											
+											<s:HGroup verticalAlign="middle">
+												<s:CheckBox id="showDeaths" selected="true" click="deathsLayer.visible = showDeaths.selected" />
+												<s:Image source="@Embed('/images/advisory/markers/death.png')" />
+												<s:Label text="Deaths" styleName="white11" color="0xF2F2F2" />
+											</s:HGroup>
+											
+											<s:HGroup verticalAlign="middle">
+												<s:CheckBox id="showUnaffectedPatients" selected="true" click="patientsUnaffectedLayer.visible = showUnaffectedPatients.selected" />
+												<s:Image source="@Embed('/images/advisory/markers/patient.png')" />
+												<s:Label text="My Patients" styleName="white11" color="0xF2F2F2" />
+											</s:HGroup>
+											
+										</s:BorderContainer>
+										
+										<s:BorderContainer width="96" height="102" cornerRadius="3" backgroundColor="0x3C3C3C" borderAlpha="0">
+											
+											<s:layout>
+												<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" gap="13" />
+											</s:layout>
+											
+											<s:Label text="Rate of Risk" styleName="blue11Bold" />
+											
+											<s:HGroup verticalAlign="middle">
+												<s:Image source="@Embed('/images/advisory/risk/low.jpg')" />
+												<s:Label text="Low" styleName="white11" color="0xF2F2F2" />
+											</s:HGroup>
+											
+											<s:HGroup verticalAlign="middle">
+												<s:Image source="@Embed('/images/advisory/risk/moderate.jpg')" />
+												<s:Label text="Moderate" styleName="white11" color="0xF2F2F2" />
+											</s:HGroup>
+											
+											<s:HGroup verticalAlign="middle">
+												<s:Image source="@Embed('/images/advisory/risk/high.jpg')" />
+												<s:Label text="High" styleName="white11" color="0xF2F2F2" />
+											</s:HGroup>
+											
+										</s:BorderContainer>
+										
+									</s:VGroup>
+									
+								</s:HGroup>
+								
+							</s:BorderContainer>
+							
+							<!--	footer charts/graphs	-->
+							<s:HGroup gap="20" paddingTop="15">
+								
+								<!--	doctor's visits	-->
+								<s:BorderContainer width="245" height="276" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderAlpha=".5">
+									
+									<s:layout>
+										<s:VerticalLayout paddingTop="14" paddingBottom="10" />
+									</s:layout>
+									
+									<s:Label text="Doctor's Visits (%)" styleName="green12Bold" paddingLeft="12" paddingBottom="-3" />
+									
+									<mx:LineChart id="doctorVisits" dataProvider="{advisory.arrStatsDetailed}" showDataTips="true" height="203" width="240" backgroundElements="{bge}" axisTitleStyleName="healthAdvisoryChartAxisTitles" dataTipFunction="dataTipsDoctorVisits">
+										<mx:series>
+											<mx:LineSeries yField="visits_national" xField="week" displayName="National Baseline" itemRenderer="mx.charts.renderers.CircleItemRenderer" radius="2.5">
+												<mx:lineStroke><s:SolidColorStroke color="0x808080" weight="1" /></mx:lineStroke>
+												<mx:fill><s:SolidColor color="0x808080" /></mx:fill>
+												<mx:stroke><s:SolidColorStroke color="0x808080" /></mx:stroke>
+											</mx:LineSeries>
+											<mx:LineSeries yField="visits_ILA" xField="week" displayName="Influenza-like Illness Surveillance Network (ILA)" itemRenderer="mx.charts.renderers.CircleItemRenderer" radius="2.5">
+												<mx:lineStroke><s:SolidColorStroke color="0xFF0000" weight="1" /></mx:lineStroke>
+												<mx:fill><s:SolidColor color="0xFF0000" /></mx:fill>
+												<mx:stroke><s:SolidColorStroke color="0xFF0000" /></mx:stroke>
+											</mx:LineSeries>
+										</mx:series>
+										<mx:seriesFilters>
+											<fx:Array />
+										</mx:seriesFilters>
+										<mx:horizontalAxis>
+											<mx:LinearAxis id="doctorVisitsXaxis" minimum="9" maximum="18" interval="1" title="Week" displayName="Week" />
+										</mx:horizontalAxis>
+										<mx:verticalAxis>
+											<mx:LinearAxis id="doctorVisitsYaxis" maximum="8" minimum="0" interval="1" title="% Visits for ILI" displayName="% Visits for ILI" />
+										</mx:verticalAxis>
+										<mx:horizontalAxisRenderers>
+											<mx:AxisRenderer axis="{doctorVisitsXaxis}" fontSize="10" color="0x808080" tickLength="4" tickPlacement="cross" minorTickPlacement="none" canDropLabels="false" canStagger="false" labelRotation="0">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:tickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:tickStroke>
+											</mx:AxisRenderer>
+										</mx:horizontalAxisRenderers>
+										<mx:verticalAxisRenderers>
+											<mx:AxisRenderer axis="{doctorVisitsYaxis}" fontSize="10" color="0x808080" tickLength="8" tickPlacement="outside" minorTickPlacement="none" canDropLabels="false" labelGap="-6" verticalAxisTitleAlignment="vertical">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:tickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:tickStroke>
+											</mx:AxisRenderer>
+										</mx:verticalAxisRenderers>
+									</mx:LineChart>
+									
+									<mx:Legend dataProvider="{doctorVisits}" fontFamily="myMyriadNoCFF" color="0x919191" fontSize="10" fontWeight="normal" markerHeight="8" markerWidth="8" verticalGap="-2" paddingTop="-12" paddingLeft="7" />
+								</s:BorderContainer>
+								
+								<!--	test results	-->
+								<s:BorderContainer width="245" height="276" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderAlpha=".5">
+									
+									<s:layout>
+										<s:VerticalLayout paddingTop="14" paddingBottom="10" />
+									</s:layout>
+									
+									<s:Label text="Positive Test Results" styleName="green12Bold" paddingLeft="12" paddingBottom="-3" />
+									
+									<mx:ColumnChart id="positiveTestResults" dataProvider="{advisory.arrStats}" showDataTips="true" height="200" width="231" backgroundElements="{bge2}" axisTitleStyleName="healthAdvisoryChartAxisTitles" columnWidthRatio=".5" dataTipFunction="dataTipsPositiveTests">
+										<mx:series>
+											<mx:ColumnSeries yField="positive_local" xField="week" displayName="Local">
+												<mx:fill><s:SolidColor color="0x0079FF" alpha=".5" /></mx:fill>
+											</mx:ColumnSeries>
+											<mx:ColumnSeries yField="positive_national" xField="week" displayName="National">
+												<mx:fill><s:SolidColor color="0xD9E021" alpha=".5" /></mx:fill>
+											</mx:ColumnSeries>
+										</mx:series>
+										<mx:seriesFilters>
+											<fx:Array />
+										</mx:seriesFilters>
+										<mx:horizontalAxis>
+											<mx:LinearAxis id="positiveResultsXaxis" minimum="11.5" interval="1" title="Week" displayName="Week" />
+										</mx:horizontalAxis>
+										<mx:verticalAxis>
+											<mx:LinearAxis id="positiveResultsYaxis" maximum="16" minimum="0" interval="2" title="% Positive Tests" displayName="% Positive Tests" />
+										</mx:verticalAxis>
+										<mx:horizontalAxisRenderers>
+											<mx:AxisRenderer axis="{positiveResultsXaxis}" fontSize="10" color="0x808080" tickPlacement="none" minorTickPlacement="cross" minorTickLength="4" canDropLabels="false" canStagger="false" labelRotation="0">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:minorTickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:minorTickStroke>
+											</mx:AxisRenderer>
+										</mx:horizontalAxisRenderers>
+										<mx:verticalAxisRenderers>
+											<mx:AxisRenderer axis="{positiveResultsYaxis}" fontSize="10" color="0x808080" tickLength="8" tickPlacement="outside" minorTickPlacement="none" canDropLabels="false" labelGap="-6" verticalAxisTitleAlignment="vertical">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:tickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:tickStroke>
+											</mx:AxisRenderer>
+										</mx:verticalAxisRenderers>
+									</mx:ColumnChart>
+									
+									<mx:Legend dataProvider="{positiveTestResults}" fontFamily="myMyriadNoCFF" color="0x919191" fontSize="10" fontWeight="normal" markerHeight="8" markerWidth="8" verticalGap="-2" paddingTop="-12" paddingLeft="7" />
+								</s:BorderContainer>
+								
+								<!--	case report comparison	-->
+								<s:BorderContainer width="245" height="276" cornerRadius="3" backgroundColor="0x4B4A4A" borderColor="0xBCBBBB" borderAlpha=".5">
+									
+									<s:layout>
+										<s:VerticalLayout paddingTop="14" paddingBottom="10" />
+									</s:layout>
+									
+									<s:Label text="Case Reports — Comparison" styleName="green12Bold" paddingLeft="12" paddingBottom="6" />
+									
+									<mx:LineChart id="caseReports" dataProvider="{advisory.arrStats}" showDataTips="true" height="195" width="240" backgroundElements="{bge3}" axisTitleStyleName="healthAdvisoryChartAxisTitles" dataTipFunction="dataTipsCaseReports">
+										<mx:series>
+											<mx:LineSeries yField="reports_new" xField="week" displayName="New Cases" itemRenderer="mx.charts.renderers.CircleItemRenderer" radius="2.5" form="curve">
+												<mx:lineStroke><s:SolidColorStroke color="0x29ABE2" weight="1" /></mx:lineStroke>
+												<mx:fill><s:SolidColor color="0x29ABE2" /></mx:fill>
+												<mx:stroke><s:SolidColorStroke color="0x29ABE2" /></mx:stroke>
+											</mx:LineSeries>
+											<mx:LineSeries yField="reports_accum" xField="week" displayName="Accumulated Cases" itemRenderer="mx.charts.renderers.CircleItemRenderer" radius="2.5" form="curve">
+												<mx:lineStroke><s:SolidColorStroke color="0x0071BC" weight="1" /></mx:lineStroke>
+												<mx:fill><s:SolidColor color="0x0071BC" /></mx:fill>
+												<mx:stroke><s:SolidColorStroke color="0x0071BC" /></mx:stroke>
+											</mx:LineSeries>
+										</mx:series>
+										<mx:seriesFilters>
+											<fx:Array />
+										</mx:seriesFilters>
+										<mx:horizontalAxis>
+											<mx:LinearAxis id="caseReportsXaxis" minimum="9" maximum="18" interval="1" title="Week" displayName="Week" />
+										</mx:horizontalAxis>
+										<mx:verticalAxis>
+											<mx:LinearAxis id="caseReportsYaxis" maximum="13" minimum="0" interval="2" title="Number of Cases" displayName="Number of Cases" />
+										</mx:verticalAxis>
+										<mx:horizontalAxisRenderers>
+											<mx:AxisRenderer axis="{caseReportsXaxis}" fontSize="10" color="0x808080" tickLength="4" tickPlacement="cross" minorTickPlacement="none" canDropLabels="false" canStagger="false" labelRotation="0">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:tickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:tickStroke>
+											</mx:AxisRenderer>
+										</mx:horizontalAxisRenderers>
+										<mx:verticalAxisRenderers>
+											<mx:AxisRenderer axis="{caseReportsYaxis}" fontSize="10" color="0x808080" tickLength="8" tickPlacement="outside" minorTickPlacement="none" canDropLabels="false" labelGap="-6" verticalAxisTitleAlignment="vertical">
+												<mx:axisStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:axisStroke>
+												<mx:tickStroke><mx:SolidColorStroke color="#808080" weight="1" /></mx:tickStroke>
+											</mx:AxisRenderer>
+										</mx:verticalAxisRenderers>
+									</mx:LineChart>
+									
+									<mx:Legend dataProvider="{caseReports}" fontFamily="myMyriadNoCFF" color="0x919191" fontSize="10" fontWeight="normal" markerHeight="8" markerWidth="8" verticalGap="-2" paddingTop="-12" paddingLeft="7" />
+									
+								</s:BorderContainer>
+								
+							</s:HGroup>
+							
+						</s:VGroup>
+						
+					</s:NavigatorContent>
+					
+					<!--	my patients	-->
+					<s:NavigatorContent height="600" width="840">
+						
+						<s:layout>
+							<s:VerticalLayout gap="0" paddingLeft="20" paddingTop="20" paddingRight="20" paddingBottom="10" />
+						</s:layout>
+						
+						<s:VGroup>
+							
+							<s:HGroup width="100%" verticalAlign="middle">
+								
+								<s:Label text="My Patients — {advisory.title}" styleName="greenBoldText" paddingTop="1" />
+								
+								<general:MainLinkButton label="View Patient Selection Criteria" styleName="linkButtonStyle1" fontSize="12" click="onViewPatientSelectionCriteriaClick(event)" />
+								
+								<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle" paddingRight="10">
+									
+									<s:Label text="Show Patients:" color="0xFFFFFF" />
+									
+									<s:DropDownList 
+										id="patientFilter" 
+										width="120" height="24" 
+										labelField="value" 
+										selectedIndex="0" styleName="buttonText"
+										creationComplete="patientFilter.dataProvider=model.patientFilters; patientFilter.selectedItem = model.patientFilter;" 
+										change="model.patientFilter = patientFilter.selectedItem; patients.refresh()" />
+									
+								</s:HGroup>
+								
+							</s:HGroup>
+							
+							<s:HGroup styleName="loginBoxWhiteItalicText" fontSize="14" gap="3">
+								
+								<s:Label text="There are" />
+								
+								<s:Label text="{advisory.update.affectedCountNetwork}" styleName="bold emphasizedNumber" />
+								
+								<s:Label text="patients affected; there are" />
+								
+								<s:Label text="{advisory.update.atRiskCountNetwork}" styleName="bold emphasizedNumber" />
+								
+								<s:Label text="patients at risk." />
+								
+								<s:Label text="(Last Updated:" />
+								
+								<s:Label id="lastUpdated" creationComplete="lastUpdated.text=DateFormatters.dateFormatterToday.format(advisory.update.date)" />
+								
+								<s:Label text=")" />
+								
+							</s:HGroup>
+							
+							<s:BorderContainer width="776" height="125" cornerRadius="3" backgroundAlpha="0" borderColor="0x999999" borderWeight="1" visible="{patient!=null}" includeInLayout="{patient!=null}">
+								
+								<s:layout>
+									<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
+								</s:layout>
+								
+								<s:HGroup verticalAlign="middle">
+									<s:Label text="{patient.fullName}" styleName="blue13Bold" fontSize="14" />
+									<s:Image source="@Embed('/images/grayEnvelope.png')" buttonMode="true" click="onMessagePatientClick(patient)" />
+								</s:HGroup>
+								
+								<s:HGroup gap="15">
+									
+									<s:Image id="patientProfilePicture" source="{patient.getProfilePictureURL()}" ioError="patientProfilePicture.source = patient.getDefaultProfilePictureURL();"  />
+									
+									<s:VGroup width="150">
+										
+										<s:HGroup>
+											<s:Label width="70" text="Status:" styleName="white12SemiBold" textAlign="right" />
+											<s:Label styleName="white12SemiBold" text="{getStatusLabel(patient)}" />
+										</s:HGroup>
+				
+										<s:HGroup>
+											<s:Label width="70" text="Listed Date:" styleName="white12SemiBold" textAlign="right" />
+											<s:Label styleName="white12SemiBold" text="{getUpdated(patient)}" />
+										</s:HGroup>
+										
+										<s:HGroup>
+											<s:Label width="70" text="Updated:" styleName="white12SemiBold" textAlign="right" />
+											<s:Label styleName="white12SemiBold" text="--" />
+										</s:HGroup>
+										
+									</s:VGroup>
+									
+									<s:Line yFrom="0" yTo="80">
+										<s:stroke>
+											<s:SolidColorStroke color="0xB3B3B3" weight=".5" />
+										</s:stroke>
+									</s:Line>
+									
+									<s:VGroup>
+										<s:Label text="Relations:" styleName="white12SemiBold" />
+										<s:List width="214" height="62" dataProvider="{patient.relations}" color="0xffffff">
+											<s:itemRenderer>
+												<fx:Component>
+													<mx:HBox toolTip="{data.type ? data.type.charAt(0).toUpperCase() + data.type.substr(1).toLowerCase() : ''}">
+														<s:Label text="{data.lastName + ', ' + data.firstName}" paddingLeft="4" paddingTop="4" paddingRight="4" paddingBottom="4" />
+													</mx:HBox>
+												</fx:Component>
+											</s:itemRenderer>
+										</s:List>
+									</s:VGroup>
+									
+									<s:Line yFrom="0" yTo="80">
+										<s:stroke>
+											<s:SolidColorStroke color="0xB3B3B3" weight=".5" />
+										</s:stroke>
+									</s:Line>
+									
+									<s:VGroup>
+										<s:Label text="Recommendation:" styleName="white12SemiBold" />
+										<s:List width="214" height="62" />
+									</s:VGroup>
+									
+								</s:HGroup>
+								
+							</s:BorderContainer>
+							
+							<mx:DataGrid 
+								id="patientList" 
+								allowMultipleSelection="true"
+								dataProvider="{patients}" selectedItem="{patient}"
+								styleName="standardDataGrid"
+								itemClick="selectPatient(event)"
+								width="777" fontSize="12"
+								headerStyleName="dataGridHeader"
+								borderVisible="true" alternatingItemColors="[0x4A4A49,0x3C3C3B]" 
+								horizontalScrollPolicy="off" rowCount="{patient!=null?13:18}" rowHeight="26" paddingTop="6">
+								
+								<mx:columns>
+									<mx:DataGridColumn dataField="status" headerText="Status" width="96" labelFunction="getStatusLabel" />
+									<mx:DataGridColumn dataField="fullName" headerText="Patients" width="160" labelFunction="getName" color="0xAEDEE4" />
+									<mx:DataGridColumn dataField="dob" headerText="DOB/Age" width="210" labelFunction="getBirthdateAndAge" />
+									<mx:DataGridColumn dataField="updated" headerText="Updated" width="135" labelFunction="getUpdated" />
+									<mx:DataGridColumn dataField="state" headerText="State" width="205" />
+								</mx:columns>
+								
+							</mx:DataGrid>
+							
+						</s:VGroup>
+						
+					</s:NavigatorContent>
+					
+					<!--	references	-->
+					<s:NavigatorContent backgroundColor="0xF6F6F6" color="0x3C3C3B">
+						<s:layout>
+							<s:VerticalLayout paddingLeft="25" paddingTop="20" paddingBottom="20" />
+						</s:layout>
+						
+						<s:Label text="References for {advisory.title}" fontSize="18" fontWeight="bold" paddingBottom="-1" />
+						<s:Label text="Last Updated: May 1, 2012" fontSize="13" fontStyle="italic" />
+						
+						<s:HGroup paddingTop="20" gap="34">
+							<s:VGroup width="271" horizontalAlign="right" gap="43">
+								<mx:Text fontSize="14" width="271" leading="4"
+										 text="Seasonal influenza, commonly called “the flu,” is caused by influenza viruses, which infect the respiratory tract (i.e., the nose, throat, lungs). Unlike many other viral respiratory infections, such as the common cold, the flu can cause severe illness and life-threatening complications in many people. In the United States, on average 5% to 20% of the population gets the flu and more than 200,000 people are hospitalized from seasonal flu-related complications. Flu seasons are unpredictable and can be severe. Over a period of 30 years, between 1976 and 2006, estimates of flu-associated deaths in the United States range from a low of about 3,000 to a high of about 49,000 people." />
+								<s:VGroup fontStyle="italic" fontSize="14" gap="7" horizontalAlign="right">
+									<general:MainLinkButton label="Treatments »" styleName="linkButtonStyle7" paddingRight="0" />
+									<general:MainLinkButton label="Detailed Prevention »" styleName="linkButtonStyle7" paddingRight="0" />
+									<general:MainLinkButton label="Antiviral Drugs »" styleName="linkButtonStyle7" paddingRight="0" />
+									<general:MainLinkButton label="Health Professionals »" styleName="linkButtonStyle7" paddingRight="0" />
+								</s:VGroup>
+							</s:VGroup>
+							
+							<s:VGroup color="0x3C3C3B" fontSize="14" gap="12">
+								<s:BorderContainer width="462" backgroundColor="0xFFFFFF" borderColor="0xBDBCBC" cornerRadius="5">
+									<s:layout>
+										<s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="15" paddingBottom="8" />
+									</s:layout>
+									<s:Label text="Preventions" fontWeight="bold" fontSize="18" color="0xF29222" />
+									<s:Label lineHeight="18" width="414" paddingBottom="3"
+											 text="Everyday preventive actions may slow the spread of germs that cause respiratory (nose, throat, and lungs) illnesses, like flu." />
+									<s:Line xFrom="0" xTo="423">
+										<s:stroke>
+											<s:SolidColorStroke color="0xBDBCBC"/>
+										</s:stroke>
+									</s:Line>
+									<s:HGroup paddingTop="4">
+										<s:Image source="@Embed('/images/phaRef1.png')" />
+										<mx:Text leading="4" fontStyle="italic" paddingTop="-3"
+												 text="{'• Get vaccination shot.\n• Cover your nose and mouth when you cough or sneeze.\n• Wash your hands often with soap and water.\n• Avoid touching your eyes, nose, and mouth.\n• Avoid close contact with sick people.'}" />
+										
+									</s:HGroup>
+									<s:HGroup width="100%" horizontalAlign="right" gap="1">
+										<s:Label text="Source:" paddingTop="6" />
+										<general:MainLinkButton label="CDC" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+										<s:Label text="|" paddingTop="6" />
+										<general:MainLinkButton label="View more »" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+									</s:HGroup>
+								</s:BorderContainer>
+								
+								<s:BorderContainer width="462" backgroundColor="0xFFFFFF" borderColor="0xBDBCBC" cornerRadius="5">
+									<s:layout>
+										<s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="15" paddingBottom="8" />
+									</s:layout>
+									<s:Label text="Symptoms" fontWeight="bold" fontSize="18" color="0xF29222" />
+									<s:Label paddingBottom="3"
+											 text="People who have the flu often feel some or all of these symptoms:" />
+									<s:Line xFrom="0" xTo="423">
+										<s:stroke>
+											<s:SolidColorStroke color="0xBDBCBC"/>
+										</s:stroke>
+									</s:Line>
+									<s:HGroup paddingTop="4">
+										<s:Image source="@Embed('/images/phaRef2.png')" />
+										<mx:Text leading="4" fontStyle="italic" paddingTop="-3"
+												 text="{'• Fever* or feeling feverish/chills\n• Cough\n• Sore throat\n• Runny or stuffy nose\n• Muscle or body aches\n• Headaches\n• Fatigue (tiredness)\n• Some may have vomiting and diarrhea\n(more common in children than adults)'}" />		
+									</s:HGroup>
+									<s:HGroup width="100%" horizontalAlign="right" gap="1">
+										<s:Label text="Source:" paddingTop="6" />
+										<general:MainLinkButton label="CDC" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+										<s:Label text="|" paddingTop="6" />
+										<general:MainLinkButton label="View more »" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+									</s:HGroup>
+								</s:BorderContainer>
+								
+								<s:BorderContainer width="462" backgroundColor="0xFFFFFF" borderColor="0xBDBCBC" cornerRadius="5">
+									<s:layout>
+										<s:VerticalLayout paddingLeft="20" paddingRight="20" paddingTop="15" paddingBottom="8" />
+									</s:layout>
+									<s:Label text="People at High Risk" fontWeight="bold" fontSize="18" color="0xF29222" />
+									<s:Label lineHeight="18" width="414" paddingBottom="3"
+											 text="Most people who get the flu will have mild illness, will not need medical care or antiviral drugs, and will recover in less than 2 weeks. Some people, however, are more severely affected." />
+									<s:Line xFrom="0" xTo="423">
+										<s:stroke>
+											<s:SolidColorStroke color="0xBDBCBC"/>
+										</s:stroke>
+									</s:Line>
+									<s:HGroup paddingTop="4">
+										<s:Image source="@Embed('/images/phaRef3.png')" />
+										<mx:Text leading="4" fontStyle="italic" paddingTop="-3"
+												 text="{'• Children younger than 5\n(especially younger than 2)\n• Adults 65 years of age and older\n• Pregnant women\n• American Indians\n• Alaskan Natives\n• Medical conditions'}" />
+										
+									</s:HGroup>
+									<s:HGroup width="100%" horizontalAlign="right" gap="1">
+										<s:Label text="Source:" paddingTop="6" />
+										<general:MainLinkButton label="CDC" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+										<s:Label text="|" paddingTop="6" />
+										<general:MainLinkButton label="View more »" styleName="linkButtonStyle2" paddingRight="0" paddingLeft="0" />
+									</s:HGroup>
+								</s:BorderContainer>
+							</s:VGroup>
+						</s:HGroup>
+					</s:NavigatorContent>
+					
+				</mx:ViewStack>
+			
+			</s:Group>
+			
+		</s:Scroller>
+		
+	</s:HGroup>
+	
+</s:NavigatorContent>

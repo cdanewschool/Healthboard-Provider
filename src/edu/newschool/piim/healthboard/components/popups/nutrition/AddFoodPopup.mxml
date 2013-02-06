@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:popups="edu.newschool.piim.healthboard.view.components.popups.*"
+	xmlns:general="edu.newschool.piim.healthboard.view.components.general.*" 
+	xmlns:net="flash.net.*"
+	width="454" height="268"
+	controlBarVisible="true" 
+	skinClass="edu.newschool.piim.healthboard.view.skins.general.myHeaderlessTitleWindow"
+	creationComplete="init()">
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.model.FileUpload;
+			import edu.newschool.piim.healthboard.model.module.nutrition.Food;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			[Bindable] public var food:Food;
+			
+			[Bindable] private var imageAttachment:FileUpload;
+			
+			private function browseAttachment(evt:MouseEvent):void 
+			{
+				fileReference.browse();
+			}
+			
+			private function onBrowseForFile(evt:Event):void 
+			{
+				fileReference.load();
+			}
+			
+			private function onBrowseForFileComplete(evt:Event):void 
+			{
+				imageAttachment = new FileUpload( fileReference.name, fileReference.size, fileReference.data );
+			}
+			
+			private function save():void
+			{
+				food = new Food( foodName.text, foodDescription.text, imageAttachment );
+				
+				var evt:CloseEvent = new CloseEvent( CloseEvent.CLOSE, true, false, Alert.YES );
+				dispatchEvent( evt );
+			}
+			
+			private function cancel():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function clear():void
+			{
+				foodName.text = "";
+				foodDescription.text = "";
+				imageAttachment = null;
+			}
+			
+			private function init():void
+			{
+				controlBarVisible = false;
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<net:FileReference id="fileReference" select="onBrowseForFile(event);" complete="onBrowseForFileComplete(event);" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" gap="5" horizontalAlign="left" />
+	</s:layout>
+	
+	<s:Label text="Add new food to list" styleName="darkGrayBold16" paddingBottom="5" />
+	
+	<mx:Form paddingLeft="5" paddingBottom="5" paddingTop="0">
+		
+		<mx:FormItem label="Food Name:" color="0x000000" labelWidth="70">
+			<general:TextInputPlaceholder id="foodName" width="326" height="24" placeholder="Black Beans" />
+		</mx:FormItem>
+		
+		<mx:FormItem label="Description:" color="0x000000" labelWidth="70">
+			<general:TextAreaPlaceholder id="foodDescription" width="326" height="78" placeholder="Low fat, cholesterol, and sodium. Boil or stir fried." />
+		</mx:FormItem>
+		
+		<mx:FormItem label="Description:" color="0x000000" labelWidth="70">
+			<s:VGroup>
+				<s:TextInput text="{imageAttachment ? imageAttachment.name : ''}" editable="false" />
+				<general:MainLinkButton label="Browse From file" styleName="linkBtnDarkBlue" fontSize="12" click="browseAttachment(event)" paddingLeft="10" />
+			</s:VGroup>
+		</mx:FormItem>
+		
+	</mx:Form>
+	
+	<s:Line xFrom="0" xTo="424">
+		<s:stroke>
+			<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:Button label="Save" width="50" height="24" click="save();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+		<s:Button label="Clear" width="50" height="24" click="clear();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+		<s:Button label="Cancel" width="55" height="24" click="cancel();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+	</s:HGroup>
+	
+</s:TitleWindow>

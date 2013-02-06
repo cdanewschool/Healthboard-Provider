@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" backgroundColor="0x3D3D3C" creationComplete="init()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.ProviderConstants;
+			
+			import edu.newschool.piim.healthboard.controller.MainController;
+			
+			import edu.newschool.piim.healthboard.events.ProfileEvent;
+			
+			import edu.newschool.piim.healthboard.model.ProviderModel;
+			
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			[Bindable] private var controller:MainController = AppProperties.getInstance().controller as MainController;
+			
+			[Bindable] public var provider:ProviderModel;
+			
+			private var editWindow:EditProvider;
+			
+			private function editProfile(event:MouseEvent):void
+			{
+				closePopup();
+				
+				editWindow = new EditProvider();
+				editWindow.provider = provider.clone();
+				editWindow.addEventListener( ProfileEvent.SAVE, onSave );
+				
+				PopUpManager.addPopUp(editWindow, this.parent.parent.parent as DisplayObject, true);
+				PopUpManager.centerPopUp(editWindow);
+			}
+			
+			private function onSave( event:ProfileEvent ):void
+			{
+				provider.copy( event.user as ProviderModel );
+				
+				closePopup();
+			}
+			
+			private function closePopup():void
+			{
+				if( editWindow )
+				{
+					PopUpManager.removePopUp( editWindow );
+					editWindow = null;
+				}
+			}
+			
+			private function init():void
+			{
+				label = provider.fullName;
+				profilePic.source = provider.getProfilePictureURL();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<s:BorderContainer height="37" width="100%" backgroundColor="0x706F6F" />
+	
+	<!--	basic	-->
+	<s:HGroup paddingLeft="14" paddingTop="14" gap="50">
+		<s:BorderContainer borderColor="0xBBBDBF" borderWeight="1" width="60" height="75"> 
+			<mx:Image id="profilePic" />
+		</s:BorderContainer>
+		
+		<s:VGroup>
+			<s:Label text="{provider.fullName}" styleName="blueBoldSubtitle" paddingBottom="4" />
+			<s:HGroup>
+				<s:Label text="DOB:" textAlign="right" width="81" styleName="whiteText13" />
+				<s:Label text="{provider.birthdateLabel}" styleName="whiteText13" />
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text="Age:" textAlign="right" width="81" styleName="whiteText13" />
+				<s:Label text="{provider.age}" styleName="whiteText13" />
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text="Sex:" textAlign="right" width="81" styleName="whiteText13"/>
+				<s:Label text="{provider.sex}" styleName="whiteText13" />
+			</s:HGroup>
+		</s:VGroup>
+	</s:HGroup>
+	
+	<s:HGroup paddingLeft="14" paddingTop="9" paddingBottom="9">
+		<s:Line xFrom="0" xTo="773">
+			<s:stroke>
+				<s:SolidColorStroke color="0x898989" weight="1" />
+			</s:stroke>
+		</s:Line>
+	</s:HGroup>
+	
+	<!--	information	-->
+	<s:VGroup width="100%" gap="8" styleName="whiteText13">
+		
+		<s:Label text="Role and Office Information" styleName="greenBoldText" fontSize="14" paddingLeft="210" paddingBottom="3"/>
+		
+		<s:HGroup>
+			<s:Label text="Position:" textAlign="right" width="205" />
+			<s:Label text="{provider.role}" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label text="Current Team:" textAlign="right" width="205"/>
+			<s:Label text="{provider.team}" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label text="Location:" textAlign="right" width="205"/>
+			<s:Label text="{provider.location}"/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label text="Office:" textAlign="right" width="205"/>
+			<s:Label text="{provider.office}" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label text="Office Phone:" textAlign="right" width="205" />
+			<s:Label text="{provider.phone}" />
+		</s:HGroup>
+		<s:HGroup paddingTop="-6">
+			<s:Label text="Email address:" textAlign="right" width="205" paddingTop="6"/>
+			<mx:LinkButton id="btnProviderEmail" label="{provider.email}" fontSize="13" paddingLeft="-3" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnProviderEmail.styleName='linkBtnUnderline';}" rollOut="btnProviderEmail.styleName='linkBtn';" />
+		</s:HGroup>
+		
+	</s:VGroup>
+	
+	<s:HGroup paddingLeft="14" paddingTop="9" paddingBottom="9">
+		<s:Line xFrom="0" xTo="773">
+			<s:stroke>
+				<s:SolidColorStroke color="0x898989" weight="1" />
+			</s:stroke>
+		</s:Line>
+	</s:HGroup>
+	
+	<!--	experience	-->
+	<s:VGroup width="100%" gap="8" styleName="whiteText13">
+		
+		<s:Label text="Education and Experience" styleName="greenBoldText" fontSize="14" paddingLeft="210" paddingBottom="3" />
+		
+		<s:HGroup>
+			<s:Label text="Education:" textAlign="right" width="205"/>
+			<s:Label text="{provider.education}" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label text="Board Certification:" textAlign="right" width="205" />
+			<s:Label text="{provider.certification}" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label text="Speicialty:" textAlign="right" width="205" />
+			<s:Label text="{provider.specialty}" />
+		</s:HGroup>
+		
+	</s:VGroup>
+	
+	<s:HGroup paddingLeft="14" paddingTop="9" paddingBottom="9">
+		<s:Line xFrom="0" xTo="773">
+			<s:stroke>
+				<s:SolidColorStroke color="0x898989" weight="1" />
+			</s:stroke>
+		</s:Line>
+	</s:HGroup>
+	
+	<!--	address	-->
+	<s:VGroup width="100%">
+		<s:Label text="Address and Emergency Contact"  color="0x999999"  paddingLeft="205" fontSize="14" fontWeight="bold" />
+		<s:Label text="Only viewable by admin" fontStyle="italic" color="0x999999" paddingLeft="205" fontSize="14" />
+	</s:VGroup>
+	
+	<s:HGroup paddingLeft="14" paddingTop="9" paddingBottom="9">
+		<s:Line xFrom="0" xTo="773">
+			<s:stroke>
+				<s:SolidColorStroke color="0x898989" weight="1" />
+			</s:stroke>
+		</s:Line>
+	</s:HGroup>
+	
+	<s:Group textAlign="center" width="100%">
+		<s:layout>
+			<s:BasicLayout />
+		</s:layout>
+		<s:Button label="Edit" click="editProfile(event)" horizontalCenter="0" visible="{provider.id == controller.model.user.id}" />
+	</s:Group>
+	
+</s:NavigatorContent>

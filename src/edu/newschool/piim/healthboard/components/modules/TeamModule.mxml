@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:plus="net.flexwiz.blog.tabbar.plus.*" 
+	width="100%" height="100%" xmlns:components="edu.newschool.piim.healthboard.view.components.*" creationComplete="init()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Metadata>
+		[Event(name="navigate", type="edu.newschool.piim.healthboard.events.ApplicationEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.Constants;
+			
+			import edu.newschool.piim.healthboard.ProviderConstants;
+			
+			import edu.newschool.piim.healthboard.components.UserProfileCard;
+			import edu.newschool.piim.healthboard.components.provider.ViewProvider;
+			
+			import edu.newschool.piim.healthboard.events.ApplicationEvent;
+			import edu.newschool.piim.healthboard.events.ProfileEvent;
+			
+			import edu.newschool.piim.healthboard.model.Message;
+			import edu.newschool.piim.healthboard.model.ProviderModel;
+			import edu.newschool.piim.healthboard.model.ProvidersModel;
+			import edu.newschool.piim.healthboard.model.UserModel;
+			
+			import mx.events.ListEvent;
+			
+			[Bindable] public var model:ProvidersModel;
+			[Bindable] public var teamRollOverRowIndex:int;
+			public var link:LinkButton;
+			
+			private const SEARCH_PLACEHOLDER:String = 'Search Patients';
+			
+			private function selectTeam(event:MouseEvent):void
+			{
+				model.selectedProviderTeam = int( DisplayObject(event.currentTarget).name );
+				update();
+			}
+			
+			private function sendMessage( recipients:Array, alias:String = null ):void
+			{
+				var message:Message = new Message();
+				message.recipients = recipients;
+				message.recipientAlias = alias;
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
+				evt.data = Constants.MODULE_MESSAGES;
+				evt.message = message;
+				dispatchEvent( evt );	
+			}
+			
+			private function update():void
+			{
+				teamProfileList.removeAllElements();
+				teamMessageLinks.removeAllElements();
+				
+				for each(var item:ProviderModel in model.providers)
+				{
+					if( model.selectedProviderTeam == -1 || parseInt(item.team) == model.selectedProviderTeam ) 
+					{
+						var profile:UserProfileCard = new UserProfileCard();
+						profile.title = item.role + " Profile";
+						profile.user = item;
+						profile.setStyle('dropShadowVisible',false);
+						profile.addEventListener( ProfileEvent.SELECT, onTeamSelect );
+						teamProfileList.addElement( profile );
+					}
+				}
+				
+				for each(var teamGroup:Object in model.providerGroups)
+				{
+					var group:String = teamGroup.group;
+					
+					var holder:VGroup = new VGroup();
+					holder.gap = teamMessageLinks.gap;
+					teamMessageLinks.addElement( holder );
+					
+					var header:Label = new Label();
+					header.setStyle('fontSize',12);
+					header.setStyle('color',"0xFFFFFF");
+					header.setStyle('paddingLeft',3);
+					header.text = group;
+					holder.addElement( header );
+					
+					link = new LinkButton();
+					link.label = "Message to All " + group + "s »";
+					link.setStyle('paddingLeft',0);
+					link.setStyle('fontSize',12);
+					link.setStyle('color',"0xAEDEE4");
+					link.setStyle("textRollOverColor","0xAEDEE4");
+					link.setStyle("textSelectedColor","0xAEDEE4");
+					link.setStyle("skin", null);
+					//link.addEventListener(MouseEvent.ROLL_OVER,manageMouseOver);		//not working properly (it adds the underline to the last button only)
+					//link.addEventListener(MouseEvent.ROLL_OUT,manageMouseOut);
+					holder.addElement( link );
+					
+					if( model.selectedProviderTeam > -1 )
+					{
+						var spacer:Spacer = new Spacer();
+						spacer.height = 18;
+						holder.addElement( spacer );
+						
+						for each(var teamMember:Object in teamGroup.members)
+						{
+							link = new LinkButton();
+							link.data = teamMember;
+							link.label = teamMember.firstName + ' ' + teamMember.lastName;
+							link.setStyle('paddingLeft',0);
+							link.setStyle('fontSize',12);
+							link.setStyle('color',"0xAEDEE4");
+							link.setStyle("textRollOverColor","0xAEDEE4");
+							link.setStyle("textSelectedColor","0xAEDEE4");
+							link.setStyle("skin", null);
+							//link.addEventListener(MouseEvent.ROLL_OVER,manageMouseOver);		//not working properly (it adds the underline to the last button only)
+							//link.addEventListener(MouseEvent.ROLL_OUT,manageMouseOut);
+							link.addEventListener( MouseEvent.CLICK, onTeamMemberClick );
+							holder.addElement( link );
+						}
+					}
+					
+					spacer = new Spacer();
+					spacer.height = 26;
+					holder.addElement( spacer );
+				}
+			}
+			
+			private function onTeamScheduleClick(event:MouseEvent):void
+			{
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.NAVIGATE, true );
+				evt.data = Constants.MODULE_APPOINTMENTS;
+				dispatchEvent( evt );
+			}
+			
+			private function onMessageTeamClick(event:MouseEvent):void
+			{
+				var users:Array = [];
+				
+				for(var i:int=0;i<teamProfileList.numElements;i++)
+				{
+					users.push( UserProfileCard(teamProfileList.getElementAt(i)).user );
+				}
+				
+				var alias:String = "All Teams";
+				
+				if( model.selectedProviderTeam > -1 )
+				{
+					alias = "Team " + model.selectedProviderTeam.toString();
+				}
+				
+				sendMessage( users, "Team 1" );
+			}
+			
+			private function onMessageGroupClick(event:MouseEvent):void
+			{
+				var group:String = LinkButton(event.currentTarget).data.toString();
+				var users:Array = model.providerGroups[ group ].members;
+				
+				sendMessage( users, group );
+			}
+			
+			private function onTeamMemberClick(event:MouseEvent):void
+			{
+				var provider:ProviderModel = ProviderModel( LinkButton(event.currentTarget).data );
+				showTeamMember( provider );
+			}
+			
+			private function manageMouseOver(event:MouseEvent):void{
+				link.setStyle("styleName",'linkBtnUnderline');
+			}
+			
+			private function manageMouseOut(event:MouseEvent):void{
+				link.setStyle("styleName",'linkBtn');	
+			}
+			
+			public function showTeamMember( data:UserModel ):void
+			{	
+				var viewTeamMember:ViewProvider = new ViewProvider();
+				viewTeamMember.provider = data as ProviderModel;
+				viewStackTeamMembers.addChild(viewTeamMember);
+				
+				viewStackTeamMembers.selectedIndex = viewStackTeamMembers.numChildren - 1;
+				tabsTeamMembers.selectedIndex = viewStackTeamMembers.selectedIndex;
+			}
+			
+			private function onHeaderSearch():void
+			{
+				model.searchText = header.searchText;
+			}
+			
+			private function onHeaderClick(event:ApplicationEvent):void
+			{
+				model.reset();
+			}
+			
+			protected function onTeamClick(event:ListEvent):void 
+			{
+				var evt:ProfileEvent = new ProfileEvent( ProfileEvent.SHOW_CONTEXT_MENU, true );
+				evt.user = DataGrid(event.currentTarget).selectedItem as UserModel;
+				dispatchEvent( evt );
+				
+				DataGrid(event.currentTarget).selectedItem = null;
+			}
+			
+			protected function onTeamSelect(event:ProfileEvent):void 
+			{
+				var evt:ProfileEvent = new ProfileEvent( ProfileEvent.SHOW_CONTEXT_MENU, true );
+				evt.user = event.user;
+				dispatchEvent( evt );
+			}
+			
+			private function onTeamRollOver(event:ListEvent):void
+			{
+				teamRollOverRowIndex = event.rowIndex;
+			}
+			
+			private function init():void
+			{
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<components:ModuleHeader id="header" title="Team Profile" icon="@Embed('/images/patientHome.png')" showSearch="true" searchPlaceholder="Search Patients" searchFunction="{onHeaderSearch}" navigate="onHeaderClick(event)" />
+	
+	<s:HGroup width="100%" paddingTop="14" gap="25" horizontalAlign="center">
+		
+		<mx:VBox width="100" height="100%" paddingTop="5">
+			
+			<mx:Repeater id="teamList" dataProvider="{model.providerTeams}">
+				<mx:LinkButton name="{teamList.currentItem.value}" label="{teamList.currentItem.label}" click="selectTeam(event);" textAlign="left" styleName="linkBtnOrange" fontSize="13" fontWeight="bold" height="25" />
+			</mx:Repeater>
+			
+		</mx:VBox>
+		
+		<s:Group creationComplete="{tabsTeamMembers.setTabClosePolicy(0, false);}">
+			
+			<mx:ViewStack id="viewStackTeamMembers" borderColor="0xBDBCBC" cornerRadius="2" backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" width="825" y="22">
+				
+				<s:NavigatorContent label="Profiles">
+					
+					<s:layout>
+						<s:VerticalLayout gap="0" />
+					</s:layout>
+					
+					<s:BorderContainer height="37" width="100%" backgroundColor="0x706F6F">
+						<s:layout>
+							<s:HorizontalLayout verticalAlign="middle" paddingRight="6" paddingLeft="8"/>
+						</s:layout>
+						
+						<s:HGroup gap="0" width="100%" horizontalAlign="right">
+							<s:Button id="btnTeamMembersProfile" width="29" height="24" icon="@Embed('/images/btnProfile.png')" chromeColor="{viewsTeamMembers.selectedIndex==0?0xFF931E:0xB3B3B3}" click="viewsTeamMembers.selectedIndex=0;update()" />
+							<s:Button id="btnTeamMembersList" width="29" height="24" icon="@Embed('/images/btnCalendarList.png')" styleName="buttonText" chromeColor="{viewsTeamMembers.selectedIndex==1?0xFF931E:0xB3B3B3}" click="viewsTeamMembers.selectedIndex=1"/>
+						</s:HGroup>
+						
+					</s:BorderContainer>
+					
+					<s:Line xFrom="0" xTo="823">
+						<s:stroke>
+							<s:SolidColorStroke color="0xBDBCBC"/>
+						</s:stroke>
+					</s:Line>
+					
+					<mx:ViewStack id="viewsTeamMembers" width="100%" creationPolicy="all" selectedIndex="1">
+						
+						<!--	profile view	-->
+						<s:NavigatorContent backgroundColor="0x303031">
+							
+							<s:Scroller width="100%" height="588" horizontalScrollPolicy="off">
+								
+								<s:VGroup paddingTop="12">
+									
+									<!--<s:Label styleName="greenBoldText" text="{model.selectedProviderTeam>-1?'Team ' + (model.selectedProviderTeam):'All Teams'}" paddingLeft="10" />-->
+									<s:Label styleName="greenBoldText" text="{model.selectedProviderTeam>-1?'Team ' + (model.selectedProviderTeam+1):'All Teams'}" paddingLeft="14" />
+									
+									<mx:ViewStack selectedIndex="{model.selectedProviderTeam==-1?0:1}" height="64">
+										
+										<!--	all teams	-->
+										<s:NavigatorContent>
+											
+											<s:VGroup paddingLeft="10" gap="4">	
+												<s:HGroup verticalAlign="middle">
+													<s:Label text="Number of Teams:" textAlign="right" width="100" styleName="grayTextBold11" />
+													<s:Label text="{model.providerTeams.length}" color="0xFFFFFF" />
+												</s:HGroup>
+												<s:HGroup verticalAlign="middle">
+													<s:Label text="Team Members:" textAlign="right" width="100" styleName="grayTextBold11" />
+													<s:Label text="{model.providers.length}" color="0xFFFFFF" />
+												</s:HGroup>
+											</s:VGroup>
+											
+										</s:NavigatorContent>
+										
+										<!--	a specific team	-->
+										<s:NavigatorContent>
+											
+											<s:HGroup width="100%" paddingLeft="10">
+												
+												<!--	column 1	-->
+												<s:VGroup width="313" gap="4">	
+													<s:HGroup verticalAlign="middle">
+														<s:Label text="Date Created:" textAlign="right" width="100" styleName="grayTextBold11" />
+														<s:Label text="August 1, 2011" color="0xFFFFFF" />
+													</s:HGroup>
+													<s:HGroup verticalAlign="middle">
+														<s:Label text="Created by:" textAlign="right" width="100" styleName="grayTextBold11" />
+														<s:Label text="Hugh Spencer (ADMIN)" color="0xFFFFFF" />
+													</s:HGroup>
+													<s:HGroup verticalAlign="middle">
+														<s:Label text="Purpose:" textAlign="right" width="100" styleName="grayTextBold11" />
+														<s:Label text="General care and emergency care" color="0xFFFFFF" />
+													</s:HGroup>
+												</s:VGroup>
+												
+												<!--	column 2	-->
+												<s:VGroup gap="4">
+													<s:HGroup verticalAlign="middle">
+														<s:Label text="Last Updated:" textAlign="right" width="100" styleName="grayTextBold11" />
+														<s:Label text="August 1, 2011" color="0xFFFFFF" />
+													</s:HGroup>
+													<s:HGroup verticalAlign="middle">
+														<s:Label text="Updated by:" textAlign="right" width="100" styleName="grayTextBold11" />
+														<s:Label text="Bob Ferguson" color="0xFFFFFF" />
+													</s:HGroup>
+													<s:HGroup verticalAlign="middle">
+														<s:Label text="Location:" textAlign="right" width="100" styleName="grayTextBold11" />
+														<s:Label text="NMMC" color="0xFFFFFF" />
+													</s:HGroup>
+													<s:HGroup verticalAlign="middle">
+														<s:Label text="Team members:" textAlign="right" width="100" styleName="grayTextBold11" />
+														<s:Label text="{model.providers.length}" color="0xFFFFFF" />
+													</s:HGroup>
+												</s:VGroup>
+											</s:HGroup>
+											
+										</s:NavigatorContent>
+										
+									</mx:ViewStack>
+									
+									<s:Line xFrom="0" xTo="823">
+										<s:stroke>
+											<s:SolidColorStroke color="0x7C7C7C" weight="1" />
+										</s:stroke>
+									</s:Line>
+									
+									<s:HGroup width="100%" paddingLeft="9" paddingTop="10">
+										
+										<s:VGroup width="130">
+											
+											<s:VGroup gap="-4">
+												<mx:LinkButton id="btnViewSchedule" label="View Team Schedule »" paddingLeft="0" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnViewSchedule.styleName='linkBtnUnderline';}" rollOut="btnViewSchedule.styleName='linkBtn';" click="onTeamScheduleClick(event)" />
+												<mx:LinkButton id="btnMessageTeam" label="Messages to Team »" paddingLeft="0" fontSize="12" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="{btnMessageTeam.styleName='linkBtnUnderline';}" rollOut="btnMessageTeam.styleName='linkBtn';" click="onMessageTeamClick(event)" />
+												<s:Spacer height="22"/>
+												<s:VGroup id="teamMessageLinks" gap="-4" />
+											</s:VGroup>
+											
+										</s:VGroup>
+										
+										<s:TileGroup 
+											id="teamProfileList" 
+											horizontalGap="19" verticalGap="19" 
+											requestedColumnCount="2" columnWidth="{UserProfileCard.WIDTH}" 
+											paddingBottom="20" />
+										
+									</s:HGroup>
+									
+								</s:VGroup>
+								
+							</s:Scroller>
+							
+						</s:NavigatorContent>
+						
+						<!--	list view	-->
+						<s:NavigatorContent>
+							<mx:DataGrid 
+								styleName="standardDataGrid"
+								buttonMode="false" selectable="true" 
+								width="100%" height="588"
+								dataProvider="{model.providers}"
+								rowHeight="25" headerHeight="25"
+								headerStyleName="dataGridHeaderAlternative"
+								horizontalScrollPolicy="off" verticalScrollPolicy="off"  horizontalSeparatorSkin="{null}" 
+								itemRollOver="onTeamRollOver(event)" itemRollOut="teamRollOverRowIndex=-1" itemClick="onTeamClick(event)">
+								<mx:columns>
+									<mx:DataGridColumn dataField="team" width="87"  headerText="Team" textAlign="center" />
+									<mx:DataGridColumn dataField="role" width="87" headerText="Title" />
+									<mx:DataGridColumn headerText="Name" width="145" dataField="lastName">
+										<mx:itemRenderer>
+											<fx:Component>
+												<mx:HBox horizontalScrollPolicy="off" width="100%">
+													<fx:Script>
+														<![CDATA[
+															import mx.collections.ListCollectionView;
+														]]>
+													</fx:Script>
+													<s:Label text="{data.firstName + ' ' + data.lastName}" fontSize="12" paddingLeft="10" fontFamily="myMyriad" width="115" />
+													<!--
+													<mx:HBox width="30">
+														<s:Image id="iconImage" source="@Embed('/images/grayEnvelope.png')" toolTip="Message" visible="{(outerDocument.model.providers as ListCollectionView).getItemIndex(data) == outerDocument.teamRollOverRowIndex}" includeInLayout="{iconImage.visible}" />
+													</mx:HBox>
+													-->
+												</mx:HBox>
+											</fx:Component>
+										</mx:itemRenderer>
+									</mx:DataGridColumn>
+									<mx:DataGridColumn dataField="department" width="121" headerText="Department" />
+									<mx:DataGridColumn dataField="location" width="101" headerText="Location" />
+									<mx:DataGridColumn dataField="specialty" width="160" headerText="Specialty"/>
+									<mx:DataGridColumn dataField="status" width="103" headerText="Board status" />
+								</mx:columns>
+							</mx:DataGrid>
+						</s:NavigatorContent>
+					</mx:ViewStack>
+				</s:NavigatorContent>
+				
+			</mx:ViewStack>
+			
+			<plus:TabBarPlus id="tabsTeamMembers" gap="6" cornerRadius="4" styleName="messagesTabs" closePolicy="always" dataProvider="{viewStackTeamMembers}" />
+			
+		</s:Group>
+		
+	</s:HGroup>
+		
+</s:NavigatorContent>

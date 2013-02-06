@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				creationComplete="init()" width="100%"
+				autoDrawBackground="true">
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.ProviderConstants;
+			
+			import edu.newschool.piim.healthboard.events.ApplicationEvent;
+			
+			import flashx.textLayout.conversion.TextConverter;
+			import flashx.textLayout.elements.Configuration;
+			import flashx.textLayout.elements.LinkElement;
+			import flashx.textLayout.elements.TextFlow;
+			import flashx.textLayout.events.FlowElementMouseEvent;
+			import flashx.textLayout.events.TextLayoutEvent;
+			import flashx.textLayout.formats.TextLayoutFormat;
+			
+			import edu.newschool.piim.healthboard.model.ChatMessage;
+			import edu.newschool.piim.healthboard.model.FileUpload;
+			import edu.newschool.piim.healthboard.model.UserPreferences;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.LinkButton;
+			
+			import edu.newschool.piim.healthboard.util.DateUtil;
+			
+			private function onLinkClick(event:FlowElementMouseEvent):void
+			{
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				
+				var attachmentID:int = parseInt( LinkElement(event.flowElement).href );
+				var attachment:FileUpload = FileUpload( ChatMessage(data).attachments.getItemAt( attachmentID ) );
+				
+				if( attachment.isImage() )
+				{
+					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.VIEW_FILE, true );
+					evt.data = attachment;
+					dispatchEvent( evt );
+				}
+			}
+			
+			private function init():void
+			{
+				var time:Date = ChatMessage(data).time;
+				var attachments:ArrayCollection = ChatMessage(data).attachments;
+				
+				var messageStart:String = UserPreferences(AppProperties.getInstance().controller.model.preferences).chatEnableTimeStamp ?
+											"[<font color='0x999999'>" + (time.hours<10?'0'+time.hours:time.hours) + ':' + (time.minutes<10?'0'+time.minutes:time.minutes) + ':' + (time.seconds<10?'0'+time.seconds:time.seconds) + "</font>]" :
+											null;
+				
+				var messageFrom:String =  ChatMessage(data).user.id == AppProperties.getInstance().controller.model.user.id ? "Me" : ChatMessage(data).user.fullName;
+				var messageBody:String = ChatMessage(data).text;
+				
+				var messageAttachments:String = "";
+				
+				if( attachments
+					&& attachments.length )
+				{
+					for(var i:int=0;i<attachments.length;i++)
+					{
+						var attachment:FileUpload = attachments[i];
+						messageAttachments += ("<a href='" + i + "'>" + attachment.name + "</a> ");
+					}
+				}
+				
+				var flow:TextFlow = TextConverter.importToFlow(messageStart + ' ' + messageFrom + ': ' + messageBody + ' ' + messageAttachments, TextConverter.TEXT_FIELD_HTML_FORMAT);
+				flow.addEventListener( FlowElementMouseEvent.CLICK, onLinkClick,false,0,true );
+				
+				message.textFlow = flow;
+				
+				var cfg:Configuration = TextFlow.defaultConfiguration;
+				
+				var normalTLF:TextLayoutFormat = new TextLayoutFormat(cfg.defaultLinkNormalFormat);
+				normalTLF.color = 0xAEDEE4;
+				
+				cfg.defaultLinkNormalFormat = normalTLF;
+				cfg.defaultLinkHoverFormat = normalTLF;
+				cfg.defaultLinkActiveFormat = normalTLF;
+				TextFlow.defaultConfiguration = cfg;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:RichEditableText id="message" width="100%" editable="false" selectable="false" styleName="black12" paddingLeft="3" paddingTop="3" paddingRight="3" paddingBottom="3" />
+	
+</s:ItemRenderer>

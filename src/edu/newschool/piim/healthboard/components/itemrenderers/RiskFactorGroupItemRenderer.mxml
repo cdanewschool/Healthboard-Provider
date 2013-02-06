@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:general="edu.newschool.piim.healthboard.view.components.general.*" 
+	horizontalScrollPolicy="off" verticalScrollPolicy="off"
+	dataChange="onDataChanged(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.components.widgets.patient.DecisionSupportWidget;
+			
+			import edu.newschool.piim.healthboard.enum.RiskLevel;
+			import edu.newschool.piim.healthboard.enum.ToggleState;
+			
+			import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactor;
+			import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactorUpdate;
+			
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			
+			import spark.components.HGroup;
+			import spark.components.Label;
+			
+			private var initizialied:Boolean;
+			
+			[Bindable] private var riskFactor:RiskFactor;
+			
+			private var dirty:Boolean;
+			
+			override public function set data(value:Object):void
+			{
+				dirty = data != value;
+				
+				super.data = value;
+			}
+			
+			private function onDataChanged(event:FlexEvent):void
+			{
+				riskFactor = data ? data as RiskFactor : null;
+				
+				if( riskFactor 
+					&& dirty )
+				{
+					riskFactorContainer.removeAllElements();
+					
+					for each(var subtype:RiskFactor in riskFactor.types)
+					{
+						var update:RiskFactorUpdate = subtype.updates.length ? subtype.updates.getItemAt(0) as RiskFactorUpdate : null;
+						
+						var hgroup:HGroup = new HGroup();
+						riskFactorContainer.addElement( hgroup );
+						
+						var subTypeLabel:Label = new Label();
+						subTypeLabel.text = subtype.name;
+						subTypeLabel.width = 150;
+						hgroup.addElement( subTypeLabel );
+						
+						var subTypeValue:Label = new Label();
+						subTypeValue.text = getRiskLevelLabel( update );
+						subTypeValue.percentWidth = 100;
+						subTypeValue.setStyle( "textAlign", "right" );
+						subTypeValue.styleName = update && update.riskLevel == RiskLevel.HIGH ? 'decisionSupportModuleRiskLevelHigh' : 'decisionSupportModuleRiskLevelLow';
+						hgroup.addElement( subTypeValue );
+					}
+					
+					//	if item is recycled, initialize state based on what it was last set to
+					if( DecisionSupportWidget.ROW_STATES[ data ] != null )
+					{
+						currentState = (DecisionSupportWidget.ROW_STATES[ data ] == 1 ? ToggleState.EXPANDED : ToggleState.COLLAPSED);
+					}
+					//	else, set to maximized state if risk level is high
+					else
+					{
+						var currentUpdate:RiskFactorUpdate = subtype.updates.getItemAt(0) as RiskFactorUpdate;
+						currentState = (currentUpdate && currentUpdate.riskLevel == RiskLevel.HIGH ? ToggleState.EXPANDED : ToggleState.COLLAPSED);
+					}
+					
+					dirty = false;
+				}
+			}
+			
+			private function getRiskLevelLabel( riskFactor:RiskFactorUpdate ):String
+			{
+				if( !riskFactor ) 
+					return 'N/A';
+				else if( riskFactor.riskLevel == RiskLevel.LOW ) 
+					return 'Low Risk';
+				
+				return 'High Risk'
+			}
+			
+			override public function set currentState(value:String):void
+			{
+				super.currentState = value;
+			}
+			
+			private function onToggleClick(event:MouseEvent):void
+			{
+				currentState = currentState == ToggleState.EXPANDED ? ToggleState.COLLAPSED : ToggleState.EXPANDED;
+				
+				DecisionSupportWidget.ROW_STATES[ data ] = currentState == ToggleState.EXPANDED ? 1 : 0;
+				
+				dispatchEvent( new ListEvent(ListEvent.CHANGE,true) );
+			}
+		]]>
+	</fx:Script>
+	
+	<mx:states>
+		<s:State name="expanded" />
+		<s:State name="collapsed" />
+	</mx:states>
+
+	<general:MainLinkButton 
+		label="{riskFactor.name}"
+		icon.expanded="@Embed(source='/images/smallArrowGray.png')" 
+		icon.collapsed="@Embed(source='/images/smallArrowCollapsedGray.png')" 
+		horizontalGap="10" id="btnVital"
+		fontSize="12" fontWeight="bold" toggle="true" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" 
+		click="onToggleClick(event)" />
+
+	<s:VGroup 
+		id="riskFactorContainer"
+		includeInLayout="{currentState == ToggleState.EXPANDED}" visible="{currentState == ToggleState.EXPANDED}" 
+		width="282" paddingLeft="30" verticalAlign="middle" fontSize="12" 
+		paddingTop="6" paddingBottom="6" gap="20" />
+	
+	<s:Group>
+		<s:Line xFrom="0" xTo="280">
+			<s:stroke>
+				<s:SolidColorStroke color="0xB3B3B3" weight="1" alpha="0.1" />
+			</s:stroke>
+		</s:Line>
+	</s:Group>
+	
+</mx:VBox>

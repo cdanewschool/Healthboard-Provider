@@ -1,0 +1,1422 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:components="edu.newschool.piim.healthboard.components.*"
+	xmlns:plus="net.flexwiz.blog.tabbar.plus.*" 
+	xmlns:appointments="edu.newschool.piim.healthboard.components.appointments.*" 
+	xmlns:calendar="edu.newschool.piim.healthboard.components.calendar.*" 
+	width="100%" height="100%" 
+	creationPolicy="all" creationComplete="init()" xmlns:components1="edu.newschool.piim.healthboard.view.components.*" >
+	
+	<fx:Metadata>
+		[Event(name="navigate", type="edu.newschool.piim.healthboard.events.ApplicationEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.Constants;
+			
+			import edu.newschool.piim.healthboard.ProviderConstants;
+			
+			import edu.newschool.piim.healthboard.components.appointments.RequestItem;
+			import edu.newschool.piim.healthboard.components.itemrenderers.DailyCustomChartLabel;
+			import edu.newschool.piim.healthboard.components.itemrenderers.WeeklyCustomChartLabel;
+			import edu.newschool.piim.healthboard.components.popups.AcceptAppointmentRequestPopup;
+			import edu.newschool.piim.healthboard.components.popups.AddAppointmentPopup;
+			import edu.newschool.piim.healthboard.components.popups.AppointmentChangedConfirmation;
+			import edu.newschool.piim.healthboard.components.popups.AppointmentReportPopup;
+			import edu.newschool.piim.healthboard.components.popups.ViewAttachmentPopup;
+			
+			import edu.newschool.piim.healthboard.controller.AppointmentsController;
+			import edu.newschool.piim.healthboard.controller.Controller;
+			import edu.newschool.piim.healthboard.controller.MainController;
+			import edu.newschool.piim.healthboard.controller.TeamAppointmentsController;
+			
+			import edu.newschool.piim.healthboard.events.ApplicationDataEvent;
+			import edu.newschool.piim.healthboard.events.ApplicationEvent;
+			import edu.newschool.piim.healthboard.events.AutoCompleteEvent;
+			import edu.newschool.piim.healthboard.events.MessageEvent;
+			import edu.newschool.piim.healthboard.events.TeamAppointmentEvent;
+			
+			import edu.newschool.piim.healthboard.model.Appointment;
+			import edu.newschool.piim.healthboard.model.AppointmentPrerequisite;
+			import edu.newschool.piim.healthboard.model.ImageReference;
+			import edu.newschool.piim.healthboard.model.Message;
+			import edu.newschool.piim.healthboard.model.ProviderModel;
+			import edu.newschool.piim.healthboard.model.TeamAppointmentsModel;
+			import edu.newschool.piim.healthboard.model.UserModel;
+			
+			import mx.charts.AxisLabel;
+			import mx.charts.CategoryAxis;
+			import mx.charts.ChartItem;
+			import mx.charts.chartClasses.AxisBase;
+			import mx.charts.chartClasses.ChartLabel;
+			import mx.charts.chartClasses.IAxis;
+			import mx.charts.chartClasses.Series;
+			import mx.charts.events.ChartItemEvent;
+			import mx.charts.renderers.BoxItemRenderer;
+			import mx.charts.series.ColumnSeries;
+			import mx.charts.series.items.ColumnSeriesItem;
+			import mx.collections.ArrayCollection;
+			import mx.collections.Sort;
+			import mx.controls.Alert;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.events.CloseEvent;
+			import mx.events.CollectionEvent;
+			import mx.events.CollectionEventKind;
+			import mx.events.DragEvent;
+			import mx.graphics.IFill;
+			import mx.managers.DragManager;
+			import mx.managers.PopUpManager;
+			
+			import spark.collections.SortField;
+			import spark.components.BorderContainer;
+			import spark.events.IndexChangeEvent;
+			import spark.skins.spark.ButtonBarSkin;
+			
+			import edu.newschool.piim.healthboard.util.DateUtil;
+			
+			[Bindable] private var controller:TeamAppointmentsController = MainController( AppProperties.getInstance().controller ).teamAppointmentsController;
+			[Bindable] private var model:TeamAppointmentsModel = TeamAppointmentsModel( controller.model );
+			
+			[Bindable] private var appointments:ArrayCollection;
+			[Bindable] private var providers:ArrayCollection;
+			
+			private const MODE_DAY:String = "day";
+			private const MODE_WEEK:String = "week";
+			private const MODE_MONTH:String = "month";
+			
+			[Bindable] private var viewModes:ArrayCollection = new ArrayCollection( [ { value: MODE_DAY, label: "Daily View" }, { value: MODE_WEEK, icon: "images/btnCalendarWeek.png", label:"Weekly View" }, { value: MODE_MONTH, icon: "images/calendar.png", label:"Monthly View" } ] );
+				
+			[Bindable] private var viewRangeStartDate:Date;
+			[Bindable] private var viewRangeEndDate:Date;
+			[Bindable] private var selectedDate:Date;
+			[Bindable] private var daysInRange:ArrayCollection;
+			
+ 			private var _selectedAppointment:Appointment;
+ 			private var _selectedProvider:ProviderModel;
+			
+			private var addAppointmentPopup:AddAppointmentPopup;
+			private var acceptRequestPopup:AcceptAppointmentRequestPopup;
+			private var printAppointmentsPopup:AppointmentReportPopup;
+			
+			private var _dirty:Boolean;
+			
+			private var pendingAppointments:Array;
+			
+			/**
+			 * The seleted providers. For this component, this means the providers whose
+			 * appointments are included in the view (i.e. chart, etc)
+			*/
+			[Bindable]
+			public function get selectedProvider():ProviderModel
+			{
+				return _selectedProvider;
+			}
+
+			public function set selectedProvider(value:ProviderModel):void
+			{
+				_selectedProvider = value;
+				
+				invalidateProperties();
+			}
+
+			/**
+			 * The selected apointment. This affects whether or not apointment data is shown
+			 * in the right sidebar, amongst other things.
+			*/
+			[Bindable]
+			public function get selectedAppointment():Appointment
+			{
+				return _selectedAppointment;
+			}
+
+			public function set selectedAppointment(value:Appointment):void
+			{
+				_selectedAppointment = value;
+				
+				//	since this could have been set in some way other than clicking
+				//	the item on the chart, try to select the corresponding chart item
+				//	(keeping in mind that the associated day may not be currently visible)
+				if( _selectedAppointment )
+				{
+					for(var i:int=0;i<chart.series.length;i++)
+					{
+						var series:ColumnSeries = ColumnSeries(chart.series[i]);
+						
+						for each(var data:ColumnSeriesItem in series.items)
+						{
+							if( data.item == _selectedAppointment )
+							{
+								series.selectedItem = data;
+								break;
+							}
+						}
+					}
+					
+					prerequisites.removeAllElements();
+					
+					for each(var prereq:AppointmentPrerequisite in selectedAppointment.prerequisites)
+					{
+						var lb:LinkButton = new LinkButton();
+						lb.label = prereq.title;
+						lb.styleName = "linkBtnBlue";
+						lb.setStyle("fontSize",9);
+						lb.addEventListener( MouseEvent.CLICK, onPrerequisitesClick );
+						prerequisites.addElement( lb );
+					}
+				}
+				
+				invalidateProperties();
+			}
+
+			public function get dirty():Boolean
+			{
+				return _dirty;
+			}
+
+			public function set dirty(value:Boolean):void
+			{
+				_dirty = value;
+				
+				invalidateProperties();
+			}
+
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				//	see if we need to refresh the view
+				if( dirty )
+				{
+					refreshRequestList();
+					
+					updateView();
+					
+					dirty = false;
+				}
+				
+				//	set dataprovider on provider schedule list component (right-hand side-bar)
+				if( currentState == MODE_MONTH )
+				{
+					providerScheduleList.providers = model.selectedProviders;
+				}
+				else if( currentState == MODE_DAY )
+				{
+					providerScheduleList.providers = selectedProvider ? new ArrayCollection( [selectedProvider] ) : null;
+				}
+				else
+				{
+					providerScheduleList.providers = null;
+				}
+				
+				//	update label for first calendar view-mode select button
+				if( selectedDate )
+				{
+					//	index gets lost with dataprovider update, so save
+					var index:int = modeSelect.selectedIndex;
+					//	trick buttonbar component into redrawing labels
+					viewModes.dispatchEvent( new CollectionEvent( CollectionEvent.COLLECTION_CHANGE, false, false, CollectionEventKind.ADD ) );
+					//	re-set index
+					modeSelect.selectedIndex = index;
+				}
+				
+				//	update labels
+				patientName.label = selectedAppointment && selectedAppointment.patient ? selectedAppointment.patient.fullName : '';
+				providerName.text = selectedAppointment && selectedAppointment.patient ? selectedAppointment.provider.fullName : '';
+			}
+			
+			private function onHeaderSearch():void
+			{
+			}
+			
+			private function onAddAppointmentClick( event:MouseEvent ):void
+			{
+				var appointment:Appointment = new Appointment();
+				appointment.provider = MainController(AppProperties.getInstance().controller).getUser( 0, UserModel.TYPE_PROVIDER );
+				showAppointmentPopup( appointment, AddAppointmentPopup.MODE_ADD );
+			}
+			
+			private function onEditOrAcceptAppointmentClick( event:MouseEvent ):void
+			{
+				if( selectedAppointment.isPending )
+				{
+					acceptAppointment( selectedAppointment );
+					
+					selectedAppointment = null;
+				}
+				else
+				{
+					showAppointmentPopup( selectedAppointment.clone(), AddAppointmentPopup.MODE_EDIT );
+				}
+			}
+			
+			private function onCancelOrDeclineAppointmentClick( event:MouseEvent ):void
+			{
+				cancelAppointment();
+			}
+			
+			private function onPrintAppointmentClick( event:MouseEvent ):void
+			{
+				printAppointmentsPopup = new AppointmentReportPopup();
+				printAppointmentsPopup.providers = model.selectedProviders;
+				printAppointmentsPopup.from = viewRangeStartDate;
+				printAppointmentsPopup.to = viewRangeEndDate;
+				
+				PopUpManager.addPopUp( printAppointmentsPopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
+				PopUpManager.centerPopUp( printAppointmentsPopup );
+			}
+			
+			private function showAppointmentPopup( appointment:Appointment, mode:String ):void
+			{
+				removePopUp( addAppointmentPopup );
+				
+				addAppointmentPopup = new AddAppointmentPopup();
+				addAppointmentPopup.mode = mode;
+				addAppointmentPopup.appointment = appointment;
+				
+				addAppointmentPopup.addEventListener( TeamAppointmentEvent.ADD, addAppointment );
+				addAppointmentPopup.addEventListener( TeamAppointmentEvent.SAVE, saveAppointment );
+				addAppointmentPopup.addEventListener( TeamAppointmentEvent.CANCEL, cancelAppointment );
+				addAppointmentPopup.addEventListener( Event.CANCEL, onAddAppointmentCancel );
+				addAppointmentPopup.addEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
+				addAppointmentPopup.addEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
+				
+				PopUpManager.addPopUp( addAppointmentPopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
+				PopUpManager.centerPopUp( addAppointmentPopup );
+			}
+			
+			private function addAppointment( event:TeamAppointmentEvent ):void
+			{
+				model.addAppointment( addAppointmentPopup.appointment );
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true );
+				evt.data = "Your appointment has been added";
+				dispatchEvent( evt );
+				
+				onAddAppointmentCancel(null);
+			}
+			
+			private function saveAppointment( event:TeamAppointmentEvent ):void
+			{
+				selectedAppointment.copy( addAppointmentPopup.appointment );
+				selectedAppointment = null;
+				
+				appointments.dispatchEvent( new CollectionEvent( CollectionEvent.COLLECTION_CHANGE ) );
+				
+				onAddAppointmentCancel(null);
+				
+				showAppointmentChanged();
+			}
+			
+			private function showAppointmentChanged( state:String = AppointmentChangedConfirmation.STATE_DEFAULT, appointment:Appointment = null ):void
+			{
+				var popup:AppointmentChangedConfirmation = new AppointmentChangedConfirmation();
+				popup.appointment = appointment;
+				popup.currentState = state;
+				
+				PopUpManager.addPopUp( popup, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function onAddAppointmentCancel(event:Event=null):void
+			{
+				if( !addAppointmentPopup ) return;
+				
+				addAppointmentPopup.removeEventListener( TeamAppointmentEvent.ADD, addAppointment );
+				addAppointmentPopup.removeEventListener( TeamAppointmentEvent.SAVE, saveAppointment );
+				addAppointmentPopup.removeEventListener( TeamAppointmentEvent.CANCEL, cancelAppointment );
+				addAppointmentPopup.removeEventListener( Event.CANCEL, onAddAppointmentCancel );
+				addAppointmentPopup.removeEventListener( AutoCompleteEvent.SHOW, onShowAutoComplete );
+				addAppointmentPopup.removeEventListener( AutoCompleteEvent.HIDE, onHideAutoComplete );
+				
+				removePopUp( addAppointmentPopup );
+			}
+			
+			private function cancelAppointment( event:TeamAppointmentEvent = null ):void
+			{
+				pendingAppointments = [ selectedAppointment ];
+				
+				confirmCancelAppointments();
+			}
+			
+			private function confirmCancelAppointments():void
+			{
+				Alert.show
+					(
+						"Are you sure you want to cancel " + (pendingAppointments.length > 1 ? "these" : "this" ) + " appointment?", "Confirm", 
+						Alert.YES|Alert.NO, null, onCancelAppointmentConfirm, null, Alert.NO
+					);
+			}
+			
+			private function onCancelAppointmentConfirm( event:CloseEvent ):void
+			{
+				if( event.detail == Alert.YES )
+				{
+					var patients:Array = [];
+					
+					for each(var appointment:Appointment in pendingAppointments)
+					{
+						if( patients.indexOf( appointment.patient ) == -1 )
+						{
+							patients.push( appointment.patient );
+						}
+					}
+					
+					var message:Message = new Message();
+					message.recipients = patients;
+					message.body = "All appointments for Wednesday, October 12, 2011 will be delayed by 15–20 minutes. I apologize for the inconvenience and thank you for your patience.";
+					message.urgency = Message.URGENCY_URGENT;
+					
+					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
+					evt.data = Constants.MODULE_MESSAGES;
+					evt.message = message;
+					dispatchEvent( evt );
+					
+					removeAppointments( pendingAppointments );
+					
+					onAddAppointmentCancel(null);
+				}
+				
+				pendingAppointments = null;
+			}
+			
+			private function removeAppointments( invalidAppointments:Array ):void
+			{
+				while( invalidAppointments.length )
+				{
+					removeAppointment( invalidAppointments.shift() );
+				}
+			}
+			
+			private function removeAppointment( appointment:Appointment ):void
+			{
+				appointments.removeItemAt( appointments.getItemIndex( appointment ) );
+				
+				if( selectedAppointment == appointment )
+					selectedAppointment = null;
+			}
+			
+			private function onShowAutoComplete( event:AutoCompleteEvent ):void
+			{
+				dispatchEvent( event );
+			}
+			
+			private function onHideAutoComplete( event:AutoCompleteEvent = null ):void
+			{
+				dispatchEvent( event );
+			}
+			
+			private function onSelectDate( event:CalendarLayoutChangeEvent ):void
+			{
+				if( selectedDate != event.currentTarget.selectedDate )
+				{
+					selectedDate = event.currentTarget.selectedDate;
+					
+					dirty = true;
+				}
+			}
+			
+			[Bindable]
+			override public function set currentState(value:String):void
+			{
+				super.currentState = value;
+				
+				dirty = true;
+			}
+			
+			private function updateView():void
+			{
+				if( controller == null ) return;
+				if( !dirty ) return;
+				if( !selectedDate ) return;
+				
+				var hAxis:IAxis;
+				var column:ColumnSeries;
+				
+				var renderer:AxisRenderer = new AxisRenderer();
+				renderer.placement = "top";
+				renderer.styleName = "blue12";
+				renderer.setStyle('axisStroke', xAxisStroke);
+				renderer.setStyle('showLine', true);
+				renderer.setStyle('tickPlacement', 'none');
+				renderer.setStyle('minorTickPlacement', 'none');
+				renderer.setStyle('labelAlign', 'center');
+				renderer.setStyle('labelGap',-1);
+				
+				if( currentState == MODE_DAY )
+				{
+					viewRangeStartDate = new Date( selectedDate.fullYear, selectedDate.month, selectedDate.date );
+					
+					viewRangeEndDate = new Date();
+					viewRangeEndDate.setTime( viewRangeStartDate.time + (DateUtil.DAY - DateUtil.SECOND) );
+					
+					hAxis = new CategoryAxis();
+					CategoryAxis(hAxis).dataProvider = model.selectedProviders;
+					CategoryAxis(hAxis).dataFunction = horizontalAxisCategoryFunction;
+					CategoryAxis(hAxis).ticksBetweenLabels = true;
+					renderer.axis = hAxis;
+					
+					column = new ColumnSeries();
+					column.id = "appointmentTime";
+					column.dataFunction = valueFunctionDay;
+					column.dataProvider = controller.getAppointments( -1, null, viewRangeStartDate );
+					column.minField = 'anything';
+					column.fillFunction = getFill;
+					column.styleName = "white12SemiBold";
+					column.labelFunction = getDataTip;
+					column.setStyle('labelPosition','inside');
+					column.setStyle('labelAlign','top');
+					column.setStyle('stroke',whiteStroke);
+					
+					chart.horizontalAxis = hAxis;
+					chart.horizontalAxisRenderers = [renderer];
+					chart.series = [column];
+					
+					renderer.setStyle('fontWeight','bold');
+					renderer.labelRenderer = new ClassFactory(DailyCustomChartLabel);
+					renderer.addEventListener( TeamAppointmentEvent.CANCEL_ALL, onCancelAllForProvider );
+					renderer.addEventListener( TeamAppointmentEvent.VIEW_PROVIDER, onViewProvider );
+					renderer.addEventListener( MessageEvent.MESSAGE_ALL, onMessageAllForProvider );
+					
+					dateLabel.text = Constants.DAYS[ viewRangeStartDate.day ] + ', ' + Constants.MONTHS[ viewRangeStartDate.month ] + ' ' + viewRangeStartDate.date;
+				}
+				else if( currentState == MODE_WEEK )
+				{
+					viewRangeStartDate = new Date( selectedDate.fullYear, selectedDate.month, selectedDate.date );
+					viewRangeStartDate.setTime( viewRangeStartDate.time - (DateUtil.DAY * viewRangeStartDate.day) );
+					
+					viewRangeEndDate = new Date();
+					viewRangeEndDate.setTime( viewRangeStartDate.time + (DateUtil.WEEK - DateUtil.DAY) );
+					
+					var series:Array = [];
+					
+					daysInRange = new ArrayCollection();
+					
+					for(var i:int=0;i<7;i++)
+					{
+						var day:Date = new Date( viewRangeStartDate.fullYear, viewRangeStartDate.month, viewRangeStartDate.date );
+						day.time += (DateUtil.DAY * i);
+						daysInRange.addItem( day );
+					}
+					
+					for(i=0;i<model.selectedProviders.length;i++)
+					{
+						var provider:ProviderModel = ProviderModel( model.selectedProviders.getItemAt(i) );
+						column = new ColumnSeries();
+						column.id = provider.id.toString();
+						column.labelFunction = getProviderName;
+						column.dataFunction = valueFunctionWeek;
+						column.minField = 'anything';
+						column.fillFunction = getFill;
+						column.setStyle('stroke',whiteStroke);
+						column.dataProvider = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER );
+						series.push( column );
+					}
+					
+					hAxis = new CategoryAxis();
+					CategoryAxis(hAxis).dataProvider = daysInRange;
+					CategoryAxis(hAxis).dataFunction = horizontalAxisCategoryFunction;
+					CategoryAxis(hAxis).ticksBetweenLabels = true;
+					CategoryAxis(hAxis).labelFunction = getDateLabel;
+					
+					renderer.setStyle('labelAlign','center');
+					renderer.styleName = "white12";
+					renderer.labelRenderer = new ClassFactory(WeeklyCustomChartLabel);
+					renderer.axis = hAxis;
+					
+					chart.horizontalAxis = hAxis;
+					chart.horizontalAxisRenderers = [renderer];
+					chart.series = series;
+				}
+				else if( currentState == MODE_MONTH )
+				{
+					viewRangeStartDate = new Date( selectedDate.fullYear, selectedDate.month, selectedDate.date );
+					viewRangeStartDate.setTime( viewRangeStartDate.time - (DateUtil.DAY * viewRangeStartDate.day) );
+					
+					viewRangeEndDate = new Date();
+					viewRangeEndDate.setTime( viewRangeStartDate.time + (DateUtil.WEEK - DateUtil.DAY) );
+					
+					monthLabel.text = Constants.MONTHS[selectedDate.month] + ', ' + selectedDate.fullYear;
+				}
+				
+				if( dateChooser )
+				{
+					dateChooser.selectedDate = selectedDate;
+					dateChooser.selectedRanges = [ {rangeStart:viewRangeStartDate, rangeEnd:viewRangeEndDate} ];
+				}
+				
+				yearLabel.text = viewRangeStartDate.fullYear.toString();
+			}
+			
+			private function onMessageAllForProvider( event:MessageEvent ):void
+			{
+				var provider:ProviderModel;
+				
+				for(var i:int=0;i<model.selectedProviders.length;i++)
+				{
+					if( ProviderModel(model.selectedProviders[i]).lastName == ChartLabel(event.target).data.value )
+					{
+						provider = ProviderModel(model.selectedProviders[i]);
+						
+						break;
+					}
+				}
+				
+				if( !provider ) return;
+				
+				var patients:Array = [];
+				
+				var appointments:ArrayCollection = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER, viewRangeStartDate );
+				for each(var appointment:Appointment in appointments)
+				{
+					if( patients.indexOf( appointment.patient ) == -1 )
+					{
+						patients.push( appointment.patient );
+					}
+				}
+				
+				var message:Message = new Message();
+				message.recipients = patients;
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
+				evt.data = Constants.MODULE_MESSAGES;
+				evt.message = message;
+				dispatchEvent( evt );
+			}
+			
+			private function onCancelAllForProvider( event:TeamAppointmentEvent ):void
+			{
+				var provider:ProviderModel;
+				
+				for(var i:int=0;i<model.selectedProviders.length;i++)
+				{
+					if( ProviderModel(model.selectedProviders[i]).lastName == ChartLabel(event.target).data.value )
+					{
+						provider = ProviderModel(model.selectedProviders[i]);
+						
+						break;
+					}
+				}
+				
+				if( !provider ) return;
+				
+				var appointments:ArrayCollection = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER, viewRangeStartDate );
+				
+				pendingAppointments = appointments && appointments.length ? appointments.source : [];
+				
+				confirmCancelAppointments();
+			}
+			
+			private function onMessageProviderClick():void
+			{
+				var message:Message = new Message();
+				message.recipients = [selectedAppointment.provider];
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
+				evt.data = Constants.MODULE_MESSAGES;
+				evt.message = message;
+				dispatchEvent( evt );
+			}
+			
+			private function onViewProvider( event:TeamAppointmentEvent ):void
+			{
+				selectedAppointment = null;
+				selectedProvider = null;
+				
+				for each(var provider:ProviderModel in model.selectedProviders)
+				{
+					if( provider.lastName == event.data )
+					{
+						selectedProvider = provider;
+					}
+				}
+			}
+			
+			private function selectMode(event:IndexChangeEvent):void
+			{
+				selectedAppointment = null;
+				selectedProvider = null;
+				
+				currentState = ButtonBar(event.currentTarget).selectedItem.value;
+			}
+			
+			private function valueFunctionDay(series:Series, item:Appointment, fieldName:String):Object 
+			{
+				if( fieldName == "xValue" 
+					&& series.id=="appointmentTime" )
+					return( item.provider.lastName );
+				else if( fieldName == "yValue" 
+					&& series.id=="appointmentTime" )
+					return( item.from.hours * DateUtil.HOUR + item.from.minutes * DateUtil.MINUTE );
+				else if( fieldName == "minValue" 
+					&& series.id=="appointmentTime" )
+					return( item.to.hours * DateUtil.HOUR + item.to.minutes * DateUtil.MINUTE );
+					
+				else
+					return null;
+			}
+			
+			private function valueFunctionWeek(series:Series, item:Appointment, fieldName:String):Object 
+			{
+				if( fieldName == "xValue" )
+					return( new Date( item.from.fullYear, item.from.month, item.from.date ) );
+				else if( fieldName == "yValue" )
+					return( item.from.hours * DateUtil.HOUR + item.from.minutes * DateUtil.MINUTE );
+				else if( fieldName == "minValue"  )
+					return( item.to.hours * DateUtil.HOUR + item.to.minutes * DateUtil.MINUTE );
+					
+				else
+					return null;
+			}
+			
+			private function horizontalAxisCategoryFunction(axis:AxisBase, item:*):Object 
+			{
+				if( item is Date ) 
+					return item;
+				else if( item is ProviderModel ) 
+					return ProviderModel(item).lastName;
+				return( Appointment(item).patient.id );
+			}
+			
+			//	chart label functions
+			
+			private function getTimeLabel(item:Object, prevValue:Object, axis:IAxis):String 
+			{
+				var hours:int = Math.floor( parseInt( item.toString() )/DateUtil.HOUR );
+				
+				if( hours >= 10 ) return hours.toString() + '00';
+				
+				return '0' + hours.toString() + '00';
+			}
+			
+			private function getDateLabel(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String 
+			{
+				return Constants.DAYS_ABBR[ item.day ] + ', ' + Constants.MONTHS_ABBR[ item.month ] + ' ' + item.date;
+			}
+			
+			private function getProviderName(item:Appointment):String
+			{
+				return item.provider.lastName;
+			}
+			
+			private function getDataTip(element:ChartItem, series:Series):String
+			{
+				var appointment:Appointment = Appointment( element.item );
+				return (appointment.patient ? appointment.patient.fullName : 'Conference') + '\n' + DateUtil.formatTimeFromDate( appointment.from, false, false ) + '-' + DateUtil.formatTimeFromDate( appointment.to, false, false ) + ' hrs';
+			}
+			
+			private function getFill(element:ChartItem, index:Number):IFill 
+			{
+				var appointment:Appointment = Appointment( element.item );
+				return controller.getFill( appointment.isPending ? Appointment.TYPE_PENDING : appointment.type );
+			}
+			
+			private function getCalendarModeLabel( item:Object ):String
+			{
+				var index:int = viewModes.getItemIndex( item );
+				
+				if( index == 0
+					&& selectedDate )
+				{
+					return selectedDate.date.toString();
+				}
+				
+				return null;
+			}
+			
+			//	appointment misc
+			
+			private function onAppointmentsChange( event:CollectionEvent = null ):void
+			{
+				appointments = model.appointments;
+				
+				chart.dataProvider = appointments;
+				
+				var p:Array = new Array();
+				for each(var a:Appointment in appointments)
+				{
+					if( p.indexOf( a.provider ) == -1 )
+					{
+						p.push( a.provider );
+					}
+				}
+				
+				providers = new ArrayCollection( p );
+				model.selectedProviders.source = p;
+				
+				var sort:Sort = new Sort();
+				sort.fields = [ new SortField('lastName') ];
+				model.selectedProviders.sort = sort;
+				model.selectedProviders.refresh();
+				
+				dirty = true;
+			}
+			
+			private function onSelectAppointment(event:ChartItemEvent):void
+			{
+				selectedAppointment = Appointment(ColumnChart(event.currentTarget).selectedChartItem.item);
+			}
+			
+			//	selected provider management
+			
+			private function onChangeSelectedProviders(event:Event):void
+			{
+				updateSelectedProviders();
+			}
+			
+			private function updateSelectedProviders():void
+			{
+				var _selectedProviders:Array = [];
+				
+				for each(var provider:ProviderModel in providers) 
+					if( provider.selected ) _selectedProviders.push( provider);
+				
+				model.selectedProviders.source = _selectedProviders;
+				
+				dirty = true;
+			}
+			
+			//	appointment request view/decline/accept
+			
+			private function refreshRequestList():void
+			{
+				requests.removeAllElements();
+				
+				for each(var a:Appointment in appointments)
+				{
+					if(a.isPending )
+					{
+						var item:RequestItem = new RequestItem();
+						item.appointment = a;
+						item.addEventListener( TeamAppointmentEvent.VIEW, onViewRequest );
+						item.addEventListener( TeamAppointmentEvent.DECLINE, onDeclineRequest );
+						item.addEventListener( TeamAppointmentEvent.ACCEPT, onAcceptRequest );
+						requests.addElement( item );
+					}
+				}
+				
+				header.actionCount = requests.numElements;
+			}
+			
+			private function onViewRequest(event:TeamAppointmentEvent):void
+			{
+				selectedAppointment = event.appointment;
+			}
+			
+			private function onDeclineRequest(event:TeamAppointmentEvent):void
+			{
+				removeAppointment( event.appointment );
+				
+				refreshRequestList();
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true );
+				evt.data = "The appointment request has been declined";
+				dispatchEvent( evt );
+			}
+			
+			private function onAcceptRequest(event:TeamAppointmentEvent):void
+			{
+				acceptRequestPopup = new AcceptAppointmentRequestPopup();
+				acceptRequestPopup.appointment = event.appointment;
+				acceptRequestPopup.addEventListener( TeamAppointmentEvent.ACCEPT, onAcceptConfirm );
+				acceptRequestPopup.addEventListener( Event.CANCEL, onAcceptCancel );
+				
+				PopUpManager.addPopUp( acceptRequestPopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
+				PopUpManager.centerPopUp( acceptRequestPopup );
+			}
+			
+			private function onAcceptConfirm(event:TeamAppointmentEvent):void
+			{
+				onAcceptCancel();	
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true );
+				evt.data = "The appointment request has been accepted";
+				dispatchEvent( evt );
+				
+				acceptAppointment( event.appointment );
+			}
+			
+			private function onAcceptCancel(event:Event=null):void
+			{
+				acceptRequestPopup.removeEventListener( TeamAppointmentEvent.ACCEPT, onAcceptConfirm );
+				acceptRequestPopup.removeEventListener( Event.CANCEL, onAcceptCancel );
+				
+				removePopUp( acceptRequestPopup );
+			}
+			
+			private function acceptAppointment( appointment:Appointment ):void
+			{
+				appointment.isPending = false;
+				refreshRequestList();
+			}
+			
+			//	general
+			
+			private function removePopUp( popup:IFlexDisplayObject ):void
+			{
+				if( popup 
+					&& popup.parent )
+				{
+					PopUpManager.removePopUp( popup );
+					popup = null;
+				}
+			}
+			
+			private function onPrerequisitesClick(event:MouseEvent):void
+			{
+				controller.showPrerequisites( selectedAppointment );
+			}
+			
+			private var dragOffset:Point;
+			
+			private function onDragStart(event:DragEvent):void
+			{
+				if( dragOffset ) return;
+				
+				var item:ColumnSeriesItem = ColumnSeriesItem( event.dragSource.dataForFormat("chartitems")[0] );
+				var renderer:BoxItemRenderer = BoxItemRenderer(item.itemRenderer);
+				dragOffset = new Point( renderer.mouseX, renderer.mouseY );
+			}
+			
+			private function onDragDrop(event:DragEvent):void
+			{
+				var horizontalAxisRenderer:AxisRenderer = AxisRenderer( chart.horizontalAxisRenderers[0] );
+				var verticalAxisRenderer:AxisRenderer = AxisRenderer( chart.verticalAxisRenderers[0] );
+				
+				var item:ColumnSeriesItem = ColumnSeriesItem( event.dragSource.dataForFormat("chartitems")[0] );
+				var series:ColumnSeries = ColumnSeries(item.itemRenderer.parent);
+				
+				var numColumns:int = CategoryAxis( chart.horizontalAxis ).dataProvider.length;
+				var columnWidth:Number = series.width / numColumns;
+				
+				var appointment:Appointment = Appointment(item.item);
+				
+				var coords:Point = new Point(event.localX, event.localY - dragOffset.y);
+				coords = chart.localToGlobal( coords );
+				coords = item.itemRenderer.parent.globalToLocal( coords );
+				
+				var xPercentage:Number = ( coords.x / series.width );
+				
+				var columnIndex:int = Math.max( 0, Math.floor( numColumns * xPercentage ) );
+				
+				//	things that can change for a dragged item
+				var from:Date = new Date( appointment.from.fullYear, appointment.from.month, appointment.from.date );
+				var to:Date = new Date();
+				var provider:ProviderModel;
+				
+				//	update x axis values
+				if( currentState == MODE_DAY )
+				{
+					provider = ProviderModel( ArrayCollection( CategoryAxis(chart.horizontalAxis).dataProvider ).getItemAt( columnIndex ) );
+				}
+				else if( currentState == MODE_WEEK )
+				{
+					var numSubColumns:int = model.selectedProviders.length;
+					var subColumnWidth:Number = columnWidth/numSubColumns;
+					
+					var providerIndex:int = Math.max( 0, Math.floor( (numColumns * numSubColumns) * xPercentage) ) % (columnIndex * numSubColumns);
+					providerIndex = Math.floor( Math.max( 0, (coords.x - columnWidth * columnIndex) ) / subColumnWidth );
+					provider = ProviderModel( model.selectedProviders.getItemAt( providerIndex ) );
+					
+					var date:Date = daysInRange.getItemAt( columnIndex ) as Date;
+					from = new Date( date.fullYear, date.month, date.date );
+					to = new Date( date.fullYear, date.month, date.date );
+				}
+				
+				var h:Number = series.height - horizontalAxisRenderer.gutters.top - horizontalAxisRenderer.gutters.bottom;
+				
+				//	update y axis values
+				var ySpread:Number = LinearAxis(chart.verticalAxis).maximum - LinearAxis(chart.verticalAxis).minimum;
+				var yValueNew:Number = LinearAxis(chart.verticalAxis).minimum + ( ySpread / h * (coords.y) );
+				var yFitValue:Number = DateUtil.HOUR/4;
+				
+				from.time += yValueNew;
+				from.time = Math.floor( from.time / yFitValue ) * yFitValue;	//	snap to nearest 15 mins
+
+				to.time = from.time + ( appointment.to.time - appointment.from.time );
+				
+				var appointments:ArrayCollection = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER, new Date( appointment.from.fullYear, appointment.from.month, appointment.from.date ) );
+				var conflictingAppointment:Appointment;
+				
+				for each(var a:Appointment in appointments)
+				{
+					if( a != appointment
+						&& ( ( from.time < a.from.time && to.time > a.from.time ) || ( from.time > a.from.time && from.time < a.to.time ) ) )
+					{
+						conflictingAppointment = a;
+						break;
+					}
+				}
+				
+				dragOffset = null;
+				
+				if( conflictingAppointment )
+				{
+					showAppointmentChanged( AppointmentChangedConfirmation.STATE_CONFLICT, conflictingAppointment );
+					
+					return 
+				}
+				
+				if( appointment.from.time != from.time
+					|| appointment.to.time != to.time
+					|| appointment.provider.id != provider.id )
+				{
+					appointment.from = from;
+					appointment.to = to;
+					appointment.provider = provider;
+					
+					showAppointmentChanged();
+					
+					selectedAppointment = null;
+				}
+			}
+			
+			private function navigate( direction:int = 1 ):void
+			{
+				if( direction == 0 )
+				{
+					var today:Date = MainController(AppProperties.getInstance().controller).model.today;
+					selectedDate = new Date( today.fullYear, today.month, today.date );
+				}
+				else if( currentState == MODE_MONTH )
+				{
+					selectedDate.time += (DateUtil.MONTH * direction);
+				}
+				else if( currentState == MODE_WEEK )
+				{
+					selectedDate.time += (DateUtil.WEEK * direction);
+				}
+				else if( currentState == MODE_DAY )
+				{
+					selectedDate.time += (DateUtil.DAY * direction);
+				}
+				
+				dirty = true;
+			}
+			
+			private function onDataLoaded(event:ApplicationDataEvent=null):void
+			{
+				model.removeEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
+				
+				model.appointments.addEventListener( CollectionEvent.COLLECTION_CHANGE, onAppointmentsChange ); 
+			}
+			
+			private function init():void
+			{
+				currentState = MODE_DAY;
+				
+				if( model.dataLoaded )
+				{
+					onDataLoaded();
+				}
+				else
+				{
+					model.addEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
+					
+					var evt:ApplicationDataEvent = new ApplicationDataEvent( ApplicationDataEvent.LOAD, true, false );
+					evt.data = TeamAppointmentsModel.ID;
+					dispatchEvent( evt );
+				}
+				
+				for each(var type:Object in Appointment.APPOINTMENT_TYPES)
+				{
+					var container:HGroup = new HGroup();
+					container.verticalAlign = "middle";
+					
+					var swatch:BorderContainer = new BorderContainer();
+					swatch.setStyle('borderColor', 0xFFFFFF);
+					swatch.backgroundFill = controller.getFill( type.value );
+					swatch.width = swatch.height = 10;
+					container.addElement( swatch );
+					
+					var label:Label = new Label();
+					label.text = type.label;
+					label.styleName = "whiteText11";
+					label.setStyle('paddingTop',3);
+					container.addElement( label );
+					
+					legend.addElement( container );
+				}
+				
+				var today:Date = MainController(AppProperties.getInstance().controller).model.today;
+				selectedDate = new Date( today.fullYear, today.month, today.date );
+				
+				onAppointmentsChange();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="day" />
+		<s:State name="week" />
+		<s:State name="month" />
+	</s:states>
+	
+	<fx:Declarations>
+		<mx:SolidColorStroke id="xAxisStroke" color="0xB3B3B3" alpha=".1" />
+		<!--<mx:SolidColorStroke id="yAxisStroke" color="0x86888A" alpha="1" />-->
+		<mx:SolidColorStroke id="whiteStroke" color="0xffffff" alpha=".5" />
+		<mx:SolidColorStroke id="minorTickGrayStroke" color="0xCCCCCC" alpha=".1" />
+		
+		<fx:Array id="gridBackground">
+			
+			<mx:GridLines 
+				horizontalChangeCount="1" verticalChangeCount="1"
+				horizontalTickAligned="true" verticalTickAligned="true"
+				gridDirection="both">
+				
+				<mx:horizontalStroke>
+					<mx:SolidColorStroke weight="1" color="0xFFFFFF" alpha=".4" />
+				</mx:horizontalStroke>
+				
+				<mx:verticalStroke>
+					<mx:SolidColorStroke weight="1" color="0xFFFFFF" alpha=".4" />
+				</mx:verticalStroke>
+				
+			</mx:GridLines>
+		</fx:Array>
+		
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<components1:ModuleHeader 
+		id="header" 
+		title="Appointments" icon="@Embed('/images/patientHome.png')" 
+		showSearch="true" searchPlaceholder="Search Appointments" searchFunction="{onHeaderSearch}"
+		actionSuffix="requests in need of confirmation." />
+	
+	<s:HGroup width="100%" horizontalAlign="center" paddingTop="14">
+		<s:Group>
+			
+			<mx:ViewStack 
+				id="appointmentTypeViews" 
+				width="991" height="605" 
+				borderColor="0xBDBCBC" cornerRadius="2" backgroundColor="0x4A4A49" borderVisible="true" borderStyle="solid" y="22">
+				
+				<s:NavigatorContent label="Visits/Teleconsults">
+					
+					<s:HGroup gap="0">
+						
+						<s:VGroup width="812" gap="0">
+							
+							<!--	header	-->
+							<s:BorderContainer width="100%" height="37" borderVisible="false" backgroundColor="0x717070">
+								<s:layout>
+									<s:HorizontalLayout verticalAlign="middle" paddingRight="6" paddingLeft="8"/>
+								</s:layout>
+																	
+								<!--	buttons	-->
+								<s:HGroup>
+									<s:Button label="+ Add Appointment" width="115" height="24" click="onAddAppointmentClick(event)" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+									<s:Button label="Print Appointments" width="115" height="24" click="onPrintAppointmentClick(event)" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+								</s:HGroup>
+								
+								<s:Spacer width="100%" />
+								
+								<!--	filter thing	-->
+								<s:HGroup verticalAlign="middle">
+									<s:Label text="Show:" styleName="white12" />
+									<components:MultiSelectDropDownList 
+										id="providerSelect"
+										width="141" height="24" placeholderText="All doctors" placeholderTextPartial="%n% doctors"
+										dataProvider="{providers}" requireSelection="false" labelField="fullName" 
+										itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.ProviderSelectableItemRenderer" selectionChange="onChangeSelectedProviders(event)"  />
+								</s:HGroup>
+								
+								<s:HGroup gap="-1" paddingLeft="19">
+									<s:Button width="26" height="24" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" icon="@Embed('/images/arrowLeft.png')" click="navigate(-1)" />
+									<s:Button width="26" height="24" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" icon="@Embed('/images/diamond.png')" click="navigate(0)"/>
+									<s:Button width="26" height="24" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" icon="@Embed('/images/arrowRight.png')" click="navigate(1)"/>
+								</s:HGroup>
+								
+								<!--	mode selector	-->
+								<s:HGroup>
+									
+									<s:ButtonBar 
+										id="modeSelect" 
+										styleName="greyButtonBar"
+										height="24" width="94" selectedIndex="0" requireSelection="true"
+										dataProvider="{viewModes}" iconField="icon" change="selectMode(event)"
+										labelFunction="getCalendarModeLabel"
+										firstButton="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin"
+										middleButton="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin"
+										lastButton="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" fontSize="12">
+										
+										<s:layout>
+											<s:ButtonBarHorizontalLayout gap="-2"  />
+										</s:layout>
+										
+									</s:ButtonBar>
+									
+								</s:HGroup>
+							</s:BorderContainer>
+							
+							<s:Line xFrom="0" xTo="812">
+								<s:stroke>
+									<s:SolidColorStroke color="0xffffff" weight="1" />
+								</s:stroke>
+							</s:Line>
+							
+							<s:HGroup width="812" height="568" gap="0">
+								
+								<!--	left sidebar	-->
+								<s:VGroup width="148">
+									
+									<!--	requests	-->
+									<s:VGroup width="148" height="368" paddingTop="10">
+										<s:Label text="Requests" styleName="greenBold12" width="100%" textAlign="center" />
+										<s:VGroup id="requests" gap="10" paddingLeft="15" paddingRight="15" paddingTop="4" />
+									</s:VGroup>
+									
+									<!--	calendar	-->
+									<mx:DateChooser 
+										width="148"
+										id="dateChooser" showToday="false"
+										contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" headerStyleName="dateChooserVitalGrayHeader"
+										fontSize="11"
+										change="onSelectDate(event)" />
+									
+								</s:VGroup>
+								
+								<s:Line yFrom="0" yTo="568">
+									<s:stroke>
+										<s:SolidColorStroke color="0xBDBCBC" weight="1" />
+									</s:stroke>
+								</s:Line>
+								
+								<s:BorderContainer id="calendarContainer" backgroundColor="0x3C3C3B" width="662" height="568">
+									
+									<s:HGroup x="10" y="10" gap="45" includeIn="day,week">
+										<s:Label id="yearLabel" styleName="greenBold12" width="100%" textAlign="center" />
+										<s:Label id="dateLabel" includeIn="day" styleName="white11" />
+									</s:HGroup>
+									
+									<s:Group x="10" y="10" includeIn="month" width="100%">
+										<s:Label id="monthLabel" styleName="greenBold12" width="100%" textAlign="center" />
+									</s:Group>
+									
+									<mx:ViewStack id="calendarViews" borderVisible="false" width="662" height="501" y="30" selectedIndex="{currentState==MODE_MONTH?1:0}">
+										
+										<s:NavigatorContent>
+											
+											<s:VGroup>
+												
+												<s:Scroller width="663" height="504" horizontalScrollPolicy="off">
+													
+													<s:Group>
+														
+														<mx:ColumnChart
+															id="chart"
+															backgroundElements="{gridBackground}" columnWidthRatio="1"
+															dataProvider="{appointments}" showDataTips="false" width="650" height="1720" paddingLeft="40" 
+															selectionMode="single" change="onSelectAppointment(event)" chartClick="{selectedAppointment=null;selectedProvider=null}"
+															dragEnabled="true" dropEnabled="true" dragEnter="onDragStart(event)" dragDrop="onDragDrop(event)"
+															itemRollOverColor="0x00adee" itemSelectionColor="0x00adee" creationComplete="updateView()" >
+															
+															<mx:horizontalAxis>
+																<mx:CategoryAxis id="xAxis" dataProvider="{model.selectedProviders}" dataFunction="horizontalAxisCategoryFunction" ticksBetweenLabels="true" />
+															</mx:horizontalAxis>
+															
+															<mx:verticalAxis>
+																<mx:LinearAxis id="yAxis" minimum="{DateUtil.HOUR*6}" maximum="{DateUtil.HOUR*24}" labelFunction="getTimeLabel" interval="{DateUtil.HOUR}" minorInterval="{DateUtil.HOUR/4}" direction="inverted" alignLabelsToInterval="false" />
+															</mx:verticalAxis>
+															
+															<mx:series>
+																<mx:ColumnSeries id="appointmentTime" dataFunction="valueFunctionDay" fillFunction="getFill" minField="x" labelFunction="getDataTip" labelAlign="bottom" labelPosition="inside" styleName="white12SemiBold" columnWidthRatio="1" />
+															</mx:series>
+															
+															<mx:horizontalAxisRenderers>
+																<mx:AxisRenderer id="hAxisRenderer" axis="{xAxis}" axisStroke="{xAxisStroke}" styleName="blue12" showLine="true" placement="top" tickPlacement="none" minorTickPlacement="none" labelAlign="center" />
+															</mx:horizontalAxisRenderers>
+															
+															<mx:verticalAxisRenderers>
+																<mx:AxisRenderer axis="{yAxis}" styleName="white12" showLine="false" tickPlacement="none" minorTickPlacement="inside" minorTickLength="650" minorTickStroke="{minorTickGrayStroke}" labelAlign="bottom" labelGap="0" />
+															</mx:verticalAxisRenderers>
+															
+														</mx:ColumnChart>
+														
+													</s:Group>
+													
+												</s:Scroller>
+												
+											</s:VGroup>
+											
+										</s:NavigatorContent>
+										
+										<s:NavigatorContent>
+											<calendar:CalendarComponent 
+												id="monthView" 
+												width="662" height="505" paddingLeft="-2"
+												itemRenderer="edu.newschool.piim.healthboard.components.calendar.CalendarItem" 
+												selectedDate="{selectedDate}" change="onSelectDate(event)"  />
+										</s:NavigatorContent>
+										
+									</mx:ViewStack>
+									
+									<s:BorderContainer backgroundColor="0x4A4A49" width="100%" height="34" x="-1" y="{calendarContainer.height-34}" borderVisible="false">
+										<s:HGroup id="legend" gap="63" paddingLeft="43" paddingTop="8" />
+									</s:BorderContainer>
+									
+									<s:Line xFrom="0" xTo="662" y="{calendarContainer.height-4}">
+										<s:stroke>
+											<s:SolidColorStroke color="0xBDBCBC" weight="1" />
+										</s:stroke>
+									</s:Line>
+									
+								</s:BorderContainer>
+								
+							</s:HGroup>
+							
+						</s:VGroup>
+						
+						<!--	right sidebar	-->
+						<s:VGroup width="180">
+							
+							<s:HGroup>
+								
+								<s:Line yFrom="0" yTo="607">
+									<s:stroke>
+										<s:SolidColorStroke color="0xBDBCBC" weight="1" />
+									</s:stroke>
+								</s:Line>
+								
+								<!--	appointment details	-->
+								<s:VGroup  width="180" paddingTop="20">
+									<s:Label text="Appointment Details" styleName="greenBold12" width="100%" textAlign="center" />
+									
+									<s:Label text="Select an appointment to view details" styleName="gray9Italic" width="100%" textAlign="center" visible="{selectedAppointment==null &amp;&amp; selectedProvider==null &amp;&amp; providerScheduleList.showOverview == false}" includeInLayout="{selectedAppointment==null &amp;&amp; selectedProvider==null &amp;&amp; providerScheduleList.showOverview == false}" />
+									
+									<s:VGroup visible="{selectedAppointment!=null}" includeInLayout="{selectedAppointment!=null}" paddingTop="15" gap="0">
+										
+										<s:Label id="providerName" styleName="blue9SemiBold" width="100%" textAlign="center" />
+										
+										<s:Spacer height="10" />
+										
+										<s:Line xFrom="5" xTo="170">
+											<s:stroke>
+												<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+											</s:stroke>
+										</s:Line>
+										
+										<s:Spacer height="10" />
+										
+										<mx:FormItem label="From:" labelWidth="60" height="16" labelStyleName="white9Bold">
+											<s:Label text="{selectedAppointment.fromDateString()}" styleName="white9" paddingLeft="-10" />
+										</mx:FormItem>
+										<mx:FormItem label="To:" labelWidth="60" height="16" labelStyleName="white9Bold">
+											<s:Label text="{selectedAppointment.toDateString()}" styleName="white9" paddingLeft="-10" />
+										</mx:FormItem>
+										<mx:FormItem label="Location:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+											<mx:Text text="{selectedAppointment.location}" styleName="white9" paddingLeft="-10" />
+										</mx:FormItem>
+										
+										<s:Spacer height="10" />
+										
+										<s:Line xFrom="5" xTo="170">
+											<s:stroke>
+												<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+											</s:stroke>
+										</s:Line>
+										
+										<s:Spacer height="10" />
+										
+										<mx:FormItem label="Patient" labelWidth="60" height="16" labelStyleName="white9Bold">
+											<mx:LinkButton id="patientName" styleName="linkBtnBlue" fontSize="9" paddingLeft="-10"/>
+										</mx:FormItem>
+										<mx:FormItem label="Telephone:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+											<s:Label text="{selectedAppointment.patient.phone}" styleName="white9" paddingLeft="-10"/>
+										</mx:FormItem>
+										<mx:FormItem label="Email:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+											<s:Label text="{selectedAppointment.patient.email}" styleName="white9" paddingLeft="-10"/>
+										</mx:FormItem>
+										
+										<s:Spacer height="10" />
+										
+										<s:Line xFrom="5" xTo="170">
+											<s:stroke>
+												<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+											</s:stroke>
+										</s:Line>
+										
+										<s:Spacer height="10" />
+										
+										<mx:FormItem label="Type:" labelWidth="60" height="16" labelStyleName="white9Bold" >
+											<s:Label text="{Appointment.getTypeByKey(selectedAppointment.type).label}" styleName="white9" fontSize="9" paddingLeft="-10"/>
+										</mx:FormItem>
+										<mx:FormItem label="Reason:" labelWidth="60" height="16" labelStyleName="white9Bold">
+											<s:Label text="{selectedAppointment.reason}" styleName="white9" paddingLeft="-10"/>
+										</mx:FormItem>
+										
+										<s:Spacer height="10" />
+										
+										<s:Line xFrom="5" xTo="170">
+											<s:stroke>
+												<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+											</s:stroke>
+										</s:Line>
+										
+										<s:Spacer height="10" />
+										
+										<mx:FormItem label="Prerequisite:" labelWidth="60" labelStyleName="white9Bold">
+											<s:VGroup id="prerequisites" paddingLeft="-10" gap="-4"/>
+										</mx:FormItem>
+										
+										<s:Spacer height="10" />
+										
+										<s:Line xFrom="5" xTo="170">
+											<s:stroke>
+												<s:SolidColorStroke color="0x9E9E9E" weight="1" />
+											</s:stroke>
+										</s:Line>
+										
+										<s:Spacer height="15" />
+										
+										<mx:LinkButton label="Send Message" styleName="linkBtnGray" fontSize="9" width="100%" textAlign="center" click="onMessageProviderClick()" />
+										
+										<s:Spacer height="15" />
+										
+										<s:VGroup horizontalAlign="center" width="100%">
+											<s:Button label="{selectedAppointment.isPending?'Accept Request':'Edit Appointment'}" width="122" height="24" click="onEditOrAcceptAppointmentClick(event)" styleName="tightButton" />
+											<s:Button label="{selectedAppointment.isPending?'Decline Request':'Cancel Appointment'}" width="122" height="24" click="onCancelOrDeclineAppointmentClick(event)" styleName="tightButton" />
+										</s:VGroup>
+										
+									</s:VGroup>
+									
+									<appointments:ProviderScheduleList 
+										id="providerScheduleList" 
+										visible="{providerScheduleList.providers!=null &amp;&amp; selectedAppointment==null}" includeInLayout="{providerScheduleList.visible}"
+										date="{selectedDate}" 
+										paddingTop="15" paddingLeft="10" 
+										showOverview="{currentState==MODE_MONTH}"
+										titleAlign="{currentState==MODE_MONTH?'left':'center'}"
+										titleStyleName="{currentState==MODE_MONTH?'white9Bold':'blue9SemiBold'}" />
+									
+								</s:VGroup>
+								
+							</s:HGroup>
+							
+						</s:VGroup>
+						
+					</s:HGroup>
+					
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent label="Classes">
+				</s:NavigatorContent>
+				
+			</mx:ViewStack>
+			
+			<plus:TabBarPlus gap="6" cornerRadius="4" styleName="messagesTabs" closePolicy="never" dataProvider="{appointmentTypeViews}" />
+			
+		</s:Group>
+	</s:HGroup>	
+	
+</s:NavigatorContent>

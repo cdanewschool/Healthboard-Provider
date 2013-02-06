@@ -1,0 +1,1109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:components="edu.newschool.piim.healthboard.components.*"
+	xmlns:general="edu.newschool.piim.healthboard.view.components.general.*"
+	label="Patient Search"
+	creationComplete="init()" >
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.components.MultiSelectDropDownList;
+			import edu.newschool.piim.healthboard.view.components.general.TextInputPlaceholder;
+			import edu.newschool.piim.healthboard.components.popups.PatientsCustomizeTable;
+			import edu.newschool.piim.healthboard.components.UserProfileCard;
+			
+			import edu.newschool.piim.healthboard.controller.MainController;
+			import edu.newschool.piim.healthboard.controller.ProviderPatientsController;
+			
+			import edu.newschool.piim.healthboard.events.PatientSearchEvent;
+			import edu.newschool.piim.healthboard.events.ProfileEvent;
+			
+			import edu.newschool.piim.healthboard.model.PatientModel;
+			import edu.newschool.piim.healthboard.model.PatientsModel;
+			import edu.newschool.piim.healthboard.model.ProviderModel;
+			import edu.newschool.piim.healthboard.model.SavedSearch;
+			import edu.newschool.piim.healthboard.model.UserModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.events.CloseEvent;
+			import mx.events.CollectionEvent;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.collections.Sort;
+			import spark.collections.SortField;
+			import spark.components.TextInput;
+			import spark.events.DropDownEvent;
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable] public var controller:ProviderPatientsController = MainController(AppProperties.getInstance().controller).patientsController as ProviderPatientsController;
+			[Bindable] public var model:PatientsModel = controller.model as PatientsModel;
+			
+			[Bindable] private var user:ProviderModel;
+			
+			public var savedSearch:SavedSearch;
+
+			[Bindable] private var showAdvancedSearch:Boolean;
+			
+			private function get fields():Array
+			{
+				var fields:Array = 
+					[ 
+						patientModuleSearch, selectPatientUrgencies, selectPatientModules, selectPatientTeams,
+						selectAdvancedSearchParameters,
+						txtAdvFirstLast, txtAdvBirthDay, sexSelect, maritalStatusSelect, txtAdvBirthMonth, txtAdvBirthYear, txtAdvAgeFrom, txtAdvAgeTo, bloodTypeSelect, familyPrefixSelect,	//	row 1
+						txtAdvID, txtAdvSSN, txtAdvSponsorSSN, raceSelect, txtAddress, //	row 2
+						serviceBranchSelect, serviceStatusSelect, txtRank, txtOccupation,	//	row 3
+						txtDeploymentFromDay, txtDeploymentFromMonth, txtDeploymentFromYear, txtDeploymentToDay, txtDeploymentToMonth, txtDeploymentToYear, txtStationed,	//	row 4
+						txtVisitFromDay, txtVisitFromMonth, txtVisitFromYear, txtVisitToDay, txtVisitToMonth, txtVisitToYear, txtCaseNumber, txtHealthConditions //	row 5
+					];
+				return fields;
+			}
+			
+			private function calculateAge( birthdate:Date ):uint 
+			{
+				var now:Date = new Date();
+				var dob:Date = birthdate;
+				
+				var years:uint = now.getFullYear() - dob.getFullYear();
+				
+				if (dob.month > now.month || (dob.month == now.month && dob.date > now.date)) years--;
+				
+				return years;
+			}
+			
+			private function getIdLabel(patient:PatientModel,column:DataGridColumn):String
+			{
+				return patient.id.toString();
+			}
+			
+			private function patientsModuleSearchFilter():void 
+			{
+				model.patients.filterFunction = filterPatients;
+				model.patients.refresh();
+				searchResults.visible = true;
+				
+				update();
+			}
+			
+			private function filterPatients(item:PatientModel):Boolean 
+			{
+				var pattern:RegExp = new RegExp( "[^]*" + patientModuleSearch.text + "[^]*", "i" );
+				var searchFilter:Boolean = (patientModuleSearch.text == patientModuleSearch.placeholder || patientModuleSearch.text == '') ? true : (pattern.test(item.lastName) || pattern.test(item.firstName));
+				
+				//	row 1 > urgency
+				var urgencyFilter:Boolean = multiSelectMatch( model.optionsUrgencies, item.urgency );
+				
+				//	TODO: modules
+				
+				//	row 1 > teams
+				var teamsFilter:Boolean = multiSelectMatch( model.optionsTeams, item.team );
+				
+				//	row 2 > name
+				var patternAdvName:RegExp = new RegExp("[^]*"+txtAdvFirstLast.text+"[^]*", "i");
+				var searchAdvName:Boolean = (txtAdvFirstLast.text == txtAdvFirstLast.placeholder || txtAdvFirstLast.text == '') ? true : (patternAdvName.test(item.lastName) || patternAdvName.test(item.firstName));
+				
+				//	row 2 > birthday
+				var birthDayFilter:Boolean = (txtAdvBirthDay.text == txtAdvBirthDay.placeholder || txtAdvBirthDay.text == '') ? true : item.birthdate.date == parseInt(txtAdvBirthDay.text);
+				var birthMonthFilter:Boolean = (txtAdvBirthMonth.text == txtAdvBirthMonth.placeholder || txtAdvBirthMonth.text == '') ? true : item.birthdate.month == parseInt(txtAdvBirthMonth.text);
+				var birthYearFilter:Boolean = (txtAdvBirthYear.text == txtAdvBirthYear.placeholder || txtAdvBirthYear.text == '') ? true : item.birthdate.fullYear == parseInt(txtAdvBirthYear.text);
+				
+				//	row 2 > sex
+				var sexFilter:Boolean = multiSelectMatch( model.optionsSex, item.sex );
+				
+				//	row 2 > age
+				var minAgeFilter:Boolean = (txtAdvAgeFrom.text == txtAdvAgeFrom.placeholder || txtAdvAgeFrom.text == '') ? true : calculateAge(item.birthdate) >= uint(txtAdvAgeFrom.text);
+				var maxAgeFilter:Boolean = (txtAdvAgeTo.text == txtAdvAgeTo.placeholder || txtAdvAgeTo.text == '') ? true : calculateAge(item.birthdate) <= uint(txtAdvAgeTo.text);
+				
+				//	row 2 > bloodType
+				var bloodTypeFilter:Boolean = multiSelectMatch( model.optionsBloodType, item.bloodType );
+				
+				//	TODO row2 > marital status, family prefix
+				
+				//	row 3 > id
+				var patternID:RegExp = new RegExp("[^]*"+txtAdvID.text+"[^]*", "i");
+				var idFilter:Boolean = (txtAdvID.text == txtAdvID.placeholder || txtAdvID.text == '') ? true : patternID.test(item.id.toString());
+				
+				//	row 3 > patient ssn
+				var patternSSN:RegExp = new RegExp("[^]*"+txtAdvSSN.text+"[^]*", "i");
+				var ssnFilter:Boolean = (txtAdvSSN.text == txtAdvSSN.placeholder || txtAdvSSN.text == '') ? true : patternSSN.test(item.ssn);
+				
+				//	row 3 > sponsor ssn
+				var patternSponsorSSN:RegExp = new RegExp("[^]*"+txtAdvSponsorSSN.text+"[^]*", "i");
+				var sponsorSSNFilter:Boolean = (txtAdvSponsorSSN.text == txtAdvSponsorSSN.placeholder || txtAdvSponsorSSN.text == '') ? true : patternSponsorSSN.test(item.sponsorSSN);
+				
+				//	row 3 > race
+				var raceFilter:Boolean = multiSelectMatch( model.optionsRace, item.race );
+				
+				//	TODO row3 > address
+				
+				//	row 4 > service branch
+				var serviceBranchFilter:Boolean = multiSelectMatch( model.optionsServiceBranch, item.serviceBranch );
+				//	row 4 > service status
+				var serviceStatusFilter:Boolean = multiSelectMatch( model.optionsServiceStatus, item.serviceStatus );
+				//	row 4 > rank
+				var patternRank:RegExp = new RegExp( "[^]*" + txtRank.text + "[^]*", "i");
+				var rankFilter:Boolean = (txtRank.text == txtRank.placeholder || txtRank.text == '') ? true : patternRank.test( item.serviceRank );
+				//	row 4 > occupation
+				var patternOccupation:RegExp = new RegExp( "[^]*" + txtOccupation.text + "[^]*", "i");
+				var occupationFilter:Boolean = (txtOccupation.text == txtOccupation.placeholder || txtOccupation.text == '') ? true : patternOccupation.test( item.occupation );
+				
+				//	TODO row5 > deployment range, deployment area
+				
+				//	row 6 > health conditions
+				var patternHealthCondition:RegExp = new RegExp( "[^]*" + txtHealthConditions.text + "[^]*", "i");
+				var healthConditionFilter:Boolean = (txtHealthConditions.text == txtHealthConditions.placeholder || txtHealthConditions.text == '') ? true : patternHealthCondition.test( item.conditions );
+				
+				//	TODO row6 > visit range, case number
+				
+				var row1Filter:Boolean = searchFilter && urgencyFilter && teamsFilter;
+				var row2Filter:Boolean = searchAdvName && birthDayFilter && birthMonthFilter && birthYearFilter && sexFilter && minAgeFilter && maxAgeFilter && bloodTypeFilter;
+				var row3Filter:Boolean = idFilter && ssnFilter && sponsorSSNFilter && raceFilter;
+				var row4Filter:Boolean = serviceBranchFilter && serviceStatusFilter && rankFilter && occupationFilter;
+				var row5Filter:Boolean = true;
+				var row6Filter:Boolean = healthConditionFilter;
+				
+				return row1Filter && row2Filter && row3Filter && row4Filter && row5Filter && row6Filter;
+			}
+			
+			private function multiSelectMatch( options:ArrayCollection, value:* ):Boolean
+			{
+				var selectedValues:Array = [];
+				
+				for each(var item:Object in options.source) 
+				{
+					if( item.selected ) selectedValues.push( item.data );
+				}
+				
+				for each(var val:* in selectedValues) 
+				{
+					if( val is String && value is String ) 
+					{
+						if( String(val).toLowerCase() == String(value).toLowerCase() )
+						{
+							return true;
+						}
+					} 
+					else if( val == value ) 
+					{
+						return true;
+					}
+				}
+				
+				return false;
+			}
+			
+			private function update():void 
+			{
+				if( !patientsProfileList || !patientsLinks ) return;
+				
+				patientsProfileList.removeAllElements();
+				patientsLinks.removeAllElements();
+				
+				var link:LinkButton;
+				
+				for each(var item:UserModel in model.patients) 
+				{
+					var profile:UserProfileCard = new UserProfileCard();
+					profile.title = "Patient Profile";
+					profile.user = item;
+					profile.setStyle('dropShadowVisible',false);
+					profile.addEventListener( ProfileEvent.SELECT, onPatientProfileClick );
+					patientsProfileList.addElement( profile );
+					
+					link = new LinkButton();
+					link.data = item;
+					link.label = item.firstName + ' ' + item.lastName;
+					link.setStyle('paddingLeft',0);
+					link.setStyle('fontSize',12);
+					link.setStyle('color',"0xAEDEE4");
+					link.setStyle("textRollOverColor","0xAEDEE4");
+					link.setStyle("textSelectedColor","0xAEDEE4");
+					link.setStyle("skin", null);
+					
+					link.addEventListener( MouseEvent.CLICK, onPatientNameClick );
+					patientsLinks.addElement( link );
+				}
+			}
+			
+			protected function onPatientProfileClick(event:ProfileEvent):void
+			{
+				var user:PatientModel = PatientModel( event.user );
+				controller.showPatient( user );
+			}
+			
+			protected function onPatientNameClick(event:MouseEvent):void 
+			{
+				var user:PatientModel = PatientModel( LinkButton(event.currentTarget).data );
+				controller.showPatient( user );
+			}
+			
+			public function getSearchOptions():Object
+			{
+				var values:Object = {};
+				
+				for each(var field:* in fields)
+				{
+					if( field is MultiSelectDropDownList )
+					{
+						values[field.id] = MultiSelectDropDownList(field).dataProvider;
+					}
+					else if( field is TextInputPlaceholder )
+					{
+						var text:String = TextInputPlaceholder(field).text;
+						values[field.id] = text != TextInputPlaceholder(field).placeholder ? text : '';
+					}
+					else
+					{
+					}
+				}
+				
+				return values;
+			}
+			
+			protected function clearPatientSearch():void 
+			{
+				for each(var field:* in fields)
+				{
+					if( field is MultiSelectDropDownList )
+					{
+						for each(var obj:Object in MultiSelectDropDownList(field).dataProvider) obj.selected = true;
+					}
+					else if( field is TextInputPlaceholder )
+					{
+						TextInputPlaceholder(field).text = TextInputPlaceholder(field).placeholder;
+					}
+					else
+					{
+						trace('s');
+					}
+				}
+				
+				patientsModuleSearchFilter();
+				
+				searchResults.visible = false;
+			}
+			
+			protected function onDropDownOpen(event:DropDownEvent):void 
+			{
+				var chooser:DateChooser = event.currentTarget as DateChooser;
+				
+				if( chooser ) chooser.addEventListener(MouseEvent.MOUSE_DOWN, stopPropagation, false, 0, true);
+			}
+			
+			protected function stopPropagation(event:Event):void 
+			{
+				var chooser:DateChooser = event.currentTarget as DateChooser;
+				
+				event.stopImmediatePropagation();
+				
+				if( chooser ) chooser.removeEventListener(MouseEvent.MOUSE_DOWN, stopPropagation);
+			}
+			
+			private function onDateChooserChange(event:CalendarLayoutChangeEvent,dropDown:DropDownList,yearInput:TextInput,monthInput:TextInput,dayInput:TextInput):void 
+			{
+				var dateChooser:DateChooser = event.currentTarget as DateChooser;
+				
+				dayInput.text = dateChooser.selectedDate.date < 10 ? '0' + dateChooser.selectedDate.date : String(dateChooser.selectedDate.date);
+				monthInput.text = dateChooser.displayedMonth < 9 ? '0' + (dateChooser.displayedMonth + 1) : String(dateChooser.displayedMonth + 1);
+				yearInput.text = String( dateChooser.displayedYear );
+				
+				dropDown.closeDropDown(true);					
+			}
+			
+			private function sortPatients(field:String):void 
+			{
+				model.patients.sort = new Sort();
+				model.patients.sort.fields = [new SortField(field)];
+				model.patients.refresh();
+				update();
+				
+				highlightSelectedSort(field);
+			}
+			
+			private function highlightSelectedSort(field:String = "none"):void 
+			{
+				btnSortUrgency.styleName = btnSortID.styleName = btnSortLastName.styleName = btnSortFirstName.styleName = btnSortAge.styleName = btnSortRank.styleName = btnSortBranch.styleName = btnSortSex.styleName = btnSortBloodType.styleName = btnSortLastVisit.styleName = "messageFolderNotSelected";
+				
+				if(field == "urgency") btnSortUrgency.styleName = "messageFolderSelected";
+				else if(field == "id") btnSortID.styleName = "messageFolderSelected";
+				else if(field == "lastName") btnSortLastName.styleName = "messageFolderSelected";
+				else if(field == "firstName") btnSortFirstName.styleName = "messageFolderSelected";
+				else if(field == "birthdate") btnSortAge.styleName = "messageFolderSelected";
+				else if(field == "serviceRank") btnSortRank.styleName = "messageFolderSelected";
+				else if(field == "serviceBranch") btnSortBranch.styleName = "messageFolderSelected";
+				else if(field == "sex") btnSortSex.styleName = "messageFolderSelected";
+				else if(field == "bloodType") btnSortBloodType.styleName = "messageFolderSelected";
+				else if(field == "lastVisit") btnSortLastVisit.styleName = "messageFolderSelected";
+			}
+			
+			private function customizeTable():void
+			{
+				var myPatientsCustomizeTable:PatientsCustomizeTable = PatientsCustomizeTable( PopUpManager.createPopUp(this, PatientsCustomizeTable) as spark.components.TitleWindow);
+				myPatientsCustomizeTable.addEventListener( CloseEvent.CLOSE, onCustomizeTableClose );
+				
+				PopUpManager.centerPopUp(myPatientsCustomizeTable);
+			}
+			
+			private function onCustomizeTableClose( event:CloseEvent ):void
+			{
+				(event.currentTarget as PatientsCustomizeTable).removeEventListener( CloseEvent.CLOSE, onCustomizeTableClose );
+				
+				updateDataGridFields();
+			}
+			
+			private function onPatientClick(event:ListEvent):void 
+			{
+				var user:PatientModel = PatientModel( event.itemRenderer.data );
+				controller.showPatient( user );
+			}
+			
+			private function getPatientAge(item:PatientModel, column:DataGridColumn):String 
+			{
+				var now:Date = new Date();
+				var dob:Date = item.birthdate;
+				
+				var years:Number = now.getFullYear() - dob.getFullYear();
+				
+				if (dob.month > now.month || (dob.month == now.month && dob.date > now.date)) years--;
+				
+				return String(years);
+			}
+			
+			private function updateDataGridFields():void
+			{
+				for each(var column:DataGridColumn in patientsList.columns)
+				{
+					column.visible = model.displayedFields.getItemIndex( column.dataField ) > -1;
+				}
+			}
+			
+			private function updateVisibleSearchParams():void
+			{
+				for each(var searchParam:Object in model.searchParameters)
+				{
+					var id:String = searchParam.id;
+					
+					try
+					{
+						this[id].visible = searchParam.selected;
+					}
+					catch(e:Error)
+					{
+						trace( e.message );
+					}
+				}
+			}
+			
+			private function initSavedSearch():void
+			{
+				if( savedSearch )
+				{
+					for(var field:String in savedSearch.values)
+					{
+						if( this[field] is MultiSelectDropDownList )
+						{
+							var values:ArrayCollection = savedSearch.values[field];
+							var dropDown:MultiSelectDropDownList = MultiSelectDropDownList( this[field] );
+							
+							for(var i:int=0;i<dropDown.dataProvider;i++)
+							{
+								if( dropDown.dataProvider.getItemAt(i).data == values.getItemAt(i).data )
+								{
+									dropDown.dataProvider.getItemAt(i).selected = values.getItemAt(i).selected;
+								}
+							}
+						}
+						else if( this[field] is TextInput )
+						{
+							var value:String = savedSearch.values[field];
+							
+							if( value != '' )
+							{
+								TextInput( this[field] ).text = value;
+							}
+						}
+					}
+					
+					label = savedSearch.name;
+					
+					showAdvancedSearch = true;
+					
+					patientsModuleSearchFilter();
+				}
+			}
+			
+			private function openSavedSearch(event:IndexChangeEvent):void
+			{
+				var search:SavedSearch = DropDownList(event.currentTarget).dataProvider.getItemAt( event.newIndex ) as SavedSearch;
+				
+				var evt:PatientSearchEvent = new PatientSearchEvent( PatientSearchEvent.NEW_TAB, true );
+				evt.search = search;
+				dispatchEvent( evt );
+				
+				DropDownList(event.currentTarget).selectedIndex = -1;
+			}
+			
+			private function onNewSearchTabClick():void
+			{
+				dispatchEvent( new PatientSearchEvent( PatientSearchEvent.NEW_TAB, true ) );
+			}
+			
+			private function onSaveSearchTabClick():void
+			{
+				dispatchEvent( new PatientSearchEvent( PatientSearchEvent.SAVE_TAB, true ) );
+			}
+			
+			private function init():void
+			{
+				user = AppProperties.getInstance().controller.model.user as ProviderModel;
+				
+				showAdvancedSearch = model.showAdvancedSearch;
+				
+				initSavedSearch();
+				
+				updateVisibleSearchParams();
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" />
+	</s:layout>
+	
+	<s:BorderContainer height="37" width="100%" backgroundColor="0x706F6F">
+		
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingRight="6" paddingLeft="8"/>
+		</s:layout>
+		
+		<s:Button label="+ New Search Tab" height="24" styleName="buttonText" click="onNewSearchTabClick()" />
+		<s:Button label="Save Search Tab" height="24" styleName="buttonText" click="onSaveSearchTabClick()" />
+		
+		<s:DropDownList 
+			id="dropDownPatientsSearchTabs" 
+			width="150" height="24" 
+			styleName="buttonText" prompt="Open Saved Search Tab" 
+			dataProvider="{user.savedSearches}" enabled="{user.savedSearches &amp;&amp; user.savedSearches.length}"
+			labelField="name" change="openSavedSearch(event)" /> 
+		
+		<s:Spacer width="100%" />
+		
+		<s:HGroup gap="0">
+			<s:Button id="btnPatientsChart" width="29" height="24" icon="@Embed('/images/btnProfile.png')" chromeColor="{viewsPatients.selectedIndex==0?0xFF931E:0xB3B3B3}" click="{viewsPatients.selectedIndex = 0;update();}" />
+			<s:Button id="btnPatientsList" width="29" height="24" icon="@Embed('/images/btnCalendarList.png')" chromeColor="{viewsPatients.selectedIndex==1?0xFF931E:0xB3B3B3}" click="{viewsPatients.selectedIndex = 1;}" />
+		</s:HGroup>
+		
+	</s:BorderContainer>
+	
+	<s:Line xFrom="0" xTo="974">
+		<s:stroke>
+			<s:SolidColorStroke color="#3F3E3D"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:VGroup width="100%" paddingTop="8">
+		
+		<s:Label text="Keyword" fontSize="12" fontWeight="bold" color="0xFFFFFF" paddingLeft="10" />
+		
+		<s:HGroup width="100%" paddingLeft="10" paddingRight="10">
+			
+			<s:HGroup gap="-1" paddingTop="-2" paddingBottom="5">
+				<general:TextInputPlaceholder id="patientModuleSearch" placeholder="First Name, Last Name, or ID Number" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" height="24" paddingLeft="7" paddingTop="5" width="228" change="patientsModuleSearchFilter();" />
+				<s:Button styleName="searchButtonIcon" width="24" height="24" />
+			</s:HGroup>
+			
+			<s:Spacer width="100%" />
+			
+			<s:HGroup verticalAlign="middle">
+				
+				<s:Label text="Only show patients with" color="0xFFFFFF" />
+				
+				<components:MultiSelectDropDownList
+					id="selectPatientUrgencies"
+					width="130" height="24" placeholderText="All urgency" placeholderTextPartial="%n% urgency"
+					dataProvider="{model.optionsUrgencies}" requireSelection="false"
+					itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" 
+					selectionChange="patientsModuleSearchFilter()" />
+				
+				<components:MultiSelectDropDownList
+					id="selectPatientModules"
+					width="130" height="24" placeholderText="All modules" placeholderTextPartial="%n% modules"
+					dataProvider="{model.optionsModules}" requireSelection="false"
+					itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" />
+				
+			</s:HGroup>
+			
+			<s:Spacer width="100%" />
+			
+			<s:HGroup verticalAlign="middle">
+				
+				<s:Label text="Show patients from" color="0xFFFFFF" />
+				
+				<components:MultiSelectDropDownList
+					id="selectPatientTeams"
+					width="130" height="24" placeholderText="All teams" placeholderTextPartial="%n% teams"
+					dataProvider="{model.optionsTeams}" requireSelection="false"
+					itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" 
+					selectionChange="patientsModuleSearchFilter()" /> 
+			</s:HGroup>
+			
+		</s:HGroup>
+		
+		<s:HGroup paddingTop="-10">
+			<mx:LinkButton id="btnAdvancedSearch" label="{!showAdvancedSearch ? 'Advanced Search »' : 'Cancel Advanced Search »'}" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnAdvancedSearch.styleName='linkBtnUnderline';" rollOut="btnAdvancedSearch.styleName='linkBtn';" click="showAdvancedSearch = !showAdvancedSearch;" />
+			<s:Spacer width="{!showAdvancedSearch ? 16 : -20}" />
+			<mx:LinkButton id="btnClearSearchCriteria" label="Clear Search Criteria »" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnClearSearchCriteria.styleName='linkBtnUnderline';" rollOut="btnClearSearchCriteria.styleName='linkBtn';" click="clearPatientSearch();" />
+		</s:HGroup>
+		
+		<s:HGroup paddingLeft="10">
+			<s:Line xFrom="0" xTo="967">
+				<s:stroke>
+					<s:SolidColorStroke color="#5B5B5B"/>
+				</s:stroke>
+			</s:Line>
+		</s:HGroup>
+	</s:VGroup>
+	
+	<s:VGroup id="advancedSearch" visible="{showAdvancedSearch}" includeInLayout="{showAdvancedSearch}" paddingTop="8" paddingLeft="10" color="0xFFFFFF" width="100%">
+		
+		<components:MultiSelectDropDownList
+			id="selectAdvancedSearchParameters" 
+			width="171" height="24" placeholderText="Show %n% Search Parameters" 
+			placeholderTextPartial="Show %n% Search Parameters"
+			dataProvider="{model.searchParameters}" requireSelection="false"
+			itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" 
+			selectionChange="updateVisibleSearchParams();"/>
+		
+		<!--	ROW 1	 -->
+		<s:HGroup 
+			id="searchColumn1" 
+			width="100%" paddingTop="7" paddingBottom="7"
+			visible = "{fullname.visible || birthday.visible || sex.visible || maritalstatus.visible || agerange.visible || bloodtype.visible || familyprefix.visible}" 
+			includeInLayout = "{searchColumn1.visible}">
+			
+			<!--	name	-->
+			<s:VGroup id="fullname" gap="5" paddingRight="21">
+				<general:TextInputPlaceholder id="txtAdvFirstLast" width="171" height="24" placeholder="e.g., Arthur Adams" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" change="patientsModuleSearchFilter();" />
+				<s:Label text="First and/or last name" fontStyle="italic" />
+			</s:VGroup>
+			
+			<!--	birthday	-->
+			<s:VGroup id="birthday" gap="5" paddingRight="65">
+				
+				<s:HGroup verticalAlign="middle" gap="3">
+					
+					<general:TextInputPlaceholder id="txtAdvBirthDay" width="26" height="24" placeholder="dd" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter();" />
+					<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtAdvBirthMonth" width="26" height="24" placeholder="mm" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter();" />
+					<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtAdvBirthYear" width="31" height="24" placeholder="year" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="4" change="patientsModuleSearchFilter();" />
+					
+					<s:DropDownList id="dropDownAdvCalendar" dropShadowVisible="false" skinClass="edu.newschool.piim.healthboard.view.skins.general.MyCalendarDropDownListSkin" itemRenderer="spark.skins.spark.DefaultComplexItemRenderer" width="25" requireSelection="false" click="event.stopImmediatePropagation()" open="onDropDownOpen(event)">
+						<s:dataProvider>
+							<s:ArrayList>
+								<mx:DateChooser 
+									id="advBirthDateChooser" showToday="true" yearNavigationEnabled="true"
+									contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" 
+									headerStyleName="dateChooserVitalGrayHeader"
+									fontSize="11" change="onDateChooserChange(event,dropDownAdvCalendar,txtAdvBirthYear,txtAdvBirthMonth,txtAdvBirthDay); patientsModuleSearchFilter();" />
+							</s:ArrayList>
+						</s:dataProvider>
+					</s:DropDownList>
+					
+				</s:HGroup>
+				
+				<s:Label text="Date of Birth" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+			<!--	sex	-->
+			<s:VGroup id="sex" gap="5" paddingRight="10">
+				
+				<components:MultiSelectDropDownList
+					id="sexSelect"
+					width="74" height="24" placeholderText="All" placeholderTextPartial="%n% selections"
+					dataProvider="{model.optionsSex}" requireSelection="false"
+					itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" 
+					selectionChange="patientsModuleSearchFilter();" />
+				
+				<s:Label text="Sex" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+			<!--	marital status	-->
+			<s:VGroup id="maritalstatus" gap="5" paddingRight="10">
+				
+				<components:MultiSelectDropDownList
+					id="maritalStatusSelect"
+					width="74" height="24" placeholderText="All" placeholderTextPartial="%n% selections"
+					dataProvider="{model.optionsMaritalStatus}" requireSelection="false"
+					itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" 
+					selectionChange="patientsModuleSearchFilter();" />
+				
+				<s:Label text="Marital Status" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+			<!--	age range	-->
+			<s:VGroup id="agerange" paddingRight="20">
+				
+				<s:HGroup verticalAlign="middle">
+					
+					<s:Label text="From" color="0xBCBABB" fontSize="12" />
+					<general:TextInputPlaceholder id="txtAdvAgeFrom" width="26" height="24" placeholder="##" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter()" />
+					
+					<s:Label text="To" color="0xBCBABB" fontSize="12" />
+					<general:TextInputPlaceholder id="txtAdvAgeTo" width="26" height="24" placeholder="##" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter()" />
+					
+				</s:HGroup>
+				
+				<s:Label text="Age or Age Range" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+			<!--	blood type	-->
+			<s:VGroup id="bloodtype" gap="5" paddingRight="30">
+				
+				<components:MultiSelectDropDownList
+					id="bloodTypeSelect"
+					width="74" height="24" placeholderText="All" placeholderTextPartial="%n% selections"
+					dataProvider="{model.optionsBloodType}" requireSelection="false"
+					itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" 
+					selectionChange="patientsModuleSearchFilter();" />
+				
+				<s:Label text="Blood Type" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+			<s:VGroup id="familyprefix" gap="5">
+				
+				<components:MultiSelectDropDownList
+					id="familyPrefixSelect"
+					width="127" height="24" placeholderText="All" placeholderTextPartial="%n% selections"
+					dataProvider="{model.optionsFamilyPrefixes}" requireSelection="false"
+					itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" />
+				
+				<s:Label text="Family Prefix" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<!--	ROW 2	 -->
+		<s:HGroup 
+			id="searchColumn2" 
+			visible="{idnumber.visible || patientssn.visible || sponsorssn.visible || race.visible || address.visible}" includeInLayout="{searchColumn2.visible}">
+			
+			<!--	id number	-->
+			<s:VGroup id="idnumber" gap="5" paddingRight="38">
+				<general:TextInputPlaceholder id="txtAdvID" width="82" height="24" placeholder="#########" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" change="patientsModuleSearchFilter()" />
+				<s:Label text="ID Number" fontStyle="italic" />
+			</s:VGroup>
+			
+			<!--	patient social security number	-->
+			<s:VGroup id="patientssn" gap="5" paddingRight="52">
+				<general:TextInputPlaceholder id="txtAdvSSN" width="82" height="24" placeholder="###-##-####" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" change="patientsModuleSearchFilter()" />
+				<s:Label text="Patient's SSN" fontStyle="italic" />
+			</s:VGroup>
+			
+			<!--	sponsor social security number	-->
+			<s:VGroup id="sponsorssn" paddingRight="50">
+				<general:TextInputPlaceholder id="txtAdvSponsorSSN" width="82" height="24" placeholder="###-##-####" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" change="patientsModuleSearchFilter()" />
+				<s:Label text="Sponsor's SSN" fontStyle="italic" />
+			</s:VGroup>
+			
+			<!--	race	-->
+			<s:VGroup id="race" gap="5" paddingRight="10">
+				
+				<components:MultiSelectDropDownList
+					id="raceSelect"
+					width="170" height="24" placeholderText="All" placeholderTextPartial="%n% selections"
+					dataProvider="{model.optionsRace}" requireSelection="false"
+					itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" 
+					selectionChange="patientsModuleSearchFilter();" />
+				
+				<s:Label text="Race" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+			<!--	sponsor social security number	-->
+			<s:VGroup id="address" gap="5">
+				<general:TextInputPlaceholder id="txtAddress" width="370" height="24" placeholder="e.g., 8901 Wisconsin Avenue, Bethesda, MD" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" change="patientsModuleSearchFilter()" />
+				<s:Label text="Address" fontStyle="italic" />
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<!--	ROW 3	 -->
+		<s:HGroup 
+			id="searchColumn3" 
+			visible="{servicebranch.visible || servicestatus.visible || rank.visible || occupation.visible}" includeInLayout="{searchColumn3.visible}">
+			
+			<!--	service branch	-->
+			<s:VGroup id="servicebranch" gap="5" paddingRight="50">
+				
+				<components:MultiSelectDropDownList
+					id="serviceBranchSelect"
+					width="123" height="24" placeholderText="All" placeholderTextPartial="%n% selections"
+					dataProvider="{model.optionsServiceBranch}" requireSelection="false"
+					itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" 
+					selectionChange="patientsModuleSearchFilter();" />
+				
+				<s:Label text="Service Branch" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+			<!--	service branch	-->
+			<s:VGroup id="servicestatus" gap="5" paddingRight="100">
+				
+				<components:MultiSelectDropDownList
+					id="serviceStatusSelect"
+					width="123" height="24" placeholderText="All" placeholderTextPartial="%n% selections"
+					dataProvider="{model.optionsServiceStatus}" requireSelection="false"
+					itemRenderer="edu.newschool.piim.healthboard.components.itemrenderers.selectable.SelectableItemRenderer" styleName="buttonText" 
+					selectionChange="patientsModuleSearchFilter();" />
+				
+				<s:Label text="Status" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+			<!--	rank	-->
+			<s:VGroup id="rank" gap="5">
+				<general:TextInputPlaceholder id="txtRank" width="370" height="24" placeholder="e.g., Sergeant" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" change="patientsModuleSearchFilter()" />
+				<s:Label text="Rank" fontStyle="italic" />
+			</s:VGroup>
+			
+			<!--	occupation	-->
+			<s:VGroup id="occupation" gap="5">
+				<general:TextInputPlaceholder id="txtOccupation" width="170" height="24" placeholder="e.g., Infantry" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" change="patientsModuleSearchFilter()" />
+				<s:Label text="Occupation" fontStyle="italic" />
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<!--	ROW 4	 -->
+		<s:HGroup 
+			id="searchColumn4" 
+			visible="{deploymentrange.visible || stationed.visible}" includeInLayout="{searchColumn4.visible}">
+			
+			<!--	deployment range	-->
+			<s:VGroup id="deploymentrange" paddingRight="90">
+				
+				<s:HGroup verticalAlign="middle" gap="3">
+					
+					<!--	from	-->
+					<s:Label text="From" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtDeploymentFromDay" width="26" height="24" placeholder="dd" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter();" />
+					<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtDeploymentFromMonth" width="26" height="24" placeholder="mm" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter();" />
+					<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtDeploymentFromYear" width="31" height="24" placeholder="year" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="4" change="patientsModuleSearchFilter();" />
+					
+					<s:DropDownList id="deploymentRangeDropDownFrom" dropShadowVisible="false" skinClass="edu.newschool.piim.healthboard.view.skins.general.MyCalendarDropDownListSkin" itemRenderer="spark.skins.spark.DefaultComplexItemRenderer" width="25" requireSelection="false" click="event.stopImmediatePropagation()" open="onDropDownOpen(event)">
+						<s:dataProvider>
+							<s:ArrayList>
+								<mx:DateChooser 
+									showToday="true" yearNavigationEnabled="true"
+									contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" 
+									headerStyleName="dateChooserVitalGrayHeader"
+									fontSize="11" change="onDateChooserChange(event,deploymentRangeDropDownFrom,txtDeploymentFromYear,txtDeploymentFromMonth,txtDeploymentFromDay); patientsModuleSearchFilter();" />
+							</s:ArrayList>
+						</s:dataProvider>
+					</s:DropDownList>
+					
+					<s:Spacer width="5" />
+					
+					<!--	to	-->
+					<s:Label text="To" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtDeploymentToDay" width="26" height="24" placeholder="dd" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter();" />
+					<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtDeploymentToMonth" width="26" height="24" placeholder="mm" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter();" />
+					<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtDeploymentToYear" width="31" height="24" placeholder="year" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="4" change="patientsModuleSearchFilter();" />
+					
+					<s:DropDownList id="deploymentRangeDropDownTo" dropShadowVisible="false" skinClass="edu.newschool.piim.healthboard.view.skins.general.MyCalendarDropDownListSkin" itemRenderer="spark.skins.spark.DefaultComplexItemRenderer" width="25" requireSelection="false" click="event.stopImmediatePropagation()" open="onDropDownOpen(event)">
+						<s:dataProvider>
+							<s:ArrayList>
+								<mx:DateChooser 
+									showToday="true" yearNavigationEnabled="true"
+									contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" 
+									headerStyleName="dateChooserVitalGrayHeader"
+									fontSize="11" change="onDateChooserChange(event,deploymentRangeDropDownTo,txtDeploymentToYear,txtDeploymentToMonth,txtDeploymentFromDay); patientsModuleSearchFilter();" />
+							</s:ArrayList>
+						</s:dataProvider>
+					</s:DropDownList>
+					
+				</s:HGroup>
+				
+				<s:Label text="Years of Service or Deployment Range" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+			<!--	stationed	-->
+			<s:VGroup id="stationed" gap="5">
+				
+				<general:TextInputPlaceholder id="txtStationed" width="370" height="24" placeholder="e.g., Fort Bragg or Afghanistan" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" change="patientsModuleSearchFilter()" />
+				<s:Label text="Stationed at or Deployment Area" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<!--	ROW 5	 -->
+		<s:HGroup 
+			id="searchColumn5" 
+			visible="{visitrange.visible || casenumber.visible || healthconditions.visible}" includeInLayout="{searchColumn5.visible}">
+			
+			<!--	visit range	-->
+			<s:VGroup id="visitrange" paddingRight="90">
+				
+				<s:HGroup verticalAlign="middle" gap="3">
+					
+					<!--	from	-->
+					<s:Label text="From" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtVisitFromDay" width="26" height="24" placeholder="dd" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter();" />
+					<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtVisitFromMonth" width="26" height="24" placeholder="mm" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter();" />
+					<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtVisitFromYear" width="31" height="24" placeholder="year" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="4" change="patientsModuleSearchFilter();" />
+					
+					<s:DropDownList id="visitRangeDropDownFrom" dropShadowVisible="false" skinClass="edu.newschool.piim.healthboard.view.skins.general.MyCalendarDropDownListSkin" itemRenderer="spark.skins.spark.DefaultComplexItemRenderer" width="25" requireSelection="false" click="event.stopImmediatePropagation()" open="onDropDownOpen(event)">
+						<s:dataProvider>
+							<s:ArrayList>
+								<mx:DateChooser 
+									showToday="true" yearNavigationEnabled="true"
+									contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" 
+									headerStyleName="dateChooserVitalGrayHeader"
+									fontSize="11" change="onDateChooserChange(event,visitRangeDropDownFrom,txtVisitFromYear,txtVisitFromMonth,txtVisitFromDay); patientsModuleSearchFilter();" />
+							</s:ArrayList>
+						</s:dataProvider>
+					</s:DropDownList>
+					
+					<s:Spacer width="5" />
+					
+					<!--	to	-->
+					<s:Label text="To" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtVisitToDay" width="26" height="24" placeholder="dd" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter();" />
+					<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtVisitToMonth" width="26" height="24" placeholder="mm" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="2" change="patientsModuleSearchFilter();" />
+					<s:Label text="/" fontSize="11" fontStyle="italic" color="0x989898" />
+					
+					<general:TextInputPlaceholder id="txtVisitToYear" width="31" height="24" placeholder="year" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" textAlign="center" maxChars="4" change="patientsModuleSearchFilter();" />
+					
+					<s:DropDownList id="visitRangeDropDownTo" dropShadowVisible="false" skinClass="edu.newschool.piim.healthboard.view.skins.general.MyCalendarDropDownListSkin" itemRenderer="spark.skins.spark.DefaultComplexItemRenderer" width="25" requireSelection="false" click="event.stopImmediatePropagation()" open="onDropDownOpen(event)">
+						<s:dataProvider>
+							<s:ArrayList>
+								<mx:DateChooser 
+									showToday="true" yearNavigationEnabled="true"
+									contentBackgroundColor="0x3C3C3B" borderColor="0x4D4D4D" color="0xEDEDED" headerColors="[0xF7F7F7,0xB3B3B3]" selectionColor="0x585858" rollOverColor="0x3C3C3B" todayColor="0xD6D6D6" 
+									headerStyleName="dateChooserVitalGrayHeader"
+									fontSize="11" change="onDateChooserChange(event,visitRangeDropDownTo,txtVisitToYear,txtVisitToMonth,txtVisitToDay); patientsModuleSearchFilter();" />
+							</s:ArrayList>
+						</s:dataProvider>
+					</s:DropDownList>
+					
+				</s:HGroup>
+				
+				<s:Label text="Last Visit or Last Visit range" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+			<!--	case number	-->
+			<s:VGroup id="casenumber" gap="5" paddingRight="60">
+				
+				<general:TextInputPlaceholder id="txtCaseNumber" width="121" height="24" placeholder="#########" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" change="patientsModuleSearchFilter()" />
+				<s:Label text="Case Number" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+			<!--	health conditions	-->
+			<s:VGroup id="healthconditions" gap="5">
+				
+				<general:TextInputPlaceholder id="txtHealthConditions" width="370" height="24" placeholder="e.g., Hypertension, laryngitis" contentBackgroundAlpha="0" color="0xCCCBCB" fontStyle="italic" change="patientsModuleSearchFilter()" />
+				<s:Label text="Special health conditions" fontStyle="italic" />
+				
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<s:HGroup paddingTop="10">
+			<s:Line xFrom="0" xTo="967">
+				<s:stroke>
+					<s:SolidColorStroke color="#5B5B5B"/>
+				</s:stroke>
+			</s:Line>
+		</s:HGroup>
+		
+		<s:HGroup gap="2" paddingTop="10">
+			<s:Button label="Clear Search" click="clearPatientSearch()" />
+		</s:HGroup>
+		
+	</s:VGroup>
+	
+	<s:VGroup id="searchResults" paddingTop="10" visible="false">
+
+		<s:HGroup color="0xCCCCCC" fontStyle="italic" gap="2" paddingLeft="10">
+			<s:Label text="There are"  />
+			<s:Label text="{model.patients.length}" color="0xFF931E" fontWeight="bold" />
+			<s:Label text="patients who fit your criteria." />
+		</s:HGroup>
+		
+		<s:HGroup paddingTop="6">
+			<s:Line xFrom="0" xTo="989">
+				<s:stroke>
+					<s:SolidColorStroke color="#BDBCBC" />
+				</s:stroke>
+			</s:Line>
+		</s:HGroup>
+		
+		<mx:ViewStack id="viewsPatients" selectedIndex="1" resizeToContent="true">
+			
+			<s:NavigatorContent width="100%" height="100%">
+				
+				<s:layout>
+					<s:HorizontalLayout />
+				</s:layout>
+				
+				<s:VGroup paddingTop="9" paddingLeft="12" gap="7" styleName="whiteText13">
+					<mx:LinkButton id="btnSortUrgency" label="Sort by Urgency" click="sortPatients('urgency');" />
+					<mx:LinkButton id="btnSortID" label="Sort by Patient ID" click="sortPatients('id');" />
+					<mx:LinkButton id="btnSortLastName" label="Sort by Last Name" styleName="messageFolderSelected" click="sortPatients('lastName');" />
+					<mx:LinkButton id="btnSortFirstName" label="Sort by First Name" click="sortPatients('firstName');" />
+					<mx:LinkButton id="btnSortAge" label="Sort by Age" click="sortPatients('birthdate');" />
+					<mx:LinkButton id="btnSortRank" label="Sort by Rank" click="sortPatients('serviceRank');" />
+					<mx:LinkButton id="btnSortBranch" label="Sort by Service Branch" click="sortPatients('serviceBranch');" />
+					<mx:LinkButton id="btnSortSex" label="Sort by Sex" click="sortPatients('sex');" />
+					<mx:LinkButton id="btnSortBloodType" label="Sort by Blood Type" click="sortPatients('bloodType');" />
+					<mx:LinkButton id="btnSortLastVisit" label="Sort by Last Visit" click="sortPatients('lastVisit');" />
+				</s:VGroup>
+				
+				<s:VGroup paddingTop="-7">
+					<s:Line yFrom="0" yTo="496">
+						<s:stroke>
+							<s:SolidColorStroke color="#7C7C7C" alpha="0.8" />
+						</s:stroke>
+					</s:Line>
+				</s:VGroup>
+				
+				<s:Scroller width="100%" height="{showAdvancedSearch ? 330 : 489}">
+					
+					<s:HGroup width="100%" paddingLeft="9" paddingTop="10">
+						
+						<s:VGroup id="patientsLinks" gap="-5" width="130" />
+						
+						<s:TileGroup 
+							id="patientsProfileList" 
+							horizontalGap="19" verticalGap="19" 
+							requestedColumnCount="2" columnWidth="{UserProfileCard.WIDTH}" 
+							paddingBottom="20" />
+						
+					</s:HGroup>
+					
+				</s:Scroller>
+				
+			</s:NavigatorContent>
+			
+			<s:NavigatorContent width="100%" height="100%">
+				
+				<s:layout>
+					<s:VerticalLayout />
+				</s:layout>
+				
+				<mx:LinkButton id="btnCustomizeTable" label="Customize Table" color="0xAEDEE4" textRollOverColor="0xAEDEE4" textSelectedColor="0xAEDEE4" skin="{null}" rollOver="btnCustomizeTable.styleName='linkBtnUnderline';" rollOut="btnCustomizeTable.styleName='linkBtn';" click="customizeTable()" paddingLeft="10" />
+				
+				<mx:DataGrid 
+					id="patientsList" 
+					dataProvider="{model.patients}" 
+					styleName="standardDataGrid"
+					width="989" height="{!showAdvancedSearch ? 462 : 303}"
+					fontSize="10" verticalAlign="middle"
+					headerStyleName="dataGridHeaderAlternative" headerHeight="30" paddingTop="6"
+					rowHeight="27" variableRowHeight="true" horizontalGridLines="false" 
+					itemClick="onPatientClick(event)" creationComplete="updateDataGridFields()">
+					
+					<mx:columns>
+						<mx:DataGridColumn dataField="urgency" headerText="Urgency" width="68">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox width="68" horizontalAlign="center">
+										<fx:Script>
+											<![CDATA[
+												import edu.newschool.piim.healthboard.enum.UrgencyType;
+											]]>
+										</fx:Script>
+										<s:Image source="{UrgencyType.iconUrgent}" toolTip="Urgent" visible="{data.urgency == UrgencyType.URGENT}" includeInLayout="{data.urgency == UrgencyType.URGENT}" />
+										<s:Image source="{UrgencyType.iconSomewhatUrgent}" toolTip="Somewhat urgent" visible="{data.urgency == UrgencyType.SOMEWHAT_URGENT}" includeInLayout="{data.urgency == UrgencyType.SOMEWHAT_URGENT}" />
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn dataField="idNumber" headerText="ID Number" width="95" labelFunction="getIdLabel" />
+						<mx:DataGridColumn dataField="photo" headerText="Photo" width="95">
+							<mx:itemRenderer>
+								<fx:Component>
+									<mx:HBox horizontalAlign="center" creationComplete="setSource();">
+										<fx:Script>		
+											<![CDATA[
+												import edu.newschool.piim.healthboard.model.PatientModel;
+												
+												private function setSource():void 
+												{
+													imgPatient.source = PatientModel(data).getProfilePictureURL();
+												}
+												
+												private function onTargetUserImageLoadError(event:IOErrorEvent):void 
+												{
+													Image(event.currentTarget).source = PatientModel(data).getDefaultProfilePictureURL();
+												}
+											]]>
+										</fx:Script>
+										<s:Image id="imgPatient" source="/assets/images/patients/small/default.jpg" ioError="onTargetUserImageLoadError(event)" />
+									</mx:HBox>
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+						<mx:DataGridColumn dataField="team" headerText="Team" width="62" />
+						<mx:DataGridColumn dataField="lastName" headerText="Last Name" width="101" />
+						<mx:DataGridColumn dataField="firstName" headerText="First Name" width="100" />
+						<mx:DataGridColumn dataField="serviceBranch" headerText="Service Branch" />
+						<mx:DataGridColumn dataField="serviceRank" headerText="Rank" width="148" />
+						<mx:DataGridColumn dataField="occupation" headerText="Occupation" />
+						<mx:DataGridColumn dataField="sexLabel" headerText="Sex" width="58"  />
+						<mx:DataGridColumn dataField="lastVisitLabel" headerText="Last Visit" width="80" />
+						<mx:DataGridColumn dataField="age" headerText="Age" labelFunction="getPatientAge" width="50" />
+						<mx:DataGridColumn dataField="birthdateLabel" headerText="DOB" width="80" />
+						<mx:DataGridColumn dataField="bloodType" headerText="Blood Type" />
+						<mx:DataGridColumn dataField="race" headerText="Race" />
+						<mx:DataGridColumn dataField="conditions" headerText="Health Conditions" width="130" />
+					</mx:columns>
+				</mx:DataGrid>
+				
+			</s:NavigatorContent>
+			
+		</mx:ViewStack>
+		
+	</s:VGroup>
+	
+</s:NavigatorContent>

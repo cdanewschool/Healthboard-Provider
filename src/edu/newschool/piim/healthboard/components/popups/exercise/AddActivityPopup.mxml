@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:popups="edu.newschool.piim.healthboard.view.components.popups.*"
+	xmlns:general="edu.newschool.piim.healthboard.view.components.general.*"
+	xmlns:net="flash.net.*"
+	width="453" height="178"
+	controlBarVisible="true" 
+	skinClass="edu.newschool.piim.healthboard.view.skins.general.myHeaderlessTitleWindow"
+	creationComplete="init()">
+	
+	<fx:Declarations>
+		<net:FileReference id="fileReference" select="onBrowseForFile(event);" complete="onBrowseForFileComplete(event);" />
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.model.FileUpload;
+			import edu.newschool.piim.healthboard.model.module.exercise.ExerciseActivity;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			[Bindable] private var imageAttachment:FileUpload;
+			
+			public var activity:ExerciseActivity;
+			
+			private function save():void
+			{
+				activity = new ExerciseActivity( activityName.text, imageAttachment.data, new Date() );
+				
+				var evt:CloseEvent = new CloseEvent( CloseEvent.CLOSE, true, false, Alert.YES );
+				dispatchEvent( evt );
+			}
+			
+			private function cancel():void
+			{
+				PopUpManager.removePopUp( this );
+			}
+			
+			private function clear():void
+			{
+				activityName.text = "";
+				
+			}
+			
+			private function browseAttachment(evt:MouseEvent):void 
+			{
+				fileReference.browse();
+			}
+			
+			private function onBrowseForFile(evt:Event):void 
+			{
+				fileReference.load();
+			}
+			
+			private function onBrowseForFileComplete(evt:Event):void 
+			{
+				imageAttachment = new FileUpload( fileReference.name, fileReference.size, fileReference.data );
+			}
+			
+			private function init():void
+			{
+				controlBarVisible = false;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" gap="10" horizontalAlign="left" />
+	</s:layout>
+	
+	<s:Label text="Add new activity to list" styleName="darkGrayBold16" paddingBottom="5" />
+	
+	<mx:Form paddingLeft="5" paddingBottom="5" paddingTop="0">
+		
+		<mx:FormItem label="Activity Name:" color="0x000000" labelWidth="100">
+			<general:TextInputPlaceholder id="activityName" width="326" height="24" placeholder="" />
+		</mx:FormItem>
+		
+		<mx:FormItem label="Icon:" color="0x000000" labelWidth="100">
+			<s:VGroup>
+				<general:TextInputPlaceholder text="{imageAttachment.name}" width="326" height="24" placeholder="" editable="false" />
+				<general:MainLinkButton label="Browse From file" styleName="linkBtnDarBlue" fontSize="12" click="browseAttachment(event)" paddingLeft="-10" />
+			</s:VGroup>
+		</mx:FormItem>
+		
+	</mx:Form>
+	
+	<s:Line xFrom="0" xTo="424">
+		<s:stroke>
+			<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:Button label="Save" width="55" height="24" click="save();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+		<s:Button label="Clear" width="55" height="24" click="clear();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+		<s:Button label="Cancel" width="55" height="24" click="cancel();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+	</s:HGroup>
+	
+</s:TitleWindow>

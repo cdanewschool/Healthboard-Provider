@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:components="edu.newschool.piim.healthboard.view.components.*" 
+	xmlns:plus="net.flexwiz.blog.tabbar.plus.*" 
+	xmlns:general="edu.newschool.piim.healthboard.view.components.general.*" 
+	width="100%" height="100%" 
+	creationPolicy="all" 
+	creationComplete="init()" xmlns:tabs="edu.newschool.piim.healthboard.components.tabs.*">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.components.popups.SaveSearchPopup;
+			import edu.newschool.piim.healthboard.components.tabs.PatientSearch;
+			
+			import edu.newschool.piim.healthboard.events.PatientSearchEvent;
+			
+			import edu.newschool.piim.healthboard.model.ProviderModel;
+			import edu.newschool.piim.healthboard.model.SavedSearch;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			private var pendingSearch:SavedSearch;
+			
+			private var user:ProviderModel;
+			
+			private function onOpenNewTab(event:PatientSearchEvent):void
+			{
+				pendingSearch = event.search;
+				
+				var popup:SaveSearchPopup = PopUpManager.createPopUp( AppProperties.getInstance().controller.application, SaveSearchPopup ) as SaveSearchPopup;
+				popup.addEventListener( CloseEvent.CLOSE, onPopupClose );
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function onSaveTab(event:PatientSearchEvent):void
+			{
+				var search:PatientSearch = viewStack.selectedChild as PatientSearch;
+				var savedSearch:SavedSearch = search.savedSearch;
+				
+				//	this is a new search
+				if( !savedSearch )
+				{
+					var popup:SaveSearchPopup = PopUpManager.createPopUp( AppProperties.getInstance().controller.application, SaveSearchPopup ) as SaveSearchPopup;
+					popup.addEventListener( CloseEvent.CLOSE, onPopupClose );
+					PopUpManager.centerPopUp( popup );
+				}
+				
+				//	this is a saved search
+				else
+				{
+					savedSearch.values = (viewStack.selectedChild as PatientSearch).getSearchOptions();
+					
+					saveSearch( savedSearch );
+				}
+			}
+			
+			private function onPopupClose(event:CloseEvent):void
+			{
+				var popup:SaveSearchPopup = event.currentTarget as SaveSearchPopup;
+				
+				var save:Boolean = false;
+				var exists:Boolean = false;
+				
+				if( event.detail == Alert.YES )
+				{
+					//	save new search
+					save = true;
+					
+					//	see if it exists
+					var savedSearches:ArrayCollection = ProviderModel(AppProperties.getInstance().controller.model.user).savedSearches;
+					if( !savedSearches ) savedSearches = new ArrayCollection( [] );
+					
+					var searchName:String = popup.searchName.text;
+					
+					for each(var search:SavedSearch in savedSearches)
+					{
+						if( search.name.toLowerCase() == searchName.toLowerCase() )
+						{
+							exists = true;
+							save = false;
+							
+							Alert.show( "There is already a saved search by that name" );
+							
+							return;
+						}
+					}
+				}
+				
+				if( !exists 
+					&& save )
+				{
+					var newSearch:SavedSearch = new SavedSearch();
+					newSearch.name = searchName;
+					newSearch.values = (viewStack.selectedChild as PatientSearch).getSearchOptions();
+					saveSearch( newSearch );
+				}
+				
+				openNewSearch( pendingSearch );
+				
+				pendingSearch = null;
+					
+				PopUpManager.removePopUp( popup );
+			}
+			
+			private function openNewSearch( savedSearch:SavedSearch = null ):void
+			{
+				var search:PatientSearch;
+				
+				if( savedSearch )
+				{
+					for(var i:int=0;i<viewStack.numChildren;i++)
+					{
+						search = viewStack.getChildAt(i) as PatientSearch;
+						
+						if( search.savedSearch
+							&& search.savedSearch.name == savedSearch.name )
+						{
+							viewStack.selectedIndex = i;
+							return;
+						}
+					}
+				}
+				
+				search = new PatientSearch();
+				search.savedSearch = savedSearch;
+				
+				viewStack.addChild( search );
+				viewStack.selectedIndex = viewStack.numChildren - 1;
+			}
+			
+			private function saveSearch( search:SavedSearch ):void
+			{
+				user.savedSearches && user.savedSearches.length ? user.savedSearches.addItem( search ) : user.savedSearches = new ArrayCollection( [ search ] );
+				
+				(viewStack.selectedChild as PatientSearch).label = search.name;
+				(viewStack.selectedChild as PatientSearch).savedSearch = search;
+				
+				AppProperties.getInstance().controller.persistentData.data.savedSearches = user.savedSearches;
+				AppProperties.getInstance().controller.persistentData.flush();
+			}
+			
+			private function init():void
+			{
+				user = AppProperties.getInstance().controller.model.user as ProviderModel;
+				
+				addEventListener( PatientSearchEvent.NEW_TAB, onOpenNewTab );
+				addEventListener( PatientSearchEvent.SAVE_TAB, onSaveTab );
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<components:ModuleHeader 
+		id="header"
+		icon="@Embed('/images/patientHome.png')"
+		title="Patients" actionCount="0" 
+		showSearch="true" searchPlaceholder="Search Patient" showBackground="true" />
+	
+	<s:VGroup paddingLeft="9" paddingTop="15" width="100%" height="100%">
+		
+		<s:Group width="100%" height="100%" creationComplete="{tabsPatients.setTabClosePolicy(0, false);}">
+			
+			<mx:ViewStack 
+				id="viewStack" 
+				x="0" y="22" 
+				width="991" height="100%"
+				borderColor="0xBDBCBC" cornerRadius="2" backgroundColor="0x3D3D3C" borderVisible="true" borderStyle="solid" resizeToContent="true">
+				
+				<tabs:PatientSearch label="Patient Search" />
+				
+			</mx:ViewStack>
+			
+			<plus:TabBarPlus id="tabsPatients" gap="6" cornerRadius="4" styleName="messagesTabs" closePolicy="always" dataProvider="{viewStack}" />
+			
+		</s:Group>
+		
+	</s:VGroup>
+	
+</s:NavigatorContent>

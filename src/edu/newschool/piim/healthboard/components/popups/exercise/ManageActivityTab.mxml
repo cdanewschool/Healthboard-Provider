@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:exercise="edu.newschool.piim.healthboard.components.popups.exercise.*"
+	width="100%">
+	
+	<fx:Declarations>
+		
+		<s:LinearGradient id="gradientFill" rotation="0">
+			<s:GradientEntry color="0xCCCCCC" alpha="1" ratio="0" />
+			<s:GradientEntry color="0xE6E6E6" alpha="1" ratio="1" />
+		</s:LinearGradient>
+		
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.view.components.popups.DeleteConfirmation;
+			
+			import edu.newschool.piim.healthboard.model.module.exercise.ExerciseActivity;
+			import edu.newschool.piim.healthboard.model.module.exercise.ExerciseActivityGroup;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.components.TitleWindow;
+			
+			[Bindable] public var exerciseGroup:ExerciseActivityGroup;
+			
+			private function onAddNewActivityClick():void
+			{
+				var popup:AddActivityPopup = AddActivityPopup( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, AddActivityPopup) as TitleWindow );
+				popup.addEventListener( CloseEvent.CLOSE, onAddActivityClose );
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function onAddActivityClose(event:CloseEvent):void
+			{
+				var popup:AddActivityPopup = event.currentTarget as AddActivityPopup;
+				popup.removeEventListener( CloseEvent.CLOSE, onAddActivityClose );
+				PopUpManager.removePopUp( popup );
+				
+				if( event.detail == Alert.YES )
+				{
+					exerciseGroup.activities.addItem( popup.activity );
+				}
+			}
+			
+			private function onChangeAllActivitiesClick(event:MouseEvent):void
+			{
+			}
+			
+			public function onDeleteActivityClick(event:MouseEvent,activity:ExerciseActivity):void
+			{
+				var popup:DeleteConfirmation = DeleteConfirmation( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, DeleteConfirmation) as TitleWindow );
+				popup.data = activity;
+				popup.addEventListener( CloseEvent.CLOSE, onConfirmDeleteClose );
+				
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function onConfirmDeleteClose(event:CloseEvent):void
+			{
+				var popup:DeleteConfirmation = event.currentTarget as DeleteConfirmation;
+				popup.removeEventListener( CloseEvent.CLOSE, onConfirmDeleteClose );
+				PopUpManager.removePopUp( popup );
+				
+				var activity:ExerciseActivity = popup.data as ExerciseActivity;
+				
+				if( event.detail == Alert.YES
+					&& activity )
+				{
+					exerciseGroup.activities.removeItemAt( exerciseGroup.activities.getItemIndex( activity ) );
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" />
+	</s:layout>
+	
+	<s:HGroup verticalAlign="middle">
+		<s:Label text="Purpose" />
+		<s:TextInput text="{exerciseGroup.purpose}" width="380" height="24" />
+	</s:HGroup>
+	
+	<s:BorderContainer width="429" height="26" backgroundFill="{gradientFill}" borderVisible="false">
+		
+		<s:layout>
+			<s:HorizontalLayout paddingLeft="5" paddingRight="5" verticalAlign="middle" />
+		</s:layout>
+		
+		<s:Label styleName="darkGray12 italic" text="Activities" />
+		
+		<s:HGroup width="100%" horizontalAlign="right">
+			<mx:LinkButton styleName="linkBtnDarkBlue" label="+Add New Activity" click="onAddNewActivityClick()" />
+		</s:HGroup>
+		
+	</s:BorderContainer>
+	
+	<s:Scroller width="100%" maxHeight="360" verticalScrollPolicy="off">
+		
+		<s:DataGroup width="100%" dataProvider="{exerciseGroup.activities}">
+			
+			<s:layout>
+				<s:VerticalLayout gap="0" />
+			</s:layout>
+			
+			<s:itemRenderer>
+				
+				<fx:Component>
+					
+					<mx:VBox width="100%" height="{maximized ? 330 : 26}">
+						
+						<fx:Script>
+							<![CDATA[
+								import edu.newschool.piim.healthboard.model.module.exercise.ExerciseActivity;
+								
+								[Bindable] private var maximized:Boolean = false;
+								[Bindable] private var bgColor:uint;
+								
+								override public function set data(value:Object):void
+								{
+									super.data = value;
+									
+									bgColor = outerDocument.exerciseGroup.activities.getItemIndex( data ) % 2 == 1 ? 0xFFFFFF : 0xECECEC;
+								}
+							]]>
+						</fx:Script>
+						
+						<s:BorderContainer width="100%" height="26" backgroundColor="{bgColor}" borderVisible="false">
+							
+							<s:layout>
+								<s:HorizontalLayout paddingLeft="5" paddingRight="5" verticalAlign="middle" />
+							</s:layout>
+							
+							<s:CheckBox selected="true" />
+							<s:Image source="{data.icon}" />
+							<mx:LinkButton styleName="linkBtnDarkBlue" label="{data.name}" click="maximized=!maximized" />
+							
+							<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
+								<mx:LinkButton styleName="linkBtnDarkBlue" label="Delete" click="outerDocument.onDeleteActivityClick(event, data as ExerciseActivity)" />
+							</s:HGroup>
+							
+						</s:BorderContainer>
+						
+						<exercise:ExerciseActivityForm width="100%" visible="{maximized}" includeInLayout="{maximized}" activity="{data}" horizontalScrollPolicy="off" verticalScrollPolicy="off" />
+						
+					</mx:VBox>
+					
+				</fx:Component>
+				
+			</s:itemRenderer>
+			
+		</s:DataGroup>
+		
+	</s:Scroller>
+	
+	<s:Line xFrom="0" xTo="429">
+		<s:stroke>
+			<s:SolidColorStroke color="0xD9D9D9" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:HGroup verticalAlign="middle">
+		<mx:Image source="@Embed('/images/plusIcon.jpg')" />
+		<mx:LinkButton styleName="linkBtnDarkBlue" label="Make Changes to All Activities" click="onChangeAllActivitiesClick(event)" />
+	</s:HGroup>
+	
+</s:NavigatorContent>

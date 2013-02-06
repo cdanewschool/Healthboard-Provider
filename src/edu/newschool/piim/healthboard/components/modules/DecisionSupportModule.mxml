@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:components="edu.newschool.piim.healthboard.view.components.*" 
+	xmlns:general="edu.newschool.piim.healthboard.view.components.general.*" 
+	xmlns:ASclasses="ASclasses.*"
+	creationComplete="init()">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.view.components.general.MainLinkButton;
+			import edu.newschool.piim.healthboard.components.popups.decisionsupport.ManageRiskFactorsPopup;
+			import edu.newschool.piim.healthboard.components.popups.decisionsupport.NotifyPopup;
+			import edu.newschool.piim.healthboard.components.tabs.decisionsupport.RiskFactorDetails;
+			import edu.newschool.piim.healthboard.components.tabs.decisionsupport.RiskFactorDetailsGeographic;
+			
+			import edu.newschool.piim.healthboard.controller.DecisionSupportController;
+			import edu.newschool.piim.healthboard.controller.MainController;
+			
+			import edu.newschool.piim.healthboard.enum.DateRanges;
+			import edu.newschool.piim.healthboard.enum.RiskLevel;
+			
+			import edu.newschool.piim.healthboard.events.ApplicationEvent;
+			import edu.newschool.piim.healthboard.events.MessageEvent;
+			import edu.newschool.piim.healthboard.events.TeamAppointmentEvent;
+			
+			import edu.newschool.piim.healthboard.model.Appointment;
+			import edu.newschool.piim.healthboard.model.Message;
+			import edu.newschool.piim.healthboard.model.PatientModel;
+			import edu.newschool.piim.healthboard.model.TeamAppointmentsModel;
+			import edu.newschool.piim.healthboard.model.module.MessagesModel;
+			import edu.newschool.piim.healthboard.model.modules.decisionsupport.DecisionSupportModel;
+			import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactor;
+			import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactorUpdate;
+			
+			import mx.controls.Image;
+			import mx.formatters.DateFormatter;
+			import mx.managers.PopUpManager;
+			
+			import edu.newschool.piim.healthboard.view.styles.ChartStyles;
+			
+			private var _patient:PatientModel;
+			
+			private var _riskFactor:RiskFactor;
+			private var dirty:Boolean;
+			
+			[Bindable] public var controller:DecisionSupportController = MainController(AppProperties.getInstance().controller).decisionSupportController as DecisionSupportController;
+			[Bindable] public var model:DecisionSupportModel = controller.model as DecisionSupportModel;
+			
+			[Bindable] private var chartStyles:ChartStyles = AppProperties.getInstance().controller.model.chartStyles;
+			
+			private var appointmentsModel:TeamAppointmentsModel = TeamAppointmentsModel( MainController( AppProperties.getInstance().controller ).teamAppointmentsController.model );
+			private var messagesModel:MessagesModel = MessagesModel( MainController( AppProperties.getInstance().controller ).messagesController.model );
+			
+			[Bindable] [Embed("/images/messagesUrgentSmall.png")] public var redDot:Class;
+			
+			[Bindable] public function get riskFactor():RiskFactor { return _riskFactor; }
+
+			private var managePopup:ManageRiskFactorsPopup;
+			private var notifyPopup:NotifyPopup;
+			
+			public var dateFormatter:DateFormatter = new DateFormatter();
+			
+			public function set riskFactor(value:RiskFactor):void
+			{
+				_riskFactor = value;
+				
+				invalidateProperties();
+			}
+
+			[Bindable]
+			public function get patient():PatientModel { return _patient; }
+			
+			public function set patient(value:PatientModel):void
+			{
+				_patient = value;
+				
+				dirty = true;
+				
+				invalidateProperties();
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				var linkButton:MainLinkButton;
+				var linkGroup:HGroup;
+				
+				if( patient 
+					&& dirty )
+				{
+					var date:Date;
+					
+					var bullet:Image;
+					
+					for each(var riskFactor:RiskFactor in patient.riskFactorGroups)
+					{
+						var currentUpdate:RiskFactorUpdate = riskFactor.updates && riskFactor.updates.length ? riskFactor.updates.getItemAt(0) as RiskFactorUpdate : null;
+						
+						linkGroup = new HGroup();
+						linkGroup.verticalAlign = "middle";
+						
+						bullet = new Image();
+						bullet.source = redDot;
+						bullet.visible = currentUpdate && currentUpdate.riskLevel == RiskLevel.HIGH;
+						linkGroup.addElement( bullet );
+						
+						linkButton = new MainLinkButton();
+						linkButton.data = riskFactor;
+						linkButton.label = riskFactor.name + ' (' + riskFactor.types.length + ')';
+						linkButton.addEventListener( MouseEvent.CLICK, onRiskFactorClick );
+						linkGroup.addElement( linkButton );
+						
+						riskFactorLinks.addElement( linkGroup );
+						
+						if( riskFactor.quantifiable )
+						{
+							var details:RiskFactorDetails = new RiskFactorDetails();
+							details.patient = patient;
+							details.riskFactor = riskFactor;
+							viewStack.addChild( details );
+						}
+						else
+						{
+							var detailsNonQuantifiable:RiskFactorDetailsGeographic = new RiskFactorDetailsGeographic();
+							detailsNonQuantifiable.patient = patient;
+							detailsNonQuantifiable.riskFactor = riskFactor;
+							viewStack.addChild( detailsNonQuantifiable );
+						}
+					}
+					
+					dirty = false;
+				}
+				
+				for(var i:int=0;i<riskFactorLinks.numElements;i++)
+				{
+					linkGroup = riskFactorLinks.getElementAt(i) as HGroup;
+					linkButton = linkGroup.getElementAt(1) as MainLinkButton;
+					
+					var active:Boolean = linkButton.data == this.riskFactor;
+					
+					linkButton.styleName = (active ? "linkButtonStyle5 bold" : "linkButtonStyle6");
+				}
+				
+				if( this.riskFactor )
+				{
+					viewStack.selectedIndex = 1 + patient.riskFactorGroups.getItemIndex( this.riskFactor );
+				}
+				else
+				{
+					viewStack.selectedIndex = 0;
+				}
+				
+				allRisks.styleName = (!this.riskFactor ? "linkButtonStyle5 bold" : "linkButtonStyle1");
+			}
+			
+			private function setDateRange(range:String=null):void
+			{
+				model.dateRange = range;
+				
+				updateDateRange();
+			}
+			
+			private function updateDateRange():void 
+			{
+				var today:Date = AppProperties.getInstance().controller.model.today;
+				
+				if(model.dateRange == DateRanges.WEEK) 
+				{
+					model.minDate = new Date(today.getTime() - 1000*60*60*24*7);
+				}
+				else if(model.dateRange == DateRanges.MONTH) 
+				{
+					model.minDate = new Date(today.getTime() - 1000*60*60*24*30);
+				}
+				else if(model.dateRange == DateRanges.MONTH_THREE) 
+				{
+					model.minDate = new Date(today.getTime() - 1000*60*60*24*91);
+				}
+				else if(model.dateRange == DateRanges.YEAR) 
+				{
+					model.minDate = new Date(today.getTime() - 1000*60*60*24*365.24);
+				}
+				else if(model.dateRange == DateRanges.YEAR_THREE) 
+				{
+					model.minDate = new Date(today.getTime() - 1000*60*60*24*1095.73);
+				}
+				else
+				{
+					model.minDate = new Date(2011,7,26);
+				}
+			}
+			
+			private function onRiskFactorClick(event:MouseEvent):void
+			{
+				var linkButton:MainLinkButton = event.currentTarget as MainLinkButton;
+				
+				riskFactor = linkButton.data as RiskFactor;
+			}
+			
+			private function onNotifyClick(event:MouseEvent):void
+			{
+				notifyPopup = new NotifyPopup();
+				notifyPopup.patient = patient;
+				notifyPopup.addEventListener( MessageEvent.ADD, addMessage );
+				
+				PopUpManager.addPopUp( notifyPopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
+				PopUpManager.centerPopUp( notifyPopup );
+			}
+			
+			private function addMessage( event:MessageEvent ):void
+			{
+				var message:Message = notifyPopup.message;
+				
+				var recipientName:String = message.recipients && message.recipients.length ? message.recipients[0].fullName : 'Patient';
+				var now:Date = AppProperties.getInstance().controller.model.today;
+				
+				//	create a message object in a format messagescontroller understands
+				var messageObj:Object = 
+					{
+						status: "unread", correspondent: recipientName, prefix: "a ", date: messagesModel.dateFormatter.format( now ), subject: message.subject, isDraft: false, checkboxSelection: false,  messages: 
+						[
+							{sender: "You", date: messagesModel.dateFormatter.format( now ), text: message.body, imageAttachments: message.imageAttachments, nonImageAttachments: message.nonImageAttachments, urgency: message.urgency, status: "read"},
+						]
+					};
+				
+				messagesModel.messages.addItem( messageObj );
+				
+				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true );
+				evt.data = "Your message has been added";
+				dispatchEvent( evt );
+			}
+			
+			private function onManageClick(event:MouseEvent):void
+			{
+				managePopup = new ManageRiskFactorsPopup();
+				managePopup.patient = patient;
+				
+				PopUpManager.addPopUp( managePopup, DisplayObject(mx.core.FlexGlobals.topLevelApplication) );
+				PopUpManager.centerPopUp( managePopup );
+			}
+			
+			private function onExportClick(event:MouseEvent):void
+			{
+				dispatchEvent( new ApplicationEvent( ApplicationEvent.SHOW_STATUS, true, false, 'Your file has been exported') )
+			}
+			
+			private function init():void
+			{
+				dateFormatter.formatString = "MMMM D, YYYY";
+			}
+		]]>
+	</fx:Script>
+	
+	<s:HGroup width="100%" gap="0">
+		
+		<s:VGroup width="100%" paddingTop="15" paddingLeft="7" gap="7" styleName="whiteText13">
+			
+			<general:MainLinkButton id="allRisks" label="ALL RISKS" styleName="linkButtonStyle5 bold" paddingLeft="-4" paddingBottom="3" click="riskFactor=null" />
+			
+			<s:VGroup id="riskFactorLinks" gap="7" />
+			
+		</s:VGroup>
+		
+		<s:BorderContainer width="823" borderColor="0xBDBCBC" backgroundAlpha="0" height="{viewStack.height + dsHeader + 1}">
+			
+			<s:layout>
+				<s:VerticalLayout gap="0" />
+			</s:layout>
+			
+			<s:BorderContainer id="dsHeader" height="37" width="100%" backgroundColor="0x706F6F" borderAlpha="0">
+				
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="9"/>
+				</s:layout>
+				
+				<s:Button label="Notify" styleName="buttonText" height="24" click="onNotifyClick(event)" />
+				<s:Button label="Manage Risk Factors" styleName="buttonText" height="24" click="onManageClick(event)" visible="{riskFactor!=null &amp;&amp; riskFactor.quantifiable}" includeInLayout="{riskFactor!=null &amp;&amp; riskFactor.quantifiable}" />
+				<s:Button label="Export" styleName="buttonText" height="24" click="onExportClick(event)" visible="{riskFactor!=null}" includeInLayout="{riskFactor!=null}" />
+				
+				<s:Spacer width="100%" />
+				
+				<s:HGroup horizontalAlign="right" color="0xFFFFFF" gap="2">
+					
+					<s:Label text="Time Range:" paddingTop="6" />
+					
+					<general:customLinkButton label="{DateRanges.DAY}" click="setDateRange(DateRanges.DAY)" toggle="true" selected="{model.dateRange==DateRanges.DAY}" toggleBackgroundColor="0x4A4A49" skin="edu.newschool.piim.healthboard.view.skins.general.MyLinkButtonSkin" />
+					<general:customLinkButton label="{DateRanges.WEEK}" click="setDateRange(DateRanges.WEEK)" toggle="true" selected="{model.dateRange==DateRanges.WEEK}" toggleBackgroundColor="0x4A4A49" skin="edu.newschool.piim.healthboard.view.skins.general.MyLinkButtonSkin" />
+					<general:customLinkButton label="{DateRanges.MONTH}" click="setDateRange(DateRanges.MONTH)" toggle="true" selected="{model.dateRange==DateRanges.MONTH}" toggleBackgroundColor="0x4A4A49" skin="edu.newschool.piim.healthboard.view.skins.general.MyLinkButtonSkin" />
+					<general:customLinkButton label="{DateRanges.MONTH_THREE}" click="setDateRange(DateRanges.MONTH_THREE)" selected="{model.dateRange==DateRanges.MONTH_THREE}" toggle="true" toggleBackgroundColor="0x4A4A49" skin="edu.newschool.piim.healthboard.view.skins.general.MyLinkButtonSkin" />
+					<general:customLinkButton label="{DateRanges.YEAR}" click="setDateRange(DateRanges.YEAR)" toggle="true" selected="{model.dateRange==DateRanges.YEAR}" toggleBackgroundColor="0x4A4A49" skin="edu.newschool.piim.healthboard.view.skins.general.MyLinkButtonSkin" />
+					<general:customLinkButton label="{DateRanges.YEAR_THREE}" click="setDateRange(DateRanges.YEAR_THREE)" selected="{model.dateRange==DateRanges.YEAR_THREE}" toggle="true" toggleBackgroundColor="0x4A4A49" skin="edu.newschool.piim.healthboard.view.skins.general.MyLinkButtonSkin" />
+					<general:customLinkButton label="All" click="setDateRange()" selected="{model.dateRange==null}"  toggle="true" toggleBackgroundColor="0x4A4A49" skin="edu.newschool.piim.healthboard.view.skins.general.MyLinkButtonSkin" />
+					<general:customLinkButton id="btnMedCustom" label="Custom" />
+					
+				</s:HGroup>
+				
+			</s:BorderContainer>
+			
+			<mx:ViewStack id="viewStack" width="100%" backgroundColor="0x4A4A49" cornerRadius="2" resizeToContent="true"><!--x="0" y="22"-->
+				
+				<s:NavigatorContent width="100%">
+					
+					<s:VGroup width="100%">
+						
+						<s:HGroup width="100%" color="0xFFFFFF" height="31" horizontalAlign="right" verticalAlign="middle">
+							
+							<s:Line xFrom="0" xTo="24">
+								<s:stroke>
+									<s:SolidColorStroke color="0x86888A" weight="2" alpha=".5"/>
+								</s:stroke>
+							</s:Line>
+							
+							<s:Label text="Projected" />
+							
+							<mx:Legend direction="horizontal" color="0xFFFFFF" fontFamily="myMyriadNoCFF" verticalAlign="bottom" paddingRight="14" paddingLeft="15" paddingTop="6">
+								<mx:LegendItem label="Patient Entry" fontSize="12" fontWeight="normal" legendMarkerRenderer="mx.charts.renderers.CircleItemRenderer" markerAspectRatio="1" markerHeight="12" markerWidth="12" fill="{chartStyles.colorVitalSignsPatient}"  stroke="{chartStyles.whiteStroke}" />
+								<mx:LegendItem label="Provider Entry" fontSize="12" fontWeight="normal" legendMarkerRenderer="mx.charts.renderers.BoxItemRenderer" markerAspectRatio="1" markerHeight="12" markerWidth="12" fill="{chartStyles.colorVitalSignsProvider}" stroke="{chartStyles.whiteStroke}" />
+							</mx:Legend>
+							
+						</s:HGroup>
+						
+						<components:RowColorDataGrid 
+							id="overview" 
+							width="100%" height="100%" 
+							dataProvider="{patient.riskFactorGroups}"
+							dropIndicatorSkin="edu.newschool.piim.healthboard.view.skins.general.myDropIndicatorSkin"
+							color="0xFFFFFF" alternatingItemColors="[0x3C3C3B,0x4A4A49]" verticalAlign="middle"
+							selectionDuration="2000" useRollOver="false" 
+							headerHeight="0" selectable="false"
+							borderVisible="false" verticalGridLines="false" horizontalGridLines="false" horizontalSeparatorSkin="{null}"
+							variableRowHeight="true" rowCount="2">
+							
+							<components:columns>
+								
+								<mx:DataGridColumn dataField="name">
+									
+									<mx:itemRenderer>
+										
+										<fx:Component>
+											
+											<mx:HBox verticalAlign="middle" paddingLeft="20" horizontalGap="20" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+												
+												<fx:Script>
+													<![CDATA[
+														import edu.newschool.piim.healthboard.Constants;
+														import edu.newschool.piim.healthboard.view.components.tooltips.MyCustomDataTip;
+														
+														import edu.newschool.piim.healthboard.view.components.itemrenderers.chart.MyCircleItemRenderer;
+														import edu.newschool.piim.healthboard.view.components.itemrenderers.chart.MyCircleItemRendererOver;
+														
+														import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactor;
+														import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactorUpdate;
+														
+														import mx.charts.HitData;
+														import mx.charts.events.ChartItemEvent;
+														import mx.controls.Alert;
+														import mx.events.FlexEvent;
+														import mx.managers.PopUpManager;
+														
+														import edu.newschool.piim.healthboard.util.DateUtil;
+														
+														[Bindable] private var riskFactor:RiskFactor;
+														
+														[Bindable] private var chartMin:Number;
+														[Bindable] private var chartMax:Number;
+														[Bindable] private var minDate:Date;
+														[Bindable] private var maxDate:Date;
+														
+														[Bindable] private var  currentUpdate:RiskFactorUpdate;
+														[Bindable] private var  previousUpdate:RiskFactorUpdate;
+														[Bindable] private var  firstUpdate:RiskFactorUpdate;
+														
+														override public function set data(value:Object):void 
+														{
+															super.data = value;
+															
+															riskFactor = data as RiskFactor;
+															
+															chart.dataProvider = riskFactor ? riskFactor.updates : null;
+															
+															//	determine chart min/max
+															chartMin = NaN;
+															chartMax = NaN;
+															
+															minDate = null;
+															maxDate = null;
+															
+															for each(var update:RiskFactorUpdate in riskFactor.updates)
+															{
+																if( update.value )
+																{
+																	chartMin = !isNaN(chartMin) ? Math.min( update.value, chartMin ) : update.value;
+																	chartMax = !isNaN(chartMax) ? Math.max( update.value, chartMax ) : update.value;
+																}
+																
+																if( update.date )
+																{
+																	minDate = minDate != null && minDate.time < update.date.time ? minDate : update.date;
+																	maxDate = maxDate != null && maxDate.time > update.date.time ? maxDate : update.date;
+																}
+															}
+															
+															chartMin -= 3;	//to ensure data points are displayed in their entirety.
+															chartMax += 3;
+															minDate = new Date(minDate.getTime() - DateUtil.DAY*2);
+															maxDate = new Date(maxDate.getTime() + DateUtil.DAY*2);
+																
+															//	get current/last update
+															currentUpdate = riskFactor.updates && riskFactor.updates.length ? riskFactor.updates.getItemAt( 0 ) as RiskFactorUpdate : null;
+															firstUpdate = riskFactor.updates && riskFactor.updates.length ? riskFactor.updates.getItemAt( riskFactor.updates.length -1 ) as RiskFactorUpdate : null;		
+															
+															if( currentUpdate && firstUpdate
+																&& currentUpdate != firstUpdate )
+															{
+																currentRiskLevel.text = currentUpdate.value + "%";
+																//dateText.text = "Increase of " + Math.ceil( (currentUpdate.date.time - firstUpdate.date.time ) / DateUtil.MONTH ) + " months";
+															}
+															else 
+															{
+																currentRiskLevel.text = currentUpdate ? outerDocument.controller.getRiskLevelLabel( currentUpdate.riskLevel ) : '';
+																dateText.text = currentUpdate ? "on " + outerDocument.dateFormatter.format( currentUpdate.date ) : '';
+															}
+														}	
+														
+														private function onChartRollOver(event:ChartItemEvent):void 
+														{
+															currentRiskLevel.text = data.updates[event.hitData.chartItem.index].value + "%";
+															myLineSeries.setStyle("itemRenderer",new ClassFactory(edu.newschool.piim.healthboard.view.components.itemrenderers.chart.MyBoxItemRendererOver));
+														}
+														
+														private function onChartRollOut(event:ChartItemEvent):void 
+														{
+															currentRiskLevel.text = currentUpdate.value + "%";
+															myLineSeries.setStyle("itemRenderer",new ClassFactory(edu.newschool.piim.healthboard.view.components.itemrenderers.chart.MyBoxItemRenderer));
+														}
+														
+														private function chartChange(event:Event):void
+														{
+															event.stopImmediatePropagation();
+														}
+													]]>
+												</fx:Script>
+												
+												<fx:Declarations>
+													<fx:Array id="bge">
+													</fx:Array>
+												</fx:Declarations>
+												
+												<mx:states>
+													<s:State name="expanded" />
+													<s:State name="collapsed" />
+												</mx:states>
+												
+												<!--	risk factor name	-->
+												<s:HGroup width="125" verticalAlign="middle" paddingLeft="7" gap="3">
+													<s:Image buttonMode="true" source.expanded="@Embed(source='/images/smallArrow2.png')" source.collapsed="@Embed(source='/images/smallArrowCollapsed2.png')" click="{this.currentState=='expanded' ? this.currentState = 'collapsed' : this.currentState = 'expanded'}" />
+													<general:MainLinkButton label="{riskFactor.name}" fontSize="13" fontWeight="bold" toggle="true" styleName="linkButtonStyle1" click="{outerDocument.riskFactor = riskFactor}" />
+												</s:HGroup>
+												
+												<s:VGroup width="445" height="161" visible="{this.currentState == 'expanded' &amp;&amp; riskFactor.quantifiable}" includeInLayout="{this.currentState == 'expanded' &amp;&amp; riskFactor.quantifiable}" verticalAlign="middle">
+													
+													<mx:LineChart 
+														id="chart" 
+														width="430" height="100" 
+														backgroundElements="{bge}" seriesFilters="[]" selectionMode="single" 
+														itemRollOver="onChartRollOver(event)" itemRollOut="onChartRollOut(event)" 
+														change="chartChange(event)" >
+														
+														<mx:series>
+															
+															<mx:LineSeries yField="value" xField="date" interactive="false">
+																<mx:lineStroke>
+																	<s:SolidColorStroke color="0x86888A" weight="2" alpha=".5" />
+																</mx:lineStroke>
+															</mx:LineSeries>
+															
+															<mx:LineSeries id="myLineSeries" yField="value" xField="date" itemRenderer="edu.newschool.piim.healthboard.view.components.itemrenderers.chart.MyBoxItemRenderer" radius="8" adjustedRadius="8" fillFunction="{outerDocument.controller.fillFunction}" selectedIndex="0">
+																<mx:lineStroke>
+																	<s:SolidColorStroke color="0xFFFFFF" weight="3" />
+																</mx:lineStroke>
+																<mx:stroke>
+																	<mx:SolidColorStroke color="0xFFFFFF" weight="1"/>
+																</mx:stroke>
+															</mx:LineSeries>
+															
+														</mx:series>
+														
+														<mx:horizontalAxis>
+															<mx:DateTimeAxis id="xaxis" minimum="{minDate}" maximum="{maxDate}" />
+														</mx:horizontalAxis>
+														
+														<mx:horizontalAxisRenderers>
+															<mx:AxisRenderer axis="{xaxis}" showLabels="false" tickPlacement="none" showLine="false" visible="false"  />
+														</mx:horizontalAxisRenderers>
+														
+														<mx:verticalAxis>
+															<mx:LinearAxis id="yaxis" minimum="{chartMin}" maximum="{chartMax}"  />
+														</mx:verticalAxis>
+														
+														<mx:verticalAxisRenderers>
+															<mx:AxisRenderer axis="{yaxis}" showLabels="false" tickPlacement="none" showLine="false" visible="false" />
+														</mx:verticalAxisRenderers>
+														
+													</mx:LineChart>
+													
+												</s:VGroup>
+												
+												<s:DataGroup width="445" height="161" dataProvider="{riskFactor.types}" visible="{this.currentState == 'expanded' &amp;&amp; !riskFactor.quantifiable}" includeInLayout="{this.currentState == 'expanded' &amp;&amp; !riskFactor.quantifiable}"> 
+													
+													<s:layout>
+														<s:VerticalLayout verticalAlign="middle" />
+													</s:layout> 
+													
+													<s:itemRenderer>
+														
+														<fx:Component>
+															
+															<mx:HBox width="100%">
+																<fx:Script>
+																	<![CDATA[
+																		import edu.newschool.piim.healthboard.enum.RiskLevel;
+																		
+																		import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactor;
+																		import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactorUpdate;
+																		
+																		[Bindable] private var riskFactor:RiskFactor;
+																		[Bindable] private var update:RiskFactorUpdate;
+																		
+																		override public function set data(value:Object):void 
+																		{
+																			super.data = value;
+																			
+																			riskFactor = data as RiskFactor;
+																			
+																			update = riskFactor && riskFactor.updates && riskFactor.updates.length ? riskFactor.updates.getItemAt(0) as RiskFactorUpdate : null;
+																		}
+																		
+																	]]>
+																</fx:Script>
+																
+																<s:Label text="{riskFactor.name}" width="150" styleName="italic" fontSize="13" />
+																
+																<s:HGroup width="100%" visible="{update!=null}" gap="5" horizontalAlign="right" paddingRight="16">
+																	<s:Label text="{outerDocument.outerDocument.controller.getRiskLevelLabel( update.riskLevel )}" styleName="italic {update.riskLevel == RiskLevel.HIGH ? 'decisionSupportModuleRiskLevelHigh' : 'decisionSupportModuleRiskLevelLow'}" fontSize="13" />
+																	<s:Label text="{'due to ' + update.reason + '.'}" styleName="italic" fontSize="13" />
+																</s:HGroup>
+																
+															</mx:HBox>
+															
+														</fx:Component>
+														
+													</s:itemRenderer>
+													
+												</s:DataGroup>
+												
+												<s:VGroup includeInLayout="{this.currentState == 'collapsed'}" visible="{this.currentState == 'collapsed'}" width="430" height="30" verticalAlign="middle">
+													<s:Label text="{riskFactor.types.length} Risk factors" fontSize="13" styleName="decisionSupportModuleRiskLevelStatText italic" />
+												</s:VGroup>
+												
+												<s:VGroup width="110">
+													
+													<s:HGroup verticalAlign.expanded="bottom" verticalAlign.collapsed="middle">
+														<s:Label id="currentRiskLevel" color="0xFBB03B" fontWeight="bold" fontSize.expanded="36" fontSize.collapsed="13" />
+														<s:Label text="risk" fontSize="13" color="0xFFFFFF" paddingBottom.expanded="6" />
+													</s:HGroup>
+													
+													<s:VGroup includeInLayout="{this.currentState == 'expanded'}" visible="{this.currentState == 'expanded'}">
+														<s:Label text="{riskFactor.types.length} Risk factors" fontSize="13" styleName="decisionSupportModuleRiskLevelStatText italic" />
+														<s:Label id="dateText" fontSize="13" styleName="decisionSupportModuleRiskLevelStatText italic" />
+													</s:VGroup>
+												</s:VGroup>
+												
+											</mx:HBox>
+											
+										</fx:Component>
+										
+									</mx:itemRenderer>
+									
+								</mx:DataGridColumn>
+								
+							</components:columns>
+							
+						</components:RowColorDataGrid>
+						
+					</s:VGroup>
+					
+				</s:NavigatorContent>
+				
+			</mx:ViewStack>
+			
+		</s:BorderContainer>
+		
+	</s:HGroup>
+	
+</s:VGroup>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark"  
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	gap="25" width="160">
+	
+	<fx:Declarations>
+		<s:SolidColorStroke id="stroke" color="0x9E9E9E" weight="1" />
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.controller.AppointmentsController;
+			import edu.newschool.piim.healthboard.controller.MainController;
+			import edu.newschool.piim.healthboard.controller.TeamAppointmentsController;
+			
+			import edu.newschool.piim.healthboard.model.Appointment;
+			import edu.newschool.piim.healthboard.model.ProviderModel;
+			import edu.newschool.piim.healthboard.model.UserModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.graphics.BitmapFill;
+			import mx.graphics.IFill;
+			
+			import spark.components.BorderContainer;
+			import spark.components.HGroup;
+			import spark.components.Label;
+			import spark.core.SpriteVisualElement;
+			import spark.primitives.Line;
+			
+			import edu.newschool.piim.healthboard.util.DateUtil;
+
+			private var _providers:ArrayCollection;
+			private var _date:Date;
+			
+			private var dirty:Boolean;
+			
+			private var _showOverview:Boolean = false;
+			
+			private var _titleStyleName:String = "blue9SemiBold";
+			private var _titleAlign:String = "left";
+			
+			private var controller:TeamAppointmentsController = MainController( AppProperties.getInstance().controller ).teamAppointmentsController;
+			
+			public function get showOverview():Boolean
+			{
+				return _showOverview;
+			}
+
+			[Bindable]
+			public function set showOverview(value:Boolean):void
+			{
+				_showOverview = value;
+				
+				dirty = true;
+				invalidateProperties();
+			}
+
+			public function get titleAlign():String
+			{
+				return _titleAlign;
+			}
+
+			public function set titleAlign(value:String):void
+			{
+				_titleAlign = value;
+				
+				dirty = true;
+				invalidateProperties();
+			}
+
+			public function get titleStyleName():String
+			{
+				return _titleStyleName;
+			}
+
+			public function set titleStyleName(value:String):void
+			{
+				_titleStyleName = value;
+				
+				dirty = true;
+				invalidateProperties();
+			}
+
+			public function get date():Date
+			{
+				return _date;
+			}
+
+			public function set date(value:Date):void
+			{
+				_date = value;
+				
+				dirty = true;
+				invalidateProperties();
+			}
+
+			[Bindable]
+			public function get providers():ArrayCollection
+			{
+				return _providers;
+			}
+
+			public function set providers(value:ArrayCollection):void
+			{
+				_providers = value;
+				
+				dirty = true;
+				invalidateProperties();
+			}
+
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if( dirty )
+				{
+					dirty = false;
+					
+					removeAllElements();
+					
+					if( !date || !providers )  return;
+					
+					for each(var provider:ProviderModel in providers)
+					{
+						var group:VGroup = new VGroup();
+						addElement( group );
+						
+						var label:Label = new Label();
+						label.styleName = titleStyleName;
+						label.percentWidth = 100;
+						label.setStyle('textAlign', titleAlign);
+						label.text = provider.fullName;
+						group.addElement( label );
+						
+						if( showOverview )
+						{
+							var overview:ProviderOverviewItem = new ProviderOverviewItem();
+							overview.provider = provider;
+							overview.day = date;
+							overview.width = 145;
+							overview.height = 8;
+							overview.showLabel = false;
+							group.addElement( overview );
+						}
+						else
+						{
+							var line:Line = new Line();
+							line.xFrom = 5;
+							line.xTo = 150;
+							line.stroke = stroke;
+							group.addElement( line );
+						}
+						
+						var list:VGroup = new VGroup();
+						group.addElement( list );
+						
+						var appointments:ArrayCollection = controller.getAppointments( provider.id, UserModel.TYPE_PROVIDER, date );
+						
+						for(var i:int=0;i<appointments.length;i++)
+						{
+							var appointment:Appointment = Appointment( appointments.getItemAt(i) );
+							
+							var row:HGroup = new HGroup();
+							list.addElement( row );
+							
+							var square:BorderContainer = new BorderContainer();
+							square.width = 8;
+							square.height = 7;
+							square.backgroundFill = controller.getFill( appointment.type );;
+							row.addElement( square );
+							
+							var date:Label = new Label();
+							date.width = 50;
+							date.text = DateUtil.formatTimeFromDate( appointment.from, false ) + '-' + DateUtil.formatTimeFromDate( appointment.to, false );
+							date.styleName = "gray9";
+							row.addElement( date );
+							
+							var patient:Label = new Label();
+							patient.text = appointment.patient ? appointment.patient.fullName : 'Conference';
+							patient.styleName = "gray9";
+							patient.setStyle('paddingLeft', 5);
+							row.addElement( patient );
+						}
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+	
+</s:VGroup>
