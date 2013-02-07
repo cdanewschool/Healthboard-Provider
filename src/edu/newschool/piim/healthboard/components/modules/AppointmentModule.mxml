@@ -1002,7 +1002,9 @@
 			{
 				model.removeEventListener( ApplicationDataEvent.LOADED, onDataLoaded );
 				
-				model.appointments.addEventListener( CollectionEvent.COLLECTION_CHANGE, onAppointmentsChange ); 
+				model.appointments.addEventListener( CollectionEvent.COLLECTION_CHANGE, onAppointmentsChange );
+				
+				onAppointmentsChange();
 			}
 			
 			private function init():void

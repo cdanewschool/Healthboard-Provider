@@ -20,7 +20,7 @@
 			{
 				super.onDataChange(event);
 				
-				checkbox.label = ProviderModel(data).fullName;
+				checkbox.label = data is ProviderModel ? ProviderModel(data).fullName : String(data.label);
 			}
 		]]>
 	</fx:Script>
