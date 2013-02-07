@@ -1259,7 +1259,7 @@
 										<s:NavigatorContent>
 											<calendar:CalendarComponent 
 												id="monthView" 
-												width="662" height="505" paddingLeft="-2"
+												width="665" height="505" paddingLeft="-2"
 												itemRenderer="edu.newschool.piim.healthboard.components.calendar.CalendarItem" 
 												selectedDate="{selectedDate}" change="onSelectDate(event)"  />
 										</s:NavigatorContent>
