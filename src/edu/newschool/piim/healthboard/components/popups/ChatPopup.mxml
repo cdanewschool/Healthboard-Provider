@@ -184,6 +184,8 @@
 				
 				if( !attachments ) attachments = new ArrayCollection();
 				attachments.addItem( attachment );
+				
+				relayMessage();		//send message automatically upon selecting an attachment
 			}
 			
 			private function copyChat( event:MouseEvent ):void
