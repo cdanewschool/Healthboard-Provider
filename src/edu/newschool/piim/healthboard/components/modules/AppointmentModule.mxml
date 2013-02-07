@@ -85,11 +85,17 @@
 			[Bindable] private var appointments:ArrayCollection;
 			[Bindable] private var providers:ArrayCollection;
 			
+			[Embed(source="images/btnCalendarWeek.png")]
+			[Bindable] private var weekIcon:Class;
+			
+			[Embed(source="images/calendar.png")]
+			[Bindable] private var calendarIcon:Class;
+			
 			private const MODE_DAY:String = "day";
 			private const MODE_WEEK:String = "week";
 			private const MODE_MONTH:String = "month";
 			
-			[Bindable] private var viewModes:ArrayCollection = new ArrayCollection( [ { value: MODE_DAY, label: "Daily View" }, { value: MODE_WEEK, icon: "images/btnCalendarWeek.png", label:"Weekly View" }, { value: MODE_MONTH, icon: "images/calendar.png", label:"Monthly View" } ] );
+			[Bindable] private var viewModes:ArrayCollection = new ArrayCollection( [ { value: MODE_DAY, label: "Daily View" }, { value: MODE_WEEK, icon: weekIcon, label:"Weekly View" }, { value: MODE_MONTH, icon: calendarIcon, label:"Monthly View" } ] );
 				
 			[Bindable] private var viewRangeStartDate:Date;
 			[Bindable] private var viewRangeEndDate:Date;
