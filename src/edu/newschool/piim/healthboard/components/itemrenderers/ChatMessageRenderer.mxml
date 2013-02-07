@@ -76,7 +76,7 @@
 				var cfg:Configuration = TextFlow.defaultConfiguration;
 				
 				var normalTLF:TextLayoutFormat = new TextLayoutFormat(cfg.defaultLinkNormalFormat);
-				normalTLF.color = 0xAEDEE4;
+				normalTLF.color = 0x064E71;
 				
 				cfg.defaultLinkNormalFormat = normalTLF;
 				cfg.defaultLinkHoverFormat = normalTLF;
