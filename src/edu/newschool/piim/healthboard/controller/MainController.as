@@ -491,6 +491,7 @@ package edu.newschool.piim.healthboard.controller
 				if( event.message.recipientType ) MessagesModel(messagesController.model).pendingRecipientType = event.message.recipientType;
 				if( event.message.subject ) MessagesModel(messagesController.model).pendingSubject = event.message.subject;
 				if( event.message.body ) MessagesModel(messagesController.model).pendingBody = event.message.body;
+				if( event.message.urgency ) MessagesModel(messagesController.model).pendingUrgency = event.message.urgency;
 			}
 			
 			var modPrefix:String = 'mod';

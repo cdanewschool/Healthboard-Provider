@@ -11,8 +11,6 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import edu.newschool.piim.healthboard.Constants;
-			
 			import com.esri.ags.Graphic;
 			import com.esri.ags.events.FindEvent;
 			import com.esri.ags.geometry.Geometry;
@@ -26,17 +24,15 @@
 			import com.esri.ags.tasks.supportClasses.FindResult;
 			import com.esri.ags.utils.GraphicUtil;
 			
+			import edu.newschool.piim.healthboard.Constants;
 			import edu.newschool.piim.healthboard.components.popups.healthadvisory.AdvisoryUpdatesPopup;
 			import edu.newschool.piim.healthboard.components.popups.publichealthadvisory.MessagePatientsPopup;
 			import edu.newschool.piim.healthboard.components.popups.publichealthadvisory.PatientSelectionCriteriaPopup;
-			
 			import edu.newschool.piim.healthboard.controller.MainController;
 			import edu.newschool.piim.healthboard.controller.PublicHealthAdvisoriesController;
-			
 			import edu.newschool.piim.healthboard.enum.RiskLevel;
-			
+			import edu.newschool.piim.healthboard.enum.UrgencyType;
 			import edu.newschool.piim.healthboard.events.ApplicationEvent;
-			
 			import edu.newschool.piim.healthboard.model.Location;
 			import edu.newschool.piim.healthboard.model.Message;
 			import edu.newschool.piim.healthboard.model.PatientModel;
@@ -46,6 +42,7 @@
 			import edu.newschool.piim.healthboard.model.modules.advisories.PublicHealthAdvisoriesModel;
 			import edu.newschool.piim.healthboard.model.modules.advisories.PublicHealthAdvisory;
 			import edu.newschool.piim.healthboard.model.modules.advisories.PublicHealthAdvisorySelectionCriteria;
+			import edu.newschool.piim.healthboard.util.DateFormatters;
 			
 			import mx.charts.HitData;
 			import mx.charts.series.items.ColumnSeriesItem;
@@ -58,8 +55,6 @@
 			import mx.formatters.DateFormatter;
 			import mx.managers.PopUpManager;
 			import mx.rpc.AsyncResponder;
-			
-			import edu.newschool.piim.healthboard.util.DateFormatters;
 			
 			private static const SEARCH_PLACEHOLDER:String = "State, City, or Zip code";
 			
@@ -270,7 +265,7 @@
 					message.subject = "Attention: All Patients affected by " + advisory.title;
 					message.recipients = recipients ? recipients.source : null;
 					message.body = body;
-					message.urgency = Message.URGENCY_SOMEWHAT_URGENT;
+					message.urgency = UrgencyType.SOMEWHAT_URGENT;
 					
 					var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
 					evt.data = Constants.MODULE_MESSAGES;
@@ -295,7 +290,7 @@
 			{
 				var message:Message = new Message();
 				message.recipients = [patient];
-				message.urgency = Message.URGENCY_SOMEWHAT_URGENT;
+				message.urgency = UrgencyType.SOMEWHAT_URGENT;
 				
 				var evt:ApplicationEvent = new ApplicationEvent( ApplicationEvent.SET_STATE, true );
 				evt.data = Constants.MODULE_MESSAGES;
