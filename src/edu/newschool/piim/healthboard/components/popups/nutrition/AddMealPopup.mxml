@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:popups="edu.newschool.piim.healthboard.view.components.popups.*"
+	xmlns:general="edu.newschool.piim.healthboard.view.components.general.*" 
+	xmlns:net="flash.net.*"
+	width="474" 
+	controlBarVisible="true" 
+	skinClass="edu.newschool.piim.healthboard.view.skins.general.myHeaderlessTitleWindow"
+	creationComplete="init()">
+	
+	<fx:Script>
+		<![CDATA[
+			import edu.newschool.piim.healthboard.model.module.nutrition.Meal;
+			import edu.newschool.piim.healthboard.model.module.nutrition.MealCategory;
+			import edu.newschool.piim.healthboard.view.components.general.TextInputPlaceholder;
+			
+			import mx.collections.ArrayCollection;
+			import mx.containers.FormItem;
+			import mx.controls.Alert;
+			import mx.controls.Image;
+			import mx.controls.TextInput;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			[Bindable] [Embed(source="/images/nutritionDelete.png")] private var closeIcon:Class;
+			
+			[Bindable] public var mealCategory:MealCategory;
+			
+			public var items:ArrayCollection = new ArrayCollection();
+			
+			private function save():void
+			{
+				for(var i:int=0;i<items.length;i++)
+				{
+					var item:FormItem = items.getItemAt(i) as FormItem;
+					var nameInput:TextInput = item.getChildByName("name"+i) as TextInput;
+					var servingsInput:TextInput = item.getChildByName("servings"+i) as TextInput;
+					
+					var meal:Meal = new Meal( nameInput.text, servingsInput.text );
+					mealCategory.meals.addItem( meal );
+				}
+				
+				var evt:CloseEvent = new CloseEvent( CloseEvent.CLOSE, true, false, Alert.YES );
+				dispatchEvent( evt );
+			}
+			
+			private function cancel():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function init():void
+			{
+				controlBarVisible = false;
+				
+				addItem();
+			}
+			
+			private function onRowDelete(event:MouseEvent):void
+			{
+				
+			}
+			
+			private function addItem():void
+			{
+				var id:int = items.length;
+				
+				var formItem:FormItem = new FormItem();
+				formItem.label = "Item " + (id+1);
+				formItem.setStyle("color","0x000000");
+				formItem.setStyle("labelWidth",50);
+				form.addChild( formItem );
+				
+				var nameInput:TextInput = new TextInput();
+				nameInput.id = "name"+id;
+				nameInput.width = 266;
+				nameInput.height = 24;
+				formItem.addChild( nameInput );
+				
+				var servingsInput:TextInputPlaceholder = new TextInputPlaceholder();
+				servingsInput.id = "servings"+id;
+				servingsInput.width = 93;
+				servingsInput.height = 24;
+				servingsInput.placeholder = "Portions (optional)";
+				formItem.addChild( servingsInput );
+				
+				var closeButton:Image = new Image();
+				closeButton.buttonMode = true;
+				closeButton.source = closeIcon;
+				closeButton.addEventListener( MouseEvent.CLICK, onRowDelete );
+				formItem.addChild( closeButton );
+				
+				items.addItem( formItem );
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" gap="5" horizontalAlign="left" />
+	</s:layout>
+	
+	<s:Label text="Add meal to {mealCategory.name}" styleName="darkGrayBold16" paddingBottom="5" />
+	
+	<mx:Form id="form" paddingBottom="0" paddingTop="0" />
+	
+	<general:MainLinkButton styleName="linkBtnDarkBlue" click="addItem()" paddingLeft="50" />
+	
+	<s:Line xFrom="0" xTo="444">
+		<s:stroke>
+			<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:Button label="Add to list" width="100" height="24" click="save();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+		<s:Button label="Cancel" width="55" height="24" click="cancel();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+	</s:HGroup>
+	
+</s:TitleWindow>

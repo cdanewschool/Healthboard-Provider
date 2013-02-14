@@ -34,7 +34,7 @@
 				
 				if( foodPlan )
 				{
-					startingDate.text = DateFormatters.monthShortDayNumberYearFull.format( foodPlan.startingDate );
+					startingDate.text = DateFormatters.monthShortDayNumberYearFull.format( foodPlan.startDate );
 				}
 			}
 			

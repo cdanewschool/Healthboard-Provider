@@ -4,19 +4,16 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	xmlns:popups="edu.newschool.piim.healthboard.view.components.popups.*"
-	width="646" height="434"
-	controlBarVisible="true" 
+	xmlns:general="edu.newschool.piim.healthboard.view.components.general.*"
 	skinClass="edu.newschool.piim.healthboard.view.skins.general.myHeaderlessTitleWindow"
-	creationComplete="init()" xmlns:general="edu.newschool.piim.healthboard.view.components.general.*" >
+	width="507" height="473"
+	controlBarVisible="true" 
+	creationComplete="init()" xmlns:components="edu.newschool.piim.healthboard.components.*" xmlns:components1="org.flashcommander.components.*">
 	
 	<fx:Script>
 		<![CDATA[
-			import edu.newschool.piim.healthboard.view.components.popups.DeleteConfirmation;
-			
 			import edu.newschool.piim.healthboard.enum.DietClassQuantifier;
-			
 			import edu.newschool.piim.healthboard.events.MealEvent;
-			
 			import edu.newschool.piim.healthboard.model.PatientModel;
 			import edu.newschool.piim.healthboard.model.ProviderModel;
 			import edu.newschool.piim.healthboard.model.ProviderNutritionModel;
@@ -24,6 +21,8 @@
 			import edu.newschool.piim.healthboard.model.module.nutrition.FoodPlan;
 			import edu.newschool.piim.healthboard.model.module.nutrition.FoodServing;
 			import edu.newschool.piim.healthboard.model.module.nutrition.MealCategory;
+			import edu.newschool.piim.healthboard.util.DateFormatters;
+			import edu.newschool.piim.healthboard.view.components.popups.DeleteConfirmation;
 			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
@@ -40,7 +39,7 @@
 			import spark.events.IndexChangeEvent;
 			import spark.events.ListEvent;
 			
-			import edu.newschool.piim.healthboard.util.DateFormatters;
+			private const NONE_LABEL:String = "NONE";
 			
 			[Bindable] public var model:ProviderNutritionModel = ProviderNutritionModel(AppProperties.getInstance().controller.nutritionController.model);
 			
@@ -63,7 +62,7 @@
 			[Bindable] private var tabOptions:ArrayCollection = new ArrayCollection
 				( 
 					[
-						'Description', 'Food Servings', 'Food to Increase', 'Food to Limit', 'Meal Library'
+						'Description', 'Food Servings', 'Food to Increase', 'Food to Limit', 'Suggested Meals'
 					]
 				);
 			
@@ -81,7 +80,9 @@
 			
 			[Bindable] private var isNew:Boolean;
 			
-			private var addNew:Object = { name: "+Add new" };
+			private var addNewOption:Object = { name: "+Add new" };
+			private var noneOption:Object = { name: NONE_LABEL };
+			
 			private var alphabeticSort:Sort;
 			
 			private function getDateLabel(item:Date):String 
@@ -92,59 +93,38 @@
 			private function initNewFoodPlan():void
 			{
 				plan = new FoodPlan();
+				plan.name = "New";
 				plan.dirty = true;
 				plan.patient = patient;
 				plan.provider = ProviderModel(AppProperties.getInstance().controller.model.user);
-			}
-			
-			private function onManageFoodServingsClick(event:MouseEvent):void
-			{
-			}
-			
-			private function onMealPlanNavigationClick(event:MouseEvent):void
-			{
-				var data:* = List(event.currentTarget).selectedItems[0];
 				
-				if( data == addNew )
+				isNew = true;
+			}
+			
+			private function onSelectMealPlan(event:IndexChangeEvent):void
+			{
+				var data:* = DropDownList(event.currentTarget).selectedItem;
+				
+				if( data.name == noneOption.name )
 				{
-					initNewFoodPlan();
-				}
-				else
-				{
-					plan = (data as FoodPlan);
+					plan = null;
 					
-					if( !plan.patient ) plan.patient = patient;
-					if( !plan.provider ) plan.provider = ProviderModel(AppProperties.getInstance().controller.model.user);
+					return;
 				}
 				
-				isNew = (data == addNew);
+				selectPlan( data as FoodPlan );
+			}
+			
+			private function selectPlan( plan:FoodPlan ):void
+			{
+				if( !plan.patient ) plan.patient = patient;
+				if( !plan.provider ) plan.provider = ProviderModel(AppProperties.getInstance().controller.model.user);
 				
-				plan.mealCategories.addEventListener(CollectionEvent.COLLECTION_CHANGE, onMealCategoriesChange);
+				this.plan = plan;
 				
-				onMealCategoriesChange();
+				isNew = false;
 				
 				tabs.selectedIndex = 0;
-			}
-			
-			private function onMealCategoriesChange(event:CollectionEvent=null):void
-			{
-				var tabIndex:int = tabs.selectedIndex;
-				
-				while( views.numChildren > 5 ) views.removeChildAt(5);
-				while( tabOptions.length > 5 ) tabOptions.removeItemAt(5);
-				
-				for(var i:int=0;i<plan.mealCategories.length;i++)
-				{
-					var tab:FoodPlanMealCategoryTab = new FoodPlanMealCategoryTab();
-					tab.mealCategory = plan.mealCategories.getItemAt(i) as MealCategory;
-					tab.mealCategories = plan.mealCategories;
-					views.addChild( tab );
-					
-					var label:String = tab.mealCategory.name + (tab.mealCategory.meals.length ? ' (' + tab.mealCategory.meals.length + ')' : '');
-					tabOptions.addItem( label );
-				}
-				
-				if( tabIndex > -1 ) tabs.selectedIndex = tabIndex;
 			}
 			
 			/*	food servings	*/
@@ -161,7 +141,8 @@
 				
 				if( event.detail == Alert.YES )
 				{
-					foodServingCategoriesCopy.addItem( popup.serving );
+					//foodServingCategoriesCopy.addItem( popup.serving );
+					plan.servingCategories.addItem( popup.serving );
 				}
 				
 				PopUpManager.removePopUp( popup );
@@ -171,17 +152,23 @@
 			
 			private function onFoodListClick(event:MouseEvent):void
 			{
-				if( List(event.currentTarget).selectedItem == addNew )
+				if( List(event.currentTarget).selectedItem == addNewOption )
 				{
-					var popup:AddFoodPopup = AddFoodPopup( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, AddFoodPopup) as TitleWindow );
-					popup.addEventListener( CloseEvent.CLOSE, onAddFoodClose );
-					PopUpManager.centerPopUp( popup );
+					addNewFood();
 				}
+			}
+			
+			private function addNewFood():void
+			{
+				var popup:AddFoodPopup = AddFoodPopup( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, AddFoodPopup) as TitleWindow );
+				popup.addEventListener( CloseEvent.CLOSE, onAddFoodClose );
+				PopUpManager.centerPopUp( popup );
 			}
 			
 			public function onDeleteFoodServingsCategoryClick(event:MouseEvent,item:FoodServing):void
 			{
 				var popup:DeleteConfirmation = DeleteConfirmation( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, DeleteConfirmation) as TitleWindow );
+				popup.confirmationText = "Are you sure you want to delete this tracker?";
 				popup.data = item;
 				popup.addEventListener( CloseEvent.CLOSE, onDeleteFoodServingsCategoryClose );
 				PopUpManager.centerPopUp( popup );
@@ -196,7 +183,8 @@
 				{
 					if( !plan ) return;
 					
-					foodServingCategoriesCopy.removeItemAt( foodServingCategoriesCopy.getItemIndex( popup.data ) );
+					//foodServingCategoriesCopy.removeItemAt( foodServingCategoriesCopy.getItemIndex( popup.data ) );
+					plan.servingCategories.removeItemAt( plan.servingCategories.getItemIndex( popup.data ) );
 				}
 				
 				PopUpManager.removePopUp( popup );
@@ -234,6 +222,7 @@
 			private function removeFoodToLimit():void
 			{
 				plan.foodsToLimit.removeItemAt( plan.foodsToLimit.getItemIndex( foodsToLimit.selectedItem ) );
+				plan.foodsToLimit.refresh();
 				
 				foodsToLimit.selectedIndex = -1;
 			}
@@ -248,14 +237,59 @@
 				foodsToIncreaseLibrary.selectedIndex = -1;
 			}
 			
+			private function onClearFoodsClick( callback:Function = null ):void
+			{
+				var popup:DeleteConfirmation = DeleteConfirmation( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, DeleteConfirmation) as TitleWindow );
+				popup.confirmationText = "Are you sure you want to clear list?";
+				popup.yesText = "Clear list";
+				popup.noText = "Cancel";
+				popup.addEventListener( CloseEvent.CLOSE, callback );
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function onClearFoodToIncreaseClickClose(event:CloseEvent):void
+			{
+				if( event.detail == Alert.YES )
+				{
+					plan.foodsToIncrease = new ArrayCollection();
+				}
+			}
+			
+			private function onClearFoodToLimitClickClose(event:CloseEvent):void
+			{
+				if( event.detail == Alert.YES )
+				{
+					plan.foodsToLimit = new ArrayCollection()
+				}
+			}
+		
 			private function removeFoodToIncrease():void
 			{
 				plan.foodsToIncrease.removeItemAt( plan.foodsToIncrease.getItemIndex( foodsToIncrease.selectedItem ) );
+				plan.foodsToIncrease.refresh();
 				
 				foodsToIncrease.selectedIndex = -1;
 			}
 			
 			/*	meal library	*/
+			private function addMealToMealCategory(mealCategory:MealCategory):void
+			{
+				var popup:AddMealPopup = AddMealPopup( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, AddMealCategoryPopup) as TitleWindow );
+				popup.mealCategory = mealCategory;
+				popup.addEventListener( CloseEvent.CLOSE, onAddMealToMealCategoryClose );
+				PopUpManager.centerPopUp( popup );
+			}
+			
+			private function onAddMealToMealCategoryClose(event:CloseEvent):void
+			{
+				var popup:AddMealPopup = event.currentTarget as AddMealPopup;
+				
+				if( event.detail == Alert.YES )
+				{
+					
+				}
+			}
+			
 			private function onAddMealCategoryClick(event:MouseEvent):void
 			{
 				var popup:AddMealCategoryPopup = AddMealCategoryPopup( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, AddMealCategoryPopup) as TitleWindow );
@@ -319,11 +353,6 @@
 				popup.removeEventListener( CloseEvent.CLOSE, onDeleteFoodServingsCategoryClose );
 			}
 			
-			/*	general	*/
-			private function search():void
-			{
-			}
-			
 			private function onSaveClick( callback:Function = null ):void
 			{
 				if( plan.dirty )
@@ -365,6 +394,7 @@
 					{
 						var template:Object = model.mealPlanTemplates.getItemAt(i);
 						
+						/*
 						if( template != addNew
 							&& FoodPlan(template).name.toLowerCase() == plan.name.toLowerCase() )
 						{
@@ -372,6 +402,7 @@
 							
 							break;
 						}
+						*/
 					}
 				}
 				else
@@ -382,6 +413,11 @@
 				}
 			}
 			
+			private function onAssignClick():void
+			{
+				
+			}
+			
 			private function onPreviewClick():void
 			{
 				var popup:FoodPlanPreviewPopup = FoodPlanPreviewPopup( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, FoodPlanPreviewPopup, true) as BorderContainer );
@@ -389,6 +425,7 @@
 				PopUpManager.centerPopUp( popup );
 			}
 			
+			/*
 			private function onFinishClick():void
 			{
 				if( !plan ) return close();
@@ -401,6 +438,7 @@
 				
 				PopUpManager.centerPopUp( popup );
 			}
+			*/
 			
 			private function onConfirmClose(event:CloseEvent):void
 			{
@@ -432,10 +470,10 @@
 			private function updateFoods():void
 			{
 				increaseFoods = new ArrayCollection( foods.source.slice() );
-				increaseFoods.addItemAt( addNew, 0 );
+				//increaseFoods.addItemAt( addNewOption, 0 );
 				
 				limitFoods = new ArrayCollection( foods.source.slice() );
-				limitFoods.addItemAt( addNew, 0 );
+				//limitFoods.addItemAt( addNewOption, 0 );
 				
 				limitFoods.sort = alphabeticSort;
 				increaseFoods.sort = alphabeticSort;
@@ -458,6 +496,26 @@
 				}
 			}
 			
+			private function searchFoods( text:String, list:List ):void
+			{
+				for(var i:int=0;i<list.dataProvider.length;i++)
+				{
+					var item:Object = list.dataProvider.getItemAt(i);
+					
+					if( item is Food
+						&& (item as Food).name == text )
+					{
+						list.selectedItem = item;
+					}
+				}
+			}
+			
+			private function showTip():void 
+			{
+				var foodPlanTips:FoodPlanTips = FoodPlanTips( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, FoodPlanTips) as TitleWindow );
+				PopUpManager.centerPopUp(foodPlanTips);
+			}
+			
 			private function init():void
 			{
 				controlBarVisible = false;
@@ -465,20 +523,28 @@
 				if( model.mealPlanTemplates 
 					&& model.mealPlanTemplates.length )
 				{
-					if( model.mealPlanTemplates.getItemAt( 0 ).name != addNew.name )
+					if( model.mealPlanTemplates.getItemAt( 0 ).name != noneOption.name )
 					{
-						model.mealPlanTemplates.addItemAt( addNew, 0 );
+						model.mealPlanTemplates.addItemAt( noneOption, 0 );
 					}
 				}
 				else
 				{
-					model.mealPlanTemplates = new ArrayCollection( [ addNew ] );
+					model.mealPlanTemplates = new ArrayCollection( [ noneOption ] );
 				}
-
+				
+				if( patient 
+					&& patient.foodPlan ) 
+				{
+					selectPlan( patient.foodPlan );
+				}
+				
 				alphabeticSort = new Sort();
 				alphabeticSort.fields = [ new SortField( 'name' ) ];
 				
 				updateFoods();
+				
+				showTip();
 			}
 		]]>
 	</fx:Script>
@@ -489,27 +555,39 @@
 	
 	<s:Label text="Set Food Plan" styleName="darkGrayBold16" paddingBottom="5" />
 	
-	<s:HGroup>
+	<s:VGroup>
 		
-		<s:VGroup width="129" gap="-1">
+		<s:HGroup width="100%" verticalAlign="middle">
 			
-			<s:HGroup gap="-1" verticalAlign="middle">
-				<general:TextInputPlaceholder id="searchText" placeholder="Search food plan" fontSize="11" fontStyle="italic" color="0x999999" contentBackgroundAlpha="0" paddingLeft="7" paddingTop="5" width="105" height="24" change="search()" />
-				<s:Button styleName="searchButtonIcon" width="24" height="24" />
+			<s:Label text="Selected Plan:" />
+			
+			<s:DropDownList id="selectedPlan" width="270" height="24" dataProvider="{model.mealPlanTemplates}" change="onSelectMealPlan(event)" labelField="name" selectedItem="{plan}" prompt="{plan==null?NONE_LABEL:''}" />
+			
+			<s:HGroup width="100%" horizontalAlign="right">
+				
+				<general:MainLinkButton label="+ Add new plan" styleName="linkBtnDarkBlue" click="initNewFoodPlan()" fontSize="12" />
+				
 			</s:HGroup>
 			
-			<s:List width="128" height="316" dataProvider="{model.mealPlanTemplates}" click="onMealPlanNavigationClick(event)" labelField="name" />
-			
-		</s:VGroup>
+		</s:HGroup>
 		
-		<s:HGroup visible="{plan==null}" includeInLayout="{plan==null}" gap="-1">
+		<s:Spacer />
+		
+		<s:HGroup gap="-1">
 			
-			<s:Spacer width="101" />
+			<s:Scroller maxHeight="340" horizontalScrollPolicy="off">
+				
+				<s:Group>
+					<mx:TabBar id="tabs" width="101" direction="vertical" dataProvider="{tabOptions}" tabHeight="38" itemClick="onTabClick(event)" mouseChildren="{plan!=null}" />
+				</s:Group>
+				
+			</s:Scroller>
 			
+			<!--
 			<s:BorderContainer width="364" height="340" left="101" backgroundColor="0xECECEC" visible="{plan==null}" includeInLayout="{plan==null}">
 				
 				<s:layout>
-					<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" gap="15" />
+					<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" gap="10" />
 				</s:layout>
 				
 				<s:Label text="Welcome! Here are the steps to set a Food Plan." styleName="darkGrayBold16" fontSize="14" />
@@ -522,7 +600,7 @@
 				
 				<s:VGroup gap="5">
 					<s:Label text="Step 1: Select a Food Plan" styleName="darkGrayBold12" />
-					<s:Label text="Set a new plan or modify reasons for plan, description, and starting date." styleName="darkGray12" paddingLeft="25" width="350" />
+					<s:Label text="Set a new plan or modify reasons for plan, description, and starting date." styleName="darkGray12" paddingLeft="35" width="350" />
 				</s:VGroup>
 				
 				<s:Line xFrom="0" xTo="323">
@@ -533,7 +611,7 @@
 				
 				<s:VGroup gap="5">
 					<s:Label text="Step 2: Review Food Groups &amp; Servings" styleName="darkGrayBold12" />
-					<s:Label text="Set serving values for patient." styleName="darkGray12" paddingLeft="25" width="350" />
+					<s:Label text="Set serving values for patient." styleName="darkGray12" paddingLeft="35" width="350" />
 				</s:VGroup>
 				
 				<s:Line xFrom="0" xTo="323">
@@ -544,7 +622,7 @@
 				
 				<s:VGroup gap="5">
 					<s:Label text="Step 3: Food List" styleName="darkGrayBold12" />
-					<s:Label text="Set foods to eat and avoid for patient." styleName="darkGray12" paddingLeft="25" width="350" />
+					<s:Label text="Set foods to eat and avoid for patient." styleName="darkGray12" paddingLeft="35" width="350" />
 				</s:VGroup>
 				
 				<s:Line xFrom="0" xTo="323">
@@ -555,45 +633,44 @@
 				
 				<s:VGroup gap="5">
 					<s:Label text="Step 4: Choose Meals" styleName="darkGrayBold12" />
-					<s:Label text="Set suggested meals for patient." styleName="darkGray12" paddingLeft="25" width="350" />
+					<s:Label text="Set suggested meals for patient." styleName="darkGray12" paddingLeft="35" width="350" />
 				</s:VGroup>
 				
 			</s:BorderContainer>
+			-->
 			
-		</s:HGroup>
-		
-		<s:HGroup visible="{plan!=null}" includeInLayout="{plan!=null}" gap="-1">
-			
-			<s:Scroller maxHeight="340" horizontalScrollPolicy="off">
+			<s:BorderContainer backgroundColor="0xECECEC" width="364" height="340" visible="{plan!=null}" includeInLayout="{plan!=null}">
 				
-				<s:Group>
-					<mx:TabBar id="tabs" width="101" direction="vertical" dataProvider="{tabOptions}" tabHeight="38" itemClick="onTabClick(event)" />
-				</s:Group>
-				
-			</s:Scroller>
-			
-			<s:BorderContainer backgroundColor="0xECECEC" width="364" height="340">
-				
-				<mx:ViewStack id="views" selectedIndex="{tabs.selectedIndex}" height="100%">
+				<mx:ViewStack id="views" selectedIndex="{tabs.selectedIndex}" width="100%" height="100%">
 					
 					<!--	description	-->
 					<s:NavigatorContent>
 						
-						<mx:Form fontSize="12" color="0x000000">
+						<mx:Form fontSize="12" color="0x000000" verticalGap="6">
 							
 							<mx:FormItem label="Plan Name:" color="0x000000" labelWidth="80" horizontalGap="5">
 								<s:TextInput id="planName" text="{plan.name}" styleName="formTextField" width="239" height="24" change="plan.name=planName.text" />
 							</mx:FormItem>
 							
-							<mx:FormItem label="Assigned by:" color="0x000000" labelWidth="80" horizontalGap="5">
-								<s:TextInput id="provider" text="{plan.provider ? plan.provider.fullName : ''}" styleName="formTextField" width="239" height="24" editable="false" />
+							<s:Spacer />
+							
+							<mx:FormItem label="Created by:" color="0x000000" labelWidth="80" horizontalGap="5">
+								<s:Label id="createdBy" text="{plan.provider ? plan.provider.fullNameAbbreviated : ''}" styleName="grayText11" />
+							</mx:FormItem>
+							
+							<mx:FormItem label="Assigned to:" color="0x000000" labelWidth="80" horizontalGap="5">
+								<s:Label id="assignedTo" text="{plan.patient ? plan.patient.fullName : ''}" styleName="grayText11" />
 							</mx:FormItem>
 							
 							<mx:FormItem label="Starting Date:" color="0x000000" labelWidth="80" horizontalGap="5">
-								<mx:DateField id="dateChooser" selectedDate="{plan.startingDate}" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput" width="100" height="24" dateChooserStyleName="dateChooserDark" labelFunction="getDateLabel" />
+								<mx:DateField id="startDateSelect" selectedDate="{plan.startDate}" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput" width="100" height="24" dateChooserStyleName="dateChooserDark" labelFunction="getDateLabel" />
 							</mx:FormItem>
 							
-							<mx:FormItem label="Reason:" color="0x000000" labelWidth="80" horizontalGap="5">
+							<mx:FormItem label="End Date:" color="0x000000" labelWidth="80" horizontalGap="5">
+								<mx:DateField id="endDateSelect" selectedDate="{plan.endDate}" textFieldClass="mx.core.UIFTETextField" textInputClass="mx.controls.MXFTETextInput" width="100" height="24" dateChooserStyleName="dateChooserDark" labelFunction="getDateLabel" />
+							</mx:FormItem>
+							
+							<mx:FormItem label="Reasons:" color="0x000000" labelWidth="80" horizontalGap="5">
 								<s:TextArea id="reason" text="{plan.reasons}" styleName="formTextField" width="239" height="46" change="plan.reasons=reason.text" />
 							</mx:FormItem>
 							
@@ -609,12 +686,29 @@
 					<s:NavigatorContent>
 						
 						<s:layout>
-							<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
+							<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" gap="5" />
 						</s:layout>
 						
-						<s:HGroup width="100%" horizontalAlign="right">
-							<mx:LinkButton styleName="linkBtnDarkBlue" label="{foodServingsViews.selectedIndex == 1 ? 'Set Food Servings' : 'Manage Food Servings'}" click="foodServingsViews.selectedIndex = (foodServingsViews.selectedIndex == 1 ? 0 : 1); " />
+						<s:HGroup width="100%" horizontalAlign="{foodServingsViews.selectedIndex == 1 ? 'left' : 'right'}">
+							<mx:LinkButton 
+								styleName="linkBtnDarkBlue" 
+								label="Manage Food Trackers »" 
+								click="foodServingsViews.selectedIndex = 1;" 
+								visible="{foodServingsViews.selectedIndex == 0}" includeInLayout="{foodServingsViews.selectedIndex == 0}" />
+							<mx:LinkButton 
+								styleName="linkBtnDarkBlue" 
+								label="« Back to Food Servings" 
+								click="foodServingsViews.selectedIndex = 0;" 
+								visible="{foodServingsViews.selectedIndex == 1}" includeInLayout="{foodServingsViews.selectedIndex == 1}" />
 						</s:HGroup>
+						
+						<s:Group>
+							<s:Line xFrom="0" xTo="350">
+								<s:stroke>
+									<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+								</s:stroke>
+							</s:Line>
+						</s:Group>
 						
 						<mx:ViewStack id="foodServingsViews" width="100%">
 							
@@ -636,11 +730,32 @@
 											
 											<fx:Component>
 												
-												<mx:HBox verticalAlign="middle">
-													<s:Label text="{data.title}" width="57" textAlign="right" />
-													<s:DropDownList id="quantifier" dataProvider="{outerDocument.quantifiers}" selectedIndex="{outerDocument.quantifiers.getItemIndex(data.quantifier)}" width="113" height="24" change="data.quantifier = quantifier.selectedItem" />
-													<s:TextInput id="servingSize" text="{data.servingSize}" width="60" height="24" change="data.servingSize = servingSize.text" textAlign="right" />
-													<s:Label text="{data.unit}" color="0x666666" fontSize="12" />
+												<mx:HBox>
+													<fx:Script>
+														<![CDATA[
+															import edu.newschool.piim.healthboard.enum.DietClassQuantifier;
+															import edu.newschool.piim.healthboard.model.module.nutrition.FoodServing;
+														]]>
+													</fx:Script>
+													
+													<s:Label text="{data.title}" width="57" textAlign="right" paddingTop="5" />
+													
+													<s:VGroup>
+														
+														<s:HGroup verticalAlign="middle">
+															<s:DropDownList id="quantifier" dataProvider="{outerDocument.quantifiers}" selectedIndex="{outerDocument.quantifiers.getItemIndex(data.quantifier)}" width="113" height="24" change="data.quantifier = quantifier.selectedItem" enabled="{!FoodServing(data).listMinMax}" />
+															<s:TextInput id="servingSize" text="{data.servingSize}" width="60" height="24" change="data.servingSize = servingSize.text" textAlign="right" />
+															<s:Label text="{data.unit}" color="0x666666" fontSize="12" />
+														</s:HGroup>
+														
+														<s:HGroup verticalAlign="middle" visible="{FoodServing(data).listMinMax}" includeInLayout="{FoodServing(data).listMinMax}">
+															<s:DropDownList  dataProvider="{outerDocument.quantifiers}" selectedIndex="{outerDocument.quantifiers.getItemIndex(DietClassQuantifier.MAXIMUM)}" width="113" height="24" enabled="{!FoodServing(data).listMinMax}" />
+															<s:TextInput id="servingSizeMaximum" text="{FoodServing(data).servingSizeMax}" width="60" height="24" change="data.servingSizeMax = servingSizeMaximum.text" textAlign="right" />
+															<s:Label text="{FoodServing(data).unit}" color="0x666666" fontSize="12" />
+														</s:HGroup>
+														
+													</s:VGroup>
+													
 												</mx:HBox>
 												
 											</fx:Component>
@@ -659,11 +774,10 @@
 									<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" />
 								</s:layout>
 								
-								<mx:LinkButton styleName="linkBtnDarkBlue" label="+ Add more Food Servings Category" click="onAddFoodServingsCategoryClick(event)" />
-								
-								<s:Scroller id="servingList" width="100%" maxHeight="220" horizontalScrollPolicy="off">
+								<s:Scroller id="servingList" width="100%" maxHeight="240" horizontalScrollPolicy="off">
 									
-									<s:DataGroup width="100%" dataProvider="{foodServingCategoriesCopy}">
+									<!--<s:DataGroup width="100%" dataProvider="{foodServingCategoriesCopy}">-->
+									<s:DataGroup width="100%" dataProvider="{plan.servingCategories}">
 										
 										<s:layout>
 											<s:VerticalLayout gap="0" />
@@ -679,7 +793,7 @@
 															import edu.newschool.piim.healthboard.model.module.nutrition.FoodServing;
 														]]>
 													</fx:Script>
-													<s:CheckBox label="{data.title + (data.unit ? ' (' + data.unit + ')' : null)}" width="{outerDocument.servingList.verticalScrollBar.visible?245:265}" selected="true" />
+													<s:CheckBox label="{data.title + (data.unit ? ' (' + data.unit + ')' : null)}" width="{outerDocument.servingList.verticalScrollBar.visible?225:245}" selected="true" />
 													<mx:LinkButton styleName="linkBtnGray" label="Delete" click="outerDocument.onDeleteFoodServingsCategoryClick(event, data as FoodServing)" />
 												</mx:HBox>
 												
@@ -691,10 +805,14 @@
 									
 								</s:Scroller>
 								
+								<mx:LinkButton styleName="linkBtnDarkBlue" label="+ Add more Food Tracker" click="onAddFoodServingsCategoryClick(event)" />
+								
+								<!--
 								<s:HGroup width="100%" horizontalAlign="right">
 									<s:Button label="Submit" width="55" height="24" click="plan.servingCategories.source = foodServingCategoriesCopy.source; plan.servingCategories.refresh(); foodServingsViews.selectedIndex = 0;" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
 									<s:Button label="Cancel" width="55" height="24" click="foodServingCategoriesCopy.source = plan.servingCategories.source.slice();foodServingCategoriesCopy.refresh();foodServingsViews.selectedIndex = 0" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
 								</s:HGroup>
+								-->
 								
 							</s:NavigatorContent>
 							
@@ -707,26 +825,55 @@
 						
 						<s:HGroup paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">
 							
-							<s:VGroup>
-								<s:Label text="Food Library" color="0x4D4D4D" fontSize="12" fontWeight="bold" />
-								<s:Label text="{foodsToIncreaseLibrary.dataProvider.length} total" color="0x4D4D4D" fontSize="12" />
-								<s:List id="foodsToIncreaseLibrary" width="148" height="262" dataProvider="{increaseFoods}" click="onFoodListClick(event)" labelField="name"/>
+							<s:VGroup width="148">
+								
+								<s:Label text="Food to Increase" color="0x4D4D4D" fontSize="12" fontWeight="bold" />
+								
+								<s:HGroup width="100%" height="12" verticalAlign="middle">
+									
+									<s:Label text="{foodsToIncrease.dataProvider.length} selected" color="0x4D4D4D" fontSize="12" />
+									
+									<s:HGroup width="100%" horizontalAlign="right">
+										<mx:LinkButton styleName="linkBtnDarkBlue" label="Clear list" click="onClearFoodsClick(onClearFoodToIncreaseClickClose)" />
+									</s:HGroup>
+									
+								</s:HGroup>
+								
+								<s:HGroup gap="-1" verticalAlign="middle" paddingLeft="4">
+									<components1:AutoComplete id="foodsToIncreaseSearch" styleName="mediumGray12Italic" dataProvider="{plan.foodsToIncrease}" labelField="name" width="123" height="24" prefixOnly="false" forceOpen="false" select="searchFoods(foodsToIncreaseSearch.text,foodsToIncrease)" />
+									<s:Button styleName="searchButtonIcon" width="24" height="24" />
+								</s:HGroup>
+								
+								<s:List id="foodsToIncrease" width="148" height="262" dataProvider="{plan.foodsToIncrease}" labelField="name" />
+								
 							</s:VGroup>
 							
 							<s:VGroup height="100%" verticalAlign="middle">
-								<s:Button label="&lt;" width="30" height="30" enabled="{foodsToIncrease.selectedItem!=null}" click="removeFoodToIncrease()" />
-								<s:Button label="&gt;" width="30" height="30" enabled="{foodsToIncreaseLibrary.selectedItem!=null}" click="addFoodToIncrease()" />
+								<s:Button label="&gt;" width="30" height="30" enabled="{foodsToIncrease.selectedItem!=null}" click="removeFoodToIncrease()" />
+								<s:Button label="&lt;" width="30" height="30" enabled="{foodsToIncreaseLibrary.selectedItem!=null}" click="addFoodToIncrease()" />
 							</s:VGroup>
 							
-							<s:VGroup width="148">
-								<s:Label text="Food to Increase" color="0x4D4D4D" fontSize="12" fontWeight="bold" />
+							<s:VGroup>
+								
+								<s:Label text="Food Library" color="0x4D4D4D" fontSize="12" fontWeight="bold" />
+								
 								<s:HGroup width="100%" height="12" verticalAlign="middle">
-									<s:Label text="{foodsToIncrease.dataProvider.length} total" color="0x4D4D4D" fontSize="12" />
+									
+									<s:Label text="{foodsToIncreaseLibrary.dataProvider.length} total" color="0x4D4D4D" fontSize="12" />
+									
 									<s:HGroup width="100%" horizontalAlign="right">
-										<mx:LinkButton styleName="linkBtnDarkBlue" label="Clear list" click="plan.foodsToIncrease = new ArrayCollection()" />
+										<mx:LinkButton styleName="linkBtnDarkBlue" label="+ Add food" click="addNewFood();" />
 									</s:HGroup>
+									
 								</s:HGroup>
-								<s:List id="foodsToIncrease" width="148" height="262" dataProvider="{plan.foodsToIncrease}" labelField="name" />
+								
+								<s:HGroup gap="-1" verticalAlign="middle" paddingLeft="4">
+									<components1:AutoComplete id="foodsToIncreaseLibrarySearch" styleName="mediumGray12Italic" dataProvider="{increaseFoods}" labelField="name" width="123" height="24" prefixOnly="false" forceOpen="false" change="searchFoods(foodsToIncreaseLibrarySearch.text,foodsToIncreaseLibrary)" />
+									<s:Button styleName="searchButtonIcon" width="24" height="24" />
+								</s:HGroup>
+								
+								<s:List id="foodsToIncreaseLibrary" width="148" height="262" dataProvider="{increaseFoods}" click="onFoodListClick(event)" labelField="name"/>
+								
 							</s:VGroup>
 							
 						</s:HGroup>
@@ -738,26 +885,55 @@
 						
 						<s:HGroup paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">
 							
-							<s:VGroup>
-								<s:Label text="Food Library" color="0x4D4D4D" fontSize="12" fontWeight="bold" />
-								<s:Label text="{foodsToLimitLibrary.dataProvider.length} total" color="0x4D4D4D" fontSize="12" />
-								<s:List id="foodsToLimitLibrary" width="148" height="262" dataProvider="{limitFoods}" click="onFoodListClick(event)" labelField="name" />
+							<s:VGroup width="148">
+								
+								<s:Label text="Food to Limit" color="0x4D4D4D" fontSize="12" fontWeight="bold" />
+								
+								<s:HGroup width="100%" height="12" verticalAlign="middle">
+									
+									<s:Label text="{foodsToLimit.dataProvider.length} selected" color="0x4D4D4D" fontSize="12" />
+									
+									<s:HGroup width="100%" horizontalAlign="right">
+										<mx:LinkButton styleName="linkBtnDarkBlue" label="Clear list" click="onClearFoodsClick(onClearFoodToIncreaseClickClose);" />
+									</s:HGroup>
+									
+								</s:HGroup>
+								
+								<s:HGroup gap="-1" verticalAlign="middle" paddingLeft="4">
+									<components1:AutoComplete id="foodsToLimitSearch" styleName="mediumGray12Italic" dataProvider="{plan.foodsToLimit}" labelField="name" width="123" height="24" prefixOnly="false" forceOpen="false" select="searchFoods(foodsToLimitSearch.text,foodsToLimit)" />
+									<s:Button styleName="searchButtonIcon" width="24" height="24" />
+								</s:HGroup>
+								
+								<s:List id="foodsToLimit" width="148" height="262" dataProvider="{plan.foodsToLimit}" labelField="name" />
+								
 							</s:VGroup>
 							
 							<s:VGroup height="100%" verticalAlign="middle">
-								<s:Button label="&lt;" width="30" height="30" enabled="{foodsToLimit.selectedItem!=null}" click="removeFoodToLimit()" />
-								<s:Button label="&gt;" width="30" height="30" enabled="{foodsToLimitLibrary.selectedItem!=null}" click="addFoodToLimit()" />
+								<s:Button label="&gt;" width="30" height="30" enabled="{foodsToLimit.selectedItem!=null}" click="removeFoodToLimit()" />
+								<s:Button label="&lt;" width="30" height="30" enabled="{foodsToLimitLibrary.selectedItem!=null}" click="addFoodToLimit()" />
 							</s:VGroup>
 							
-							<s:VGroup width="148">
-								<s:Label text="Food to Limit" color="0x4D4D4D" fontSize="12" fontWeight="bold" />
+							<s:VGroup>
+								
+								<s:Label text="Food Library" color="0x4D4D4D" fontSize="12" fontWeight="bold" />
+								
 								<s:HGroup width="100%" height="12" verticalAlign="middle">
-									<s:Label text="{foodsToLimit.dataProvider.length} total" color="0x4D4D4D" fontSize="12" />
+									
+									<s:Label text="{foodsToLimitLibrary.dataProvider.length} total" color="0x4D4D4D" fontSize="12" />
+									
 									<s:HGroup width="100%" horizontalAlign="right">
-										<mx:LinkButton styleName="linkBtnDarkBlue" label="Clear list" click="plan.foodsToLimit = new ArrayCollection()" />
+										<mx:LinkButton styleName="linkBtnDarkBlue" label="+ Add food" click="addNewFood();" />
 									</s:HGroup>
+									
 								</s:HGroup>
-								<s:List id="foodsToLimit" width="148" height="262" dataProvider="{plan.foodsToLimit}" labelField="name" />
+								
+								<s:HGroup gap="-1" verticalAlign="middle" paddingLeft="4">
+									<components1:AutoComplete id="foodsToLimitLibrarySearch" styleName="mediumGray12Italic" dataProvider="{limitFoods}" labelField="name" width="123" height="24" prefixOnly="false" forceOpen="false" select="searchFoods(foodsToLimitLibrarySearch.text,foodsToLimitLibrary)"  />
+									<s:Button styleName="searchButtonIcon" width="24" height="24" click="searchFoods(foodsToLimitSearch.text,foodsToLimitLibrary)" />
+								</s:HGroup>
+								
+								<s:List id="foodsToLimitLibrary" width="148" height="262" dataProvider="{limitFoods}" click="onFoodListClick(event)" labelField="name" />
+								
 							</s:VGroup>
 							
 						</s:HGroup>
@@ -780,7 +956,6 @@
 							
 							<s:VGroup width="100%" horizontalAlign="right" gap="2">
 								<mx:LinkButton styleName="linkBtnDarkBlue" label="{mealLibraryViews.selectedIndex==1?'Set Meal Library':'Manage meal categories'}" click="mealLibraryViews.selectedIndex = (mealLibraryViews.selectedIndex == 1 ? 0 : 1);" />
-								<mx:LinkButton styleName="linkBtnDarkBlue" label="+ Add new meal" click="meal=null;mealLibraryViews.selectedIndex=2" visible="{mealLibraryViews.selectedIndex != 1}" includeInLayout="{mealLibraryViews.selectedIndex != 1}" enabled="{mealCategoriesCopy != null &amp;&amp; mealCategoriesCopy.length}" />
 							</s:VGroup>
 							
 						</s:HGroup>
@@ -793,30 +968,6 @@
 									
 									[Bindable] private var meal:Meal;
 									
-									private function saveMeal():void
-									{
-										var meal:Meal = this.meal ? this.meal : new Meal( null, description.text, link.text );
-										
-										if( !this.meal )
-										{
-											for each(var category:MealCategory in mealCategoriesCopy)
-											{
-												if( category == mealCategory.selectedItem )
-												{
-													if( category.meals )
-														category.meals.addItem( meal );
-													else
-														category.meals = new ArrayCollection( [meal] );
-												}
-											}
-										}
-										
-										plan.mealCategories.source = mealCategoriesCopy.source; 
-										plan.mealCategories.refresh(); 
-										
-										mealLibraryViews.selectedIndex = 0;
-									}
-									
 									public function onMealAction( event:MealEvent ):void
 									{
 										if( event.type == MealEvent.EDIT )
@@ -828,10 +979,6 @@
 										{
 											event.mealCategory.meals.removeItemAt( event.mealCategory.meals.getItemIndex( event.meal ) );
 										}
-										else if( event.type == MealEvent.DUPLICATE )
-										{
-											event.mealCategory.meals.addItem( new Meal( event.meal.name, event.meal.description, event.meal.link ) );
-										}
 										
 										event.mealCategory.meals.refresh();
 										
@@ -840,7 +987,6 @@
 									
 									private function initViewStack():void
 									{
-										addEventListener( MealEvent.DUPLICATE, onMealAction );
 										addEventListener( MealEvent.EDIT, onMealAction );
 										addEventListener( MealEvent.REMOVE, onMealAction );
 									}
@@ -849,144 +995,130 @@
 							
 							<s:NavigatorContent>
 								
-								<s:Scroller width="100%" height="270" horizontalScrollPolicy="off">
-									
-									<s:Group>
+								<mx:Accordion width="100%" height="270" >
+								
+									<mx:Repeater id="mealList" width="100%" minHeight="270" dataProvider="{mealCategoriesCopy}">
 										
-										<s:List width="100%" minHeight="270" dataProvider="{mealCategoriesCopy}" horizontalScrollPolicy="off">
+										<mx:VBox label="{mealList.currentItem.name}" color="0x4D4D4D" fontWeight="bold" fontSize="12" paddingLeft="10" paddingTop="10" paddingRight="10">
 											
-											<s:itemRenderer>
-												
-												<fx:Component>
-													
-													<mx:VBox paddingLeft="10" paddingTop="10" paddingRight="10">
-														
-														<s:Label text="{data.name}" color="0x4D4D4D" fontWeight="bold" fontSize="12" />
-														
-														<s:DataGroup dataProvider="{data.meals}" width="100%">
-															
-															<s:layout>
-																<s:VerticalLayout />
-															</s:layout>
-															
-															<s:itemRenderer>
-																
-																<fx:Component>
-																	
-																	<mx:VBox width="100%">
-																		
-																		<fx:Script>
-																			<![CDATA[
-																				import edu.newschool.piim.healthboard.view.components.popups.DeleteConfirmation;
-																				
-																				import edu.newschool.piim.healthboard.events.MealEvent;
-																				
-																				import flash.net.navigateToURL;
-																				
-																				import edu.newschool.piim.healthboard.model.module.nutrition.Meal;
-																				import edu.newschool.piim.healthboard.model.module.nutrition.MealCategory;
-																				
-																				import mx.controls.Alert;
-																				import mx.events.CloseEvent;
-																				import mx.managers.PopUpManager;
-																				
-																				import spark.events.IndexChangeEvent;
-																				import spark.components.TitleWindow;
-																				
-																				private function onMealAction(event:IndexChangeEvent):void
-																				{
-																					var index:int = DropDownList(event.currentTarget).selectedIndex;
-																					
-																					var evt:MealEvent;
-																					
-																					if( index == 0 )
-																					{
-																						evt = new MealEvent( MealEvent.EDIT, true, false );
-																					}
-																					else if( index == 1 )
-																					{
-																						var popup:DeleteConfirmation = DeleteConfirmation( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, DeleteConfirmation) as TitleWindow );
-																						popup.data = evt.meal;
-																						popup.addEventListener( CloseEvent.CLOSE, onDeleteConfirmClose );
-																						
-																						PopUpManager.centerPopUp( popup );
-																					}
-																					else if( index == 2 )
-																					{
-																						evt = new MealEvent( MealEvent.DUPLICATE, true, false );
-																					}
-																					
-																					if( evt )
-																					{
-																						evt.mealCategory = outerDocument.data as MealCategory;
-																						evt.meal = data as Meal;
-																						dispatchEvent( evt );
-																					}
-																					
-																					DropDownList(event.currentTarget).selectedIndex = -1;
-																				}
-																				
-																				private function onDeleteConfirmClose(event:CloseEvent):void
-																				{
-																					var popup:DeleteConfirmation = event.currentTarget as DeleteConfirmation;
-																					
-																					if( event.detail == Alert.YES
-																						&& popup.data is Meal )
-																					{
-																						var evt:MealEvent = new MealEvent( MealEvent.REMOVE, true, false );
-																						evt.mealCategory = outerDocument.data as MealCategory;
-																						evt.meal = popup.data as Meal;
-																						
-																						dispatchEvent( evt );
-																					}
-																					
-																					PopUpManager.removePopUp( popup );
-																					
-																					popup.removeEventListener( CloseEvent.CLOSE, onDeleteConfirmClose );
-																				}
-																			]]>
-																		</fx:Script>
-																		
-																		<mx:HBox width="100%">
-																			
-																			<mx:VBox>
-																				<s:TextArea text="{data.description}" width="200" color="0x000000" heightInLines="{NaN}" editable="false" borderVisible="false" />
-																				<mx:LinkButton styleName="linkBtnDarkBlue" label="{data.name ? data.name : data.link}" click="navigateToURL(new URLRequest(data.link),'_blank')" visible="{data.link!=null}" textAlign="left" />
-																			</mx:VBox>
-																			
-																			<mx:HBox width="100%" horizontalAlign="right">
-																				<s:DropDownList dropShadowVisible="false" dataProvider="{outerDocument.outerDocument.model.mealActions}" change="onMealAction(event)" skinClass="edu.newschool.piim.healthboard.view.skins.general.HealthFocusOptionsDropDownListSkin" color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" width="19" fontSize="12" />
-																			</mx:HBox>
-																			
-																		</mx:HBox>
-																		
-																	</mx:VBox>
-																	
-																</fx:Component>
-																
-															</s:itemRenderer>
-															
-														</s:DataGroup>
-														
-														<s:Group>
-															<s:Line xFrom="0" xTo="298">
-																<s:stroke>
-																	<s:SolidColorStroke color="0x4E4E4E" weight="1"/>
-																</s:stroke>
-															</s:Line>
-														</s:Group>
-														
-													</mx:VBox>
-													
-												</fx:Component>
-												
-											</s:itemRenderer>
+											<mx:HBox width="100%" horizontalAlign="right">
+												<mx:LinkButton styleName="linkBtnDarkBlue" label="Add meal to {mealList.currentItem.name}" click="addMealToMealCategory(mealList.currentItem.meals)" />
+											</mx:HBox>
 											
-										</s:List>
+											<s:DataGroup dataProvider="{mealList.currentItem.meals}" width="100%">
+												
+												<s:layout>
+													<s:VerticalLayout />
+												</s:layout>
+												
+												<s:itemRenderer>
+													
+													<fx:Component>
+														
+														<mx:VBox width="100%">
+															
+															<fx:Script>
+																<![CDATA[
+																	import edu.newschool.piim.healthboard.view.components.popups.DeleteConfirmation;
+																	
+																	import edu.newschool.piim.healthboard.events.MealEvent;
+																	
+																	import flash.net.navigateToURL;
+																	
+																	import edu.newschool.piim.healthboard.model.module.nutrition.Meal;
+																	import edu.newschool.piim.healthboard.model.module.nutrition.MealCategory;
+																	
+																	import mx.controls.Alert;
+																	import mx.events.CloseEvent;
+																	import mx.managers.PopUpManager;
+																	
+																	import spark.events.IndexChangeEvent;
+																	import spark.components.TitleWindow;
+																	
+																	private function onMealAction(event:IndexChangeEvent):void
+																	{
+																		var index:int = DropDownList(event.currentTarget).selectedIndex;
+																		
+																		var evt:MealEvent;
+																		
+																		if( index == 0 )
+																		{
+																			evt = new MealEvent( MealEvent.EDIT, true, false );
+																		}
+																		else if( index == 1 )
+																		{
+																			var popup:DeleteConfirmation = DeleteConfirmation( PopUpManager.createPopUp(AppProperties.getInstance().controller.application, DeleteConfirmation) as TitleWindow );
+																			popup.data = evt.meal;
+																			popup.addEventListener( CloseEvent.CLOSE, onDeleteConfirmClose );
+																			
+																			PopUpManager.centerPopUp( popup );
+																		}
+																		
+																		if( evt )
+																		{
+																			evt.mealCategory = outerDocument.mealList.currentItem as MealCategory;
+																			evt.meal = data as Meal;
+																			dispatchEvent( evt );
+																		}
+																		
+																		DropDownList(event.currentTarget).selectedIndex = -1;
+																	}
+																	
+																	private function onDeleteConfirmClose(event:CloseEvent):void
+																	{
+																		var popup:DeleteConfirmation = event.currentTarget as DeleteConfirmation;
+																		
+																		if( event.detail == Alert.YES
+																			&& popup.data is Meal )
+																		{
+																			var evt:MealEvent = new MealEvent( MealEvent.REMOVE, true, false );
+																			evt.mealCategory = outerDocument.mealList.currentItem as MealCategory;
+																			evt.meal = popup.data as Meal;
+																			
+																			dispatchEvent( evt );
+																		}
+																		
+																		PopUpManager.removePopUp( popup );
+																		
+																		popup.removeEventListener( CloseEvent.CLOSE, onDeleteConfirmClose );
+																	}
+																]]>
+															</fx:Script>
+															
+															<mx:HBox width="100%">
+																
+																<mx:VBox>
+																	<s:TextArea text="{data.description}" width="200" color="0x000000" heightInLines="{NaN}" editable="false" borderVisible="false" />
+																	<mx:LinkButton styleName="linkBtnDarkBlue" label="{data.name ? data.name : data.link}" click="navigateToURL(new URLRequest(data.link),'_blank')" visible="{data.link!=null}" textAlign="left" />
+																</mx:VBox>
+																
+																<mx:HBox width="100%" horizontalAlign="right">
+																	<s:DropDownList dropShadowVisible="false" dataProvider="{outerDocument.model.mealActions}" change="onMealAction(event)" skinClass="edu.newschool.piim.healthboard.view.skins.general.HealthFocusOptionsDropDownListSkin" color="0x074F72" rollOverColor="0xAEDBE2" selectionColor="0xAEDBE2" width="19" fontSize="12" />
+																</mx:HBox>
+																
+															</mx:HBox>
+															
+														</mx:VBox>
+														
+													</fx:Component>
+													
+												</s:itemRenderer>
+												
+											</s:DataGroup>
+											
+											<s:Group>
+												<s:Line xFrom="0" xTo="298">
+													<s:stroke>
+														<s:SolidColorStroke color="0x4E4E4E" weight="1"/>
+													</s:stroke>
+												</s:Line>
+											</s:Group>
+												
+										</mx:VBox>
 										
-									</s:Group>
-									
-								</s:Scroller>
+									</mx:Repeater>
+								
+								</mx:Accordion>
 								
 							</s:NavigatorContent>
 							
@@ -1037,31 +1169,6 @@
 								
 							</s:NavigatorContent>
 							
-							<s:NavigatorContent width="100%">
-								
-								<mx:Form paddingBottom="0" paddingTop="0">
-									
-									<mx:FormItem label="Category:" color="0x000000" labelWidth="75">
-										<s:DropDownList id="mealCategory" width="225" dataProvider="{mealCategoriesCopy}" labelField="name" selectedItem="{mealCategoriesCopy.getItemAt(0)}" />
-									</mx:FormItem>
-									
-									<mx:FormItem label="Description:" color="0x000000" labelWidth="75">
-										<general:TextAreaPlaceholder id="description" width="225" height="78" text="{meal.description ? meal.description : ''}" />										
-									</mx:FormItem>
-									
-									<mx:FormItem label="Link to recipe:" color="0x000000" labelWidth="75">
-										<general:TextInputPlaceholder id="link" width="225" height="24" text="{meal.link ? meal.link : ''}"/>										
-									</mx:FormItem>
-									
-									<s:HGroup width="100%" horizontalAlign="right">
-										<s:Button label="Submit" width="55" height="24" click="saveMeal();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
-										<s:Button label="Cancel" width="55" height="24" click="meal = null; mealLibraryViews.selectedIndex = 0" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
-									</s:HGroup>
-									
-								</mx:Form>
-								
-							</s:NavigatorContent>
-							
 						</mx:ViewStack>
 						
 					</s:NavigatorContent>
@@ -1072,7 +1179,7 @@
 			
 		</s:HGroup>
 		
-	</s:HGroup>
+	</s:VGroup>
 	
 	<s:HGroup paddingLeft="125" width="100%" horizontalAlign="right">
 		
@@ -1082,10 +1189,11 @@
 			<s:Button label="Next" width="50" height="24" click="tabs.selectedIndex+=1" enabled="{tabs.selectedIndex&lt;tabs.dataProvider.length-1}"  />
 			
 			<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
-				<s:Image source="@Embed(source='/images/checkmarkNextSteps.png')" visible="{!isNew &amp;&amp; !plan.dirty}" />
-				<s:Button label="Save" width="50" height="24" click="onSaveClick();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" enabled="{plan!=null &amp;&amp; plan.dirty}" />
-				<s:Button label="Preview" width="85" height="24" click="onPreviewClick();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" enabled="{plan!=null}"/>
-				<s:Button label="Finish" width="55" height="24" click="onFinishClick();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+				<!--<s:Image source="@Embed(source='/images/checkmarkNextSteps.png')" visible="{!isNew &amp;&amp; !plan.dirty}" />-->
+				<s:Button label="Preview" width="75" height="24" click="onPreviewClick();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" enabled="{plan!=null}"/>
+				<s:Button label="Assign" width="70" height="24" click="onAssignClick();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" enabled="{plan!=null &amp;&amp; plan!=patient.foodPlan}" />
+				<s:Button label="Save As..." width="85" height="24" click="onSaveClick();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" enabled="{plan!=null &amp;&amp; plan.dirty}" />
+				<s:Button label="Cancel" width="60" height="24" click="close();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
 			</s:HGroup>
 			
 		</s:HGroup>

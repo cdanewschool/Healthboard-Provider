@@ -7,7 +7,6 @@ package edu.newschool.piim.healthboard.events
 	
 	public class MealEvent extends Event
 	{
-		public static const DUPLICATE:String = "MealEvent.DUPLICATE";
 		public static const EDIT:String = "MealEvent.EDIT";
 		public static const REMOVE:String = "MealEvent.REMOVE";
 		
