@@ -14,22 +14,18 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import edu.newschool.piim.healthboard.view.components.general.MainLinkButton;
 			import edu.newschool.piim.healthboard.components.popups.decisionsupport.ManageRiskFactorsPopup;
 			import edu.newschool.piim.healthboard.components.popups.decisionsupport.NotifyPopup;
 			import edu.newschool.piim.healthboard.components.tabs.decisionsupport.RiskFactorDetails;
 			import edu.newschool.piim.healthboard.components.tabs.decisionsupport.RiskFactorDetailsGeographic;
-			
 			import edu.newschool.piim.healthboard.controller.DecisionSupportController;
 			import edu.newschool.piim.healthboard.controller.MainController;
-			
 			import edu.newschool.piim.healthboard.enum.DateRanges;
+			import edu.newschool.piim.healthboard.enum.RecipientType;
 			import edu.newschool.piim.healthboard.enum.RiskLevel;
-			
 			import edu.newschool.piim.healthboard.events.ApplicationEvent;
 			import edu.newschool.piim.healthboard.events.MessageEvent;
 			import edu.newschool.piim.healthboard.events.TeamAppointmentEvent;
-			
 			import edu.newschool.piim.healthboard.model.Appointment;
 			import edu.newschool.piim.healthboard.model.Message;
 			import edu.newschool.piim.healthboard.model.PatientModel;
@@ -38,12 +34,12 @@
 			import edu.newschool.piim.healthboard.model.modules.decisionsupport.DecisionSupportModel;
 			import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactor;
 			import edu.newschool.piim.healthboard.model.modules.decisionsupport.RiskFactorUpdate;
+			import edu.newschool.piim.healthboard.view.components.general.MainLinkButton;
+			import edu.newschool.piim.healthboard.view.styles.ChartStyles;
 			
 			import mx.controls.Image;
 			import mx.formatters.DateFormatter;
 			import mx.managers.PopUpManager;
-			
-			import edu.newschool.piim.healthboard.view.styles.ChartStyles;
 			
 			private var _patient:PatientModel;
 			
@@ -219,7 +215,7 @@
 			{
 				var message:Message = notifyPopup.message;
 				
-				var recipientName:String = message.recipients && message.recipients.length ? message.recipients[0].fullName : 'Patient';
+				var recipientName:String = message.recipients && message.recipients.length ? message.recipients[0].fullName : RecipientType.PATIENT;
 				var now:Date = AppProperties.getInstance().controller.model.today;
 				
 				//	create a message object in a format messagescontroller understands
