@@ -7,17 +7,22 @@
 	width="384" height="191"
 	controlBarVisible="true" 
 	skinClass="edu.newschool.piim.healthboard.view.skins.general.myHeaderlessTitleWindow"
-	creationComplete="init()" xmlns:general="edu.newschool.piim.healthboard.view.components.general.*" >
+	xmlns:components="org.flashcommander.components.*"
+	xmlns:general="edu.newschool.piim.healthboard.view.components.general.*"
+	creationComplete="init()">
 	
 	<fx:Script>
 		<![CDATA[
 			import edu.newschool.piim.healthboard.model.module.nutrition.FoodServing;
 			
+			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
 			
 			public var serving:FoodServing;
+			
+			[Bindable] private var servingUnits:ArrayCollection = new ArrayCollection( ['milligrams','servings'] );
 			
 			private function save():void
 			{
@@ -26,16 +31,16 @@
 					servingTitle.errorString = "Please enter a title";
 					return;
 				}
-				else if( servingUnits.text == servingUnits.placeholder ) 
+				else if( !servingUnit.selectedItem ) 
 				{
-					servingUnits.errorString = "Please enter a unit";
+					servingUnit.errorString = "Please enter a unit";
 					return;
 				}
 				
 				servingTitle.errorString = "";
-				servingUnits.errorString = "";
+				servingUnit.errorString = "";
 				
-				serving = new FoodServing( servingTitle.text, null, servingUnits.text, null, null, listMinMax.selected );
+				serving = new FoodServing( servingTitle.text, null, servingUnit.selectedItem as String, null, null, listMinMax.selected );
 				
 				var evt:CloseEvent = new CloseEvent( CloseEvent.CLOSE, true, false, Alert.YES );
 				dispatchEvent( evt );
@@ -57,16 +62,26 @@
 		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" gap="12" horizontalAlign="left" />
 	</s:layout>
 	
-	<s:Label text="Create a new serving category" styleName="darkGrayBold16" paddingBottom="5" />
+	<s:Label text="Create a new tracker" styleName="darkGrayBold16" paddingBottom="5" />
 	
-	<general:TextInputPlaceholder id="servingTitle" width="165" height="24" placeholder="Serving" />
+	<mx:Form fontSize="12" color="0x000000" verticalGap="6">
 	
-	<s:HGroup verticalAlign="middle">
-		<general:TextInputPlaceholder id="servingUnits" width="88" height="24" placeholder="Units" />
-		<s:Label text="example: milligrams" />
-	</s:HGroup>
-	
-	<s:CheckBox id="listMinMax" label="List both minimum and maximum values" />
+		<mx:FormItem label="Name:" labelWidth="40" horizontalGap="5">
+			<general:TextInputPlaceholder id="servingTitle" width="165" height="24" placeholder="" />
+		</mx:FormItem>
+		
+		<mx:FormItem label="Unit:" labelWidth="40" horizontalGap="5">
+			<s:HGroup verticalAlign="middle">
+				<components:AutoComplete id="servingUnit" dataProvider="{servingUnits}" width="88" height="24" prefixOnly="false" forceOpen="true" />
+				<s:Label text="example: milligrams" />
+			</s:HGroup>
+		</mx:FormItem>
+		
+		<mx:FormItem label="" labelWidth="80" horizontalGap="5">
+			<s:CheckBox id="listMinMax" label="List both minimum and maximum values" />
+		</mx:FormItem>
+		
+	</mx:Form>
 	
 	<s:HGroup width="100%" horizontalAlign="right">
 		<s:Button label="Add to Serving Category" width="150" height="24" click="save();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />

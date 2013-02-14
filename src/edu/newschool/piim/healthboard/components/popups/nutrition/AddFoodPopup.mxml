@@ -86,7 +86,7 @@
 			<general:TextAreaPlaceholder id="foodDescription" width="326" height="78" placeholder="Low fat, cholesterol, and sodium. Boil or stir fried." />
 		</mx:FormItem>
 		
-		<mx:FormItem label="Description:" color="0x000000" labelWidth="70">
+		<mx:FormItem label="Image:" color="0x000000" labelWidth="70">
 			<s:VGroup>
 				<s:TextInput text="{imageAttachment ? imageAttachment.name : ''}" editable="false" />
 				<general:MainLinkButton label="Browse From file" styleName="linkBtnDarkBlue" fontSize="12" click="browseAttachment(event)" paddingLeft="10" />

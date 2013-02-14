@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" width="364" height="340"
+	xmlns:net="flash.net.*"
+	skinClass="edu.newschool.piim.healthboard.view.skins.general.myHeaderlessTitleWindow" 
+	color="0x4D4D4D">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			
+			private function close():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="20" paddingTop="20" paddingRight="20" paddingBottom="10" gap="10" />
+	</s:layout>
+	
+	<s:Label text="Tips for Setting Food Plan" styleName="darkGrayBold16" />
+	
+	<s:Spacer />
+	
+	<s:Label text="Welcome! Here are the steps to set a Food Plan." styleName="darkGrayBold16" fontSize="14" />
+	
+	<s:Line xFrom="0" xTo="323">
+		<s:stroke>
+			<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:VGroup gap="5">
+		<s:Label text="Step 1: Select a Food Plan" styleName="darkGrayBold12" />
+		<s:Label text="Set a new plan or modify reasons for plan, description, and starting date." styleName="darkGray12" paddingLeft="35" width="350" />
+	</s:VGroup>
+	
+	<s:Line xFrom="0" xTo="323">
+		<s:stroke>
+			<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:VGroup gap="5">
+		<s:Label text="Step 2: Review Food Groups &amp; Servings" styleName="darkGrayBold12" />
+		<s:Label text="Set serving values for patient." styleName="darkGray12" paddingLeft="35" width="350" />
+	</s:VGroup>
+	
+	<s:Line xFrom="0" xTo="323">
+		<s:stroke>
+			<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:VGroup gap="5">
+		<s:Label text="Step 3: Food List" styleName="darkGrayBold12" />
+		<s:Label text="Set foods to eat and avoid for patient." styleName="darkGray12" paddingLeft="35" width="350" />
+	</s:VGroup>
+	
+	<s:Line xFrom="0" xTo="323">
+		<s:stroke>
+			<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:VGroup gap="5">
+		<s:Label text="Step 4: Choose Meals" styleName="darkGrayBold12" />
+		<s:Label text="Set suggested meals for patient." styleName="darkGray12" paddingLeft="35" width="350" />
+	</s:VGroup>
+	
+	
+	<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
+		<s:CheckBox label="Don't show me this again" styleName="darkGray12" />
+		<s:Button label="Close" width="60" height="24" click="close();" />
+	</s:HGroup>
+	
+</s:TitleWindow>
