@@ -80,10 +80,10 @@
 			[Bindable] private var appointments:ArrayCollection;
 			[Bindable] private var providers:ArrayCollection;
 			
-			[Embed(source="images/btnCalendarWeek.png")]
+			[Embed(source="/images/btnCalendarWeek.png")]
 			[Bindable] private var weekIcon:Class;
 			
-			[Embed(source="images/calendar.png")]
+			[Embed(source="/images/calendar.png")]
 			[Bindable] private var calendarIcon:Class;
 			
 			private const MODE_DAY:String = "day";
