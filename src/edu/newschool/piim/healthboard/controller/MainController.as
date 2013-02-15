@@ -120,6 +120,7 @@ package edu.newschool.piim.healthboard.controller
 			model.addEventListener( ApplicationDataEvent.LOADED, onAlertsLoaded );
 			medicationsController.model.addEventListener( ApplicationDataEvent.LOADED, onMedicationsLoaded );
 		
+			appointmentsController.model.addEventListener( ApplicationDataEvent.LOADED, onAppointmentsLoaded );
 			patientsController.model.addEventListener( ApplicationDataEvent.LOADED, onPatientsLoaded );
 			providersController.model.addEventListener( ApplicationDataEvent.LOADED, onProvidersLoaded );
 			
