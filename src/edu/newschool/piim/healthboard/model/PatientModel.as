@@ -39,7 +39,7 @@ package edu.newschool.piim.healthboard.model
 		public var relations:ArrayCollection;
 		public var riskFactorGroups:ArrayCollection;
 		
-		public var foodPlan:FoodPlan = FoodPlan.AVERAGE;
+		public var foodPlan:FoodPlan = FoodPlan.AVERAGE.clone();
 		
 		public function PatientModel()
 		{

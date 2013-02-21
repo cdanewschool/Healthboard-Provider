@@ -2,14 +2,13 @@ package edu.newschool.piim.healthboard.components.modules
 {
 	import edu.newschool.piim.healthboard.components.popups.nutrition.AddFoodNotePopup;
 	import edu.newschool.piim.healthboard.components.popups.nutrition.FoodPlanPopup;
+	import edu.newschool.piim.healthboard.model.PatientModel;
+	import edu.newschool.piim.healthboard.model.module.nutrition.FoodPlan;
+	import edu.newschool.piim.healthboard.view.modules.NutritionModule;
 	
 	import flash.events.MouseEvent;
 	
-	import edu.newschool.piim.healthboard.model.PatientModel;
-	import edu.newschool.piim.healthboard.model.module.nutrition.FoodPlan;
-	
-	import edu.newschool.piim.healthboard.view.modules.NutritionModule;
-	
+	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.events.CloseEvent;
@@ -28,7 +27,8 @@ package edu.newschool.piim.healthboard.components.modules
 			currentState = "provider";
 		}
 		
-		override protected function init():void {
+		override protected function init():void 
+		{
 			super.init();
 			
 			hgNutrition.removeElement(vgRecordIntake);
@@ -78,9 +78,7 @@ package edu.newschool.piim.healthboard.components.modules
 		{
 			_patient = value;
 			
-			if( _patient 
-				&& _patient.hasOwnProperty('foodPlan') )
-				foodPlan = _patient['foodPlan'] as FoodPlan;
+			BindingUtils.bindProperty(this,'foodPlan',patient,'foodPlan');
 		}
 
 	}

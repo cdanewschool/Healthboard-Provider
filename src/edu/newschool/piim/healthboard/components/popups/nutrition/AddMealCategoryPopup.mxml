@@ -30,6 +30,14 @@
 			
 			private function save():void
 			{
+				if( categoryName.text == "" ) 
+				{
+					categoryName.errorString = "Please enter a value";
+					return;
+				}
+				
+				categoryName.errorString = "";
+				
 				category = new MealCategory( categoryName.text );
 				referenceCategory = arrangement.selectedItem;
 				referencePosition = beforeOrAfter.selectedValue.toString();
@@ -63,10 +71,16 @@
 		</mx:FormItem>
 		
 		<mx:FormItem label="Arrangement:" color="0x000000" labelWidth="90" visible="{categories != null &amp;&amp; categories.length}">
+			
 			<s:VGroup gap="5">
+				
+				<s:HGroup>
+					<s:RadioButton value="before" groupName="beforeOrAfter" label="Before" />
+					<s:RadioButton value="after" groupName="beforeOrAfter" label="After" selected="true" />
+				</s:HGroup>
+				
 				<s:DropDownList id="arrangement" width="165" height="24" dataProvider="{categories}" labelField="name" selectedItem="{categories.getItemAt(categories.length-1)}" />
-				<s:RadioButton value="before" groupName="beforeOrAfter" label="Before" />
-				<s:RadioButton value="after" groupName="beforeOrAfter" label="After" selected="true" />
+				
 			</s:VGroup>
 			
 		</mx:FormItem>

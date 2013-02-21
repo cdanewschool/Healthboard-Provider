@@ -333,7 +333,7 @@ package edu.newschool.piim.healthboard.controller
 		private function editProfile():void
 		{
 			editProfilePopup = PopUpManager.createPopUp( application, EditProvider, true ) as EditProvider;
-			editProfilePopup.provider = ProviderModel(model.user).clone();
+			editProfilePopup.provider = ProviderModel(model.user).clone() as ProviderModel;
 			editProfilePopup.addEventListener( ProfileEvent.SAVE, onEditProfileSave );
 			
 			PopUpManager.centerPopUp( editProfilePopup );
