@@ -1,10 +1,9 @@
 package edu.newschool.piim.healthboard.model
 {
 	import edu.newschool.piim.healthboard.events.ChatEvent;
+	import edu.newschool.piim.healthboard.model.module.ModuleModel;
 	
 	import flash.events.EventDispatcher;
-	
-	import edu.newschool.piim.healthboard.model.module.ModuleModel;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
@@ -80,9 +79,22 @@ package edu.newschool.piim.healthboard.model
 			else if( selectedChatGroup == 2 )
 				dataProvider = new ArrayCollection( providers.source );
 			
+			//	remove logged-in user
+			var loggedInUser:UserModel = AppProperties.getInstance().controller.model.user;
+			
+			for(var i:int=0;i<dataProvider.length;i++)
+			{
+				if( (dataProvider.getItemAt(i) as UserModel).userType == loggedInUser.userType 
+					&& (dataProvider.getItemAt(i) as UserModel).id == loggedInUser.id )
+				{
+					dataProvider.removeItemAt(i);
+					break;
+				}
+			}
+			
 			var sort:Sort = new Sort();
 			sort.fields = [ new SortField('lastName') ];
-				
+			
 			dataProvider.filterFunction = filterFunction;
 			dataProvider.sort = sort;
 			
