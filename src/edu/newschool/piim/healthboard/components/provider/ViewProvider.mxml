@@ -9,11 +9,8 @@
 	<fx:Script>
 		<![CDATA[
 			import edu.newschool.piim.healthboard.ProviderConstants;
-			
 			import edu.newschool.piim.healthboard.controller.MainController;
-			
 			import edu.newschool.piim.healthboard.events.ProfileEvent;
-			
 			import edu.newschool.piim.healthboard.model.ProviderModel;
 			
 			import mx.events.CloseEvent;
@@ -30,7 +27,7 @@
 				closePopup();
 				
 				editWindow = new EditProvider();
-				editWindow.provider = provider.clone();
+				editWindow.provider = provider.clone() as ProviderModel;
 				editWindow.addEventListener( ProfileEvent.SAVE, onSave );
 				
 				PopUpManager.addPopUp(editWindow, this.parent.parent.parent as DisplayObject, true);

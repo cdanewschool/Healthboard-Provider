@@ -30,6 +30,7 @@
 			import edu.newschool.piim.healthboard.controller.Controller;
 			import edu.newschool.piim.healthboard.controller.MainController;
 			import edu.newschool.piim.healthboard.controller.TeamAppointmentsController;
+			import edu.newschool.piim.healthboard.enum.AppointmentType;
 			import edu.newschool.piim.healthboard.enum.UrgencyType;
 			import edu.newschool.piim.healthboard.events.ApplicationDataEvent;
 			import edu.newschool.piim.healthboard.events.ApplicationEvent;
@@ -44,6 +45,7 @@
 			import edu.newschool.piim.healthboard.model.TeamAppointmentsModel;
 			import edu.newschool.piim.healthboard.model.UserModel;
 			import edu.newschool.piim.healthboard.util.DateUtil;
+			import edu.newschool.piim.healthboard.view.components.popups.Confirmation;
 			
 			import mx.charts.AxisLabel;
 			import mx.charts.CategoryAxis;
@@ -971,8 +973,12 @@
 					appointment.from = from;
 					appointment.to = to;
 					appointment.provider = provider;
+					appointment.type = Appointment.TYPE_PENDING;
 					
-					showAppointmentChanged();
+					var popup:Confirmation = PopUpManager.createPopUp( AppProperties.getInstance().controller.application, Confirmation ) as Confirmation;
+					popup.confirmationText = "Patient notified of appointment change";
+					popup.buttonText = "Close";
+					PopUpManager.centerPopUp( popup );
 					
 					selectedAppointment = null;
 				}

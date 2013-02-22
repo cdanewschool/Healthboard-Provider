@@ -212,10 +212,11 @@ package edu.newschool.piim.healthboard.controller
 				}
 			}
 			
+			var application:Application = AppProperties.getInstance().controller.application;
+			
 			if( !isPatientAlreadyOpen ) 
 			{
 				var appointmentsModel:AppointmentsModel = AppProperties.getInstance().controller.appointmentsController.model as AppointmentsModel;
-				var application:Application = AppProperties.getInstance().controller.application;
 				
 				viewPatient = new ViewPatient();
 				viewPatient.name = "patient" + patient.id;

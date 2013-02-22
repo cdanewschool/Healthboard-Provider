@@ -234,7 +234,7 @@
 					
 					<s:VGroup paddingLeft="5" paddingTop="10" paddingRight="5" paddingBottom="10" width="100%" height="100%">
 						
-						<!--	view mode	-->
+						<!--	view mode	
 						<s:BorderContainer width="100%" height="26" backgroundFill="{headerFill}" borderAlpha="0">
 							<s:Label text="View Mode" paddingLeft="7" paddingTop="7" verticalAlign="middle" styleName="darkGray12Italic" />
 						</s:BorderContainer>
@@ -250,6 +250,7 @@
 								<s:RadioButton groupName="viewModeGroup" label="Widget view" click="preferences.viewMode = ViewModeType.WIDGET" selected="{preferences.viewMode == ViewModeType.WIDGET}"/>
 							</s:VGroup>
 						</s:HGroup>
+						-->
 						
 						<!--	color scheme	-->
 						<s:BorderContainer width="100%" height="26" backgroundFill="{headerFill}" borderAlpha="0">

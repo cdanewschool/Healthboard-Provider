@@ -21,25 +21,58 @@
 			import mx.containers.FormItem;
 			import mx.controls.Alert;
 			import mx.controls.Image;
-			import mx.controls.TextInput;
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
 			
+			import spark.components.TextInput;
+			
+			public static const MODE_ADD:String = "add";
+			public static const MODE_EDIT:String = "edit";
+			
 			[Bindable] [Embed(source="/images/nutritionDelete.png")] private var closeIcon:Class;
 			
+			[Bindable] public var mode:String = MODE_ADD;
 			[Bindable] public var mealCategory:MealCategory;
+			[Bindable] public var meal:Meal;
 			
-			public var items:ArrayCollection = new ArrayCollection();
+			[Bindable] public var formItems:ArrayCollection = new ArrayCollection();
 			
 			private function save():void
 			{
-				for(var i:int=0;i<items.length;i++)
+				var valid:Boolean = true;
+				
+				var item:FormItem;
+				var nameInput:TextInputPlaceholder;
+				
+				for(var i:int=0;i<formItems.length;i++)
 				{
-					var item:FormItem = items.getItemAt(i) as FormItem;
-					var nameInput:TextInput = item.getChildByName("name"+i) as TextInput;
-					var servingsInput:TextInput = item.getChildByName("servings"+i) as TextInput;
+					item = formItems.getItemAt(i) as FormItem;
+					nameInput = item.getChildByName("nameInput") as TextInputPlaceholder;
 					
-					var meal:Meal = new Meal( nameInput.text, servingsInput.text );
+					nameInput.errorString = nameInput.text == "" || nameInput.text == nameInput.placeholder ? "Please enter a value" : "";
+					
+					valid = valid && !nameInput.errorString;
+				}
+				
+				if( !valid ) return;
+				
+				var items:Array = [];
+				
+				for(i=0;i<formItems.length;i++)
+				{
+					item = formItems.getItemAt(i) as FormItem;
+					nameInput = item.getChildByName("nameInput") as TextInputPlaceholder;
+					
+					items.push( nameInput.text );
+				}
+				
+				if( mode == MODE_EDIT )
+				{
+					meal.description = items.join('\n');
+				}
+				else
+				{
+					var meal:Meal = new Meal( items.join('\n') );
 					mealCategory.meals.addItem( meal );
 				}
 				
@@ -56,57 +89,86 @@
 			{
 				controlBarVisible = false;
 				
-				addItem();
+				if( mode == MODE_EDIT )
+				{
+					var mealItems:Array = meal.description.split("\n");
+					
+					for each(var mealItem:String in mealItems)
+					{
+						addItem( mealItem );
+					}
+				}
+				else
+				{
+					addItem();
+				}
 			}
 			
 			private function onRowDelete(event:MouseEvent):void
 			{
+				var items:ArrayCollection = new ArrayCollection( formItems.source.slice() );
 				
+				for(var i:int=0,j:int=0;i<items.length;i++)
+				{
+					var formItem:FormItem = items.getItemAt(i) as FormItem;
+					var image:Image = formItem.getChildByName("image") as Image;
+					
+					if( image == event.currentTarget )
+					{
+						form.removeChild( formItem );
+						formItems.removeItemAt(i);
+					}
+					else
+					{
+						formItem.label = "Item " + (j+1);
+						j++;
+					}
+				}
 			}
 			
-			private function addItem():void
+			private function addItem( value:String = null ):void
 			{
-				var id:int = items.length;
+				if( formItems.length >= 4 ) return;
+				
+				var id:int = formItems.length;
 				
 				var formItem:FormItem = new FormItem();
 				formItem.label = "Item " + (id+1);
 				formItem.setStyle("color","0x000000");
 				formItem.setStyle("labelWidth",50);
+				formItem.direction = "horizontal";
+				formItem.setStyle("verticalAlign","middle");
 				form.addChild( formItem );
 				
-				var nameInput:TextInput = new TextInput();
-				nameInput.id = "name"+id;
-				nameInput.width = 266;
+				var nameInput:TextInputPlaceholder = new TextInputPlaceholder();
+				nameInput.name = "nameInput";
+				nameInput.text = value;
+				nameInput.width = 359;
 				nameInput.height = 24;
 				formItem.addChild( nameInput );
 				
-				var servingsInput:TextInputPlaceholder = new TextInputPlaceholder();
-				servingsInput.id = "servings"+id;
-				servingsInput.width = 93;
-				servingsInput.height = 24;
-				servingsInput.placeholder = "Portions (optional)";
-				formItem.addChild( servingsInput );
-				
 				var closeButton:Image = new Image();
+				closeButton.name = "image";
 				closeButton.buttonMode = true;
 				closeButton.source = closeIcon;
+				closeButton.setStyle("paddingTop",10);
 				closeButton.addEventListener( MouseEvent.CLICK, onRowDelete );
 				formItem.addChild( closeButton );
 				
-				items.addItem( formItem );
+				formItems.addItem( formItem );
 			}
 		]]>
 	</fx:Script>
 	
 	<s:layout>
-		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" gap="5" horizontalAlign="left" />
+		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" gap="5" horizontalAlign="left" />
 	</s:layout>
 	
-	<s:Label text="Add meal to {mealCategory.name}" styleName="darkGrayBold16" paddingBottom="5" />
+	<s:Label text="{mode==MODE_EDIT?'Edit meal':'Add meal to '+mealCategory.name}" styleName="darkGrayBold16" paddingBottom="5" />
 	
-	<mx:Form id="form" paddingBottom="0" paddingTop="0" />
+	<mx:Form id="form" paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0" />
 	
-	<general:MainLinkButton styleName="linkBtnDarkBlue" click="addItem()" paddingLeft="50" />
+	<general:MainLinkButton label="+ Add more to {mealCategory.name}" styleName="linkBtnDarkBlue" click="addItem()" paddingLeft="60" />
 	
 	<s:Line xFrom="0" xTo="444">
 		<s:stroke>
@@ -115,7 +177,7 @@
 	</s:Line>
 	
 	<s:HGroup width="100%" horizontalAlign="right">
-		<s:Button label="Add to list" width="100" height="24" click="save();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
+		<s:Button label="Add to list" width="100" height="24" click="save();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" enabled="{formItems.length>0}" />
 		<s:Button label="Cancel" width="55" height="24" click="cancel();" skinClass="edu.newschool.piim.healthboard.view.skins.general.IconButtonSkin" />
 	</s:HGroup>
 	
