@@ -976,7 +976,9 @@
 					appointment.type = Appointment.TYPE_PENDING;
 					
 					var popup:Confirmation = PopUpManager.createPopUp( AppProperties.getInstance().controller.application, Confirmation ) as Confirmation;
-					popup.confirmationText = "Patient notified of appointment change";
+					popup.confirmationText = "Patient notified of appointment change request.\nPending on patient confirmation.";
+					popup.width = 370;
+					popup.height = 100;
 					popup.buttonText = "Close";
 					PopUpManager.centerPopUp( popup );
 					
