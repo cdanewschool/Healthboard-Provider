@@ -66,8 +66,7 @@
 	<views:LoginView 
 		width="1024" includeIn="default" 
 		authenticationSuccess="dispatchEvent( new ApplicationEvent( ApplicationEvent.SET_STATE, true, false, controller.model.viewMode) )" 
-		allowAccountCreation="false"
-		adminUsername="popo" />
+		allowAccountCreation="false" />
 	
 	<s:VGroup includeIn="loggedIn" width="1024" horizontalAlign="center">	
 		
