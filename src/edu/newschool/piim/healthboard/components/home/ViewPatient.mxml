@@ -163,7 +163,7 @@
 				EnhancedTitleWindow(nutritionWidget).subtitle = DateFormatters.dateFormatterDay.format( new Date() );
 				
 				patientProfileWidget.patient = patient;
-				patientProfileWidget.maxHeight = activeModuleID?156:NaN;
+				patientProfileWidget.maxHeight = activeModuleID?166:NaN;
 				patientProfileWidget.width = activeModuleID?314:304;
 				patientProfileWidget.showDetails = activeModuleID == null;
 				

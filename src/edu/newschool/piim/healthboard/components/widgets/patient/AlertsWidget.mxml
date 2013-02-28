@@ -315,7 +315,7 @@
 	
 	<mx:DataGrid 
 		id="datagrid"
-		styleName="standardDataGridSolid"
+		styleName="standardDataGridSolid" headerHeight="23"
 		width="100%" 
 		borderVisible="false" 
 		horizontalScrollPolicy="off" 

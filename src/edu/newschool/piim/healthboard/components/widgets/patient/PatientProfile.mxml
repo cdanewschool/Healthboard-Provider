@@ -40,13 +40,6 @@
 				evt.user = patient;
 				dispatchEvent( evt );
 			}
-			
-			private function onViewProfileClick(event:MouseEvent):void
-			{
-				var evt:ProfileEvent = new ProfileEvent( ProfileEvent.VIEW_PROFILE, true );
-				evt.user = patient;
-				dispatchEvent( evt );
-			}
 
 			[Bindable]
 			public function get showDetails():Boolean
@@ -72,10 +65,10 @@
 		label="{patient.fullName}" styleName="linkBtnBlue" fontSize="16" fontWeight="bold" click="onPatientNameClick(event)"
 		visible="{showDetails}" includeInLayout="{showDetails}" />
 	
-	<s:HGroup color="0xFFFFFF" fontSize="12" paddingTop="8">
+	<s:HGroup color="0xFFFFFF" fontSize="12" paddingTop="{showDetails ? 8 : 10}" paddingBottom="{showDetails ? 0 : 10}">
 		<s:Image source="@Embed('/images/profilePicSmall.png')" />
 		<s:VGroup gap="0">
-			<s:Label text="{patient.fullName}" styleName="white14Bold" paddingTop="2" visible="{!showDetails}" includeInLayout="{!showDetails}"  />
+			<s:Label text="{patient.fullName}" color="0xAEDEE4" fontSize="14" fontWeight="bold" paddingTop="2" paddingBottom="3" visible="{!showDetails}" includeInLayout="{!showDetails}"  />
 			<s:HGroup>
 				<s:Label id="labels" textAlign="right" paddingLeft="4" lineHeight="16" paddingTop="2" />
 				<s:Label id="values" text="{'000704190\n213-55-4232\n01/01/1965 (46 Years)\nMale\nSCPO, Navy'}" lineHeight="16" paddingTop="2" />
@@ -168,7 +161,7 @@
 	</s:VGroup>
 	
 	<s:HGroup width="100%" visible="{!showDetails}" includeInLayout="{!showDetails}" horizontalAlign="right">
-		<mx:LinkButton label="View Full Patient Profile »" click="onViewProfileClick(event)" styleName="linkBtnBlue" />
+		<mx:LinkButton label="View Full Patient Profile »" click="onPatientNameClick(event)" styleName="linkBtnBlue" />
 	</s:HGroup>
 	
 </enhancedtitlewindow:EnhancedTitleWindow>
