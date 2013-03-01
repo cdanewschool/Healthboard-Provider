@@ -430,7 +430,7 @@
 	
 	<fx:Declarations>
 		
-		<s:NumberFormatter id="numberFormatter" />
+		<s:NumberFormatter id="numberFormatter" fractionalDigits="0" />
 		
 		<esri:FindTask
 			id="findTask"
@@ -622,22 +622,22 @@
 									<s:Label text="National" styleName="green12Bold" paddingBottom="10" />
 									
 									<s:HGroup gap="15">
-										<s:Label width="45" text="{advisory.update.caseReportCount}" styleName="orange16Bold" textAlign="right" />
+										<s:Label width="49" text="{!isNaN(advisory.update.caseReportCount)?numberFormatter.format(advisory.update.caseReportCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
 										<s:Label text="Case Reports" styleName="white12Bold" />
 									</s:HGroup>
 									
 									<s:HGroup gap="15">
-										<s:Label width="45" text="{!isNaN(advisory.update.affectedStatesCount)?numberFormatter.format(advisory.update.affectedStatesCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label width="49" text="{!isNaN(advisory.update.affectedStatesCount)?numberFormatter.format(advisory.update.affectedStatesCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
 										<s:Label text="States" styleName="white12Bold" />
 									</s:HGroup>
 									
 									<s:HGroup gap="15">
-										<s:Label width="45" text="{!isNaN(advisory.update.deathCount)?numberFormatter.format(advisory.update.deathCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label width="49" text="{!isNaN(advisory.update.deathCount)?numberFormatter.format(advisory.update.deathCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
 										<s:Label text="Deaths" styleName="white12Bold" />
 									</s:HGroup>
 									
 									<s:HGroup gap="15">
-										<s:Label width="45" text="{!isNaN(advisory.update.hospitalizationsCount)?numberFormatter.format(advisory.update.hospitalizationsCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
+										<s:Label width="49" text="{!isNaN(advisory.update.hospitalizationsCount)?numberFormatter.format(advisory.update.hospitalizationsCount):'N/A'}" styleName="orange16Bold" textAlign="right" />
 										<s:Label text="Hospitalizations" styleName="white12Bold" />
 									</s:HGroup>
 									
