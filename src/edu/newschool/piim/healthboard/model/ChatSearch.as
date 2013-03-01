@@ -1,5 +1,6 @@
 package edu.newschool.piim.healthboard.model
 {
+	import edu.newschool.piim.healthboard.events.AuthenticationEvent;
 	import edu.newschool.piim.healthboard.events.ChatEvent;
 	import edu.newschool.piim.healthboard.model.module.ModuleModel;
 	
@@ -7,9 +8,10 @@ package edu.newschool.piim.healthboard.model
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
+	import mx.core.FlexGlobals;
 	
 	import spark.collections.SortField;
-
+	
 	[Bindable] 
 	public class ChatSearch extends ModuleModel
 	{
@@ -56,8 +58,10 @@ package edu.newschool.piim.healthboard.model
 			super();
 			
 			mode = MODE_TEXT;
+			
+			FlexGlobals.topLevelApplication.addEventListener( AuthenticationEvent.SUCCESS, onAuthenticated );
 		}
-
+		
 		public function getUser( id:int, type:String = null ):UserModel
 		{
 			var user:UserModel;
@@ -70,7 +74,7 @@ package edu.newschool.piim.healthboard.model
 		
 		private function updateDataProvider():void
 		{
-			if( !providers || !patients ) return;
+			if( !providers || !patients || !AppProperties.getInstance().controller.model.user ) return;
 			
 			if( selectedChatGroup == 0 )
 				dataProvider = new ArrayCollection( providers.source.slice().concat( patients.source.slice() ) );
@@ -132,51 +136,51 @@ package edu.newschool.piim.healthboard.model
 		{
 			return _selectedChatGroup;
 		}
-
+		
 		public function set selectedChatGroup(value:int):void
 		{
 			_selectedChatGroup = value;
 			updateDataProvider();
 		}
-
+		
 		public function get searchText():String
 		{
 			return _searchText;
 		}
-
+		
 		public function set searchText(value:String):void
 		{
 			_searchText = value;
 			filter();
 		}
-
+		
 		public function get providers():ArrayCollection
 		{
 			return _providers;
 		}
-
+		
 		public function set providers(value:ArrayCollection):void
 		{
 			_providers = value;
 			updateDataProvider();
 		}
-
+		
 		public function get patients():ArrayCollection
 		{
 			return _patients;
 		}
-
+		
 		public function set patients(value:ArrayCollection):void
 		{
 			_patients = value;
 			updateDataProvider();
 		}
-
+		
 		public function get state():String
 		{
 			return _state;
 		}
-
+		
 		public function set state(value:String):void
 		{
 			var changed:Boolean = value != _state;
@@ -192,7 +196,13 @@ package edu.newschool.piim.healthboard.model
 				}
 			}
 		}
-
-
+		
+		private function onAuthenticated(event:AuthenticationEvent):void
+		{
+			FlexGlobals.topLevelApplication.removeEventListener( AuthenticationEvent.SUCCESS, onAuthenticated );
+			
+			updateDataProvider();
+		}
+		
 	}
 }
