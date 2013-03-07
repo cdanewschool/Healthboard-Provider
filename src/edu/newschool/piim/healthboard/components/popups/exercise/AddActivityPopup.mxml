@@ -70,27 +70,27 @@
 	</fx:Script>
 	
 	<s:layout>
-		<s:VerticalLayout paddingLeft="10" paddingTop="10" paddingRight="10" gap="10" horizontalAlign="left" />
+		<s:VerticalLayout paddingLeft="15" paddingTop="10" paddingRight="10" gap="10" horizontalAlign="left" />
 	</s:layout>
 	
-	<s:Label text="Add new activity to list" styleName="darkGrayBold16" paddingBottom="5" />
+	<s:Label text="Add new activity to list" styleName="darkGrayBold16" />
 	
 	<mx:Form paddingLeft="5" paddingBottom="5" paddingTop="0">
 		
-		<mx:FormItem label="Activity Name:" color="0x000000" labelWidth="100">
+		<mx:FormItem label="Activity Name:" color="0x000000" labelWidth="77">
 			<general:TextInputPlaceholder id="activityName" width="326" height="24" placeholder="" />
 		</mx:FormItem>
 		
-		<mx:FormItem label="Icon:" color="0x000000" labelWidth="100">
+		<mx:FormItem label="Icon:" color="0x000000" labelWidth="77">
 			<s:VGroup>
 				<general:TextInputPlaceholder text="{imageAttachment.name}" width="326" height="24" placeholder="" editable="false" />
-				<general:MainLinkButton label="Browse From file" styleName="linkBtnDarBlue" fontSize="12" click="browseAttachment(event)" paddingLeft="-10" />
+				<general:MainLinkButton label="Browse from file »" styleName="linkBtnDarkBlue" fontSize="12" click="browseAttachment(event)" paddingLeft="-4" />
 			</s:VGroup>
 		</mx:FormItem>
 		
 	</mx:Form>
 	
-	<s:Line xFrom="0" xTo="424">
+	<s:Line xFrom="0" xTo="425">
 		<s:stroke>
 			<s:SolidColorStroke color="0x4D4D4D" weight="1"/>
 		</s:stroke>
