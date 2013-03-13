@@ -4,18 +4,15 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx" 
 	autoDrawBackground="false" 
-	resizeMode="scale" 
-	creationComplete="init()"
+	resizeMode="noScale" minWidth="0" minHeight="0"
+	added="onAdded()" removed="onRemoved()" 
+	creationComplete="init()" implements="edu.newschool.piim.healthboard.view.components.calendar.renderer.ICalendarDayItemRenderer"
 	dataChange="onDataChange(event)">
 	
 	<fx:Script>
 		<![CDATA[
 			import edu.newschool.piim.healthboard.components.appointments.ProviderOverviewItem;
-			
-			import edu.newschool.piim.healthboard.controller.AppointmentsController;
 			import edu.newschool.piim.healthboard.controller.MainController;
-			import edu.newschool.piim.healthboard.controller.TeamAppointmentsController;
-			
 			import edu.newschool.piim.healthboard.model.ProviderModel;
 			import edu.newschool.piim.healthboard.model.TeamAppointmentsModel;
 			
@@ -25,13 +22,19 @@
 			
 			private var dirty:Boolean;
 			
-			override public function set data(value:Object):void
-			{
-				if( !dirty ) dirty = data != value;
-				
-				super.data = value;
-			}
+			private var _appointments:ArrayCollection;
 			
+			private var _selectable:Boolean;
+			
+			[Bindable]
+			public function set selectable(value:Boolean):void{ _selectable = value; }
+			public function get selectable():Boolean { return _selectable; }
+			
+			public function set appointments(value:ArrayCollection):void { _appointments = value; }
+			public function get appointments():ArrayCollection { return _appointments; }
+			
+			public function get date():Date{ return data as Date; }
+
 			private function onDataChange(event:FlexEvent=null):void
 			{
 				if( !dirty || !data ) return;
@@ -39,11 +42,10 @@
 				var providers:ArrayCollection = TeamAppointmentsModel( MainController( AppProperties.getInstance().controller ).teamAppointmentsController.model ).selectedProviders;
 				
 				var day:Date = new Date();
-				day.time = parseInt( data.toString() );
-				dayLabel.text = day.date.toString();
+				day.time = date.time;
+				dateLabel.text = day.date.toString();
 				
 				providerList.removeAllElements();
-				
 				
 				for each(var provider:ProviderModel in providers)
 				{
@@ -62,7 +64,7 @@
 			
 			private function updateState():void
 			{
-				if( dayLabel ) dayLabel.styleName = selected ? 'calendarSelectedDay' : 'lightGray11';
+				if( dateLabel ) dateLabel.styleName = selected ? 'monthDayLabelSelected' : 'monthDayLabel';
 				if( providerList && border ) providerList.alpha = border.alpha = selected ? 1 : .45;
 			}
 			
@@ -78,29 +80,40 @@
 				updateState();
 			}
 			
-			private function onProvidersChange(event:CollectionEvent):void
+			private function onProvidersChange(event:CollectionEvent=null):void
 			{
 				dirty = true;
 				
 				onDataChange();
 			}
 			
+			private function onAdded():void
+			{
+				TeamAppointmentsModel( MainController( AppProperties.getInstance().controller ).teamAppointmentsController.model ).selectedProviders.addEventListener(CollectionEvent.COLLECTION_CHANGE, onProvidersChange );	
+			}
+			
+			private function onRemoved():void
+			{
+				TeamAppointmentsModel( MainController( AppProperties.getInstance().controller ).teamAppointmentsController.model ).selectedProviders.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onProvidersChange );	
+			}
+			
 			private function init():void
 			{
-				TeamAppointmentsModel( MainController( AppProperties.getInstance().controller ).teamAppointmentsController.model ).selectedProviders.addEventListener(CollectionEvent.COLLECTION_CHANGE, onProvidersChange );
+				removeEventListener( FlexEvent.CREATION_COMPLETE, init );
+				onProvidersChange();
 			}
 		]]>
 	</fx:Script>
 	
-	<s:BorderContainer id="border" borderColor="0xffffff" backgroundAlpha="0">
+	<s:BorderContainer id="border" width="{width}" height="{height}" borderColor="0xffffff" backgroundAlpha="0" minWidth="0" minHeight="0">
 		
 		<s:layout>
 			<s:BasicLayout  />
 		</s:layout>
 		
-		<s:Label id="dayLabel" width="20" x="75" y="5" styleName="lightGray11" fontSize="11" />
+		<mx:Label id="dateLabel" width="100%"/>
 		
-		<s:VGroup id="providerList" gap="2" x="10" y="20" height="60" />
+		<s:VGroup id="providerList" gap="2" x="10" y="25" height="60" />
 		
 	</s:BorderContainer>
 	

@@ -7,12 +7,15 @@
 	xmlns:plus="net.flexwiz.blog.tabbar.plus.*" 
 	xmlns:appointments="edu.newschool.piim.healthboard.components.appointments.*" 
 	xmlns:calendar="edu.newschool.piim.healthboard.components.calendar.*" 
+	xmlns:components1="edu.newschool.piim.healthboard.view.components.*" xmlns:calendar1="edu.newschool.piim.healthboard.view.components.calendar.*"
 	width="100%" height="100%" 
-	creationPolicy="all" creationComplete="init()" xmlns:components1="edu.newschool.piim.healthboard.view.components.*" >
+	creationPolicy="all" creationComplete="init()">
 	
 	<fx:Metadata>
 		[Event(name="navigate", type="edu.newschool.piim.healthboard.events.ApplicationEvent")]
 	</fx:Metadata>
+	
+	<fx:Style source="edu/newschool/piim/healthboard/view/components/calendar/skin.css" />
 	
 	<fx:Script>
 		<![CDATA[
@@ -1263,11 +1266,11 @@
 										</s:NavigatorContent>
 										
 										<s:NavigatorContent>
-											<calendar:CalendarComponent 
+											<calendar1:CalendarComponent 
 												id="monthView" 
-												width="665" height="505" paddingLeft="-2"
+												width="665" height="505" 
 												itemRenderer="edu.newschool.piim.healthboard.components.calendar.CalendarItem" 
-												selectedDate="{selectedDate}" change="onSelectDate(event)"  />
+												highlightedDate="{selectedDate}" change="onSelectDate(event)" clickNavigation="true" />
 										</s:NavigatorContent>
 										
 									</mx:ViewStack>
