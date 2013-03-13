@@ -1,18 +1,16 @@
 package edu.newschool.piim.healthboard.model
 {
 	import edu.newschool.piim.healthboard.Constants;
-	
-	import edu.newschool.piim.healthboard.controller.Controller;
 	import edu.newschool.piim.healthboard.controller.MainController;
+	import edu.newschool.piim.healthboard.util.DateUtil;
+	import edu.newschool.piim.healthboard.view.components.calendar.ICalendarItem;
 	
 	import flash.utils.describeType;
 	
 	import mx.collections.ArrayCollection;
-	
-	import edu.newschool.piim.healthboard.util.DateUtil;
 
 	[Bindable]
-	public class Appointment
+	public class Appointment implements ICalendarItem
 	{
 		public static const RECUR_TYPE_DAY:String = "day";
 		public static const RECUR_TYPE_WEEK:String = "week";
@@ -57,8 +55,11 @@ package edu.newschool.piim.healthboard.model
 		public var patient:UserModel;
 		public var provider:UserModel;
 		
+		/*	ICalendarItem	*/
 		public var from:Date;
 		public var to:Date;
+		public var selected:Boolean;
+		public var description:String;
 		
 		public var isPending:Boolean;
 		
@@ -91,6 +92,8 @@ package edu.newschool.piim.healthboard.model
 			
 			type = TYPE_VISIT;
 		}
+		
+		public function get isScheduled():Boolean { return true; };
 		
 		public function fromDateString():String{ return getAppointmentTime( from ); }
 		public function toDateString():String{ return getAppointmentTime( to ); }
