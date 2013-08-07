@@ -5,8 +5,8 @@
 	<property name="FLEX_HOME" value="/Applications/Adobe Flash Builder 4.5/sdks/4.5.0" />
 	
 	<!--	references to project and lib directories	-->
-	<property name="APP_ROOT" value="../../visualDashboardProvider"/>
-	<property name="LIB_ROOT" value="../../visualDashboardShared"/>
+	<property name="APP_ROOT" value="../../Healthboard-Provider"/>
+	<property name="LIB_ROOT" value="../../Healthboard-Lib"/>
 	
 	<!--	supported locale(s)	-->
 	<property name="LOCALE" value="en_US" />
@@ -63,8 +63,8 @@
 		</tstamp>
 		
 		<mxmlc 
-			file="${APP_ROOT}/src/visualDashboardProvider.mxml" 
-			output="${APP_ROOT}/${OUTPUT_FOLDER}/visualDashboardProvider.swf" 
+			file="${APP_ROOT}/src/Main.mxml" 
+			output="${APP_ROOT}/${OUTPUT_FOLDER}/main.swf" 
 			actionscript-file-encoding="UTF-8" locale="${LOCALE}" 
 			keep-generated-actionscript="false" 
 			incremental="true" swf-version="13" 
@@ -94,7 +94,7 @@
 		<copy todir="${APP_ROOT}/${OUTPUT_FOLDER}/" file="${FLEX_HOME}/frameworks/rsls/framework_4.5.0.20967.swz"/>
 		<copy todir="${APP_ROOT}/${OUTPUT_FOLDER}/" file="${FLEX_HOME}/frameworks/rsls/framework_4.5.0.20967.swf"/>
 					
-	    <html-wrapper title="Visual Dashboard Prototype (updated ${UPDATE_TIME})" file="index.html" height="100%" width="100%" application="visualDashboardProvider" swf="visualDashboardProvider" version-major="10" version-minor="2" version-revision="0" history="true" output="${APP_ROOT}/${OUTPUT_FOLDER}"/>
+	    <html-wrapper title="Healthboard Provider Portal (updated ${UPDATE_TIME})" file="index.html" height="100%" width="100%" application="Healthboard-Provider" swf="main" version-major="10" version-minor="2" version-revision="0" history="true" output="${APP_ROOT}/${OUTPUT_FOLDER}"/>
 	    
 	</target>
 	

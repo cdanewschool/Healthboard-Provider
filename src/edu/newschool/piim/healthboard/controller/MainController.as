@@ -428,7 +428,7 @@ package edu.newschool.piim.healthboard.controller
 					evt.data = ProviderConstants.MODULE_TEAM_PROFILE;
 					application.dispatchEvent( evt );
 					
-					TeamModule( visualDashboardProvider(application).viewStackProviderModules.getChildByName( ProviderConstants.MODULE_TEAM_PROFILE ) ).showTeamMember( event.user );
+					TeamModule( Main(application).viewStackProviderModules.getChildByName( ProviderConstants.MODULE_TEAM_PROFILE ) ).showTeamMember( event.user );
 				}
 				else
 				{
@@ -512,8 +512,8 @@ package edu.newschool.piim.healthboard.controller
 				}
 			}
 			
-			if( visualDashboardProvider(application).viewStackMain ) visualDashboardProvider(application).viewStackMain.verticalScrollPosition = 0;
-			if( visualDashboardProvider(application).viewStackProviderModules ) visualDashboardProvider(application).viewStackProviderModules.verticalScrollPosition = 0;
+			if( Main(application).viewStackMain ) Main(application).viewStackMain.verticalScrollPosition = 0;
+			if( Main(application).viewStackProviderModules ) Main(application).viewStackProviderModules.verticalScrollPosition = 0;
 			
 			super.onSetState(event);
 		}
@@ -527,23 +527,23 @@ package edu.newschool.piim.healthboard.controller
 			var child:DisplayObject;
 				
 			//	show relevant application module if valid
-			if( visualDashboardProvider(application).viewStackProviderModules
-				&& (child = visualDashboardProvider(application).viewStackProviderModules.getChildByName( state ) ) != null )
+			if( Main(application).viewStackProviderModules
+				&& (child = Main(application).viewStackProviderModules.getChildByName( state ) ) != null )
 			{
-				visualDashboardProvider(application).viewStackProviderModules.selectedChild = child as INavigatorContent;
+				Main(application).viewStackProviderModules.selectedChild = child as INavigatorContent;
 				
-				if( visualDashboardProvider(application).viewStackMain.selectedIndex != 0 )
+				if( Main(application).viewStackMain.selectedIndex != 0 )
 				{
-					visualDashboardProvider(application).viewStackMain.selectedIndex = 0;
+					Main(application).viewStackMain.selectedIndex = 0;
 				}
 				
 				return true;
 			}
 				
 			//	show relevant patient module if valid
-			else if( visualDashboardProvider(application).viewStackMain.selectedChild is ViewPatient )
+			else if( Main(application).viewStackMain.selectedChild is ViewPatient )
 			{
-				(visualDashboardProvider(application).viewStackMain.selectedChild as ViewPatient).showModule( state );
+				(Main(application).viewStackMain.selectedChild as ViewPatient).showModule( state );
 				
 				return true;
 			}
@@ -566,7 +566,7 @@ package edu.newschool.piim.healthboard.controller
 				}
 				else if( application.currentState == model.viewMode ) 
 				{
-					if( dataProvider == visualDashboardProvider(application).viewStackMain ) 
+					if( dataProvider == Main(application).viewStackMain ) 
 					{
 						PatientsModel(patientsController.model).openTabs.splice(index-1,1);
 					}
@@ -586,9 +586,9 @@ package edu.newschool.piim.healthboard.controller
 			
 			if( event.data is int )
 			{
-				visualDashboardProvider(application).viewStackProviderModules.selectedIndex = event.data;
+				Main(application).viewStackProviderModules.selectedIndex = event.data;
 				
-				module = visualDashboardProvider(application).viewStackProviderModules.selectedChild;
+				module = Main(application).viewStackProviderModules.selectedChild;
 			}
 			else if( event.data is String )
 			{
@@ -596,22 +596,22 @@ package edu.newschool.piim.healthboard.controller
 				{
 					var moduleName:String = event.data.toString();
 					
-					if( visualDashboardProvider(application).viewStackProviderModules.getChildByName( moduleName ) ) 
+					if( Main(application).viewStackProviderModules.getChildByName( moduleName ) ) 
 					{
-						module = visualDashboardProvider(application).viewStackProviderModules.getChildByName( moduleName ) as INavigatorContent;
+						module = Main(application).viewStackProviderModules.getChildByName( moduleName ) as INavigatorContent;
 						
-						visualDashboardProvider(application).viewStackProviderModules.selectedChild = module;
+						Main(application).viewStackProviderModules.selectedChild = module;
 						
-						if( visualDashboardProvider(application).viewStackMain.selectedIndex != 0 )
+						if( Main(application).viewStackMain.selectedIndex != 0 )
 						{
-							visualDashboardProvider(application).viewStackMain.selectedIndex = 0;
+							Main(application).viewStackMain.selectedIndex = 0;
 						}
 					}
 				}
 			}
 			
-			visualDashboardProvider(application).viewStackMain.verticalScrollPosition = 0;
-			visualDashboardProvider(application).viewStackProviderModules.verticalScrollPosition = 0;
+			Main(application).viewStackMain.verticalScrollPosition = 0;
+			Main(application).viewStackProviderModules.verticalScrollPosition = 0;
 			
 			onHideAutoComplete();
 		}
@@ -629,8 +629,8 @@ package edu.newschool.piim.healthboard.controller
 		{
 			for each(var patient:PatientModel in PatientsModel(patientsController.model).openTabs)
 			{
-				var viewPatient:ViewPatient =  visualDashboardProvider(application).viewStackMain.getChildByName(  "patient" + patient.id ) as ViewPatient;
-				visualDashboardProvider(application).viewStackMain.removeChild(  viewPatient );
+				var viewPatient:ViewPatient =  Main(application).viewStackMain.getChildByName(  "patient" + patient.id ) as ViewPatient;
+				Main(application).viewStackMain.removeChild(  viewPatient );
 			}
 			
 			PatientsModel(patientsController.model).openTabs = [];
@@ -858,7 +858,7 @@ package edu.newschool.piim.healthboard.controller
 		
 		override protected function get id():String
 		{
-			return 'visualDashboardProvider';
+			return 'Main';
 		}
 	}
 }

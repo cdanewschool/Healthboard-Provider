@@ -222,17 +222,17 @@ package edu.newschool.piim.healthboard.controller
 				viewPatient.name = "patient" + patient.id;
 				viewPatient.patient = patient;		//acMessages[event.rowIndex];
 				viewPatient.selectedAppointment = appointmentsModel.appointments[ appointmentsModel.currentAppointmentIndex ];
-				visualDashboardProvider( application ).viewStackMain.addChild(viewPatient);
-				visualDashboardProvider( application ).tabsMain.selectedIndex = visualDashboardProvider(application).viewStackMain.length - 1;
+				Main( application ).viewStackMain.addChild(viewPatient);
+				Main( application ).tabsMain.selectedIndex = Main(application).viewStackMain.length - 1;
 				
 				model.openTabs.push(patient);	
 			}
 			else
 			{
-				viewPatient = visualDashboardProvider(application).viewStackMain.getChildByName(  "patient" + patient.id ) as ViewPatient;
+				viewPatient = Main(application).viewStackMain.getChildByName(  "patient" + patient.id ) as ViewPatient;
 				viewPatient.currentState = ViewPatient.STATE_DEFAULT;
 				
-				visualDashboardProvider(application).viewStackMain.selectedIndex = visualDashboardProvider(application).viewStackMain.getChildIndex( viewPatient );
+				Main(application).viewStackMain.selectedIndex = Main(application).viewStackMain.getChildIndex( viewPatient );
 			}
 		}
 		

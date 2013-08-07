@@ -47,7 +47,7 @@
 	</fx:Script>
 	
 	<!--	external actionscript includes 	-->
-	<fx:Script source="visualDashboardProvider.as" />
+	<fx:Script source="main.as" />
 	
 	<fx:Style source="css/styles.css" />
 	

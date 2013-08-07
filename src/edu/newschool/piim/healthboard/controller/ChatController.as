@@ -61,7 +61,7 @@ package edu.newschool.piim.healthboard.controller
 		{
 			if( !ChatSearch(model).targetUser ) return;
 			
-			var application:visualDashboardProvider = AppProperties.getInstance().controller.application as visualDashboardProvider;
+			var application:Main = AppProperties.getInstance().controller.application as Main;
 			
 			if( ChatSearch(model).targetUser.available == UserModel.STATE_AVAILABLE )
 			{
@@ -139,7 +139,7 @@ package edu.newschool.piim.healthboard.controller
 		
 		private function onPopupClose( event:CloseEvent ):void
 		{
-			var application:visualDashboardProvider = AppProperties.getInstance().controller.application as visualDashboardProvider;
+			var application:Main = AppProperties.getInstance().controller.application as Main;
 			application.stage.removeEventListener( Event.RESIZE, onResize );
 			
 			reset();
